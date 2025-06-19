@@ -1,20 +1,43 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient, createServerClient } from '@supabase/ssr'
 import { Database } from '@/lib/types/database'
-import { Startup, Target } from '../types'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase URL and Anon Key must be provided.')
 }
 
-// Use the generated types for our client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+// Browser client for client-side components
+export function createSupabaseBrowserClient() {
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
+}
 
-export async function getStartupDataForUser(userId: string): Promise<Startup> {
+// Server client for server-side components
+export async function createSupabaseServerClient() {
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  
+  return createServerClient<Database>(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+}
+
+// Legacy client for backward compatibility (use browser client instead)
+export const supabase = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
+
+export async function getStartupDataForUser(userId: string) {
   console.log(`Fetching startup data for user ${userId}...`)
-
+  
+  const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.rpc('get_startup_data_by_user_id', {
     p_user_id: userId,
   })
@@ -29,11 +52,13 @@ export async function getStartupDataForUser(userId: string): Promise<Startup> {
   }
 
   console.log('✅ Startup data fetched successfully.')
-  return data as unknown as Startup
+  return data
 }
 
-export async function getTargets(): Promise<Target[]> {
+export async function getTargets() {
   console.log('Fetching targets from Supabase...')
+  
+  const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.from('targets').select('*')
 
   if (error) {
@@ -41,5 +66,5 @@ export async function getTargets(): Promise<Target[]> {
     throw new Error('Could not fetch targets from Supabase.')
   }
   console.log(`✅ Found ${data.length} targets.`)
-  return data as Target[]
+  return data
 }

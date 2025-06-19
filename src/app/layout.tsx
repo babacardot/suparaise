@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Suparaise',
+  title: 'Suparaise | Automated VC Fundraising',
   description:
     'Agentic tool for automated VC fundraising and investor outreach.',
 }

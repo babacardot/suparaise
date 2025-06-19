@@ -2,18 +2,16 @@
 
 import * as React from "react"
 import {
-  BookOpen,
   Bot,
   Command,
-  Frame,
+  Home,
   LifeBuoy,
-  Map,
-  PieChart,
   Send,
-  Settings2,
-  SquareTerminal,
+  Target,
+  User,
+  Building,
+  Settings,
 } from "lucide-react"
-
 import { NavMain } from '@/components/sidebar/nav-main'
 import { NavProjects } from '@/components/sidebar/nav-projects'
 import { NavSecondary } from '@/components/sidebar/nav-secondary'
@@ -28,144 +26,137 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user?: {
+    name: string
+    email: string
+    avatar?: string
+  } | null
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
+  const userData = {
+    name: user?.name || "User",
+    email: user?.email || "user@example.com",
+    avatar: user?.avatar || "",
+  }
+
+  const data = {
+    user: userData,
+    navMain: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: Home,
+        isActive: true,
+        items: [
+          {
+            title: "Overview",
+            url: "/dashboard",
+          },
+          {
+            title: "Settings",
+            url: "/dashboard/settings",
+          },
+        ],
+      },
+      {
+        title: "Startup Profile",
+        url: "/dashboard/startup",
+        icon: Building,
+        items: [
+          {
+            title: "Company Info",
+            url: "/dashboard/startup",
+          },
+          {
+            title: "Pitch Deck",
+            url: "/dashboard/startup/pitch",
+          },
+          {
+            title: "Founder Info",
+            url: "/dashboard/startup/founders",
+          },
+        ],
+      },
+      {
+        title: "VC Targets",
+        url: "/dashboard/vcs",
+        icon: Target,
+        items: [
+          {
+            title: "Browse VCs",
+            url: "/dashboard/vcs",
+          },
+          {
+            title: "Target List",
+            url: "/dashboard/vcs/targets",
+          },
+          {
+            title: "Add VC",
+            url: "/dashboard/vcs/add",
+          },
+        ],
+      },
+      {
+        title: "Agent",
+        url: "/dashboard/agent",
+        icon: Bot,
+        items: [
+          {
+            title: "Run Campaign",
+            url: "/dashboard/agent/run",
+          },
+          {
+            title: "Campaign History",
+            url: "/dashboard/agent/history",
+          },
+          {
+            title: "Agent Settings",
+            url: "/dashboard/agent/settings",
+          },
+        ],
+      },
+    ],
+    navSecondary: [
+      {
+        title: "Support",
+        url: "#",
+        icon: LifeBuoy,
+      },
+      {
+        title: "Feedback",
+        url: "#",
+        icon: Send,
+      },
+    ],
+    projects: [
+      {
+        name: "Current Campaign",
+        url: "/dashboard/campaigns/current",
+        icon: Target,
+      },
+      {
+        name: "Account Settings",
+        url: "/dashboard/settings",
+        icon: Settings,
+      },
+    ],
+  }
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <a href="/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-semibold">Suparaise</span>
+                  <span className="truncate text-xs">VC Automation</span>
                 </div>
               </a>
             </SidebarMenuButton>

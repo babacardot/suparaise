@@ -1,0 +1,123 @@
+import { Check } from "lucide-react";
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+
+interface PricingTier {
+  name: string;
+  price: string | number;
+  priceSuffix: string;
+  description: string;
+  features: string[];
+  buttonText: string;
+  href: string;
+  popular?: boolean;
+}
+
+const pricingTiers: PricingTier[] = [
+  {
+    name: "Starter",
+    price: 20,
+    priceSuffix: "/mo",
+    description: "Perfect for early-stage founders getting started with fundraising",
+    features: [
+      "Up to 25 VC applications per month",
+      "State of the art form automation",
+      "Email support",
+      "Analytics"
+    ],
+    buttonText: "Start free trial",
+    href: "/signup",
+  },
+  {
+    name: "Pro",
+    price: 50,
+    priceSuffix: "/mo",
+    description: "For startups actively fundraising with multiple rounds",
+    features: [
+      "Up to 100 VC applications per month",
+      "Advanced AI personalization",
+      "Email outreach automation",
+      "Priority support",
+      "Advanced analytics & tracking",
+    ],
+    buttonText: "Start free trial",
+    href: "/signup",
+    popular: true,
+  },
+];
+
+export const Pricing = () => {
+  return (
+    <section className="py-32">
+      <div className="mx-auto max-w-5xl px-6">
+        <div className="flex flex-col items-center gap-6 text-center">
+          <div className="flex justify-center">
+            <div className="border py-1 px-4 rounded-sm">Pricing</div>
+          </div>
+          <h2 className="text-4xl font-semibold text-pretty lg:text-6xl">
+            Simple, transparent pricing
+          </h2>
+          <p className="max-w-2xl text-muted-foreground lg:text-xl">
+            Choose the plan that fits your fundraising needs. All plans include a free trial.
+          </p>
+
+          <div className="grid gap-8 lg:grid-cols-2 mt-12 w-full max-w-4xl">
+            {pricingTiers.map((tier, idx) => (
+              <div
+                key={idx}
+                className={`relative flex flex-col rounded-sm border p-6 ${tier.popular ? 'ring-2 ring-primary' : ''}`}
+              >
+                {tier.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded-sm">
+                      Recommended
+                    </span>
+                  </div>
+                )}
+
+                <div className="text-left">
+                  <h3 className="text-xl font-semibold">{tier.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-2">{tier.description}</p>
+                </div>
+
+                <div className="flex items-baseline mt-6">
+                  <span className="text-lg font-semibold">$</span>
+                  <span className="text-4xl font-semibold">{tier.price}</span>
+                  <span className="text-muted-foreground ml-1">{tier.priceSuffix}</span>
+                </div>
+
+                <ul className="flex flex-col gap-3 mt-6 flex-1">
+                  {tier.features.map((feature, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-sm"
+                    >
+                      <Check className="size-4 shrink-0 mt-0.5 text-primary" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  asChild
+                  className="mt-6 w-full"
+                  variant={tier.popular ? "default" : "outline"}
+                >
+                  <Link href={tier.href}>{tier.buttonText}</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-sm text-muted-foreground mt-8">
+            All plans include SSL encryption, GDPR compliance, and can be cancelled anytime.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Pricing;
