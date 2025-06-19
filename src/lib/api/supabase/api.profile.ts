@@ -90,3 +90,26 @@ export async function getUserProfileWithStartup(userId: string) {
 
   return data
 }
+
+/**
+ * Get user profile with startup data (client-side)
+ */
+export async function getCurrentUserProfileWithStartup() {
+  const supabase = createSupabaseBrowserClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data, error } = await supabase.rpc('get_user_profile_with_startup', {
+    p_user_id: user.id,
+  })
+
+  if (error) {
+    console.error('Error fetching current profile with startup via RPC:', error)
+    return null
+  }
+
+  return data
+}

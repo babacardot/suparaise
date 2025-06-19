@@ -34,31 +34,28 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true)
   const supabase = createSupabaseBrowserClient()
 
-  const fetchUserData = useCallback(
-    async (userId: string) => {
-      try {
-        // Get profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single()
+  const fetchUserData = useCallback(async (userId: string) => {
+    try {
+      // Use RPC function instead of direct queries
+      const supabase = createSupabaseBrowserClient()
+      const { data, error } = await supabase.rpc('get_user_profile_with_startup', {
+        p_user_id: userId,
+      })
 
-        // Get startup
-        const { data: startup } = await supabase
-          .from('startups')
-          .select('name')
-          .eq('user_id', userId)
-          .single()
-
-        return { profile, startup }
-      } catch (error) {
-        console.error('Error fetching user data:', error)
+      if (error) {
+        console.error('Error fetching user data via RPC:', error)
         return { profile: null, startup: null }
       }
-    },
-    [supabase],
-  )
+
+      return {
+        profile: data ? (data as any).profile : null,
+        startup: data ? (data as any).startup : null,
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error)
+      return { profile: null, startup: null }
+    }
+  }, [])
 
   useEffect(() => {
     const fetchUser = async () => {

@@ -25,11 +25,6 @@ export default function NotFound() {
         </div>
 
         {/* Main heading */}
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-          Page Not Found
-        </h1>
-
-        {/* Description */}
         <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
           Looks like this page got lost in the fundraising process. Don&apos;t
           worry, we&apos;ll help you get back on track.
@@ -40,7 +35,7 @@ export default function NotFound() {
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href="/">
               <Home className="w-4 h-4 mr-2" />
-              Back to Home
+              Homepage
             </Link>
           </Button>
 
@@ -52,7 +47,7 @@ export default function NotFound() {
           >
             <Link href="/dashboard">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Go to Dashboard
+              Go to dashboard
             </Link>
           </Button>
         </div>
