@@ -1,5 +1,5 @@
-import * as React from "react"
-import { type LucideIcon } from "lucide-react"
+import * as React from 'react'
+import { LottieIcon } from '@/components/design/lottie-icon'
 
 import {
   SidebarGroup,
@@ -16,7 +16,7 @@ export function NavSecondary({
   items: {
     title: string
     url: string
-    icon: LucideIcon
+    animation: object
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
@@ -27,7 +27,13 @@ export function NavSecondary({
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild size="sm">
                 <a href={item.url}>
-                  <item.icon />
+                  <LottieIcon
+                    animationData={item.animation}
+                    size={14}
+                    loop={false}
+                    autoplay={false}
+                    initialFrame={0}
+                  />
                   <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>

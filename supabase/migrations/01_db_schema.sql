@@ -35,6 +35,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- --------------------------------------------------
+-- Auto-create profile when user signs up
+-- --------------------------------------------------
+CREATE OR REPLACE FUNCTION create_profile_for_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, full_name, email)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+    NEW.email
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- --------------------------------------------------
 -- Table: targets
 -- Stores all the VC firms we can apply to.
 -- --------------------------------------------------
@@ -71,6 +87,12 @@ CREATE TABLE profiles (
     full_name TEXT,
     email TEXT
 );
+
+-- Create trigger to auto-create profile when user signs up
+CREATE TRIGGER create_profile_on_signup
+    AFTER INSERT ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION create_profile_for_new_user();
 
 -- --------------------------------------------------
 -- Table: startups
@@ -173,6 +195,7 @@ CREATE POLICY "Allow public read access to targets" ON targets FOR SELECT USING 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to read their own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Allow users to update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Allow users to insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Users can only manage their own startup
 ALTER TABLE startups ENABLE ROW LEVEL SECURITY;

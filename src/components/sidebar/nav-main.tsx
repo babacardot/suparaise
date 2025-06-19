@@ -1,6 +1,7 @@
-"use client"
+'use client'
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { LottieIcon } from '@/components/design/lottie-icon'
+import { animations } from '@/lib/utils/lottie-animations'
 
 import {
   Collapsible,
@@ -25,7 +26,7 @@ export function NavMain({
   items: {
     title: string
     url: string
-    icon: LucideIcon
+    animation: object
     isActive?: boolean
     items?: {
       title: string
@@ -42,7 +43,13 @@ export function NavMain({
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
                 <a href={item.url}>
-                  <item.icon />
+                  <LottieIcon
+                    animationData={item.animation}
+                    size={16}
+                    loop={false}
+                    autoplay={false}
+                    initialFrame={0}
+                  />
                   <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>
@@ -50,7 +57,13 @@ export function NavMain({
                 <>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRight />
+                      <LottieIcon
+                        animationData={animations.arrowDown}
+                        size={12}
+                        loop={false}
+                        autoplay={false}
+                        initialFrame={0}
+                      />
                       <span className="sr-only">Toggle</span>
                     </SidebarMenuAction>
                   </CollapsibleTrigger>

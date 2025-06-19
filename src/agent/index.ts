@@ -1,5 +1,6 @@
 import 'dotenv/config'
-import { getStartupDataForUser, getTargets } from '../lib/supabase/client'
+import { getStartupDataForUser } from '../lib/api/supabase/api.startup'
+import { getTargets } from '../lib/api/supabase/api.targets'
 import { runFormFillingAgent } from './runner'
 
 function getUserIdFromArgs(): string | null {
@@ -45,7 +46,7 @@ async function main() {
     console.log('\n--- FINAL RESULT ---')
     console.log(finalResult)
     console.log('--------------------')
-  } catch (error) {
+  } catch {
     console.error(`\n\nFailed to complete agent run for ${target.name}.`)
   }
 

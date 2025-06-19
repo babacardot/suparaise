@@ -1,19 +1,9 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import {
-  Bot,
-  Command,
-  Home,
-  LifeBuoy,
-  Send,
-  Target,
-  User,
-  Building,
-  Settings,
-} from "lucide-react"
+import * as React from 'react'
+import { LottieIcon } from '@/components/design/lottie-icon'
+import { animations } from '@/lib/utils/lottie-animations'
 import { NavMain } from '@/components/sidebar/nav-main'
-import { NavProjects } from '@/components/sidebar/nav-projects'
 import { NavSecondary } from '@/components/sidebar/nav-secondary'
 import { NavUser } from '@/components/sidebar/nav-user'
 import {
@@ -31,115 +21,97 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     name: string
     email: string
     avatar?: string
+    startupName?: string
   } | null
 }
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const userData = {
-    name: user?.name || "User",
-    email: user?.email || "user@example.com",
-    avatar: user?.avatar || "",
+    name: user?.name || 'User',
+    email: user?.email || 'user@example.com',
+    avatar: user?.avatar || '',
   }
+
+  // Create display text: FirstName + StartupName or fallback
+  const displayText = user?.startupName
+    ? `${user.name} • ${user.startupName}`
+    : user?.name || 'Welcome'
 
   const data = {
     user: userData,
     navMain: [
       {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: Home,
+        title: 'Dashboard',
+        url: '/dashboard',
+        animation: animations.home,
         isActive: true,
         items: [
           {
-            title: "Overview",
-            url: "/dashboard",
+            title: 'Overview',
+            url: '/dashboard',
           },
           {
-            title: "Settings",
-            url: "/dashboard/settings",
-          },
-        ],
-      },
-      {
-        title: "Startup Profile",
-        url: "/dashboard/startup",
-        icon: Building,
-        items: [
-          {
-            title: "Company Info",
-            url: "/dashboard/startup",
-          },
-          {
-            title: "Pitch Deck",
-            url: "/dashboard/startup/pitch",
-          },
-          {
-            title: "Founder Info",
-            url: "/dashboard/startup/founders",
+            title: 'Settings',
+            url: '/dashboard/settings',
           },
         ],
       },
       {
-        title: "VC Targets",
-        url: "/dashboard/vcs",
-        icon: Target,
+        title: 'Startup',
+        url: '/dashboard/startup',
+        animation: animations.work,
         items: [
           {
-            title: "Browse VCs",
-            url: "/dashboard/vcs",
+            title: 'Company',
+            url: '/dashboard/startup',
           },
           {
-            title: "Target List",
-            url: "/dashboard/vcs/targets",
-          },
-          {
-            title: "Add VC",
-            url: "/dashboard/vcs/add",
+            title: 'Team',
+            url: '/dashboard/startup/team',
           },
         ],
       },
       {
-        title: "Agent",
-        url: "/dashboard/agent",
-        icon: Bot,
+        title: 'Targets',
+        url: '/dashboard/targets',
+        animation: animations.tag,
         items: [
           {
-            title: "Run Campaign",
-            url: "/dashboard/agent/run",
+            title: 'Funds',
+            url: '/dashboard/vcs',
           },
           {
-            title: "Campaign History",
-            url: "/dashboard/agent/history",
+            title: 'Browse',
+            url: '/dashboard/targets/browse',
+          },
+        ],
+      },
+      {
+        title: 'Agent',
+        url: '/dashboard/agent',
+        animation: animations.science,
+        items: [
+          {
+            title: 'Run',
+            url: '/dashboard/agent/run',
           },
           {
-            title: "Agent Settings",
-            url: "/dashboard/agent/settings",
+            title: 'History',
+            url: '/dashboard/agent/history',
           },
         ],
       },
     ],
     navSecondary: [
       {
-        title: "Support",
-        url: "#",
-        icon: LifeBuoy,
+        title: 'Support',
+        url: '#',
+        animation: animations.support,
       },
       {
-        title: "Feedback",
-        url: "#",
-        icon: Send,
-      },
-    ],
-    projects: [
-      {
-        name: "Current Campaign",
-        url: "/dashboard/campaigns/current",
-        icon: Target,
-      },
-      {
-        name: "Account Settings",
-        url: "/dashboard/settings",
-        icon: Settings,
+        title: 'Feedback',
+        url: '#',
+        animation: animations.mail,
       },
     ],
   }
@@ -152,11 +124,16 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
+                  <LottieIcon
+                    animationData={animations.takeoff}
+                    size={16}
+                    loop={false}
+                    autoplay={false}
+                    initialFrame={0}
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Suparaise</span>
-                  <span className="truncate text-xs">VC Automation</span>
+                  <span className="truncate font-semibold">{displayText}</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -165,7 +142,6 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

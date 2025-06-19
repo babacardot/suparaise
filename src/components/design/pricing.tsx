@@ -1,52 +1,51 @@
-import { Check } from "lucide-react";
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Check } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 interface PricingTier {
-  name: string;
-  price: string | number;
-  priceSuffix: string;
-  description: string;
-  features: string[];
-  buttonText: string;
-  href: string;
-  popular?: boolean;
+  name: string
+  price: string | number
+  priceSuffix: string
+  description: string
+  features: string[]
+  buttonText: string
+  href: string
+  popular?: boolean
 }
 
 const pricingTiers: PricingTier[] = [
   {
-    name: "Starter",
+    name: 'Starter',
     price: 20,
-    priceSuffix: "/mo",
-    description: "Perfect for early-stage founders getting started with fundraising",
+    priceSuffix: '/mo',
+    description:
+      'Perfect for early-stage founders getting started with fundraising',
     features: [
-      "Up to 25 VC applications per month",
-      "State of the art form automation",
-      "Email support",
-      "Analytics"
+      'Up to 25 VC applications per month',
+      'State of the art form automation',
+      'Email support',
+      'Analytics',
     ],
-    buttonText: "Start free trial",
-    href: "/signup",
+    buttonText: 'Start free trial',
+    href: '/signup',
   },
   {
-    name: "Pro",
+    name: 'Pro',
     price: 50,
-    priceSuffix: "/mo",
-    description: "For startups actively fundraising with multiple rounds",
+    priceSuffix: '/mo',
+    description: 'For startups actively fundraising with multiple rounds',
     features: [
-      "Up to 100 VC applications per month",
-      "Advanced AI personalization",
-      "Email outreach automation",
-      "Priority support",
-      "Advanced analytics & tracking",
+      'Up to 100 VC applications per month',
+      'Advanced AI personalization',
+      'Email outreach automation',
+      'Priority support',
+      'Advanced analytics & tracking',
     ],
-    buttonText: "Start free trial",
-    href: "/signup",
+    buttonText: 'Start free trial',
+    href: '/signup',
     popular: true,
   },
-];
+]
 
 export const Pricing = () => {
   return (
@@ -56,11 +55,12 @@ export const Pricing = () => {
           <div className="flex justify-center">
             <div className="border py-1 px-4 rounded-sm">Pricing</div>
           </div>
-          <h2 className="text-4xl font-semibold text-pretty lg:text-6xl">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter">
             Simple, transparent pricing
           </h2>
-          <p className="max-w-2xl text-muted-foreground lg:text-xl">
-            Choose the plan that fits your fundraising needs. All plans include a free trial.
+          <p className="text-center mt-5 opacity-75">
+            Choose the plan that fits your fundraising needs. All plans include
+            a free trial.
           </p>
 
           <div className="grid gap-8 lg:grid-cols-2 mt-12 w-full max-w-4xl">
@@ -79,21 +79,22 @@ export const Pricing = () => {
 
                 <div className="text-left">
                   <h3 className="text-xl font-semibold">{tier.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-2">{tier.description}</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {tier.description}
+                  </p>
                 </div>
 
                 <div className="flex items-baseline mt-6">
                   <span className="text-lg font-semibold">$</span>
                   <span className="text-4xl font-semibold">{tier.price}</span>
-                  <span className="text-muted-foreground ml-1">{tier.priceSuffix}</span>
+                  <span className="text-muted-foreground ml-1">
+                    {tier.priceSuffix}
+                  </span>
                 </div>
 
                 <ul className="flex flex-col gap-3 mt-6 flex-1">
                   {tier.features.map((feature, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2 text-sm"
-                    >
+                    <li key={i} className="flex items-start gap-2 text-sm">
                       <Check className="size-4 shrink-0 mt-0.5 text-primary" />
                       {feature}
                     </li>
@@ -103,7 +104,7 @@ export const Pricing = () => {
                 <Button
                   asChild
                   className="mt-6 w-full"
-                  variant={tier.popular ? "default" : "outline"}
+                  variant={tier.popular ? 'default' : 'outline'}
                 >
                   <Link href={tier.href}>{tier.buttonText}</Link>
                 </Button>
@@ -112,12 +113,13 @@ export const Pricing = () => {
           </div>
 
           <p className="text-sm text-muted-foreground mt-8">
-            All plans include SSL encryption, GDPR compliance, and can be cancelled anytime.
+            All plans include SSL encryption, GDPR compliance, and can be
+            cancelled anytime.
           </p>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default Pricing;
+export default Pricing

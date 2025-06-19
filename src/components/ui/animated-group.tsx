@@ -1,8 +1,8 @@
-'use client';
-import { ReactNode } from 'react';
-import { motion, Variants } from 'framer-motion';
-import { cn } from '@/lib/actions/utils';
-import React from 'react';
+'use client'
+import { ReactNode } from 'react'
+import { motion, Variants } from 'framer-motion'
+import { cn } from '@/lib/actions/utils'
+import React from 'react'
 
 type PresetType =
   | 'fade'
@@ -14,17 +14,17 @@ type PresetType =
   | 'flip'
   | 'bounce'
   | 'rotate'
-  | 'swing';
+  | 'swing'
 
 type AnimatedGroupProps = {
-  children: ReactNode;
-  className?: string;
+  children: ReactNode
+  className?: string
   variants?: {
-    container?: Variants;
-    item?: Variants;
-  };
-  preset?: PresetType;
-};
+    container?: Variants
+    item?: Variants
+  }
+  preset?: PresetType
+}
 
 const defaultContainerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -34,12 +34,12 @@ const defaultContainerVariants: Variants = {
       staggerChildren: 0.1,
     },
   },
-};
+}
 
 const defaultItemVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
-};
+}
 
 const presetVariants: Record<
   PresetType,
@@ -135,7 +135,7 @@ const presetVariants: Record<
       },
     },
   },
-};
+}
 
 function AnimatedGroup({
   children,
@@ -145,14 +145,14 @@ function AnimatedGroup({
 }: AnimatedGroupProps) {
   const selectedVariants = preset
     ? presetVariants[preset]
-    : { container: defaultContainerVariants, item: defaultItemVariants };
-  const containerVariants = variants?.container || selectedVariants.container;
-  const itemVariants = variants?.item || selectedVariants.item;
+    : { container: defaultContainerVariants, item: defaultItemVariants }
+  const containerVariants = variants?.container || selectedVariants.container
+  const itemVariants = variants?.item || selectedVariants.item
 
   return (
     <motion.div
-      initial='hidden'
-      animate='visible'
+      initial="hidden"
+      animate="visible"
       variants={containerVariants}
       className={cn(className)}
     >
@@ -162,7 +162,7 @@ function AnimatedGroup({
         </motion.div>
       ))}
     </motion.div>
-  );
+  )
 }
 
-export { AnimatedGroup };
+export { AnimatedGroup }

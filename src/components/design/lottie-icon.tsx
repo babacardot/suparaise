@@ -1,120 +1,120 @@
-import { useState, useRef, useEffect, memo } from "react";
-import Lottie from "lottie-react";
-import { useTheme } from "next-themes";
-import type { LottieAnimationData } from "@/lib/utils/lottie-animations";
+import { useState, useRef, useEffect, memo } from 'react'
+import Lottie from 'lottie-react'
+import { useTheme } from 'next-themes'
+import type { LottieAnimationData } from '@/lib/utils/lottie-animations'
 
 interface LottieIconProps {
-  animationData: string | object;
-  size?: number;
-  className?: string;
-  loop?: boolean;
-  autoplay?: boolean;
-  initialFrame?: number; // Frame to show initially for better static visibility
-  isHovered?: boolean; // External hover control
-  customColor?: [number, number, number]; // RGB values as decimals (0-1)
+  animationData: string | object
+  size?: number
+  className?: string
+  loop?: boolean
+  autoplay?: boolean
+  initialFrame?: number // Frame to show initially for better static visibility
+  isHovered?: boolean // External hover control
+  customColor?: [number, number, number] // RGB values as decimals (0-1)
 }
 
 const LottieIconComponent = ({
   animationData,
   size = 18,
-  className = "",
+  className = '',
   loop = false,
   autoplay = false,
   initialFrame,
   isHovered: externalHovered,
   customColor,
 }: LottieIconProps) => {
-  const [internalHovered, setInternalHovered] = useState(false);
-  const [animData, setAnimData] = useState<LottieAnimationData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [internalHovered, setInternalHovered] = useState(false)
+  const [animData, setAnimData] = useState<LottieAnimationData | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const lottieRef = useRef<any>(null);
-  const { theme } = useTheme();
+  const lottieRef = useRef<any>(null)
+  const { theme } = useTheme()
 
   // Use external hover state if provided, otherwise use internal state
   const isHovered =
-    externalHovered !== undefined ? externalHovered : internalHovered;
+    externalHovered !== undefined ? externalHovered : internalHovered
 
   useEffect(() => {
     // Handle direct object data (our new preferred approach)
-    if (typeof animationData === "object" && animationData !== null) {
-      let processedData = animationData as LottieAnimationData;
+    if (typeof animationData === 'object' && animationData !== null) {
+      let processedData = animationData as LottieAnimationData
 
       // If customColor is provided, override the primary color in the control layer
       if (customColor && processedData.layers) {
-        processedData = JSON.parse(JSON.stringify(processedData)); // Deep clone
+        processedData = JSON.parse(JSON.stringify(processedData)) // Deep clone
         const controlLayer = processedData.layers.find(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (layer: any) => layer.nm === "control" && layer.ef,
+          (layer: any) => layer.nm === 'control' && layer.ef,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ) as any;
+        ) as any
         if (controlLayer?.ef) {
           const primaryEffect = controlLayer.ef.find(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (effect: any) => effect.nm === "primary",
+            (effect: any) => effect.nm === 'primary',
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ) as any;
+          ) as any
           if (primaryEffect?.ef) {
             const colorControl = primaryEffect.ef.find(
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (control: any) => control.nm === "Color",
+              (control: any) => control.nm === 'Color',
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ) as any;
+            ) as any
             if (colorControl?.v?.k) {
-              colorControl.v.k = [...customColor, 1]; // Add alpha channel
+              colorControl.v.k = [...customColor, 1] // Add alpha channel
             }
           }
         }
       }
 
-      setAnimData(processedData);
-      setIsLoading(false);
-      return;
+      setAnimData(processedData)
+      setIsLoading(false)
+      return
     }
 
     // Handle string paths (legacy - should warn developers)
-    if (typeof animationData === "string") {
+    if (typeof animationData === 'string') {
       console.warn(
         `Using path string "${animationData}" for Lottie animation is deprecated. Please use direct animation imports from @/lib/utils/lottie-animations instead.`,
-      );
-      setAnimData(null);
-      setIsLoading(false);
+      )
+      setAnimData(null)
+      setIsLoading(false)
     }
-  }, [animationData, customColor]);
+  }, [animationData, customColor])
 
   // Set initial frame when animation loads
   useEffect(() => {
     if (lottieRef.current && animData && initialFrame !== undefined) {
-      lottieRef.current.goToAndStop(initialFrame, true);
+      lottieRef.current.goToAndStop(initialFrame, true)
     }
-  }, [animData, initialFrame]);
+  }, [animData, initialFrame])
 
   // Handle animation based on hover state
   useEffect(() => {
     if (lottieRef.current && animData) {
       if (isHovered) {
-        lottieRef.current.play();
+        lottieRef.current.play()
       } else if (!loop) {
         if (initialFrame !== undefined) {
-          lottieRef.current.goToAndStop(initialFrame, true);
+          lottieRef.current.goToAndStop(initialFrame, true)
         } else {
-          lottieRef.current.stop();
+          lottieRef.current.stop()
         }
       }
     }
-  }, [isHovered, animData, initialFrame, loop]);
+  }, [isHovered, animData, initialFrame, loop])
 
   const handleMouseEnter = () => {
     if (externalHovered === undefined) {
-      setInternalHovered(true);
+      setInternalHovered(true)
     }
-  };
+  }
 
   const handleMouseLeave = () => {
     if (externalHovered === undefined) {
-      setInternalHovered(false);
+      setInternalHovered(false)
     }
-  };
+  }
 
   if (isLoading || !animData) {
     return (
@@ -128,22 +128,23 @@ const LottieIconComponent = ({
           <div className="w-full h-full bg-muted-foreground/20 rounded-sm animate-pulse" />
         )}
       </div>
-    );
+    )
   }
 
   // Apply theme-based filter if no custom color is provided
-  const shouldApplyThemeFilter = !customColor;
-  const isDark = theme === "dark";
+  const shouldApplyThemeFilter = !customColor
+  const isDark = theme === 'dark'
   const filterStyle = shouldApplyThemeFilter
     ? isDark
-      ? { filter: "invert(1) brightness(1.2)" }
-      : { filter: "brightness(0.8)" }
-    : {};
+      ? { filter: 'invert(1) brightness(1.2)' }
+      : { filter: 'brightness(0.8)' }
+    : {}
 
   return (
     <div
-      className={`inline-flex items-center justify-center transition-all duration-200 ease-out ${isHovered ? "scale-110" : ""
-        } ${className}`}
+      className={`inline-flex items-center justify-center transition-all duration-200 ease-out ${
+        isHovered ? 'scale-110' : ''
+      } ${className}`}
       style={{ width: size, height: size }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -160,11 +161,11 @@ const LottieIconComponent = ({
         }}
       />
     </div>
-  );
-};
+  )
+}
 
 // Memoize the component to prevent unnecessary re-renders
-export const LottieIcon = memo(LottieIconComponent);
+export const LottieIcon = memo(LottieIconComponent)
 
 // Set displayName for proper component identification
-LottieIcon.displayName = "LottieIcon";
+LottieIcon.displayName = 'LottieIcon'

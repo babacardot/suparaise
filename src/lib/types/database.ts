@@ -299,8 +299,48 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_startup: {
+        Args: { p_startup_data: Json }
+        Returns: Json
+      }
+      filter_targets: {
+        Args: {
+          p_stages?: string[]
+          p_industries?: string[]
+          p_regions?: string[]
+        }
+        Returns: Json
+      }
+      get_all_targets: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_profile_by_id: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       get_startup_data_by_user_id: {
         Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_target_by_id: {
+        Args: { p_target_id: string }
+        Returns: Json
+      }
+      get_user_profile_with_startup: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      search_targets: {
+        Args: { p_query: string }
+        Returns: Json
+      }
+      update_profile: {
+        Args: { p_user_id: string; p_full_name?: string }
+        Returns: Json
+      }
+      update_startup: {
+        Args: { p_startup_id: string; p_updates: Json }
         Returns: Json
       }
     }
