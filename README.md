@@ -4,7 +4,7 @@
 
 ## Overview
 
-[Suparaise](https://suparaise.com) is a web-based agentic tool engine for automated VC fundraising, investor outreach, and deal management.
+[suparaise.com](https://suparaise.com) is a web-based agentic tool engine for automated VC fundraising and investor outreach.
 
 ## Core Features
 

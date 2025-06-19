@@ -1,11 +1,18 @@
-import { Agent } from "@hyperbrowser/agent";
-import { config } from "dotenv";
-
-config();
+import "dotenv/config";
+import HyperAgent from "@hyperbrowser/agent";
+import { ChatAnthropic } from "@langchain/anthropic";
 
 async function main() {
-  const agent = new Agent({
-    apiKey: process.env.HYPERBROWSER_API_KEY,
+  console.log("Starting agent with Anthropic...");
+
+  const llm = new ChatAnthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: "claude-3-7-sonnet-20250219",
+  });
+
+  const agent = new HyperAgent({
+    llm: llm,
+    browserProvider: "Hyperbrowser",
   });
 
   const objective = `
@@ -14,11 +21,14 @@ async function main() {
   `;
 
   try {
-    const result = await agent.run(objective);
-    console.log("Agent finished with result:", result);
+    const result = await agent.executeTask(objective);
+    console.log("Agent finished with result:", result.output);
   } catch (error) {
     console.error("Agent encountered an error:", error);
+  } finally {
+    await agent.closeAgent();
+    console.log("Agent closed.");
   }
 }
 
-main(); 
+main().catch(console.error); 
