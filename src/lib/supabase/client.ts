@@ -1,50 +1,45 @@
-import { createClient } from "@supabase/supabase-js";
-import { Startup } from "../types";
+import { createClient } from '@supabase/supabase-js'
+import { Database } from '@/lib/types/database'
+import { Startup, Target } from '../types'
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase URL and Anon Key must be provided.");
+  throw new Error('Supabase URL and Anon Key must be provided.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use the generated types for our client
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
 
-// This is a placeholder for a real user session
-const FAKE_USER_ID = "123e4567-e89b-12d3-a456-426614174000";
+export async function getStartupDataForUser(userId: string): Promise<Startup> {
+  console.log(`Fetching startup data for user ${userId}...`)
 
-export async function getStartupDataForCurrentUser(): Promise<Startup> {
-    console.log("Fetching startup data from Supabase...");
+  const { data, error } = await supabase.rpc('get_startup_data_by_user_id', {
+    p_user_id: userId,
+  })
 
-    const { data: startupData, error: startupError } = await supabase
-        .from("startups")
-        .select(`
-            name,
-            website,
-            description,
-            oneLiner,
-            commonResponses:common_responses,
-            founders (
-                fullName:full_name,
-                email,
-                linkedin
-            )
-        `)
-        .eq("user_id", FAKE_USER_ID)
-        .single();
+  if (error) {
+    console.error('Error fetching startup data via RPC:', error)
+    throw new Error('Could not fetch startup data from Supabase.')
+  }
 
-    if (startupError) {
-        console.error("Error fetching startup data:", startupError);
-        throw new Error("Could not fetch startup data from Supabase.");
-    }
+  if (!data) {
+    throw new Error(`No startup found for user ${userId}`)
+  }
 
-    if (!startupData) {
-        throw new Error(`No startup found for user ${FAKE_USER_ID}`);
-    }
+  console.log('✅ Startup data fetched successfully.')
+  return data as unknown as Startup
+}
 
-    console.log("✅ Startup data fetched successfully.");
-    
-    // The data from Supabase needs to be cast to our Startup interface.
-    // Supabase returns snake_case, so we map it to our camelCase properties.
-    return startupData as unknown as Startup;
-} 
+export async function getTargets(): Promise<Target[]> {
+  console.log('Fetching targets from Supabase...')
+  const { data, error } = await supabase.from('targets').select('*')
+
+  if (error) {
+    console.error('Error fetching targets:', error)
+    throw new Error('Could not fetch targets from Supabase.')
+  }
+  console.log(`✅ Found ${data.length} targets.`)
+  return data as Target[]
+}

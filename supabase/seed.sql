@@ -1,4 +1,4 @@
--- Seed data for the 'targets' table
+-- Seed data
 
 -- Clear existing data from all tables to prevent foreign key constraint errors
 TRUNCATE TABLE 
@@ -24,7 +24,7 @@ VALUES
     'standard', '11-20', ARRAY['pitch_deck'], FALSE, 'Focus on African startups with a strong technical team.'
 ),
 (
-    'Quona', 'https://www.quona.com', 'https://quona.com/contact/', 'submissions@quona.com', 'email',
+    'Quona', 'https://www.quona.com', 'https://quona.com/contact/', NULL, 'form',
     ARRAY['Seed', 'Series A', 'Series B']::investment_stage[],
     ARRAY['Fintech']::industry_type[],
     ARRAY['Emerging Markets'],
@@ -38,7 +38,7 @@ VALUES
     'comprehensive', '21+', ARRAY['pitch_deck', 'intro_video'], TRUE, 'Requires a warm intro for best results, but cold submissions are accepted via the form.'
 ),
 (
-    'Lateral Frontiers', 'https://www.lateralfrontiers.com', 'https://www.lateralfrontiers.com/contact', 'deals@lateralfrontiers.com', 'email',
+    'Lateral Frontiers', 'https://www.lateralfrontiers.com', 'https://www.lateralfrontiers.com/contact', NULL, 'form',
     ARRAY['Pre-seed', 'Seed']::investment_stage[],
     ARRAY['Deep tech', 'AI/ML', 'Climate tech']::industry_type[],
     ARRAY['Global'],
@@ -59,12 +59,9 @@ VALUES
     'standard', '11-20', ARRAY['pitch_deck'], FALSE, NULL
 ),
 (
-    'Open Startup', 'https://open-startup.org/', 'https://open-startup.org/#get-in-contact', 'contact@open-startup.org', 'email',
+    'Open Startup', 'https://open-startup.org/', 'https://open-startup.org/#get-in-contact', NULL, 'form',
     ARRAY['Pre-seed']::investment_stage[],
     ARRAY['Developer tools', 'B2B SaaS']::industry_type[],
     ARRAY['Global'],
     'simple', '1-5', ARRAY['pitch_deck'], FALSE, 'Prefers email submissions with a loom video and public metrics.'
 );
-
--- Note: The data above contains assumptions for demonstration purposes.
--- You can adjust these values based on actual research. 

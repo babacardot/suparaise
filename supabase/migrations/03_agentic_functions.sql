@@ -10,9 +10,8 @@ BEGIN
         'website', s.website,
         'industry', s.industry,
         'location', s.location,
-        'description_short', s.description_short,
-        'description_medium', s.description_medium,
-        'description_long', s.description_long,
+        'oneLiner', s.description_short,
+        'description', s.description_long,
         'traction_summary', s.traction_summary,
         'market_summary', s.market_summary,
         'mrr', s.mrr,
@@ -24,12 +23,11 @@ BEGIN
         'founders', (
             SELECT jsonb_agg(jsonb_build_object(
                 'fullName', f.full_name,
-                'role', f.role,
-                'bio', f.bio,
                 'email', f.email,
                 'linkedin', f.linkedin,
-                'githubUrl', f.github_url,
-                'personalWebsiteUrl', f.personal_website_url
+                'bio', f.bio,
+                'github_url', f.github_url,
+                'personal_website_url', f.personal_website_url
             ))
             FROM founders f
             WHERE f.startup_id = s.id
