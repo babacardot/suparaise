@@ -10,13 +10,16 @@ import {
     DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Button as ExpandButton } from '@/components/design/button-expand'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Upload, Plus, X, ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { Upload, Plus, X, ArrowLeft, ArrowRight, Check, Building2 } from 'lucide-react'
 import { Database } from '@/lib/types/database'
+import PhoneNumberInput from '@/components/design/phone-number-input'
+import * as RPNInput from 'react-phone-number-input'
 
 type FounderRole = Database['public']['Enums']['founder_role']
 type IndustryType = Database['public']['Enums']['industry_type']
@@ -26,6 +29,7 @@ interface FounderData {
     role: FounderRole
     bio: string
     email: string
+    phone: string
     linkedin: string
     githubUrl: string
     personalWebsiteUrl: string
@@ -36,6 +40,10 @@ interface StartupData {
     website: string
     industry: IndustryType | null
     location: string
+    isIncorporated: boolean
+    incorporationCity: string
+    incorporationCountry: string
+    operatingCountries: string[]
     descriptionShort: string
     descriptionMedium: string
     descriptionLong: string
@@ -92,6 +100,11 @@ const INDUSTRIES: IndustryType[] = [
     'Other'
 ]
 
+// Get all countries from react-phone-number-input library
+const COUNTRIES = RPNInput.getCountries().map(countryCode =>
+    new Intl.DisplayNames(['en'], { type: 'region' }).of(countryCode) || countryCode
+).sort()
+
 export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialogProps) {
     const [currentStep, setCurrentStep] = useState(1)
     const [loading, setLoading] = useState(false)
@@ -100,6 +113,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
         role: 'Founder',
         bio: '',
         email: '',
+        phone: '',
         linkedin: '',
         githubUrl: '',
         personalWebsiteUrl: ''
@@ -110,6 +124,10 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
         website: '',
         industry: null,
         location: '',
+        isIncorporated: false,
+        incorporationCity: '',
+        incorporationCountry: '',
+        operatingCountries: [],
         descriptionShort: '',
         descriptionMedium: '',
         descriptionLong: '',
@@ -132,11 +150,14 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
             role: 'Co-founder',
             bio: '',
             email: '',
+            phone: '',
             linkedin: '',
             githubUrl: '',
             personalWebsiteUrl: ''
         }])
     }
+
+
 
     const removeFounder = (index: number) => {
         if (founders.length > 1) {
@@ -205,6 +226,10 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                 website: startup.website,
                 industry: startup.industry,
                 location: startup.location,
+                is_incorporated: startup.isIncorporated,
+                incorporation_city: startup.incorporationCity,
+                incorporation_country: startup.incorporationCountry,
+                operating_countries: startup.operatingCountries.join(','),
                 description_short: startup.descriptionShort,
                 description_medium: startup.descriptionMedium,
                 description_long: startup.descriptionLong,
@@ -235,6 +260,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                             role: founder.role,
                             bio: founder.bio || null,
                             email: founder.email || null,
+                            phone: founder.phone || null,
                             linkedin: founder.linkedin || null,
                             github_url: founder.githubUrl || null,
                             personal_website_url: founder.personalWebsiteUrl || null
@@ -280,30 +306,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
 
     return (
         <Dialog open={isOpen} onOpenChange={() => { }}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
-                <DialogHeader>
-                    <DialogTitle className="text-2xl">Welcome to Suparaise!</DialogTitle>
-                    <DialogDescription>
-                        Let&apos;s set up your startup profile to get started with fundraising automation.
-                    </DialogDescription>
-                </DialogHeader>
-
-                {/* Progress indicator */}
-                <div className="flex items-center justify-between mb-6">
-                    {[1, 2, 3, 4].map((step) => (
-                        <div key={step} className="flex items-center">
-                            <div className={`rounded-full h-8 w-8 flex items-center justify-center text-sm font-medium ${step <= currentStep ? 'bg-primary text-primary-foreground' : 'bg-gray-200 text-gray-600'
-                                }`}>
-                                {step < currentStep ? <Check className="h-4 w-4" /> : step}
-                            </div>
-                            {step < 4 && (
-                                <div className={`h-1 w-16 mx-2 ${step < currentStep ? 'bg-primary' : 'bg-gray-200'
-                                    }`} />
-                            )}
-                        </div>
-                    ))}
-                </div>
-
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" showCloseButton={false} onPointerDownOutside={(e) => e.preventDefault()}>
                 {/* Step 1: Team Information */}
                 {currentStep === 1 && (
                     <div className="space-y-6">
@@ -318,7 +321,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                             <Card key={index}>
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <CardTitle className="text-lg">
-                                        {index === 0 ? 'You (Primary Founder)' : `Co-founder ${index}`}
+                                        {index === 0 ? 'You' : 'Co-founder'}
                                     </CardTitle>
                                     {index > 0 && (
                                         <Button
@@ -330,22 +333,23 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                         </Button>
                                     )}
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-6">
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <Label htmlFor={`founder-${index}-name`}>Full Name *</Label>
+                                        <div className="space-y-1">
+                                            <Label htmlFor={`founder-${index}-name`}>Full name</Label>
                                             <Input
                                                 id={`founder-${index}-name`}
                                                 value={founder.fullName}
                                                 onChange={(e) => updateFounder(index, 'fullName', e.target.value)}
                                                 placeholder="John Doe"
+                                                autoComplete="name"
                                             />
                                         </div>
-                                        <div>
-                                            <Label htmlFor={`founder-${index}-role`}>Role *</Label>
+                                        <div className="space-y-1">
+                                            <Label htmlFor={`founder-${index}-role`}>Role</Label>
                                             <select
                                                 id={`founder-${index}-role`}
-                                                className="w-full p-2 border border-input rounded-md"
+                                                className="w-full p-2 border border-input rounded-sm"
                                                 value={founder.role}
                                                 onChange={(e) => updateFounder(index, 'role', e.target.value)}
                                             >
@@ -356,7 +360,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
+                                        <div className="space-y-1">
                                             <Label htmlFor={`founder-${index}-email`}>Email</Label>
                                             <Input
                                                 id={`founder-${index}-email`}
@@ -364,19 +368,41 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                                 value={founder.email}
                                                 onChange={(e) => updateFounder(index, 'email', e.target.value)}
                                                 placeholder="john@company.com"
+                                                autoComplete="email"
                                             />
                                         </div>
-                                        <div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor={`founder-${index}-phone`}>Phone</Label>
+                                            <PhoneNumberInput
+                                                value={founder.phone}
+                                                onChange={(value) => updateFounder(index, 'phone', value || '')}
+                                                placeholder="Phone number"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
                                             <Label htmlFor={`founder-${index}-linkedin`}>LinkedIn</Label>
                                             <Input
                                                 id={`founder-${index}-linkedin`}
                                                 value={founder.linkedin}
                                                 onChange={(e) => updateFounder(index, 'linkedin', e.target.value)}
                                                 placeholder="https://linkedin.com/in/johndoe"
+                                                autoComplete="url"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor={`founder-${index}-github`}>GitHub</Label>
+                                            <Input
+                                                id={`founder-${index}-github`}
+                                                value={founder.githubUrl}
+                                                onChange={(e) => updateFounder(index, 'githubUrl', e.target.value)}
+                                                placeholder="https://github.com/johndoe"
+                                                autoComplete="url"
                                             />
                                         </div>
                                     </div>
-                                    <div>
+                                    <div className="space-y-1">
                                         <Label htmlFor={`founder-${index}-bio`}>Bio</Label>
                                         <Textarea
                                             id={`founder-${index}-bio`}
@@ -396,7 +422,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                             className="w-full"
                         >
                             <Plus className="h-4 w-4 mr-2" />
-                            Add Co-founder
+                            Add co-founder
                         </Button>
                     </div>
                 )}
@@ -405,62 +431,143 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                 {currentStep === 2 && (
                     <div className="space-y-6">
                         <div>
-                            <h3 className="text-lg font-semibold mb-4">Company basics</h3>
+                            <h3 className="text-lg font-semibold mb-4">Company</h3>
                             <p className="text-sm text-muted-foreground mb-6">
                                 Tell us about your startup and what you&apos;re building.
                             </p>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="company-name">Company Name *</Label>
+                                <div className="space-y-1">
+                                    <Label htmlFor="company-name">Name</Label>
                                     <Input
                                         id="company-name"
                                         value={startup.name}
                                         onChange={(e) => setStartup({ ...startup, name: e.target.value })}
                                         placeholder="Acme Inc."
+                                        autoComplete="organization"
                                     />
                                 </div>
-                                <div>
+                                <div className="space-y-1">
                                     <Label htmlFor="company-website">Website</Label>
                                     <Input
                                         id="company-website"
                                         value={startup.website}
                                         onChange={(e) => setStartup({ ...startup, website: e.target.value })}
                                         placeholder="https://acme.com"
+                                        autoComplete="url"
                                     />
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="industry">Industry</Label>
-                                    <select
-                                        id="industry"
-                                        className="w-full p-2 border border-input rounded-md"
-                                        value={startup.industry || ''}
-                                        onChange={(e) => setStartup({ ...startup, industry: e.target.value as IndustryType })}
-                                    >
-                                        <option value="">Select an industry</option>
-                                        {INDUSTRIES.map((industry) => (
-                                            <option key={industry} value={industry}>{industry}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <Label htmlFor="location">Location</Label>
-                                    <Input
-                                        id="location"
-                                        value={startup.location}
-                                        onChange={(e) => setStartup({ ...startup, location: e.target.value })}
-                                        placeholder="San Francisco, CA"
-                                    />
-                                </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="industry">Industry</Label>
+                                <select
+                                    id="industry"
+                                    className="w-full p-2 border border-input rounded-sm"
+                                    value={startup.industry || ''}
+                                    onChange={(e) => setStartup({ ...startup, industry: e.target.value as IndustryType })}
+                                >
+                                    <option value="">Select an industry</option>
+                                    {INDUSTRIES.map((industry) => (
+                                        <option key={industry} value={industry}>{industry}</option>
+                                    ))}
+                                </select>
                             </div>
 
-                            <div>
-                                <Label htmlFor="one-liner">One-liner (Elevator Pitch) *</Label>
+                            <div className="space-y-4">
+                                <div className="space-y-1">
+                                    <Label>Is your company incorporated?</Label>
+                                    <div className="flex gap-4">
+                                        <label className="flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="incorporated"
+                                                checked={startup.isIncorporated === true}
+                                                onChange={() => setStartup({ ...startup, isIncorporated: true })}
+                                            />
+                                            <span>Yes</span>
+                                        </label>
+                                        <label className="flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="incorporated"
+                                                checked={startup.isIncorporated === false}
+                                                onChange={() => setStartup({ ...startup, isIncorporated: false })}
+                                            />
+                                            <span>No</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {startup.isIncorporated ? (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="incorporation-city">Incorporation City</Label>
+                                            <Input
+                                                id="incorporation-city"
+                                                value={startup.incorporationCity}
+                                                onChange={(e) => setStartup({ ...startup, incorporationCity: e.target.value })}
+                                                placeholder="Wilmington"
+                                                autoComplete="address-level2"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="incorporation-country">Incorporation Country</Label>
+                                            <select
+                                                id="incorporation-country"
+                                                className="w-full p-2 border border-input rounded-sm"
+                                                value={startup.incorporationCountry}
+                                                onChange={(e) => setStartup({ ...startup, incorporationCountry: e.target.value })}
+                                            >
+                                                <option value="">Select country</option>
+                                                {COUNTRIES.map((country) => (
+                                                    <option key={country} value={country}>{country}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-1">
+                                        <Label htmlFor="operating-countries">Countries where you operate</Label>
+                                        <div className="border border-input rounded-sm p-3 max-h-32 overflow-y-auto">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {COUNTRIES.map((country) => (
+                                                    <label key={country} className="flex items-center gap-2 text-sm">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={startup.operatingCountries.includes(country)}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setStartup({
+                                                                        ...startup,
+                                                                        operatingCountries: [...startup.operatingCountries, country]
+                                                                    })
+                                                                } else {
+                                                                    setStartup({
+                                                                        ...startup,
+                                                                        operatingCountries: startup.operatingCountries.filter(c => c !== country)
+                                                                    })
+                                                                }
+                                                            }}
+                                                        />
+                                                        <span>{country}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        {startup.operatingCountries.length > 0 && (
+                                            <p className="text-xs text-muted-foreground">
+                                                Selected: {startup.operatingCountries.join(', ')}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-1">
+                                <Label htmlFor="one-liner">One-liner</Label>
                                 <Input
                                     id="one-liner"
                                     value={startup.descriptionShort}
@@ -473,8 +580,8 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                 </p>
                             </div>
 
-                            <div>
-                                <Label htmlFor="description">Company Description</Label>
+                            <div className="space-y-1">
+                                <Label htmlFor="description">Description</Label>
                                 <Textarea
                                     id="description"
                                     value={startup.descriptionLong}
@@ -484,28 +591,35 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                 />
                             </div>
 
-                            <div className="space-y-4">
-                                <div>
-                                    <Label>Company Logo</Label>
-                                    <div
-                                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400"
-                                        onClick={() => logoInputRef.current?.click()}
-                                    >
-                                        <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                                        <p className="text-sm text-gray-600">
-                                            {startup.logoFile ? startup.logoFile.name : 'Click to upload your logo'}
-                                        </p>
-                                        <input
-                                            ref={logoInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0]
-                                                if (file) handleFileUpload('logo', file)
-                                            }}
-                                        />
+                            <div className="space-y-1">
+                                <Label>Logo</Label>
+                                <div
+                                    className="border-2 border-dashed border-input rounded-sm p-8 text-center cursor-pointer hover:border-primary/50 transition-colors group"
+                                    onClick={() => logoInputRef.current?.click()}
+                                >
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="bg-muted rounded-full p-3 group-hover:bg-primary/10 transition-colors">
+                                            <Building2 className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium">
+                                                {startup.logoFile ? startup.logoFile.name : 'Upload your company logo'}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                PNG, JPG or SVG (max 5MB)
+                                            </p>
+                                        </div>
                                     </div>
+                                    <input
+                                        ref={logoInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            if (file) handleFileUpload('logo', file)
+                                        }}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -522,9 +636,9 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                             </p>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <div className="grid grid-cols-3 gap-4">
-                                <div>
+                                <div className="space-y-1">
                                     <Label htmlFor="employee-count">Team Size</Label>
                                     <Input
                                         id="employee-count"
@@ -532,9 +646,10 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                         min="1"
                                         value={startup.employeeCount}
                                         onChange={(e) => setStartup({ ...startup, employeeCount: parseInt(e.target.value) || 1 })}
+                                        placeholder="1"
                                     />
                                 </div>
-                                <div>
+                                <div className="space-y-1">
                                     <Label htmlFor="mrr">Monthly Recurring Revenue ($)</Label>
                                     <Input
                                         id="mrr"
@@ -545,7 +660,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                         placeholder="0"
                                     />
                                 </div>
-                                <div>
+                                <div className="space-y-1">
                                     <Label htmlFor="arr">Annual Recurring Revenue ($)</Label>
                                     <Input
                                         id="arr"
@@ -558,7 +673,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                 </div>
                             </div>
 
-                            <div>
+                            <div className="space-y-1">
                                 <Label htmlFor="traction">Traction Summary</Label>
                                 <Textarea
                                     id="traction"
@@ -569,7 +684,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                                 />
                             </div>
 
-                            <div>
+                            <div className="space-y-1">
                                 <Label htmlFor="market">Market Summary</Label>
                                 <Textarea
                                     id="market"
@@ -583,7 +698,7 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
                             <div>
                                 <Label>Pitch Deck</Label>
                                 <div
-                                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400"
+                                    className="border-2 border-dashed border-gray-300 rounded-sm p-6 text-center cursor-pointer hover:border-gray-400"
                                     onClick={() => pitchDeckInputRef.current?.click()}
                                 >
                                     <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
@@ -653,30 +768,33 @@ export function OnboardingDialog({ isOpen, userId, onComplete }: OnboardingDialo
 
                 {/* Navigation */}
                 <div className="flex justify-between pt-6 border-t">
-                    <Button
+                    <ExpandButton
                         variant="outline"
                         onClick={prevStep}
                         disabled={currentStep === 1}
+                        Icon={ArrowLeft}
+                        iconPlacement="left"
                     >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
                         Previous
-                    </Button>
+                    </ExpandButton>
 
                     {currentStep < 4 ? (
-                        <Button
+                        <ExpandButton
                             onClick={nextStep}
                             disabled={!canProceedFromStep(currentStep)}
+                            Icon={ArrowRight}
+                            iconPlacement="right"
                         >
                             Next
-                            <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
+                        </ExpandButton>
                     ) : (
-                        <Button
+                        <ExpandButton
                             onClick={submitData}
                             disabled={loading}
+                            variant="default"
                         >
                             {loading ? 'Setting up...' : 'Complete Setup'}
-                        </Button>
+                        </ExpandButton>
                     )}
                 </div>
             </DialogContent>

@@ -112,6 +112,30 @@ export const Header = () => {
 
 const Logo = ({ className }: { className?: string }) => {
   const { theme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Avoid hydration mismatch by not rendering theme-dependent content until mounted
+  if (!mounted) {
+    return (
+      <div className={cn('flex items-center space-x-2', className)}>
+        <Image
+          src="/logo.webp"
+          alt="Suparaise logo"
+          className="h-8 w-auto"
+          width={32}
+          height={32}
+          priority
+          style={{ width: 'auto', height: '32px' }}
+        />
+        {/* Placeholder to prevent layout shift */}
+        <div className="h-8" style={{ width: '120px' }} />
+      </div>
+    )
+  }
 
   return (
     <div className={cn('flex items-center space-x-2', className)}>

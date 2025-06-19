@@ -6,9 +6,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'randomuser.me',
+        hostname: 'picsum.photos',
         port: '',
-        pathname: '/api/portraits/**',
+        pathname: '/seed/**',
       },
     ],
     formats: ['image/webp', 'image/avif'],
