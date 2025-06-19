@@ -1,0 +1,6 @@
+# Build
+docs/
+node_modules/
+
+# Environment
+.env
