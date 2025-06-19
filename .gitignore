@@ -1,6 +1,7 @@
 # Build
 docs/
 node_modules/
+.cursor/
 
 # Environment
 .env
