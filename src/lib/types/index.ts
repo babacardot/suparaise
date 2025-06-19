@@ -3,6 +3,15 @@ import { Tables } from './database'
 // The Target type is a direct mapping of the 'targets' table.
 export type Target = Tables<'targets'>
 
+// Profile type from the profiles table
+export type Profile = Tables<'profiles'>
+
+// Response types for RPC functions
+export interface UserProfileWithStartupResponse {
+  profile: Profile | null
+  startup: { name: string } | null
+}
+
 // The Founder object is custom-built by the 'get_startup_data_by_user_id'
 // function. We define its shape here, using the underlying table column
 // types from 'database.ts' for accuracy and maintainability.

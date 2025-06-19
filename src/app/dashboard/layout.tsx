@@ -17,6 +17,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { UserProfileWithStartupResponse } from '@/lib/types'
+import { OnboardingDialog } from '@/components/onboarding/onboarding-dialog'
 
 interface UserData {
   name: string
@@ -25,6 +27,8 @@ interface UserData {
   startupName?: string
 }
 
+
+
 export default function DashboardLayout({
   children,
 }: {
@@ -32,6 +36,8 @@ export default function DashboardLayout({
 }) {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
   const supabase = createSupabaseBrowserClient()
 
   const fetchUserData = useCallback(async (userId: string) => {
@@ -47,9 +53,10 @@ export default function DashboardLayout({
         return { profile: null, startup: null }
       }
 
+      const typedData = data as UserProfileWithStartupResponse | null
       return {
-        profile: data ? (data as any).profile : null,
-        startup: data ? (data as any).startup : null,
+        profile: typedData?.profile || null,
+        startup: typedData?.startup || null,
       }
     } catch (error) {
       console.error('Error fetching user data:', error)
@@ -57,37 +64,52 @@ export default function DashboardLayout({
     }
   }, [])
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser()
+  const fetchUser = useCallback(async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
-        if (user) {
-          const { profile, startup } = await fetchUserData(user.id)
+      if (user) {
+        setUserId(user.id)
+        const { profile, startup } = await fetchUserData(user.id)
 
-          // Extract first name from full name or email
-          const fullName =
-            profile?.full_name ||
-            user.user_metadata?.full_name ||
-            user.email?.split('@')[0] ||
-            'User'
-          const firstName = fullName.split(' ')[0]
-
-          setUserData({
-            name: firstName,
-            email: user.email || '',
-            avatar: user.user_metadata?.avatar_url,
-            startupName: startup?.name,
-          })
+        // Check if user needs onboarding (no startup profile)
+        if (!startup?.name) {
+          setNeedsOnboarding(true)
         }
-      } catch (error) {
-        console.error('Error fetching user:', error)
-      } finally {
-        setLoading(false)
+
+        // Extract first name from full name or email
+        const fullName =
+          profile?.full_name ||
+          user.user_metadata?.full_name ||
+          user.email?.split('@')[0] ||
+          'User'
+        const firstName = fullName.split(' ')[0]
+
+        setUserData({
+          name: firstName,
+          email: user.email || '',
+          avatar: user.user_metadata?.avatar_url,
+          startupName: startup?.name,
+        })
       }
+    } catch (error) {
+      console.error('Error fetching user:', error)
+    } finally {
+      setLoading(false)
     }
+  }, [supabase.auth, fetchUserData])
+
+  const handleOnboardingComplete = () => {
+    setNeedsOnboarding(false)
+    // Refetch user data to update the UI
+    if (userId) {
+      fetchUser()
+    }
+  }
+
+  useEffect(() => {
     fetchUser()
 
     // Listen for auth changes
@@ -95,7 +117,13 @@ export default function DashboardLayout({
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
+        setUserId(session.user.id)
         const { profile, startup } = await fetchUserData(session.user.id)
+
+        // Check if user needs onboarding (no startup profile)
+        if (!startup?.name) {
+          setNeedsOnboarding(true)
+        }
 
         const fullName =
           profile?.full_name ||
@@ -112,13 +140,15 @@ export default function DashboardLayout({
         })
       } else {
         setUserData(null)
+        setUserId(null)
+        setNeedsOnboarding(false)
       }
 
       setLoading(false)
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth, fetchUserData])
+  }, [supabase.auth, fetchUserData, fetchUser])
 
   if (loading) {
     return (
@@ -151,6 +181,15 @@ export default function DashboardLayout({
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
+
+      {/* Onboarding Dialog */}
+      {needsOnboarding && userId && (
+        <OnboardingDialog
+          isOpen={needsOnboarding}
+          userId={userId}
+          onComplete={handleOnboardingComplete}
+        />
+      )}
     </SidebarProvider>
   )
 }
