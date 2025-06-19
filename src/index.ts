@@ -1,34 +1,39 @@
 import "dotenv/config";
-import HyperAgent from "@hyperbrowser/agent";
-import { ChatAnthropic } from "@langchain/anthropic";
+import { getStartupDataForCurrentUser } from "./lib/supabase/client";
+import { vcTargets } from "./lib/data/targets";
+import { runFormFillingAgent } from "./agent/runner";
 
 async function main() {
-  console.log("Starting agent with Anthropic...");
+    console.log("🚀 Starting Suparaise agent...");
 
-  const llm = new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: "claude-3-7-sonnet-20250219",
-  });
+    const startupData = await getStartupDataForCurrentUser();
+    if (!startupData) {
+        console.log("Could not fetch startup data. Exiting.");
+        return;
+    }
 
-  const agent = new HyperAgent({
-    llm: llm,
-    browserProvider: "Hyperbrowser",
-  });
+    const target = vcTargets[0];
+    if (!target) {
+        console.log("No VC targets found. Exiting.");
+        return;
+    }
 
-  const objective = `
-    Go to Y Combinator's website, find the 'Apply' button, and click it.
-    Then, find the form for applying and tell me the first question.
-  `;
+    console.log(`\n🎯 Targeting: ${target.name}`);
+    console.log(`📝 Using data for startup: ${startupData.name}`);
 
-  try {
-    const result = await agent.executeTask(objective);
-    console.log("Agent finished with result:", result.output);
-  } catch (error) {
-    console.error("Agent encountered an error:", error);
-  } finally {
-    await agent.closeAgent();
-    console.log("Agent closed.");
-  }
+    try {
+        const finalResult = await runFormFillingAgent(startupData, target.applicationUrl);
+        console.log("\n--- FINAL RESULT ---");
+        console.log(finalResult);
+        console.log("--------------------");
+    } catch (error) {
+        console.error(`\n\nFailed to complete agent run for ${target.name}.`);
+    }
+
+    console.log("\n👋 Suparaise agent run finished.");
 }
 
-main().catch(console.error); 
+main().catch(error => {
+    console.error("\nAn unexpected error occurred in the main process:", error);
+    process.exit(1);
+}); 
