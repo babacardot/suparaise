@@ -1,2 +1,6 @@
+# Supabase
+.branches
+.temp
 functions/
 .temp/
+.env.*

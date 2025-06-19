@@ -1,12 +1,15 @@
 {
   "name": "suparaise",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext .ts,.js,.jsx,.cjs,.mjs,.tsx",
-    "format": "prettier --write ."
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "agent:run": "ts-node src/index.ts",
+    "format": "prettier --write .",
+    "update:types": "bunx supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,9 +18,25 @@
   "dependencies": {
     "@hyperbrowser/sdk": "^0.51.0",
     "@supabase/supabase-js": "^2.45.0",
-    "@types/node": "^24.0.3",
     "dotenv": "^16.5.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "next": "15.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5.8.3",
+    "tailwindcss": "^4",
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.4",
+    "@eslint/eslintrc": "^3",
+    "supabase": "^1.187.3",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.5",
+    "@ianvs/prettier-plugin-sort-imports": "^4.3.1"
   }
 }
