@@ -67,11 +67,11 @@ export const Pricing = () => {
             {pricingTiers.map((tier, idx) => (
               <div
                 key={idx}
-                className={`relative flex flex-col rounded-sm border p-6 ${tier.popular ? 'ring-2 ring-primary' : ''}`}
+                className={`relative flex flex-col rounded-sm border p-6 ${tier.popular ? 'ring-2 ring-green-200 dark:ring-green-800' : ''}`}
               >
                 {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded-sm">
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <span className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 text-sm font-medium px-3 py-1 rounded-sm">
                       Recommended
                     </span>
                   </div>
@@ -103,8 +103,12 @@ export const Pricing = () => {
 
                 <Button
                   asChild
-                  className="mt-6 w-full"
-                  variant={tier.popular ? 'default' : 'outline'}
+                  className={`mt-6 w-full ${
+                    tier.popular
+                      ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                      : ''
+                  }`}
+                  variant={tier.popular ? 'outline' : 'outline'}
                 >
                   <Link href={tier.href}>{tier.buttonText}</Link>
                 </Button>

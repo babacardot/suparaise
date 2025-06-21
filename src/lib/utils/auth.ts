@@ -7,5 +7,5 @@ export function getRedirectURL() {
   // Make sure to include a trailing `/`.
   url = url.charAt(url.length - 1) === '/' ? url : `${url}/`
 
-  return `${url}dashboard`
+  return `${url}/callback`
 }

@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Button as ExpandButton } from '@/components/design/button-expand'
 import { cn } from '@/lib/actions/utils'
 import { useScroll } from 'motion/react'
 import { useTheme } from 'next-themes'
@@ -91,16 +90,25 @@ export const Header = () => {
                 </ul>
               </div>
               <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                <Button asChild variant="outline" size="sm">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="default"
+                  className="rounded-sm px-4 text-sm"
+                >
                   <Link href="/login">
                     <span>Login</span>
                   </Link>
                 </Button>
-                <ExpandButton asChild size="sm">
+                <Button
+                  asChild
+                  size="default"
+                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
+                >
                   <Link href="/signup">
-                    <span>Sign Up</span>
+                    <span>Sign up</span>
                   </Link>
-                </ExpandButton>
+                </Button>
               </div>
             </div>
           </div>
@@ -111,7 +119,7 @@ export const Header = () => {
 }
 
 const Logo = ({ className }: { className?: string }) => {
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
@@ -123,7 +131,7 @@ const Logo = ({ className }: { className?: string }) => {
     return (
       <div className={cn('flex items-center space-x-2', className)}>
         <Image
-          src="/logo.webp"
+          src="/lb.webp" // Neutral logo for SSR
           alt="Suparaise logo"
           className="h-8 w-auto"
           width={32}
@@ -131,32 +139,29 @@ const Logo = ({ className }: { className?: string }) => {
           priority
           style={{ width: 'auto', height: '32px' }}
         />
-        {/* Placeholder to prevent layout shift */}
-        <div className="h-8" style={{ width: '120px' }} />
+        <span className="text-xl font-semibold text-foreground">suparaise</span>
       </div>
     )
   }
 
+  // Determine which logo to use based on resolved theme
+  const logoSrc = resolvedTheme === 'dark' ? '/tw.webp' : '/tb.webp'
+
   return (
     <div className={cn('flex items-center space-x-2', className)}>
       <Image
-        src="/logo.webp"
+        key={logoSrc} // Force re-render when logo changes
+        src={logoSrc}
         alt="Suparaise logo"
-        className="h-8 w-auto"
+        className="h-8 w-auto transition-opacity duration-200"
         width={32}
         height={32}
         priority
         style={{ width: 'auto', height: '32px' }}
       />
-      <Image
-        src={theme === 'dark' ? '/logo_w.webp' : '/logo_d.webp'}
-        alt="Suparaise text logo"
-        className="h-8 w-auto"
-        width={120}
-        height={32}
-        priority
-        style={{ width: 'auto', height: '32px' }}
-      />
+      <span className="text-xl font-semibold text-foreground transition-colors duration-200">
+        Suparaise
+      </span>
     </div>
   )
 }

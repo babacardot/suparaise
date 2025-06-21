@@ -10,6 +10,7 @@ import { getRedirectURL } from '@/lib/utils/auth'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/actions/utils'
+import Spinner from '../ui/spinner'
 
 export function LoginForm({
   className,
@@ -24,6 +25,7 @@ export function LoginForm({
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
+    setIsSubmitting(true)
     const supabase = createSupabaseBrowserClient()
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -36,6 +38,7 @@ export function LoginForm({
       router.push('/dashboard')
       router.refresh()
     }
+    setIsSubmitting(false)
   }
 
   return (
@@ -59,6 +62,7 @@ export function LoginForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="grid gap-2">
@@ -77,11 +81,16 @@ export function LoginForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button type="submit" className="w-full">
-                Login
+              <Button
+                type="submit"
+                className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? <Spinner /> : 'Login'}
               </Button>
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
                 <span className="relative z-10 bg-background px-2 text-muted-foreground">

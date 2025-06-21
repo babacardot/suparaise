@@ -17,16 +17,6 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
           response.cookies.set({
             name,
             value,
@@ -34,16 +24,6 @@ export async function middleware(request: NextRequest) {
           })
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
           response.cookies.set({
             name,
             value: '',
@@ -55,18 +35,21 @@ export async function middleware(request: NextRequest) {
   )
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
 
-  // Redirect to dashboard if user is logged in and tries to access auth pages
-  if (session && (pathname === '/login' || pathname === '/signup')) {
+  // Auth routes
+  const authRoutes = ['/login', '/signup', '/callback']
+
+  // If user is logged in, redirect auth routes to dashboard
+  if (user && authRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Redirect to login if user is not logged in and tries to access protected routes
-  if (!session && pathname.startsWith('/dashboard')) {
+  // If user is not logged in, redirect protected routes to login
+  if (!user && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 

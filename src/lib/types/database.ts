@@ -36,11 +36,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "common_responses_startup_id_fkey"
-            columns: ["startup_id"]
+            foreignKeyName: 'common_responses_startup_id_fkey'
+            columns: ['startup_id']
             isOneToOne: false
-            referencedRelation: "startups"
-            referencedColumns: ["id"]
+            referencedRelation: 'startups'
+            referencedColumns: ['id']
           },
         ]
       }
@@ -49,12 +49,14 @@ export type Database = {
           bio: string | null
           created_at: string | null
           email: string | null
-          full_name: string
+          first_name: string
           github_url: string | null
           id: string
+          last_name: string
           linkedin: string | null
           personal_website_url: string | null
-          role: Database["public"]["Enums"]["founder_role"] | null
+          phone: string | null
+          role: Database['public']['Enums']['founder_role'] | null
           startup_id: string
           updated_at: string | null
         }
@@ -62,12 +64,14 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           email?: string | null
-          full_name: string
+          first_name: string
           github_url?: string | null
           id?: string
+          last_name: string
           linkedin?: string | null
           personal_website_url?: string | null
-          role?: Database["public"]["Enums"]["founder_role"] | null
+          phone?: string | null
+          role?: Database['public']['Enums']['founder_role'] | null
           startup_id: string
           updated_at?: string | null
         }
@@ -75,22 +79,24 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           email?: string | null
-          full_name?: string
+          first_name?: string
           github_url?: string | null
           id?: string
+          last_name?: string
           linkedin?: string | null
           personal_website_url?: string | null
-          role?: Database["public"]["Enums"]["founder_role"] | null
+          phone?: string | null
+          role?: Database['public']['Enums']['founder_role'] | null
           startup_id?: string
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "founders_startup_id_fkey"
-            columns: ["startup_id"]
+            foreignKeyName: 'founders_startup_id_fkey'
+            columns: ['startup_id']
             isOneToOne: false
-            referencedRelation: "startups"
-            referencedColumns: ["id"]
+            referencedRelation: 'startups'
+            referencedColumns: ['id']
           },
         ]
       }
@@ -99,16 +105,19 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          onboarded: boolean
         }
         Insert: {
           email?: string | null
           full_name?: string | null
           id: string
+          onboarded?: boolean
         }
         Update: {
           email?: string | null
           full_name?: string | null
           id?: string
+          onboarded?: boolean
         }
         Relationships: []
       }
@@ -120,15 +129,26 @@ export type Database = {
           description_medium: string | null
           description_short: string | null
           employee_count: number | null
+          funding_amount_sought: number | null
+          funding_round: Database['public']['Enums']['investment_stage'] | null
           id: string
-          industry: Database["public"]["Enums"]["industry_type"] | null
+          incorporation_city: string | null
+          incorporation_country: string | null
+          industry: Database['public']['Enums']['industry_type'] | null
           intro_video_url: string | null
+          investment_instrument:
+            | Database['public']['Enums']['investment_instrument']
+            | null
+          is_incorporated: boolean | null
+          legal_structure: Database['public']['Enums']['legal_structure'] | null
           location: string | null
           logo_url: string | null
           market_summary: string | null
           mrr: number | null
           name: string
+          operating_countries: string[] | null
           pitch_deck_url: string | null
+          pre_money_valuation: number | null
           traction_summary: string | null
           updated_at: string | null
           user_id: string
@@ -141,15 +161,28 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
+          funding_amount_sought?: number | null
+          funding_round?: Database['public']['Enums']['investment_stage'] | null
           id?: string
-          industry?: Database["public"]["Enums"]["industry_type"] | null
+          incorporation_city?: string | null
+          incorporation_country?: string | null
+          industry?: Database['public']['Enums']['industry_type'] | null
           intro_video_url?: string | null
+          investment_instrument?:
+            | Database['public']['Enums']['investment_instrument']
+            | null
+          is_incorporated?: boolean | null
+          legal_structure?:
+            | Database['public']['Enums']['legal_structure']
+            | null
           location?: string | null
           logo_url?: string | null
           market_summary?: string | null
           mrr?: number | null
           name: string
+          operating_countries?: string[] | null
           pitch_deck_url?: string | null
+          pre_money_valuation?: number | null
           traction_summary?: string | null
           updated_at?: string | null
           user_id: string
@@ -162,15 +195,28 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
+          funding_amount_sought?: number | null
+          funding_round?: Database['public']['Enums']['investment_stage'] | null
           id?: string
-          industry?: Database["public"]["Enums"]["industry_type"] | null
+          incorporation_city?: string | null
+          incorporation_country?: string | null
+          industry?: Database['public']['Enums']['industry_type'] | null
           intro_video_url?: string | null
+          investment_instrument?:
+            | Database['public']['Enums']['investment_instrument']
+            | null
+          is_incorporated?: boolean | null
+          legal_structure?:
+            | Database['public']['Enums']['legal_structure']
+            | null
           location?: string | null
           logo_url?: string | null
           market_summary?: string | null
           mrr?: number | null
           name?: string
+          operating_countries?: string[] | null
           pitch_deck_url?: string | null
+          pre_money_valuation?: number | null
           traction_summary?: string | null
           updated_at?: string | null
           user_id?: string
@@ -184,7 +230,7 @@ export type Database = {
           created_at: string | null
           id: string
           startup_id: string
-          status: Database["public"]["Enums"]["submission_status"] | null
+          status: Database['public']['Enums']['submission_status'] | null
           submission_date: string | null
           target_id: string
         }
@@ -193,7 +239,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           startup_id: string
-          status?: Database["public"]["Enums"]["submission_status"] | null
+          status?: Database['public']['Enums']['submission_status'] | null
           submission_date?: string | null
           target_id: string
         }
@@ -202,24 +248,24 @@ export type Database = {
           created_at?: string | null
           id?: string
           startup_id?: string
-          status?: Database["public"]["Enums"]["submission_status"] | null
+          status?: Database['public']['Enums']['submission_status'] | null
           submission_date?: string | null
           target_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "submissions_startup_id_fkey"
-            columns: ["startup_id"]
+            foreignKeyName: 'submissions_startup_id_fkey'
+            columns: ['startup_id']
             isOneToOne: false
-            referencedRelation: "startups"
-            referencedColumns: ["id"]
+            referencedRelation: 'startups'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "submissions_target_id_fkey"
-            columns: ["target_id"]
+            foreignKeyName: 'submissions_target_id_fkey'
+            columns: ['target_id']
             isOneToOne: false
-            referencedRelation: "targets"
-            referencedColumns: ["id"]
+            referencedRelation: 'targets'
+            referencedColumns: ['id']
           },
         ]
       }
@@ -228,19 +274,19 @@ export type Database = {
           application_email: string | null
           application_url: string
           created_at: string | null
-          form_complexity: Database["public"]["Enums"]["form_complexity"] | null
+          form_complexity: Database['public']['Enums']['form_complexity'] | null
           id: string
-          industry_focus: Database["public"]["Enums"]["industry_type"][] | null
+          industry_focus: Database['public']['Enums']['industry_type'][] | null
           name: string
           notes: string | null
           question_count_range:
-            | Database["public"]["Enums"]["question_count_range"]
+            | Database['public']['Enums']['question_count_range']
             | null
           region_focus: string[] | null
           required_documents: string[] | null
           requires_video: boolean | null
-          stage_focus: Database["public"]["Enums"]["investment_stage"][] | null
-          submission_type: Database["public"]["Enums"]["submission_type"] | null
+          stage_focus: Database['public']['Enums']['investment_stage'][] | null
+          submission_type: Database['public']['Enums']['submission_type'] | null
           updated_at: string | null
           website: string | null
         }
@@ -249,21 +295,21 @@ export type Database = {
           application_url: string
           created_at?: string | null
           form_complexity?:
-            | Database["public"]["Enums"]["form_complexity"]
+            | Database['public']['Enums']['form_complexity']
             | null
           id?: string
-          industry_focus?: Database["public"]["Enums"]["industry_type"][] | null
+          industry_focus?: Database['public']['Enums']['industry_type'][] | null
           name: string
           notes?: string | null
           question_count_range?:
-            | Database["public"]["Enums"]["question_count_range"]
+            | Database['public']['Enums']['question_count_range']
             | null
           region_focus?: string[] | null
           required_documents?: string[] | null
           requires_video?: boolean | null
-          stage_focus?: Database["public"]["Enums"]["investment_stage"][] | null
+          stage_focus?: Database['public']['Enums']['investment_stage'][] | null
           submission_type?:
-            | Database["public"]["Enums"]["submission_type"]
+            | Database['public']['Enums']['submission_type']
             | null
           updated_at?: string | null
           website?: string | null
@@ -273,21 +319,21 @@ export type Database = {
           application_url?: string
           created_at?: string | null
           form_complexity?:
-            | Database["public"]["Enums"]["form_complexity"]
+            | Database['public']['Enums']['form_complexity']
             | null
           id?: string
-          industry_focus?: Database["public"]["Enums"]["industry_type"][] | null
+          industry_focus?: Database['public']['Enums']['industry_type'][] | null
           name?: string
           notes?: string | null
           question_count_range?:
-            | Database["public"]["Enums"]["question_count_range"]
+            | Database['public']['Enums']['question_count_range']
             | null
           region_focus?: string[] | null
           required_documents?: string[] | null
           requires_video?: boolean | null
-          stage_focus?: Database["public"]["Enums"]["investment_stage"][] | null
+          stage_focus?: Database['public']['Enums']['investment_stage'][] | null
           submission_type?:
-            | Database["public"]["Enums"]["submission_type"]
+            | Database['public']['Enums']['submission_type']
             | null
           updated_at?: string | null
           website?: string | null
@@ -299,8 +345,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_user_onboarding_status: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       create_startup: {
         Args: { p_startup_data: Json }
+        Returns: Json
+      }
+      create_startup_and_founders: {
+        Args: { p_data: Json }
         Returns: Json
       }
       filter_targets: {
@@ -345,52 +399,94 @@ export type Database = {
       }
     }
     Enums: {
-      form_complexity: "simple" | "standard" | "comprehensive"
+      form_complexity: 'simple' | 'standard' | 'comprehensive'
       founder_role:
-        | "Founder"
-        | "Co-founder"
-        | "CEO"
-        | "CTO"
-        | "COO"
-        | "CPO"
-        | "CMO"
-        | "Lead Engineer"
-        | "Product Manager"
-        | "Designer"
-        | "Sales Lead"
-        | "Marketing Lead"
-        | "Advisor"
-        | "Legal Counsel"
-        | "Other"
+        | 'Founder'
+        | 'Co-founder'
+        | 'CEO'
+        | 'CTO'
+        | 'COO'
+        | 'CPO'
+        | 'CMO'
+        | 'Engineer'
+        | 'Product'
+        | 'Designer'
+        | 'Advisor'
+        | 'Legal Counsel'
+        | 'Other'
       industry_type:
-        | "B2B SaaS"
-        | "Fintech"
-        | "Healthtech"
-        | "AI/ML"
-        | "Deep tech"
-        | "Climate tech"
-        | "Consumer"
-        | "E-commerce"
-        | "Marketplace"
-        | "Edtech"
-        | "Gaming"
-        | "Web3"
-        | "Developer tools"
-        | "Cybersecurity"
-        | "Logistics"
-        | "Agritech"
-        | "Other"
+        | 'B2B SaaS'
+        | 'Fintech'
+        | 'Healthtech'
+        | 'AI/ML'
+        | 'Deep tech'
+        | 'Climate tech'
+        | 'Consumer'
+        | 'E-commerce'
+        | 'Marketplace'
+        | 'Gaming'
+        | 'Web3'
+        | 'Developer tools'
+        | 'Cybersecurity'
+        | 'Logistics'
+        | 'AdTech'
+        | 'PropTech'
+        | 'InsurTech'
+        | 'Agriculture'
+        | 'Automotive'
+        | 'Biotechnology'
+        | 'Construction'
+        | 'Consulting'
+        | 'Consumer Goods'
+        | 'Education'
+        | 'Energy'
+        | 'Entertainment'
+        | 'Environmental Services'
+        | 'Fashion'
+        | 'Food & Beverage'
+        | 'Government'
+        | 'Healthcare Services'
+        | 'Hospitality'
+        | 'Human Resources'
+        | 'Insurance'
+        | 'Legal'
+        | 'Manufacturing'
+        | 'Media'
+        | 'Non-profit'
+        | 'Pharmaceuticals'
+        | 'Real Estate'
+        | 'Retail'
+        | 'Telecommunications'
+        | 'Transportation'
+        | 'Utilities'
+        | 'Other'
+      investment_instrument:
+        | 'Equity'
+        | 'Debt'
+        | 'Convertible Note'
+        | 'SAFE'
+        | 'Other'
       investment_stage:
-        | "Pre-seed"
-        | "Seed"
-        | "Series A"
-        | "Series B"
-        | "Series C"
-        | "Growth"
-        | "All stages"
-      question_count_range: "1-5" | "6-10" | "11-20" | "21+"
-      submission_status: "pending" | "in_progress" | "completed" | "failed"
-      submission_type: "form" | "email" | "other"
+        | 'Pre-seed'
+        | 'Seed'
+        | 'Series A'
+        | 'Series B'
+        | 'Series C'
+        | 'Growth'
+        | 'All stages'
+      legal_structure:
+        | 'Not yet incorporated'
+        | 'Delaware C-Corp'
+        | 'Canadian company'
+        | 'B-Corp'
+        | 'Public Benefit Corporation (PBC)'
+        | 'LLC'
+        | 'S-Corp'
+        | 'Non-profit'
+        | 'Other'
+      question_count_range: '1-5' | '6-10' | '11-20' | '21+'
+      submission_status: 'pending' | 'in_progress' | 'completed' | 'failed'
+      submission_type: 'form' | 'email' | 'other'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -398,29 +494,29 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, 'public'>]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
     | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (Database[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        Database[DefaultSchemaTableNameOrOptions['schema']]['Views'])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+  ? (Database[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      Database[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -429,21 +525,21 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof Database[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? Database[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -452,21 +548,21 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof Database[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? Database[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -475,86 +571,130 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
+    | keyof DefaultSchema['Enums']
     | { schema: keyof Database },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof Database[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  ? Database[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
+    | keyof DefaultSchema['CompositeTypes']
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
   public: {
     Enums: {
-      form_complexity: ["simple", "standard", "comprehensive"],
+      form_complexity: ['simple', 'standard', 'comprehensive'],
       founder_role: [
-        "Founder",
-        "Co-founder",
-        "CEO",
-        "CTO",
-        "COO",
-        "CPO",
-        "CMO",
-        "Lead Engineer",
-        "Product Manager",
-        "Designer",
-        "Sales Lead",
-        "Marketing Lead",
-        "Advisor",
-        "Legal Counsel",
-        "Other",
+        'Founder',
+        'Co-founder',
+        'CEO',
+        'CTO',
+        'COO',
+        'CPO',
+        'CMO',
+        'Engineer',
+        'Product',
+        'Designer',
+        'Advisor',
+        'Legal Counsel',
+        'Other',
       ],
       industry_type: [
-        "B2B SaaS",
-        "Fintech",
-        "Healthtech",
-        "AI/ML",
-        "Deep tech",
-        "Climate tech",
-        "Consumer",
-        "E-commerce",
-        "Marketplace",
-        "Edtech",
-        "Gaming",
-        "Web3",
-        "Developer tools",
-        "Cybersecurity",
-        "Logistics",
-        "Agritech",
-        "Other",
+        'B2B SaaS',
+        'Fintech',
+        'Healthtech',
+        'AI/ML',
+        'Deep tech',
+        'Climate tech',
+        'Consumer',
+        'E-commerce',
+        'Marketplace',
+        'Gaming',
+        'Web3',
+        'Developer tools',
+        'Cybersecurity',
+        'Logistics',
+        'AdTech',
+        'PropTech',
+        'InsurTech',
+        'Agriculture',
+        'Automotive',
+        'Biotechnology',
+        'Construction',
+        'Consulting',
+        'Consumer Goods',
+        'Education',
+        'Energy',
+        'Entertainment',
+        'Environmental Services',
+        'Fashion',
+        'Food & Beverage',
+        'Government',
+        'Healthcare Services',
+        'Hospitality',
+        'Human Resources',
+        'Insurance',
+        'Legal',
+        'Manufacturing',
+        'Media',
+        'Non-profit',
+        'Pharmaceuticals',
+        'Real Estate',
+        'Retail',
+        'Telecommunications',
+        'Transportation',
+        'Utilities',
+        'Other',
+      ],
+      investment_instrument: [
+        'Equity',
+        'Debt',
+        'Convertible Note',
+        'SAFE',
+        'Other',
       ],
       investment_stage: [
-        "Pre-seed",
-        "Seed",
-        "Series A",
-        "Series B",
-        "Series C",
-        "Growth",
-        "All stages",
+        'Pre-seed',
+        'Seed',
+        'Series A',
+        'Series B',
+        'Series C',
+        'Growth',
+        'All stages',
       ],
-      question_count_range: ["1-5", "6-10", "11-20", "21+"],
-      submission_status: ["pending", "in_progress", "completed", "failed"],
-      submission_type: ["form", "email", "other"],
+      legal_structure: [
+        'Not yet incorporated',
+        'Delaware C-Corp',
+        'Canadian company',
+        'B-Corp',
+        'Public Benefit Corporation (PBC)',
+        'LLC',
+        'S-Corp',
+        'Non-profit',
+        'Other',
+      ],
+      question_count_range: ['1-5', '6-10', '11-20', '21+'],
+      submission_status: ['pending', 'in_progress', 'completed', 'failed'],
+      submission_type: ['form', 'email', 'other'],
     },
   },
 } as const

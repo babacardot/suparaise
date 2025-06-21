@@ -14,6 +14,11 @@ BEGIN
         'incorporationCity', s.incorporation_city,
         'incorporationCountry', s.incorporation_country,
         'operatingCountries', s.operating_countries,
+        'legalStructure', s.legal_structure,
+        'investmentInstrument', s.investment_instrument,
+        'fundingRound', s.funding_round,
+        'fundingAmountSought', s.funding_amount_sought,
+        'preMoneyValuation', s.pre_money_valuation,
         'oneLiner', s.description_short,
         'description', s.description_long,
         'traction_summary', s.traction_summary,
@@ -26,7 +31,8 @@ BEGIN
         'intro_video_url', s.intro_video_url,
         'founders', (
             SELECT jsonb_agg(jsonb_build_object(
-                'fullName', f.full_name,
+                'firstName', f.first_name,
+                'lastName', f.last_name,
                 'email', f.email,
                 'phone', f.phone,
                 'linkedin', f.linkedin,
@@ -49,7 +55,7 @@ BEGIN
 
     RETURN result;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ==========================================
 -- PROFILE FUNCTIONS
@@ -68,7 +74,7 @@ BEGIN
 
     RETURN result;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Function to update profile
 CREATE OR REPLACE FUNCTION update_profile(p_user_id UUID, p_full_name TEXT DEFAULT NULL)
@@ -84,33 +90,7 @@ BEGIN
 
     RETURN result;
 END;
-$$ LANGUAGE plpgsql;
-
--- Function to get user profile with startup data
-CREATE OR REPLACE FUNCTION get_user_profile_with_startup(p_user_id UUID)
-RETURNS JSONB AS $$
-DECLARE
-    result JSONB;
-BEGIN
-    SELECT jsonb_build_object(
-        'profile', (
-            SELECT to_jsonb(p.*)
-            FROM profiles p
-            WHERE p.id = p_user_id
-        ),
-        'startup', (
-            SELECT jsonb_build_object(
-                'name', s.name
-            )
-            FROM startups s
-            WHERE s.user_id = p_user_id
-        )
-    )
-    INTO result;
-
-    RETURN result;
-END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ==========================================
 -- TARGET FUNCTIONS
@@ -128,7 +108,7 @@ BEGIN
 
     RETURN COALESCE(result, '[]'::jsonb);
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Function to get target by ID
 CREATE OR REPLACE FUNCTION get_target_by_id(p_target_id UUID)
@@ -143,7 +123,7 @@ BEGIN
 
     RETURN result;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Function to search targets by name or notes
 CREATE OR REPLACE FUNCTION search_targets(p_query TEXT)
@@ -159,7 +139,7 @@ BEGIN
 
     RETURN COALESCE(result, '[]'::jsonb);
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Function to filter targets by stages, industries, and regions
 CREATE OR REPLACE FUNCTION filter_targets(
@@ -180,7 +160,7 @@ BEGIN
 
     RETURN COALESCE(result, '[]'::jsonb);
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ==========================================
 -- STARTUP FUNCTIONS
@@ -202,6 +182,11 @@ BEGIN
         incorporation_city,
         incorporation_country,
         operating_countries,
+        legal_structure,
+        investment_instrument,
+        funding_round,
+        funding_amount_sought,
+        pre_money_valuation,
         description_short,
         description_medium,
         description_long,
@@ -224,6 +209,11 @@ BEGIN
         p_startup_data->>'incorporation_city',
         p_startup_data->>'incorporation_country',
         string_to_array(p_startup_data->>'operating_countries', ','),
+        (p_startup_data->>'legal_structure')::legal_structure,
+        (p_startup_data->>'investment_instrument')::investment_instrument,
+        (p_startup_data->>'funding_round')::investment_stage,
+        (p_startup_data->>'funding_amount_sought')::NUMERIC,
+        (p_startup_data->>'pre_money_valuation')::NUMERIC,
         p_startup_data->>'description_short',
         p_startup_data->>'description_medium',
         p_startup_data->>'description_long',
@@ -240,7 +230,7 @@ BEGIN
 
     RETURN result;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Function to update startup
 CREATE OR REPLACE FUNCTION update_startup(p_startup_id UUID, p_updates JSONB)
@@ -258,6 +248,11 @@ BEGIN
         incorporation_city = COALESCE((p_updates->>'incorporation_city'), incorporation_city),
         incorporation_country = COALESCE((p_updates->>'incorporation_country'), incorporation_country),
         operating_countries = COALESCE(string_to_array(p_updates->>'operating_countries', ','), operating_countries),
+        legal_structure = COALESCE((p_updates->>'legal_structure')::legal_structure, legal_structure),
+        investment_instrument = COALESCE((p_updates->>'investment_instrument')::investment_instrument, investment_instrument),
+        funding_round = COALESCE((p_updates->>'funding_round')::investment_stage, funding_round),
+        funding_amount_sought = COALESCE((p_updates->>'funding_amount_sought')::NUMERIC, funding_amount_sought),
+        pre_money_valuation = COALESCE((p_updates->>'pre_money_valuation')::NUMERIC, pre_money_valuation),
         description_short = COALESCE((p_updates->>'description_short'), description_short),
         description_medium = COALESCE((p_updates->>'description_medium'), description_medium),
         description_long = COALESCE((p_updates->>'description_long'), description_long),
@@ -275,4 +270,4 @@ BEGIN
 
     RETURN result;
 END;
-$$ LANGUAGE plpgsql; 
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public; 

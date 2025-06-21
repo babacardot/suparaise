@@ -6,8 +6,6 @@ import { ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Button as ExpandButton } from '@/components/design/button-expand'
 import { AnimatedGroup } from '@/components/ui/animated-group'
-import { Header } from '@/components/design/header'
-
 const transitionVariants = {
   item: {
     hidden: {
@@ -31,7 +29,6 @@ const transitionVariants = {
 export function HeroSection() {
   return (
     <>
-      <Header />
       <main className="overflow-hidden">
         <section>
           <div className="relative pt-24">
@@ -64,12 +61,12 @@ export function HeroSection() {
                       key={1}
                       asChild
                       size="lg"
-                      className="rounded-sm px-5 text-base"
+                      className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
                       Icon={ChevronRight}
                       iconPlacement="right"
                     >
                       <Link href="/signup">
-                        <span className="text-nowrap">Get Started</span>
+                        <span className="text-nowrap">Get started</span>
                       </Link>
                     </ExpandButton>
                     <Button

@@ -120,7 +120,7 @@
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* Remove focus outline globally */
   *:focus,
   *:focus-visible {

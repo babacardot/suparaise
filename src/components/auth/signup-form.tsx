@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { getRedirectURL } from '@/lib/utils/auth'
 import { useState } from 'react'
+import Spinner from '../ui/spinner'
 
 export function SignupForm({
   className,
@@ -23,10 +24,14 @@ export function SignupForm({
   const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
+    setIsSubmitting(true)
     const supabase = createSupabaseBrowserClient()
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: getRedirectURL(),
+      },
     })
 
     if (error) {
@@ -34,6 +39,7 @@ export function SignupForm({
     } else {
       setIsSignedUp(true)
     }
+    setIsSubmitting(false)
   }
 
   if (isSignedUp) {
@@ -75,6 +81,7 @@ export function SignupForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="grid gap-2">
@@ -88,11 +95,16 @@ export function SignupForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button type="submit" className="w-full">
-                Create account
+              <Button
+                type="submit"
+                className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? <Spinner /> : 'Create account'}
               </Button>
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
                 <span className="relative z-10 bg-background px-2 text-muted-foreground">
@@ -123,7 +135,7 @@ export function SignupForm({
                     }
                   }}
                   disabled={isSubmitting}
-                  className="w-full h-[42px] px-3 rounded-sm bg-[#333] hover:bg-[#444] dark:bg-[#171515] dark:hover:bg-[#2b2a2a] text-white text-sm font-medium transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-9 px-3 rounded-sm bg-[#333] hover:bg-[#444] dark:bg-[#171515] dark:hover:bg-[#2b2a2a] text-white text-sm font-medium transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg
                     className="h-5 w-5"
@@ -162,7 +174,7 @@ export function SignupForm({
                     }
                   }}
                   disabled={isSubmitting}
-                  className="w-full h-[42px] px-3 rounded-sm bg-white hover:bg-gray-50 dark:bg-[#333] dark:hover:bg-[#444] text-gray-600 dark:text-white border border-gray-300 dark:border-transparent text-sm font-medium transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-9 px-3 rounded-sm bg-white hover:bg-gray-50 dark:bg-[#333] dark:hover:bg-[#444] text-gray-600 dark:text-white border border-gray-300 dark:border-transparent text-sm font-medium transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path

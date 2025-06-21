@@ -11,17 +11,39 @@ CREATE TYPE founder_role AS ENUM (
     'COO',
     'CPO',
     'CMO',
-    'Lead Engineer',
-    'Product Manager',
+    'Engineer',
+    'Product',
     'Designer',
-    'Sales Lead',
-    'Marketing Lead',
     'Advisor',
     'Legal Counsel',
     'Other'
 );
 CREATE TYPE investment_stage AS ENUM ('Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'All stages');
-CREATE TYPE industry_type AS ENUM ('B2B SaaS', 'Fintech', 'Healthtech', 'AI/ML', 'Deep tech', 'Climate tech', 'Consumer', 'E-commerce', 'Marketplace', 'Edtech', 'Gaming', 'Web3', 'Developer tools', 'Cybersecurity', 'Logistics', 'Agritech', 'Other');
+CREATE TYPE industry_type AS ENUM (
+    -- Tech
+    'B2B SaaS', 'Fintech', 'Healthtech', 'AI/ML', 'Deep tech', 'Climate tech', 
+    'Consumer', 'E-commerce', 'Marketplace', 'Gaming', 'Web3', 
+    'Developer tools', 'Cybersecurity', 'Logistics', 'AdTech', 'PropTech', 'InsurTech',
+    -- Non-Tech / Other
+    'Agriculture', 'Automotive', 'Biotechnology', 'Construction', 'Consulting', 
+    'Consumer Goods', 'Education', 'Energy', 'Entertainment', 'Environmental Services', 
+    'Fashion', 'Food & Beverage', 'Government', 'Healthcare Services', 'Hospitality', 
+    'Human Resources', 'Insurance', 'Legal', 'Manufacturing', 'Media', 
+    'Non-profit', 'Pharmaceuticals', 'Real Estate', 'Retail', 'Telecommunications', 
+    'Transportation', 'Utilities', 'Other'
+);
+CREATE TYPE legal_structure AS ENUM (
+    'Not yet incorporated',
+    'Delaware C-Corp',
+    'Canadian company',
+    'B-Corp',
+    'Public Benefit Corporation (PBC)',
+    'LLC',
+    'S-Corp',
+    'Non-profit',
+    'Other'
+);
+CREATE TYPE investment_instrument AS ENUM ('Equity', 'Debt', 'Convertible Note', 'SAFE', 'Other');
 
 -- --------------------------------------------------
 -- Auto-update `updated_at` column
@@ -32,7 +54,7 @@ BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- --------------------------------------------------
 -- Auto-create profile when user signs up
@@ -43,12 +65,17 @@ BEGIN
   INSERT INTO public.profiles (id, full_name, email)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+    COALESCE(
+      (NEW.raw_user_meta_data::jsonb)->>'full_name',
+      (NEW.raw_user_meta_data::jsonb)->>'name',
+      TRIM(CONCAT((NEW.raw_user_meta_data::jsonb)->>'first_name', ' ', (NEW.raw_user_meta_data::jsonb)->>'last_name')),
+      split_part(NEW.email, '@', 1)
+    ),
     NEW.email
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- --------------------------------------------------
 -- Table: targets
@@ -85,7 +112,8 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 CREATE TABLE profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     full_name TEXT,
-    email TEXT
+    email TEXT,
+    onboarded BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 -- Create trigger to auto-create profile when user signs up
@@ -109,6 +137,11 @@ CREATE TABLE startups (
     incorporation_city TEXT,
     incorporation_country TEXT,
     operating_countries TEXT[],
+    legal_structure legal_structure,
+    investment_instrument investment_instrument,
+    funding_round investment_stage,
+    funding_amount_sought NUMERIC(15, 2),
+    pre_money_valuation NUMERIC(15, 2),
     description_short TEXT,
     description_medium TEXT,
     description_long TEXT,
@@ -137,7 +170,8 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 CREATE TABLE founders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
-    full_name TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
     role founder_role,
     bio TEXT,
     email TEXT UNIQUE,
@@ -188,6 +222,36 @@ CREATE TABLE submissions (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- =================================================================
+-- PERFORMANCE OPTIMIZATION INDEXES
+-- =================================================================
+
+-- Index for startups.user_id (critical for dashboard queries)
+CREATE INDEX IF NOT EXISTS idx_startups_user_id ON startups(user_id);
+
+-- Index for founders.startup_id (for founder lookups)
+CREATE INDEX IF NOT EXISTS idx_founders_startup_id ON founders(startup_id);
+
+-- Index for common_responses.startup_id (for response lookups)
+CREATE INDEX IF NOT EXISTS idx_common_responses_startup_id ON common_responses(startup_id);
+
+-- Index for submissions queries
+CREATE INDEX IF NOT EXISTS idx_submissions_startup_id ON submissions(startup_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_target_id ON submissions(target_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
+
+-- Composite index for the unique constraint queries
+CREATE INDEX IF NOT EXISTS idx_submissions_startup_target ON submissions(startup_id, target_id);
+CREATE INDEX IF NOT EXISTS idx_common_responses_startup_question ON common_responses(startup_id, question);
+
+-- Index for email lookups in founders (if used)
+CREATE INDEX IF NOT EXISTS idx_founders_email ON founders(email) WHERE email IS NOT NULL;
+
+-- Performance indexes for targets table (for filtering)
+CREATE INDEX IF NOT EXISTS idx_targets_stage_focus ON targets USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_targets_industry_focus ON targets USING GIN(industry_focus) WHERE industry_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_targets_region_focus ON targets USING GIN(region_focus) WHERE region_focus IS NOT NULL;
+
 -- --------------------------------------------------
 -- Row Level Security (RLS) Policies
 -- --------------------------------------------------
@@ -196,29 +260,40 @@ CREATE TABLE submissions (
 ALTER TABLE targets ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read access to targets" ON targets FOR SELECT USING (true);
 
--- Users can only see their own profile
+-- Users can only see their own profile (optimized with select auth.uid())
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow users to read their own profile" ON profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Allow users to update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Allow users to insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Allow users to read their own profile" ON profiles FOR SELECT USING ((select auth.uid()) = id);
+CREATE POLICY "Allow users to update their own profile" ON profiles FOR UPDATE USING ((select auth.uid()) = id);
+CREATE POLICY "Allow users to insert their own profile" ON profiles FOR INSERT WITH CHECK ((select auth.uid()) = id);
 
--- Users can only manage their own startup
+-- Users can only manage their own startup (optimized with select auth.uid())
 ALTER TABLE startups ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow users to read their own startup" ON startups FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Allow users to create their own startup" ON startups FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Allow users to update their own startup" ON startups FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Allow users to read their own startup" ON startups FOR SELECT USING ((select auth.uid()) = user_id);
+CREATE POLICY "Allow users to create their own startup" ON startups FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
+CREATE POLICY "Allow users to update their own startup" ON startups FOR UPDATE USING ((select auth.uid()) = user_id);
 
--- Users can only manage founders of their own startup
+-- Users can only manage founders of their own startup (optimized with select auth.uid())
 ALTER TABLE founders ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage founders of their own startup" ON founders FOR ALL
-USING (auth.uid() = (SELECT user_id FROM startups WHERE id = startup_id));
+USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
 
--- Users can only manage common responses for their own startup
+-- Users can only manage common responses for their own startup (optimized with select auth.uid())
 ALTER TABLE common_responses ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage responses for their own startup" ON common_responses FOR ALL
-USING (auth.uid() = (SELECT user_id FROM startups WHERE id = startup_id));
+USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
 
--- Users can only manage submissions for their own startup
+-- Users can only manage submissions for their own startup (optimized with select auth.uid())
 ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage submissions for their own startup" ON submissions FOR ALL
-USING (auth.uid() = (SELECT user_id FROM startups WHERE id = startup_id)); 
+USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
+
+-- =================================================================
+-- ANALYZE TABLES FOR OPTIMAL QUERY PLANNING
+-- =================================================================
+-- Update table statistics for better query planning
+ANALYZE profiles;
+ANALYZE startups;
+ANALYZE founders;
+ANALYZE common_responses;
+ANALYZE submissions;
+ANALYZE targets; 

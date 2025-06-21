@@ -1,22 +1,30 @@
 import { Tables } from './database'
 
-// The Target type is a direct mapping of the 'targets' table.
 export type Target = Tables<'targets'>
+export type Profile = Tables<'profiles'> & { onboarded?: boolean }
 
-// Profile type from the profiles table
-export type Profile = Tables<'profiles'>
-
-// Response types for RPC functions
 export interface UserProfileWithStartupResponse {
   profile: Profile | null
-  startup: { name: string } | null
+  startup: {
+    name: string
+    id?: string
+  } | null
+  error?: string
+}
+
+// New interface for the lightweight onboarding check
+export interface OnboardingStatusResponse {
+  needsOnboarding: boolean
+  profileName: string
+  hasStartup: boolean
 }
 
 // The Founder object is custom-built by the 'get_startup_data_by_user_id'
 // function. We define its shape here, using the underlying table column
 // types from 'database.ts' for accuracy and maintainability.
 export type Founder = {
-  fullName: Tables<'founders'>['full_name']
+  firstName: Tables<'founders'>['first_name']
+  lastName: Tables<'founders'>['last_name']
   email: Tables<'founders'>['email']
   linkedin: Tables<'founders'>['linkedin']
   bio: Tables<'founders'>['bio']
@@ -34,6 +42,15 @@ export type Startup = {
   website: Tables<'startups'>['website']
   industry: Tables<'startups'>['industry']
   location: Tables<'startups'>['location']
+  is_incorporated: Tables<'startups'>['is_incorporated']
+  incorporation_city: Tables<'startups'>['incorporation_city']
+  incorporation_country: Tables<'startups'>['incorporation_country']
+  operating_countries: Tables<'startups'>['operating_countries']
+  legal_structure: Tables<'startups'>['legal_structure']
+  investment_instrument: Tables<'startups'>['investment_instrument']
+  funding_round: Tables<'startups'>['funding_round']
+  funding_amount_sought: Tables<'startups'>['funding_amount_sought']
+  pre_money_valuation: Tables<'startups'>['pre_money_valuation']
   oneLiner: Tables<'startups'>['description_short']
   description: Tables<'startups'>['description_long']
   traction_summary: Tables<'startups'>['traction_summary']

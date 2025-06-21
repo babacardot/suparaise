@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
 import { XIcon } from '@/components/icons/XIcon'
@@ -9,6 +10,11 @@ import { animations } from '@/lib/utils/lottie-animations'
 
 export const Footer = () => {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark')
@@ -62,7 +68,11 @@ export const Footer = () => {
           <button
             onClick={toggleTheme}
             className="h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors [&_svg]:fill-current"
-            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-label={
+              mounted
+                ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
+                : 'Toggle theme'
+            }
           >
             <LottieIcon
               animationData={animations.point}

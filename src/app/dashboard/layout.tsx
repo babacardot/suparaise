@@ -1,7 +1,7 @@
 'use client'
 
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import {
   SidebarInset,
@@ -17,150 +17,92 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { UserProfileWithStartupResponse } from '@/lib/types'
 import { OnboardingDialog } from '@/components/onboarding/onboarding-dialog'
-
-interface UserData {
-  name: string
-  email: string
-  avatar?: string
-  startupName?: string
-}
-
-
+import Spinner from '@/components/ui/spinner'
+import { Profile } from '@/lib/types'
+import { User } from '@supabase/supabase-js'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
-  const supabase = createSupabaseBrowserClient()
+  const supabase = useMemo(() => createSupabaseBrowserClient(), [])
 
-  const fetchUserData = useCallback(async (userId: string) => {
-    try {
-      // Use RPC function instead of direct queries
-      const supabase = createSupabaseBrowserClient()
-      const { data, error } = await supabase.rpc('get_user_profile_with_startup', {
-        p_user_id: userId,
-      })
+  const fetchInitialData = useCallback(
+    async (userId: string) => {
+      console.log('Fetching initial data for user:', userId)
+      const { data, error } = await supabase.rpc(
+        'get_user_profile_with_startup',
+        {
+          p_user_id: userId,
+        },
+      )
 
       if (error) {
-        console.error('Error fetching user data via RPC:', error)
-        return { profile: null, startup: null }
+        console.error('Error fetching initial data:', error)
+        return
       }
 
-      const typedData = data as UserProfileWithStartupResponse | null
-      return {
-        profile: typedData?.profile || null,
-        startup: typedData?.startup || null,
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error)
-      return { profile: null, startup: null }
-    }
-  }, [])
-
-  const fetchUser = useCallback(async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (user) {
-        setUserId(user.id)
-        const { profile, startup } = await fetchUserData(user.id)
-
-        // Check if user needs onboarding (no startup profile)
-        if (!startup?.name) {
+      console.log('Initial data fetched:', data)
+      if (data) {
+        const profile = (data as { profile: Profile | null }).profile
+        if (profile && !profile.onboarded) {
           setNeedsOnboarding(true)
         }
-
-        // Extract first name from full name or email
-        const fullName =
-          profile?.full_name ||
-          user.user_metadata?.full_name ||
-          user.email?.split('@')[0] ||
-          'User'
-        const firstName = fullName.split(' ')[0]
-
-        setUserData({
-          name: firstName,
-          email: user.email || '',
-          avatar: user.user_metadata?.avatar_url,
-          startupName: startup?.name,
-        })
       }
-    } catch (error) {
-      console.error('Error fetching user:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [supabase.auth, fetchUserData])
-
-  const handleOnboardingComplete = () => {
-    setNeedsOnboarding(false)
-    // Refetch user data to update the UI
-    if (userId) {
-      fetchUser()
-    }
-  }
+    },
+    [supabase],
+  )
 
   useEffect(() => {
-    fetchUser()
-
-    // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event)
+      setUser(session?.user ?? null)
       if (session?.user) {
-        setUserId(session.user.id)
-        const { profile, startup } = await fetchUserData(session.user.id)
-
-        // Check if user needs onboarding (no startup profile)
-        if (!startup?.name) {
-          setNeedsOnboarding(true)
-        }
-
-        const fullName =
-          profile?.full_name ||
-          session.user.user_metadata?.full_name ||
-          session.user.email?.split('@')[0] ||
-          'User'
-        const firstName = fullName.split(' ')[0]
-
-        setUserData({
-          name: firstName,
-          email: session.user.email || '',
-          avatar: session.user.user_metadata?.avatar_url,
-          startupName: startup?.name,
-        })
-      } else {
-        setUserData(null)
-        setUserId(null)
-        setNeedsOnboarding(false)
+        fetchInitialData(session.user.id)
       }
-
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
-  }, [supabase.auth, fetchUserData, fetchUser])
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase, fetchInitialData])
+
+  const handleOnboardingComplete = () => {
+    setNeedsOnboarding(false)
+    if (user) {
+      fetchInitialData(user.id) // Re-fetch to confirm onboarding status
+    }
+  }
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-sm h-8 w-8 border-b-2 border-gray-900"></div>
+        <Spinner className="h-5 w-5" />
       </div>
     )
   }
 
   return (
     <SidebarProvider>
-      <AppSidebar user={userData} />
+      <AppSidebar
+        user={
+          user
+            ? {
+                name: user.user_metadata?.full_name || user.email || '',
+                email: user.email || '',
+                avatar: user.user_metadata?.avatar_url,
+              }
+            : null
+        }
+      />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
@@ -182,11 +124,10 @@ export default function DashboardLayout({
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
 
-      {/* Onboarding Dialog */}
-      {needsOnboarding && userId && (
+      {needsOnboarding && user && (
         <OnboardingDialog
           isOpen={needsOnboarding}
-          userId={userId}
+          userId={user.id}
           onComplete={handleOnboardingComplete}
         />
       )}

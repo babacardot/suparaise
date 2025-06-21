@@ -1,4 +1,4 @@
-import { createBrowserClient, createServerClient } from '@supabase/ssr'
+import { createBrowserClient } from '@supabase/ssr'
 import { Database } from '@/lib/types/database'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -8,27 +8,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase URL and Anon Key must be provided.')
 }
 
-// Browser client for client-side components
-export function createSupabaseBrowserClient() {
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
-}
-
-// Server client for server-side components
-export async function createSupabaseServerClient() {
-  const { cookies } = await import('next/headers')
-  const cookieStore = await cookies()
-
-  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
-      },
-    },
-  })
-}
-
-// Legacy client for backward compatibility (use browser client instead)
-export const supabase = createBrowserClient<Database>(
+// Create a singleton instance of the Supabase client
+const supabaseSingleton = createBrowserClient<Database>(
   supabaseUrl,
   supabaseAnonKey,
 )
+
+// Browser client for client-side components
+export function createSupabaseBrowserClient() {
+  return supabaseSingleton
+}
+
+// Legacy client for backward compatibility (use browser client instead)
+export const supabase = supabaseSingleton
