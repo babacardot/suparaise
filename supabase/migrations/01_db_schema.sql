@@ -112,8 +112,7 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 CREATE TABLE profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     full_name TEXT,
-    email TEXT,
-    onboarded BOOLEAN DEFAULT FALSE NOT NULL
+    email TEXT
 );
 
 -- Create trigger to auto-create profile when user signs up
@@ -150,6 +149,7 @@ CREATE TABLE startups (
     mrr NUMERIC(12, 2) DEFAULT 0,
     arr NUMERIC(12, 2) DEFAULT 0,
     employee_count INTEGER,
+    onboarded BOOLEAN DEFAULT FALSE NOT NULL,
     -- Asset URLs from Supabase Storage
     logo_url TEXT,
     pitch_deck_url TEXT,
@@ -228,6 +228,9 @@ CREATE TABLE submissions (
 
 -- Index for startups.user_id (critical for dashboard queries)
 CREATE INDEX IF NOT EXISTS idx_startups_user_id ON startups(user_id);
+
+-- Index for startups.onboarded (for filtering incomplete onboarding)
+CREATE INDEX IF NOT EXISTS idx_startups_onboarded ON startups(onboarded);
 
 -- Index for founders.startup_id (for founder lookups)
 CREATE INDEX IF NOT EXISTS idx_founders_startup_id ON founders(startup_id);

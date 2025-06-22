@@ -27,6 +27,16 @@ const transitionVariants = {
 }
 
 export function HeroSection() {
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.3
+      audio.play().catch(() => {
+        // Silently handle audio play errors (autoplay policies, etc.)
+      })
+    }
+  }
+
   return (
     <>
       <main className="overflow-hidden">
@@ -61,11 +71,12 @@ export function HeroSection() {
                       key={1}
                       asChild
                       size="lg"
+                      onClick={playClickSound}
                       className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
                       Icon={ChevronRight}
                       iconPlacement="right"
                     >
-                      <Link href="/signup">
+                      <Link href="/signup" prefetch={true}>
                         <span className="text-nowrap">Get started</span>
                       </Link>
                     </ExpandButton>
@@ -74,9 +85,10 @@ export function HeroSection() {
                       asChild
                       size="lg"
                       variant="outline"
+                      onClick={playClickSound}
                       className="rounded-sm px-5 text-base"
                     >
-                      <Link href="/login">
+                      <Link href="/login" prefetch={true}>
                         <span className="text-nowrap">Login</span>
                       </Link>
                     </Button>

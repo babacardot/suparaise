@@ -39,6 +39,15 @@ export function NavUser({
   const { theme, setTheme } = useTheme()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
 
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.3
+      audio.play().catch(() => {
+      })
+    }
+  }
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/')
@@ -72,10 +81,11 @@ export function NavUser({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={(open) => { if (open) playClickSound() }}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
+              onClick={playClickSound}
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-sm">
@@ -121,6 +131,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
+                onClick={playClickSound}
                 onMouseEnter={() => setHoveredItem('profile')}
                 onMouseLeave={() => setHoveredItem(null)}
                 className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
@@ -136,6 +147,7 @@ export function NavUser({
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem
+                onClick={playClickSound}
                 onMouseEnter={() => setHoveredItem('settings')}
                 onMouseLeave={() => setHoveredItem(null)}
                 className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
@@ -151,7 +163,10 @@ export function NavUser({
                 Settings
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={toggleTheme}
+                onClick={() => {
+                  playClickSound()
+                  toggleTheme()
+                }}
                 onMouseEnter={() => setHoveredItem('theme')}
                 onMouseLeave={() => setHoveredItem(null)}
                 className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
@@ -171,7 +186,10 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={handleSignOut}
+              onClick={() => {
+                playClickSound()
+                handleSignOut()
+              }}
               onMouseEnter={() => setHoveredItem('logout')}
               onMouseLeave={() => setHoveredItem(null)}
               className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"

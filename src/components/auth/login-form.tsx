@@ -190,7 +190,9 @@ export function LoginForm({
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
-                <Link href="/signup" className="underline underline-offset-4">
+                <Link href="/signup"
+                  prefetch={true}
+                  className="underline underline-offset-4">
                   Sign up
                 </Link>
               </div>

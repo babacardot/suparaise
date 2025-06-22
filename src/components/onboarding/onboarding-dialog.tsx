@@ -33,7 +33,19 @@ import {
 } from './onboarding-steps'
 
 // Welcome Step Component
-const WelcomeStep = () => {
+const WelcomeStep = ({ isFirstStartup = true }: { isFirstStartup?: boolean }) => {
+  const welcomeContent = isFirstStartup ? {
+    title: "Welcome to suparaise.com",
+    subtitle: "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+    image: "/random/onboarding.svg",
+    statusText: "Onboarding"
+  } : {
+    title: "Ready to launch another venture?",
+    subtitle: "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+    image: "/random/test_your_app.svg",
+    statusText: "New venture"
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -44,8 +56,8 @@ const WelcomeStep = () => {
     >
       <div className="relative w-48 h-48 mt-8">
         <Image
-          src="/random/onboarding.svg"
-          alt="Welcome to Suparaise"
+          src={welcomeContent.image}
+          alt={welcomeContent.title}
           fill
           className="object-contain"
           priority
@@ -54,16 +66,16 @@ const WelcomeStep = () => {
 
       <div className="space-y-4">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-          Welcome to suparaise.com
+          {welcomeContent.title}
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl">
-          We&apos;re about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.
+          {welcomeContent.subtitle}
         </p>
       </div>
 
       <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-        <div className="w-2 h-2 bg-green-500 rounded-sm animate-pulse"></div>
-        <span>Onboarding</span>
+        <div className="w-2 h-2 bg-blue-500 rounded-sm animate-pulse"></div>
+        <span>{welcomeContent.statusText}</span>
       </div>
     </motion.div>
   )
@@ -73,11 +85,14 @@ export function OnboardingDialog({
   isOpen,
   userId,
   onComplete,
+  isFirstStartup = true,
+  onCancel,
 }: OnboardingDialogProps) {
   const [currentStep, setCurrentStep] = useState(0) // Start with welcome step (0)
   const [loading, setLoading] = useState(false)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [validationAttempted, setValidationAttempted] = useState(false)
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false)
 
   // File upload states
   const [logoUploadProgress, setLogoUploadProgress] = useState(0)
@@ -200,16 +215,50 @@ export function OnboardingDialog({
     }
   }, [isOpen, supabase])
 
-  // Auto-advance from welcome step after 10 seconds
+  // Auto-advance from welcome step - longer for first startup, shorter for additional ones
   useEffect(() => {
     if (currentStep === 0 && isOpen) {
       const timer = setTimeout(() => {
         setCurrentStep(1)
-      }, 9000)
+      }, isFirstStartup ? 9000 : 5000) // 9s for first startup, 5s for additional ones
 
       return () => clearTimeout(timer)
     }
-  }, [currentStep, isOpen])
+  }, [currentStep, isOpen, isFirstStartup])
+
+  // Handle dialog cancellation
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel()
+    }
+  }
+
+  // Handle close button click - show confirmation for additional startups
+  const handleCloseAttempt = () => {
+    if (!isFirstStartup) {
+      setShowExitConfirmation(true)
+    } else {
+      handleCancel()
+    }
+  }
+
+  // Confirm exit
+  const handleConfirmExit = () => {
+    setShowExitConfirmation(false)
+    handleCancel()
+  }
+
+  // Cancel exit
+  const handleCancelExit = () => {
+    setShowExitConfirmation(false)
+  }
+
+  // Handle dialog open change (only for first startup - allows outside clicks to close)
+  const handleOpenChange = (open: boolean) => {
+    if (!open && isFirstStartup && onCancel) {
+      handleCancel()
+    }
+  }
 
   // URL validation function
   const isValidUrl = (url: string): boolean => {
@@ -708,9 +757,10 @@ export function OnboardingDialog({
           scrollbar-width: none;
         }
       `}</style>
-      <Dialog open={isOpen}>
+      <Dialog open={isOpen} onOpenChange={isFirstStartup ? handleOpenChange : undefined}>
         <DialogContent
-          showCloseButton={false}
+          showCloseButton={!isFirstStartup}
+          onCloseClick={!isFirstStartup ? handleCloseAttempt : undefined}
           className="max-w-2xl max-h-[85vh] flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:duration-500 data-[state=closed]:duration-300"
         >
           <DialogHeader className="sr-only">
@@ -755,7 +805,7 @@ export function OnboardingDialog({
                   exit={{ opacity: 0, y: -30 }}
                   transition={{ duration: 0.4, ease: 'easeInOut' }}
                 >
-                  <WelcomeStep />
+                  <WelcomeStep isFirstStartup={isFirstStartup} />
                 </motion.div>
               )}
 
@@ -863,6 +913,31 @@ export function OnboardingDialog({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Exit Confirmation Dialog */}
+      {showExitConfirmation && (
+        <Dialog open={showExitConfirmation} onOpenChange={(open) => !open && handleCancelExit()}>
+          <DialogContent
+            showCloseButton={false}
+            className="max-w-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:duration-500 data-[state=closed]:duration-300"
+          >
+            <DialogHeader>
+              <DialogTitle>Cancel creation?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to cancel creating this new startup? All progress will be lost.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={handleCancelExit}>
+                Nope
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmExit}>
+                Yes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   )
 }

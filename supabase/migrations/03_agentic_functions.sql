@@ -197,7 +197,8 @@ BEGIN
         employee_count,
         logo_url,
         pitch_deck_url,
-        intro_video_url
+        intro_video_url,
+        onboarded
     )
     VALUES (
         (p_startup_data->>'user_id')::UUID,
@@ -224,7 +225,8 @@ BEGIN
         (p_startup_data->>'employee_count')::INTEGER,
         p_startup_data->>'logo_url',
         p_startup_data->>'pitch_deck_url',
-        p_startup_data->>'intro_video_url'
+        p_startup_data->>'intro_video_url',
+        COALESCE((p_startup_data->>'onboarded')::BOOLEAN, FALSE)
     )
     RETURNING to_jsonb(startups.*) INTO result;
 
@@ -264,10 +266,34 @@ BEGIN
         logo_url = COALESCE((p_updates->>'logo_url'), logo_url),
         pitch_deck_url = COALESCE((p_updates->>'pitch_deck_url'), pitch_deck_url),
         intro_video_url = COALESCE((p_updates->>'intro_video_url'), intro_video_url),
+        onboarded = COALESCE((p_updates->>'onboarded')::BOOLEAN, onboarded),
         updated_at = NOW()
     WHERE id = p_startup_id
     RETURNING to_jsonb(startups.*) INTO result;
 
     RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to get user startups with onboarding status
+CREATE OR REPLACE FUNCTION get_user_startups_with_status(p_user_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    SELECT jsonb_agg(
+        jsonb_build_object(
+            'id', s.id,
+            'name', s.name,
+            'logo_url', s.logo_url,
+            'onboarded', s.onboarded,
+            'created_at', s.created_at
+        ) ORDER BY s.created_at DESC
+    )
+    INTO result
+    FROM startups s
+    WHERE s.user_id = p_user_id;
+
+    RETURN COALESCE(result, '[]'::jsonb);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public; 

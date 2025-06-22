@@ -27,12 +27,14 @@ export const Footer = () => {
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
             <Link
               href="/privacy"
+              prefetch={true}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Privacy
             </Link>
             <Link
               href="/terms"
+              prefetch={true}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Terms

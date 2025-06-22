@@ -22,6 +22,16 @@ export const Header = () => {
 
   const { scrollYProgress } = useScroll()
 
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.3
+      audio.play().catch(() => {
+        // Silently handle audio play errors (autoplay policies, etc.)
+      })
+    }
+  }
+
   React.useEffect(() => {
     const unsubscribe = scrollYProgress.on('change', (latest) => {
       setScrolled(latest > 0.05)
@@ -94,18 +104,20 @@ export const Header = () => {
                   asChild
                   variant="outline"
                   size="default"
+                  onClick={playClickSound}
                   className="rounded-sm px-4 text-sm"
                 >
-                  <Link href="/login">
+                  <Link href="/login" prefetch={true}>
                     <span>Login</span>
                   </Link>
                 </Button>
                 <Button
                   asChild
                   size="default"
+                  onClick={playClickSound}
                   className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
                 >
-                  <Link href="/signup">
+                  <Link href="/signup" prefetch={true}>
                     <span>Sign up</span>
                   </Link>
                 </Button>

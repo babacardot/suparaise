@@ -2,9 +2,8 @@
 -- ONBOARDING RPC FUNCTIONS
 -- =================================================================
 
--- This function creates a new startup and its associated founders
--- in a single transaction. This ensures that we don't end up with
--- orphaned startup records if founder creation fails.
+-- Creates a new startup and its associated founders in a single transaction
+-- This startup will have onboarded=TRUE since it's completing the full onboarding process
 CREATE OR REPLACE FUNCTION create_startup_and_founders(p_data JSONB)
 RETURNS JSONB AS $$
 DECLARE
@@ -19,7 +18,7 @@ BEGIN
         legal_structure, investment_instrument, funding_round, funding_amount_sought,
         pre_money_valuation, description_short, description_medium, description_long,
         traction_summary, market_summary, mrr, arr, employee_count,
-        logo_url, pitch_deck_url, intro_video_url
+        logo_url, pitch_deck_url, intro_video_url, onboarded
     )
     VALUES (
         (p_data->>'user_id')::UUID,
@@ -46,7 +45,8 @@ BEGIN
         (p_data->>'employee_count')::INTEGER,
         p_data->>'logo_url',
         p_data->>'pitch_deck_url',
-        p_data->>'intro_video_url'
+        p_data->>'intro_video_url',
+        TRUE -- Mark this startup as onboarded since it's completing the full process
     )
     RETURNING id INTO new_startup_id;
 
@@ -73,11 +73,6 @@ BEGIN
         END LOOP;
     END IF;
 
-    -- Update the user's profile to mark them as onboarded
-    UPDATE public.profiles
-    SET onboarded = TRUE
-    WHERE id = (p_data->>'user_id')::UUID;
-
     -- Return the new startup ID as a JSON object
     SELECT jsonb_build_object('id', new_startup_id) INTO result;
     RETURN result;
@@ -92,12 +87,11 @@ DECLARE
     profile_data JSONB;
     startup_data JSONB;
 BEGIN
-    -- Get profile data, including the new 'onboarded' flag
+    -- Get profile data
     SELECT jsonb_build_object(
         'id', p.id,
         'full_name', p.full_name,
-        'email', p.email,
-        'onboarded', p.onboarded
+        'email', p.email
     )
     INTO profile_data
     FROM profiles p
@@ -130,27 +124,34 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
--- Create a faster lightweight version for onboarding checks
+-- Check if user needs to create their first startup or if any startup needs onboarding
 CREATE OR REPLACE FUNCTION check_user_onboarding_status(p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
     startup_exists BOOLEAN;
     profile_name TEXT;
+    has_incomplete_startups BOOLEAN;
 BEGIN
-    -- Check if startup exists (faster than full data fetch)
+    -- Check if user has any startups
     SELECT EXISTS(
         SELECT 1 FROM startups WHERE user_id = p_user_id
     ) INTO startup_exists;
 
-    -- Get profile name
+    -- Check if user has any startups that need onboarding
+    SELECT EXISTS(
+        SELECT 1 FROM startups WHERE user_id = p_user_id AND onboarded = FALSE
+    ) INTO has_incomplete_startups;
+
+    -- Get profile info
     SELECT full_name INTO profile_name
     FROM profiles
     WHERE id = p_user_id;
 
     RETURN jsonb_build_object(
-        'needsOnboarding', NOT startup_exists,
+        'needsOnboarding', NOT startup_exists OR has_incomplete_startups,
         'profileName', COALESCE(profile_name, ''),
-        'hasStartup', startup_exists
+        'hasStartup', startup_exists,
+        'hasIncompleteStartups', has_incomplete_startups
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
@@ -159,7 +160,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 -- MULTI-STARTUP FUNCTIONS
 -- =================================================================
 
--- Function to get all startups for a user
+-- Function to get all startups for a user (including onboarding status)
 CREATE OR REPLACE FUNCTION get_user_startups(p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
@@ -170,6 +171,7 @@ BEGIN
             'id', s.id,
             'name', s.name,
             'logo_url', s.logo_url,
+            'onboarded', s.onboarded,
             'created_at', s.created_at
         ) ORDER BY s.created_at DESC
     )

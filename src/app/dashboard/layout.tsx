@@ -2,6 +2,7 @@
 
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import {
   SidebarInset,
@@ -9,23 +10,22 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+import { TopBanner } from '@/components/ui/top-banner'
 import { OnboardingDialog } from '@/components/onboarding/onboarding-dialog'
 import Spinner from '@/components/ui/spinner'
-import { Profile } from '@/lib/types'
 import { User } from '@supabase/supabase-js'
 
 interface StartupData {
   name: string
   id: string
   logo_url?: string
+  setup_completed?: boolean
+}
+
+interface StartupDisplay {
+  id: string
+  name: string
+  logo_url?: string | null
 }
 
 export default function DashboardLayout({
@@ -36,39 +36,93 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
+  const [creatingNewStartup, setCreatingNewStartup] = useState(false)
   const [startupData, setStartupData] = useState<StartupData | null>(null)
-  const supabase = useMemo(() => createSupabaseBrowserClient(), [])
+  const [allStartups, setAllStartups] = useState<StartupDisplay[]>([])
 
-  const fetchInitialData = useCallback(
+  const supabase = useMemo(() => createSupabaseBrowserClient(), [])
+  const router = useRouter()
+
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.3
+      audio.play().catch(() => {
+        // Silently handle audio play errors (autoplay policies, etc.)
+      })
+    }
+  }
+
+  const fetchUserStartups = useCallback(
     async (userId: string) => {
-      console.log('Fetching initial data for user:', userId)
-      const { data, error } = await supabase.rpc(
-        'get_user_profile_with_startup',
+      console.log('Fetching user startups for:', userId)
+
+      const { data: startups, error } = await supabase.rpc(
+        'get_user_startups_with_status',
         {
           p_user_id: userId,
         },
       )
 
       if (error) {
-        console.error('Error fetching initial data:', error)
+        console.error('Error fetching startups:', error)
+        return []
+      }
+
+      console.log('Fetched startups:', startups)
+      const startupsArray = startups as Array<{
+        id: string
+        name: string
+        logo_url?: string | null
+        onboarded: boolean
+        created_at: string
+      }>
+
+      return startupsArray || []
+    },
+    [supabase],
+  )
+
+  const fetchInitialData = useCallback(
+    async (userId: string) => {
+      console.log('Fetching initial data for user:', userId)
+
+      // Check onboarding status
+      const { data: onboardingStatus, error: onboardingError } = await supabase.rpc(
+        'check_user_onboarding_status',
+        {
+          p_user_id: userId,
+        },
+      )
+
+      if (onboardingError) {
+        console.error('Error fetching onboarding status:', onboardingError)
         return
       }
 
-      console.log('Initial data fetched:', data)
-      if (data) {
-        const profile = (data as { profile: Profile | null }).profile
-        const startup = (data as { startup: StartupData | null }).startup
+      console.log('Onboarding status:', onboardingStatus)
+      const statusData = onboardingStatus as { needsOnboarding: boolean; hasStartup: boolean }
+      if (statusData && statusData.needsOnboarding) {
+        setNeedsOnboarding(true)
+      }
 
-        if (profile && !profile.onboarded) {
-          setNeedsOnboarding(true)
-        }
+      // Get user's startups if they have any
+      if (statusData && statusData.hasStartup) {
+        const startups = await fetchUserStartups(userId)
+        setAllStartups(startups)
 
-        if (startup) {
-          setStartupData(startup)
+        if (startups && startups.length > 0) {
+          // Set the most recent startup as current
+          const mostRecentStartup = startups[0]
+          setStartupData({
+            name: mostRecentStartup.name,
+            id: mostRecentStartup.id,
+            logo_url: mostRecentStartup.logo_url || undefined,
+          })
         }
       }
     },
-    [supabase],
+    [supabase, fetchUserStartups],
   )
 
   useEffect(() => {
@@ -88,11 +142,66 @@ export default function DashboardLayout({
     }
   }, [supabase, fetchInitialData])
 
-  const handleOnboardingComplete = () => {
+  const handleOnboardingComplete = async () => {
     setNeedsOnboarding(false)
     if (user) {
-      fetchInitialData(user.id) // Re-fetch to confirm onboarding status
+      await fetchInitialData(user.id) // Re-fetch to confirm onboarding status
+
+      // After fetching data, redirect to the startup's home page
+      const startups = await fetchUserStartups(user.id)
+      if (startups && startups.length > 0) {
+        const mostRecentStartup = startups[0]
+        router.push(`/dashboard/${mostRecentStartup.id}/home`)
+      }
     }
+  }
+
+  const handleNewStartupCreation = () => {
+    console.log('Creating new startup...')
+    playClickSound()
+    setCreatingNewStartup(true)
+  }
+
+  const handleNewStartupComplete = async () => {
+    setCreatingNewStartup(false)
+    if (user) {
+      // Re-fetch startups to get the new one
+      const startups = await fetchUserStartups(user.id)
+      setAllStartups(startups)
+
+      if (startups && startups.length > 0) {
+        // Find the most recent startup (the one just created)
+        const mostRecentStartup = startups[0]
+        setStartupData({
+          name: mostRecentStartup.name,
+          id: mostRecentStartup.id,
+          logo_url: mostRecentStartup.logo_url || undefined,
+        })
+
+        // Navigate to the new startup's home page
+        router.push(`/dashboard/${mostRecentStartup.id}/home`)
+      }
+    }
+  }
+
+  const handleNewStartupCancel = () => {
+    console.log('Canceling new startup creation...')
+    playClickSound()
+    setCreatingNewStartup(false)
+  }
+
+  const handleStartupSwitch = (startup: StartupDisplay) => {
+    console.log('Switching to startup:', startup)
+    playClickSound()
+
+    setStartupData({
+      name: startup.name,
+      id: startup.id,
+      logo_url: startup.logo_url || undefined,
+    })
+
+    // Navigate to the selected startup's home page
+    router.push(`/dashboard/${startup.id}/home`)
   }
 
   if (loading) {
@@ -117,42 +226,41 @@ export default function DashboardLayout({
             }
             : null
         }
-        startups={[]} // TODO: Fetch user's startups from database
-        onStartupSelect={(startup) => {
-          console.log('Selected startup:', startup)
-          // TODO: Handle startup selection
-        }}
-        onCreateNewStartup={() => {
-          console.log('Create new startup')
-          // TODO: Handle new startup creation
-        }}
+        startups={allStartups}
+        onStartupSelect={handleStartupSwitch}
+        onCreateNewStartup={handleNewStartupCreation}
+        currentStartupId={startupData?.id}
       />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
+            <SidebarTrigger className="-ml-1" onClick={playClickSound} />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Overview</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+            <div className="-ml-2">
+              <TopBanner />
+            </div>
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
 
+      {/* First-time onboarding dialog */}
       {needsOnboarding && user && (
         <OnboardingDialog
           isOpen={needsOnboarding}
           userId={user.id}
           onComplete={handleOnboardingComplete}
+        />
+      )}
+
+      {/* New startup creation dialog */}
+      {creatingNewStartup && user && (
+        <OnboardingDialog
+          isOpen={creatingNewStartup}
+          userId={user.id}
+          onComplete={handleNewStartupComplete}
+          onCancel={handleNewStartupCancel}
+          isFirstStartup={false}
         />
       )}
     </SidebarProvider>

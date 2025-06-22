@@ -50,6 +50,8 @@ export interface OnboardingDialogProps {
   isOpen: boolean
   userId: string
   onComplete: () => void
+  isFirstStartup?: boolean
+  onCancel?: () => void
 }
 
 export interface ValidationResult {

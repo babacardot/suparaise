@@ -29,7 +29,9 @@ interface StartupDisplay {
 
 interface StartupSwitcherProps {
     startups: StartupDisplay[]
-    currentStartup: StartupDisplay | null
+    currentStartupId?: string
+    currentStartupDisplay?: StartupDisplay | null // For formatted display (FirstName+StartupName)
+    firstName?: string // For formatting other startup names in dropdown
     onStartupSelect: (startup: StartupDisplay) => void
     onCreateNew: () => void
     className?: string
@@ -38,25 +40,22 @@ interface StartupSwitcherProps {
 
 export function StartupSwitcher({
     startups,
-    currentStartup,
+    currentStartupId,
+    currentStartupDisplay,
+    firstName = 'User',
     onStartupSelect,
     onCreateNew,
     className,
     isCollapsed = false,
 }: StartupSwitcherProps) {
     const [open, setOpen] = React.useState(false)
-    const [selectedStartup, setSelectedStartup] = React.useState<StartupDisplay | null>(
-        currentStartup
-    )
 
-    // Update selectedStartup when currentStartup changes
-    React.useEffect(() => {
-        console.log('StartupSwitcher Debug:', { currentStartup })
-        setSelectedStartup(currentStartup)
-    }, [currentStartup])
+    // Format startup names for display in dropdown
+    const formatStartupDisplayName = (startup: StartupDisplay) => {
+        return `${firstName}+${startup.name}`
+    }
 
     const handleSelect = (startup: StartupDisplay) => {
-        setSelectedStartup(startup)
         onStartupSelect(startup)
         setOpen(false)
     }
@@ -89,10 +88,10 @@ export function StartupSwitcher({
                     )}
                 >
                     <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-sidebar-accent/20 text-sidebar-foreground overflow-hidden flex-shrink-0">
-                        {selectedStartup?.logo_url ? (
+                        {currentStartupDisplay?.logo_url ? (
                             <Image
-                                src={selectedStartup.logo_url}
-                                alt={selectedStartup.name}
+                                src={currentStartupDisplay.logo_url}
+                                alt={currentStartupDisplay.name}
                                 className="w-full h-full object-contain"
                                 width={32}
                                 height={32}
@@ -109,7 +108,7 @@ export function StartupSwitcher({
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                         <span className="truncate font-semibold">
-                            {selectedStartup?.name || 'Select startup'}
+                            {currentStartupDisplay?.name || 'Select startup'}
                         </span>
                     </div>
                 </Button>
@@ -122,7 +121,7 @@ export function StartupSwitcher({
                                 {startups.map((startup) => (
                                     <CommandItem
                                         key={startup.id}
-                                        value={startup.name}
+                                        value={formatStartupDisplayName(startup)}
                                         onSelect={() => handleSelect(startup)}
                                         className="text-sm"
                                     >
@@ -146,12 +145,12 @@ export function StartupSwitcher({
                                                     />
                                                 )}
                                             </div>
-                                            <span className="truncate">{startup.name}</span>
+                                            <span className="truncate">{formatStartupDisplayName(startup)}</span>
                                         </div>
                                         <Check
                                             className={cn(
                                                 'ml-auto h-4 w-4',
-                                                selectedStartup?.id === startup.id
+                                                currentStartupId === startup.id
                                                     ? 'opacity-100'
                                                     : 'opacity-0'
                                             )}

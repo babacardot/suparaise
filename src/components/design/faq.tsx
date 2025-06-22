@@ -52,7 +52,7 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
             <div className="flex justify-center">
               <div className="border py-1 px-4 rounded-sm">FAQ</div>
             </div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">
               Frequently asked questions
             </h2>
             <p className="text-center mt-5 opacity-75">
@@ -137,8 +137,8 @@ const FaqItem = React.forwardRef<
         <h3
           className={cn(
             'text-base font-medium transition-colors duration-200 text-left',
-            'text-foreground/70',
-            isOpen && 'text-foreground',
+            'text-gray-600 dark:text-gray-300',
+            isOpen && 'text-gray-900 dark:text-white',
           )}
         >
           {question}

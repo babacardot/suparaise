@@ -1,7 +1,7 @@
 import { Tables } from './database'
 
 export type Target = Tables<'targets'>
-export type Profile = Tables<'profiles'> & { onboarded?: boolean }
+export type Profile = Tables<'profiles'>
 
 export interface UserProfileWithStartupResponse {
   profile: Profile | null
