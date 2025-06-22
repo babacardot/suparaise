@@ -1,19 +1,22 @@
 'use client'
 
 import * as React from 'react'
+
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 import { NavMain } from '@/components/sidebar/nav-main'
 import { NavSecondary } from '@/components/sidebar/nav-secondary'
 import { NavUser } from '@/components/sidebar/nav-user'
+import { StartupSwitcher } from '@/components/sidebar/startup-switcher'
+import { Button } from '@/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -22,84 +25,84 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     email: string
     avatar?: string
     startupName?: string
+    startupLogo?: string
   } | null
+  startups?: Array<{
+    id: string
+    name: string
+    logo_url?: string | null
+  }>
+  onStartupSelect?: (startup: { id: string; name: string; logo_url?: string | null }) => void
+  onCreateNewStartup?: () => void
 }
 
-export function AppSidebar({ user, ...props }: AppSidebarProps) {
+const playClickSound = () => {
+  if (typeof window !== 'undefined') {
+    const audio = new Audio('/sounds/light.mp3')
+    audio.volume = 0.3
+    audio.play().catch(() => {
+      // Silently handle audio play errors (autoplay policies, etc.)
+    })
+  }
+}
+
+export function AppSidebar({
+  user,
+  startups = [],
+  onStartupSelect,
+  onCreateNewStartup,
+  ...props
+}: AppSidebarProps) {
+  const { state, toggleSidebar } = useSidebar()
+  const [isToggleHovered, setIsToggleHovered] = React.useState(false)
+
+  // Create display text: FirstName+StartupName
+  const firstName = user?.name?.split(' ')[0] || 'User'
+  const displayText = user?.startupName
+    ? `${firstName}+${user.startupName}`
+    : firstName
+
+  // Create current startup object for the switcher
+  const currentStartup = user?.startupName ? {
+    id: 'current',
+    name: displayText, // Use formatted display text
+    logo_url: user.startupLogo || null
+  } : null
+
+  // Debug logging
+  console.log('AppSidebar Debug:', {
+    userName: user?.name,
+    startupName: user?.startupName,
+    startupLogo: user?.startupLogo,
+    displayText,
+    currentStartup
+  })
+
   const userData = {
     name: user?.name || 'User',
     email: user?.email || 'user@example.com',
     avatar: user?.avatar || '',
   }
 
-  // Create display text: FirstName + StartupName or fallback
-  const displayText = user?.startupName
-    ? `${user.name} • ${user.startupName}`
-    : user?.name || 'Welcome'
+
 
   const data = {
     user: userData,
     navMain: [
       {
-        title: 'Dashboard',
-        url: '/dashboard',
+        title: 'Home',
+        url: '/dashboard/home',
         animation: animations.home,
-        isActive: true,
-        items: [
-          {
-            title: 'Overview',
-            url: '/dashboard',
-          },
-          {
-            title: 'Settings',
-            url: '/dashboard/settings',
-          },
-        ],
       },
       {
-        title: 'Startup',
-        url: '/dashboard/startup',
-        animation: animations.work,
-        items: [
-          {
-            title: 'Company',
-            url: '/dashboard/startup',
-          },
-          {
-            title: 'Team',
-            url: '/dashboard/startup/team',
-          },
-        ],
+        title: 'Funds',
+        url: '/dashboard/funds',
+        animation: animations.cash,
       },
       {
-        title: 'Targets',
-        url: '/dashboard/targets',
-        animation: animations.tag,
-        items: [
-          {
-            title: 'Funds',
-            url: '/dashboard/vcs',
-          },
-          {
-            title: 'Browse',
-            url: '/dashboard/targets/browse',
-          },
-        ],
-      },
-      {
-        title: 'Agent',
-        url: '/dashboard/agent',
-        animation: animations.science,
-        items: [
-          {
-            title: 'Run',
-            url: '/dashboard/agent/run',
-          },
-          {
-            title: 'History',
-            url: '/dashboard/agent/history',
-          },
-        ],
+        title: 'Applications',
+        url: '/dashboard/applications',
+        animation: animations.view,
       },
     ],
     navSecondary: [
@@ -117,36 +120,54 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
   }
 
   return (
-    <Sidebar variant="inset" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-sidebar-primary text-sidebar-primary-foreground">
-                  <LottieIcon
-                    animationData={animations.takeoff}
-                    size={16}
-                    loop={false}
-                    autoplay={false}
-                    initialFrame={0}
-                  />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{displayText}</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
-    </Sidebar>
+    <div className="relative">
+      <Sidebar variant="inset" collapsible="icon" {...props}>
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem className="-my-2">
+              <StartupSwitcher
+                startups={startups}
+                currentStartup={currentStartup}
+                onStartupSelect={onStartupSelect || (() => { })}
+                onCreateNew={onCreateNewStartup || (() => { })}
+                isCollapsed={state === 'collapsed'}
+              />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain items={data.navMain} onItemClick={playClickSound} />
+          <NavSecondary items={data.navSecondary} className="mt-auto" onItemClick={playClickSound} />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser user={data.user} />
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* Collapse/Expand Button - Always visible, fixed to viewport center */}
+      <Button
+        onClick={() => {
+          playClickSound()
+          toggleSidebar()
+        }}
+        onMouseEnter={() => setIsToggleHovered(true)}
+        onMouseLeave={() => setIsToggleHovered(false)}
+        variant="ghost"
+        size="sm"
+        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-4 rounded-[2px] bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
+          ? 'left-[calc(3rem+8px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
+          : 'left-[calc(16rem-8px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
+          }`}
+      >
+        <LottieIcon
+          animationData={animations.nineGrid}
+          size={8}
+          className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors duration-200"
+          isHovered={isToggleHovered}
+        />
+        <span className="sr-only">Toggle Sidebar</span>
+      </Button>
+
+    </div>
   )
 }

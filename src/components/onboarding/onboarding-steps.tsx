@@ -1,12 +1,21 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Plus, X, ChevronDown, FileUp, FileIcon, Building2 } from 'lucide-react'
+import {
+  Plus,
+  X,
+  ChevronDown,
+  FileUp,
+  FileIcon,
+  ChevronsUpDown,
+  Check,
+} from 'lucide-react'
 import PhoneNumberInput from '@/components/design/phone-number-input'
 import * as RPNInput from 'react-phone-number-input'
 import {
@@ -26,6 +35,23 @@ import {
   FUNDING_ROUNDS,
   INVESTMENT_INSTRUMENTS,
 } from './onboarding-types'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import { cn } from '@/lib/actions/utils'
+import Image from 'next/image'
+import { LottieIcon } from '@/components/design/lottie-icon'
+import { animations } from '@/lib/utils/lottie-animations'
 
 // Get all countries from react-phone-number-input library
 const COUNTRIES = RPNInput.getCountries()
@@ -110,6 +136,21 @@ const handleNumericChange = (
   setter(numericValue)
 }
 
+// Badge colors for operating countries  
+const getBadgeColor = (index: number) => {
+  const colors = [
+    'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 dark:hover:bg-blue-900/40',
+    'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900/40',
+    'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800 dark:hover:bg-purple-900/40',
+    'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800 dark:hover:bg-orange-900/40',
+    'bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-800 dark:hover:bg-pink-900/40',
+    'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-900/40',
+    'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800 dark:hover:bg-yellow-900/40',
+    'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 dark:hover:bg-red-900/40',
+  ]
+  return colors[index % colors.length]
+}
+
 // File Upload Component
 const FileUploadComponent: React.FC<
   FileUploadProps & {
@@ -131,76 +172,190 @@ const FileUploadComponent: React.FC<
   description,
   label,
 }) => {
-  return (
-    <div className="space-y-2">
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => {
-          const selectedFile = e.target.files?.[0]
-          if (selectedFile) onUpload(type, selectedFile)
-        }}
-        disabled={uploadStatus === 'uploading'}
-      />
-      {!file && (
-        <div className="flex flex-col space-y-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => inputRef.current?.click()}
-            disabled={uploadStatus === 'uploading'}
-            className="w-full"
-          >
-            <FileUp className="mr-2 h-4 w-4" />
-            {uploadStatus === 'uploading' ? 'Uploading...' : label}
-          </Button>
-          <p className="text-xs text-muted-foreground text-start">
-            {description} (max {maxSize})
-          </p>
-        </div>
-      )}
-      {file && (
-        <div className="border rounded-sm p-4 relative">
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
-              <FileIcon className="h-6 w-6" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {uploadStatus === 'uploading'
-                  ? `${formatFileSize((uploadProgress / 100) * file.size)} of ${formatFileSize(file.size)}`
-                  : formatFileSize(file.size)}
-              </p>
-            </div>
-          </div>
-          {uploadStatus === 'uploading' && (
-            <div className="mt-2 w-full bg-muted h-1.5 rounded-full overflow-hidden">
-              <div
-                className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                style={{ width: `${uploadProgress}%` }}
-              />
-            </div>
-          )}
-          {uploadStatus === 'failed' && (
-            <button
-              onClick={() => onUpload(type, file)}
-              className="mt-2 text-sm text-red-500 hover:underline"
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+    useEffect(() => {
+      if ((type === 'logo' || type === 'introVideo') && file) {
+        const url = URL.createObjectURL(file)
+        setPreviewUrl(url)
+
+        return () => {
+          URL.revokeObjectURL(url)
+          setPreviewUrl(null)
+        }
+      } else {
+        setPreviewUrl(null)
+      }
+    }, [file, type])
+
+    return (
+      <div className="space-y-2">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => {
+            const selectedFile = e.target.files?.[0]
+            if (selectedFile) onUpload(type, selectedFile)
+          }}
+          disabled={uploadStatus === 'uploading'}
+        />
+        {!file && (
+          <div className="flex flex-col space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploadStatus === 'uploading'}
+              className="w-full"
             >
-              Try again
+              <FileUp className="mr-2 h-4 w-4" />
+              {uploadStatus === 'uploading' ? 'Uploading...' : label}
+            </Button>
+            <p className="text-xs text-muted-foreground text-right">
+              {description} (max {maxSize})
+            </p>
+          </div>
+        )}
+        {file && (
+          <div className="border rounded-sm p-4 relative">
+            <div className="flex items-center space-x-3">
+              {previewUrl ? (
+                type === 'logo' ? (
+                  <Image
+                    src={previewUrl}
+                    alt="Logo preview"
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 rounded-sm object-contain"
+                  />
+                ) : (
+                  <video
+                    src={previewUrl}
+                    muted
+                    playsInline
+                    className="h-12 w-16 rounded-sm object-contain"
+                  />
+                )
+              ) : (
+                <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
+                  <FileIcon className="h-6 w-6" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{file.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {uploadStatus === 'uploading'
+                    ? `${formatFileSize(
+                      (uploadProgress / 100) * file.size,
+                    )} of ${formatFileSize(file.size)}`
+                    : formatFileSize(file.size)}
+                </p>
+              </div>
+            </div>
+            {uploadStatus === 'uploading' && (
+              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+                <div
+                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+            {uploadStatus === 'failed' && (
+              <button
+                onClick={() => onUpload(type, file)}
+                className="mt-2 text-sm text-red-500 hover:underline"
+              >
+                Try again
+              </button>
+            )}
+            <button
+              onClick={onRemove}
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
             </button>
-          )}
-          <button
-            onClick={onRemove}
-            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
+          </div>
+        )}
+      </div>
+    )
+  }
+
+const MultiSelectCountries: React.FC<{
+  selected: string[]
+  onChange: (selected: string[]) => void
+}> = ({ selected, onChange }) => {
+  const [open, setOpen] = useState(false)
+
+  const handleSelect = (country: string) => {
+    const newSelected = selected.includes(country)
+      ? selected.filter((c) => c !== country)
+      : [...selected, country]
+    onChange(newSelected)
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+        >
+          <span className="truncate">
+            {selected.length > 0
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
+              : 'Select countries...'}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+        side="bottom"
+        sideOffset={4}
+        onWheel={(e) => {
+          e.stopPropagation()
+        }}
+      >
+        <Command shouldFilter={false}>
+          <CommandInput placeholder="Search country..." />
+          <CommandList
+            className="max-h-48 [&>div]:overflow-y-auto [&>div]:scroll-smooth"
+            onWheel={(e) => {
+              e.stopPropagation()
+              const target = e.currentTarget.querySelector('[cmdk-list-sizer]')
+              if (target) {
+                target.scrollTop += e.deltaY
+              }
+            }}
           >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-    </div>
+            <CommandEmpty>No country found.</CommandEmpty>
+            <CommandGroup>
+              {COUNTRIES.map((country) => (
+                <CommandItem
+                  key={country}
+                  value={country}
+                  onSelect={() => handleSelect(country)}
+                >
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      selected.includes(country) ? 'opacity-100' : 'opacity-0',
+                    )}
+                  />
+                  {country}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -248,7 +403,7 @@ export const TeamStep: React.FC<TeamStepProps> = ({
       <div>
         <h3 className="text-lg font-semibold mb-4">Tell us about your team</h3>
         <p className="text-sm text-muted-foreground mb-6">
-          Start by adding information about yourself and your co-founders.
+          Share details about yourself (and your co-founders). Investors always want to know who&apos;s driving the vision and execution.
         </p>
       </div>
 
@@ -323,7 +478,7 @@ export const TeamStep: React.FC<TeamStepProps> = ({
                 <div className="relative">
                   <select
                     id={`founder-${index}-role`}
-                    className="w-full p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                    className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                     value={founder.role}
                     onChange={(e) =>
                       updateFounder(
@@ -360,6 +515,9 @@ export const TeamStep: React.FC<TeamStepProps> = ({
                       : ''
                   }
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Your company email is preferred.
+                </p>
                 {fieldErrors[index]?.email && (
                   <p className="text-sm text-red-600 mt-1">
                     {fieldErrors[index].email}
@@ -413,7 +571,7 @@ export const TeamStep: React.FC<TeamStepProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-github`}>GitHub *</Label>
+                <Label htmlFor={`founder-${index}-github`}>Github</Label>
                 <Input
                   id={`founder-${index}-github`}
                   value={founder.githubUrl}
@@ -435,7 +593,7 @@ export const TeamStep: React.FC<TeamStepProps> = ({
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-website`}>Website *</Label>
+                <Label htmlFor={`founder-${index}-website`}>Personal website</Label>
                 <Input
                   id={`founder-${index}-website`}
                   value={founder.personalWebsiteUrl}
@@ -495,8 +653,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           Tell us about your company
         </h3>
         <p className="text-sm text-muted-foreground mb-6">
-          In order for our agents to be able to perfectly describe your company,
-          we need to know more about it.
+          The more our agents know about your business, the more compelling and accurate they can be when representing you to investors.
         </p>
       </div>
 
@@ -540,15 +697,15 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="location">Headquarters *</Label>
+          <Label htmlFor="location">Country *</Label>
           <Input
             id="location"
             value={startup.location}
             onChange={(e) =>
               setStartup({ ...startup, location: e.target.value })
             }
-            placeholder="Austin, TX"
-            autoComplete="country"
+            placeholder="Paris"
+            autoComplete="address-level2"
             required
             className={
               fieldErrors.location ? 'border-red-500 focus:border-red-500' : ''
@@ -564,11 +721,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="industry"
-              className={`w-full p-2 border rounded-sm appearance-none bg-transparent text-sm ${
-                fieldErrors.industry
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-input'
-              }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
+                ? 'border-red-500 focus:border-red-500'
+                : 'border-input'
+                }`}
               value={startup.industry || ''}
               onChange={(e) =>
                 setStartup({
@@ -597,7 +753,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="legal-structure"
-              className="w-full p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+              className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
               value={startup.legalStructure || ''}
               onChange={(e) =>
                 setStartup({
@@ -649,28 +805,13 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           {startup.isIncorporated && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="incorporation-city">Incorporation City</Label>
-                <Input
-                  id="incorporation-city"
-                  value={startup.incorporationCity}
-                  onChange={(e) =>
-                    setStartup({
-                      ...startup,
-                      incorporationCity: e.target.value,
-                    })
-                  }
-                  placeholder="Dover"
-                  autoComplete="address-level2"
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="incorporation-country">
-                  Incorporation Country
+                  Incorporation country
                 </Label>
                 <div className="relative">
                   <select
                     id="incorporation-country"
-                    className="w-full p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                    className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                     value={startup.incorporationCountry}
                     onChange={(e) =>
                       setStartup({
@@ -689,6 +830,21 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="incorporation-city">Incorporation city</Label>
+                <Input
+                  id="incorporation-city"
+                  value={startup.incorporationCity}
+                  onChange={(e) =>
+                    setStartup({
+                      ...startup,
+                      incorporationCity: e.target.value,
+                    })
+                  }
+                  placeholder="Paris"
+                  autoComplete="address-level2"
+                />
+              </div>
             </div>
           )}
 
@@ -696,26 +852,23 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             <Label htmlFor="operating-countries">
               Countries where you operate
             </Label>
-            <div className="border border-input rounded-sm p-3 max-h-32 overflow-y-auto scrollbar-hide">
-              <div className="grid grid-cols-2 gap-2">
-                {COUNTRIES.map((country) => (
-                  <label
-                    key={country}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={startup.operatingCountries.includes(country)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setStartup({
-                            ...startup,
-                            operatingCountries: [
-                              ...startup.operatingCountries,
-                              country,
-                            ],
-                          })
-                        } else {
+            <MultiSelectCountries
+              selected={startup.operatingCountries}
+              onChange={(selected) =>
+                setStartup({ ...startup, operatingCountries: selected })
+              }
+            />
+            {startup.operatingCountries.length > 0 && (
+              <div className="pt-2">
+                <div className="flex flex-wrap gap-1">
+                  {startup.operatingCountries.map((country, index) => (
+                    <Badge
+                      key={country}
+                      className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
+                    >
+                      {country}
+                      <button
+                        onClick={() =>
                           setStartup({
                             ...startup,
                             operatingCountries:
@@ -724,17 +877,15 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                               ),
                           })
                         }
-                      }}
-                    />
-                    <span>{country}</span>
-                  </label>
-                ))}
+                        className="ml-1.5"
+                        aria-label={`Remove ${country}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-            {startup.operatingCountries.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Selected: {startup.operatingCountries.join(', ')}
-              </p>
             )}
           </div>
         </div>
@@ -748,7 +899,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               setStartup({ ...startup, descriptionShort: e.target.value })
             }
             placeholder="AI workflow automation that saves teams 20+ hours weekly."
-            maxLength={150}
+            maxLength={100}
             required
             className={
               fieldErrors.descriptionShort
@@ -762,12 +913,12 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             </p>
           )}
           <p className="text-xs text-muted-foreground mt-1">
-            {startup.descriptionShort.length}/150 characters
+            {startup.descriptionShort.length}/100 characters
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="elevator-pitch">Elevator pitch</Label>
+          <Label htmlFor="elevator-pitch">Elevator pitch *</Label>
           <Textarea
             id="elevator-pitch"
             value={startup.descriptionMedium}
@@ -777,14 +928,25 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             placeholder="We're building AI-powered workflow automation that helps teams save 20+ hours per week. Our platform connects scattered tools and automates repetitive tasks without any coding required."
             rows={3}
             maxLength={300}
+            required
+            className={
+              fieldErrors.descriptionMedium
+                ? 'border-red-500 focus:border-red-500'
+                : ''
+            }
           />
+          {fieldErrors.descriptionMedium && (
+            <p className="text-sm text-red-600 mt-1">
+              {fieldErrors.descriptionMedium}
+            </p>
+          )}
           <p className="text-xs text-muted-foreground mt-1">
             {startup.descriptionMedium.length}/300 characters
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="full-description">Full description</Label>
+          <Label htmlFor="full-description">Full description *</Label>
           <Textarea
             id="full-description"
             value={startup.descriptionLong}
@@ -793,7 +955,18 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             }
             placeholder="Modern teams use 50+ different tools daily, creating chaos and wasted time. Our AI platform intelligently connects these tools, learns team patterns, and automates complex workflows. Unlike traditional automation tools that require technical setup, our solution works out-of-the-box with natural language commands..."
             rows={5}
+            required
+            className={
+              fieldErrors.descriptionLong
+                ? 'border-red-500 focus:border-red-500'
+                : ''
+            }
           />
+          {fieldErrors.descriptionLong && (
+            <p className="text-sm text-red-600 mt-1">
+              {fieldErrors.descriptionLong}
+            </p>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -838,17 +1011,16 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
           Tell us about your current fundraising round
         </h3>
         <p className="text-sm text-muted-foreground mb-6">
-          This information will help our agents better respond to VCs forms and
-          increase your chances of success.
+          These details help our agents tailor responses to each fund&apos;s questions and requirements, maximizing your chances of getting booked.
         </p>
       </div>
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="funding-round">What round are you raising?</Label>
+          <Label htmlFor="funding-round">What round are you raising? *</Label>
           <div className="relative">
             <select
               id="funding-round"
-              className="w-full p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+              className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
               value={startup.fundingRound || ''}
               onChange={(e) =>
                 setStartup({
@@ -856,6 +1028,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                   fundingRound: e.target.value as InvestmentStage,
                 })
               }
+              required
             >
               <option value="">Select a round</option>
               {FUNDING_ROUNDS.map((r) => (
@@ -869,12 +1042,12 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
         </div>
         <div className="space-y-2">
           <Label htmlFor="investment-instrument">
-            What type of investment are you seeking?
+            What type of investment are you seeking? *
           </Label>
           <div className="relative">
             <select
               id="investment-instrument"
-              className="w-full p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+              className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
               value={startup.investmentInstrument || ''}
               onChange={(e) =>
                 setStartup({
@@ -882,6 +1055,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                   investmentInstrument: e.target.value as InvestmentInstrument,
                 })
               }
+              required
             >
               <option value="">Select an instrument</option>
               {INVESTMENT_INSTRUMENTS.map((i) => (
@@ -896,7 +1070,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="funding-amount">
-              How much are you raising? (USD)
+              How much are you raising? (in USD) *
             </Label>
             <Input
               id="funding-amount"
@@ -911,11 +1085,12 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               }
               placeholder="500,000"
               className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="pre-money-valuation">
-              Pre-money valuation (USD)
+              Pre-money valuation (in USD)
             </Label>
             <Input
               id="pre-money-valuation"
@@ -937,11 +1112,11 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
         <div className="space-y-6">
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="employee-count">Team size</Label>
+              <Label htmlFor="employee-count">Team size *</Label>
               <div className="relative">
                 <select
                   id="employee-count"
-                  className="w-full p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                  className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                   value={startup.employeeCount}
                   onChange={(e) =>
                     setStartup({
@@ -949,7 +1124,9 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                       employeeCount: parseInt(e.target.value) || 1,
                     })
                   }
+                  required
                 >
+                  <option value="">Select team size</option>
                   <option value={1}>Just me</option>
                   <option value={2}>2 people</option>
                   <option value={3}>3 people</option>
@@ -965,7 +1142,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mrr">Monthly recurring revenue (USD)</Label>
+              <Label htmlFor="mrr">MRR (in USD) *</Label>
               <Input
                 id="mrr"
                 type="text"
@@ -979,10 +1156,14 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 }
                 placeholder="25,000"
                 className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                required
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                If pre-revenue, enter 0
+              </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="arr">Annual recurring revenue (USD)</Label>
+              <Label htmlFor="arr">ARR (in USD) *</Label>
               <Input
                 id="arr"
                 type="text"
@@ -996,12 +1177,16 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 }
                 placeholder="300,000"
                 className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                required
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                If pre-revenue, enter 0
+              </p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="traction">Traction</Label>
+            <Label htmlFor="traction">Traction *</Label>
             <Textarea
               id="traction"
               value={startup.tractionSummary}
@@ -1010,11 +1195,12 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               }
               placeholder="Key metrics, growth numbers, user adoption, partnerships, etc."
               rows={3}
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="market">Market</Label>
+            <Label htmlFor="market">Market *</Label>
             <Textarea
               id="market"
               value={startup.marketSummary}
@@ -1023,6 +1209,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               }
               placeholder="Market size, target customers, competitive landscape, etc."
               rows={3}
+              required
             />
           </div>
         </div>
@@ -1037,135 +1224,77 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   founders,
 }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-4">Review your information</h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          Please review all the information before submitting.
+        <h3 className="text-lg font-semibold mb-2">Review your information</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Take a moment to ensure everything looks perfect.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-4">
         {/* Company Information */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Company Information
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LottieIcon
+                animationData={animations.work}
+                size={20}
+                loop={false}
+                autoplay={false}
+              />
+              Company
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">
-                    Basic Info
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="font-medium">Name:</span> {startup.name}
-                    </div>
-                    <div>
-                      <span className="font-medium">Website:</span>{' '}
-                      {startup.website || 'Not provided'}
-                    </div>
-                    <div>
-                      <span className="font-medium">Industry:</span>{' '}
-                      {startup.industry || 'Not provided'}
-                    </div>
-                    <div>
-                      <span className="font-medium">Location:</span>{' '}
-                      {startup.location || 'Not provided'}
-                    </div>
-                  </div>
-                </div>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-muted-foreground">Name</span>
+                <p>{startup.name || 'Not provided'}</p>
               </div>
-
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">
-                    Legal Structure
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="font-medium">Structure:</span>{' '}
-                      {startup.legalStructure || 'Not provided'}
-                    </div>
-                    <div>
-                      <span className="font-medium">Incorporated:</span>{' '}
-                      {startup.isIncorporated ? 'Yes' : 'No'}
-                    </div>
-                    {startup.isIncorporated && (
-                      <>
-                        <div>
-                          <span className="font-medium">Inc. City:</span>{' '}
-                          {startup.incorporationCity || 'Not provided'}
-                        </div>
-                        <div>
-                          <span className="font-medium">Inc. Country:</span>{' '}
-                          {startup.incorporationCountry || 'Not provided'}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Website</span>
+                <p>{startup.website || 'Not provided'}</p>
               </div>
-
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">
-                    Assets
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Logo:</span>
-                      {startup.logoFile ? (
-                        <Badge variant="secondary" className="text-xs">
-                          {startup.logoFile.name}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Not uploaded
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Pitch deck:</span>
-                      {startup.pitchDeckFile ? (
-                        <Badge variant="secondary" className="text-xs">
-                          {startup.pitchDeckFile.name}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Not uploaded
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Product video:</span>
-                      {startup.introVideoFile ? (
-                        <Badge variant="secondary" className="text-xs">
-                          {startup.introVideoFile.name}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Not uploaded
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Industry</span>
+                <p>{startup.industry || 'Not provided'}</p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Country</span>
+                <p>{startup.location || 'Not provided'}</p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Legal structure</span>
+                <p>{startup.legalStructure || 'Not provided'}</p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Incorporated</span>
+                <p>{startup.isIncorporated ? 'Yes' : 'No'}</p>
               </div>
             </div>
 
+            {startup.isIncorporated && (startup.incorporationCountry || startup.incorporationCity) && (
+              <div className="pt-2 border-t">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-muted-foreground">Inc. country</span>
+                    <p>{startup.incorporationCountry || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-muted-foreground">Inc. city</span>
+                    <p>{startup.incorporationCity || 'Not provided'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {startup.operatingCountries.length > 0 && (
-              <div className="mt-6 pt-4 border-t">
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">
-                  Operating Countries
-                </h4>
-                <div className="flex flex-wrap gap-1">
+              <div className="pt-2 border-t">
+                <span className="font-medium text-muted-foreground text-sm">Operating countries</span>
+                <div className="flex flex-wrap gap-1 mt-1">
                   {startup.operatingCountries.map((country, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
+                    <Badge key={index} className={`text-xs border ${getBadgeColor(index)}`}>
                       {country}
                     </Badge>
                   ))}
@@ -1173,188 +1302,175 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               </div>
             )}
 
-            <div className="mt-6 pt-4 border-t space-y-3">
+            <div className="pt-2 border-t space-y-2">
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">
-                  One-liner
-                </h4>
-                <p className="text-sm">
-                  {startup.descriptionShort || 'Not provided'}
-                </p>
+                <span className="font-medium text-muted-foreground text-sm">One-liner</span>
+                <p className="text-sm">{startup.descriptionShort || 'Not provided'}</p>
               </div>
               {startup.descriptionMedium && (
                 <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">
-                    Elevator Pitch
-                  </h4>
+                  <span className="font-medium text-muted-foreground text-sm">Elevator pitch</span>
                   <p className="text-sm">{startup.descriptionMedium}</p>
                 </div>
               )}
               {startup.descriptionLong && (
                 <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">
-                    Full Description
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {startup.descriptionLong}
-                  </p>
+                  <span className="font-medium text-muted-foreground text-sm">Full description</span>
+                  <p className="text-sm">{startup.descriptionLong}</p>
                 </div>
               )}
+            </div>
+
+            <div className="pt-2 border-t">
+              <span className="font-medium text-muted-foreground text-sm">Assets</span>
+              <div className="flex items-center gap-4 mt-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-sm">Logo</span>
+                  {startup.logoFile ? (
+                    <Check className="h-3 w-3 pt-1 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 pt-1 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm">Pitch deck</span>
+                  {startup.pitchDeckFile ? (
+                    <Check className="h-3 w-3 pt-1 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 pt-1 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm">Product video</span>
+                  {startup.introVideoFile ? (
+                    <Check className="h-3 w-3 pt-1 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 pt-1 text-muted-foreground" />
+                  )}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Team */}
         <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Team</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LottieIcon
+                animationData={animations.group}
+                size={20}
+                loop={false}
+                autoplay={false}
+              />
+              Team
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {founders.map((founder, index) => (
-                <div
-                  key={index}
-                  className="border-l-4 border-primary/20 pl-4 pb-4 last:pb-0"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="outline" className="text-xs">
-                      {founder.role}
-                    </Badge>
-                    <span className="font-medium text-sm">
-                      {founder.firstName} {founder.lastName}
-                    </span>
+          <CardContent className="space-y-3">
+            {founders.map((founder, index) => (
+              <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-sm">
+                <Badge variant="outline" className="text-xs mt-0.5">
+                  {founder.role}
+                </Badge>
+                <div className="flex-1 space-y-1">
+                  <p className="font-medium text-sm">
+                    {founder.firstName} {founder.lastName}
+                  </p>
+                  <div className="text-xs text-muted-foreground space-y-0.5">
+                    <p>Email: {founder.email}</p>
+                    {founder.phone && <p>Phone: {founder.phone}</p>}
+                    {founder.linkedin && <p>LinkedIn: {founder.linkedin}</p>}
+                    {founder.githubUrl && <p>Github: {founder.githubUrl}</p>}
+                    {founder.personalWebsiteUrl && <p>Website: {founder.personalWebsiteUrl}</p>}
+                    {founder.bio && <p className="mt-1 text-xs leading-relaxed">{founder.bio}</p>}
                   </div>
-                  <div className="space-y-1 text-xs text-muted-foreground">
-                    {founder.email && (
-                      <div>
-                        <span className="font-medium">Email:</span>{' '}
-                        {founder.email}
-                      </div>
-                    )}
-                    {founder.phone && (
-                      <div>
-                        <span className="font-medium">Phone:</span>{' '}
-                        {founder.phone}
-                      </div>
-                    )}
-                    {founder.linkedin && (
-                      <div>
-                        <span className="font-medium">LinkedIn:</span>{' '}
-                        {founder.linkedin}
-                      </div>
-                    )}
-                    {founder.githubUrl && (
-                      <div>
-                        <span className="font-medium">GitHub:</span>{' '}
-                        {founder.githubUrl}
-                      </div>
-                    )}
-                    {founder.personalWebsiteUrl && (
-                      <div>
-                        <span className="font-medium">Website:</span>{' '}
-                        {founder.personalWebsiteUrl}
-                      </div>
-                    )}
-                  </div>
-                  {founder.bio && (
-                    <div className="mt-2">
-                      <h5 className="font-medium text-xs text-muted-foreground mb-1">
-                        Bio
-                      </h5>
-                      <p className="text-xs text-muted-foreground">
-                        {founder.bio}
-                      </p>
-                    </div>
-                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
         {/* Fundraising */}
         <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Fundraising</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LottieIcon
+                animationData={animations.cash}
+                size={20}
+                loop={false}
+                autoplay={false}
+              />
+              Fundraising
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">
-                  Round Details
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">Round:</span>{' '}
-                    {startup.fundingRound || 'Not specified'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Instrument:</span>{' '}
-                    {startup.investmentInstrument || 'Not specified'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Amount:</span>{' '}
-                    {startup.fundingAmountSought > 0
-                      ? `$${formatCurrency(startup.fundingAmountSought)}`
-                      : 'Not specified'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Valuation:</span>{' '}
-                    {startup.preMoneyValuation > 0
-                      ? `$${formatCurrency(startup.preMoneyValuation)}`
-                      : 'Not specified'}
-                  </div>
-                </div>
+                <span className="font-medium text-muted-foreground">Round</span>
+                <p>{startup.fundingRound || 'Not specified'}</p>
               </div>
-
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">
-                  Metrics
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">Team size:</span>{' '}
-                    {startup.employeeCount === 1
-                      ? 'Just me'
-                      : `${startup.employeeCount} people`}
-                  </div>
-                  <div>
-                    <span className="font-medium">MRR:</span>{' '}
-                    {startup.mrr > 0
-                      ? `$${formatCurrency(startup.mrr)}`
-                      : 'Not specified'}
-                  </div>
-                  <div>
-                    <span className="font-medium">ARR:</span>{' '}
-                    {startup.arr > 0
-                      ? `$${formatCurrency(startup.arr)}`
-                      : 'Not specified'}
-                  </div>
-                </div>
+                <span className="font-medium text-muted-foreground">Investment type</span>
+                <p>{startup.investmentInstrument || 'Not specified'}</p>
               </div>
-
-              {startup.tractionSummary && (
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">
-                    Traction
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    {startup.tractionSummary}
-                  </p>
-                </div>
-              )}
-
-              {startup.marketSummary && (
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">
-                    Market
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    {startup.marketSummary}
-                  </p>
-                </div>
-              )}
+              <div>
+                <span className="font-medium text-muted-foreground">Amount seeking</span>
+                <p>
+                  {startup.fundingAmountSought > 0
+                    ? `$${formatCurrency(startup.fundingAmountSought)}`
+                    : 'Not specified'}
+                </p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Pre-money valuation</span>
+                <p>
+                  {startup.preMoneyValuation > 0
+                    ? `$${formatCurrency(startup.preMoneyValuation)}`
+                    : 'Not specified'}
+                </p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Team size</span>
+                <p>
+                  {startup.employeeCount === 1
+                    ? 'Just me'
+                    : `${startup.employeeCount} people`}
+                </p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">MRR</span>
+                <p>
+                  {startup.mrr > 0
+                    ? `$${formatCurrency(startup.mrr)}`
+                    : 'Not specified'}
+                </p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">ARR</span>
+                <p>
+                  {startup.arr > 0
+                    ? `$${formatCurrency(startup.arr)}`
+                    : 'Not specified'}
+                </p>
+              </div>
             </div>
+
+            {(startup.tractionSummary || startup.marketSummary) && (
+              <div className="pt-2 border-t space-y-2">
+                {startup.tractionSummary && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">Traction</span>
+                    <p className="text-sm">{startup.tractionSummary}</p>
+                  </div>
+                )}
+                {startup.marketSummary && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">Market</span>
+                    <p className="text-sm">{startup.marketSummary}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

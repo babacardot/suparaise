@@ -77,6 +77,8 @@ export interface StartupFieldErrors {
   industry?: string
   location?: string
   descriptionShort?: string
+  descriptionMedium?: string
+  descriptionLong?: string
 }
 
 export interface FileUploadProps {

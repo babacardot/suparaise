@@ -13,10 +13,9 @@ export default function DashboardPage() {
             Welcome to Suparaise
           </h3>
           <p className="text-sm text-muted-foreground">
-            You have no startup profiles yet. Get started by creating a new
-            profile for your startup.
+            Your AI-powered VC fundraising automation platform
           </p>
-          <Link href="/dashboard/setup" className="mt-4">
+          <Link href="/dashboard/home" className="mt-4">
             <Button>Get Started</Button>
           </Link>
         </div>

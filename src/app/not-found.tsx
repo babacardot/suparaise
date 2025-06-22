@@ -53,7 +53,7 @@ export default function NotFound() {
         </div>
 
         {/* Help text */}
-        <div className="mt-12 p-6 rounded-lg bg-muted/50 border">
+        <div className="mt-12 p-6 rounded-sm bg-muted/50 border">
           <p className="text-sm text-muted-foreground">
             If you think this is an error, please{' '}
             <a

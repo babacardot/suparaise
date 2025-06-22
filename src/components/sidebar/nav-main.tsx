@@ -1,90 +1,71 @@
 'use client'
 
+import React from 'react'
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { LottieIcon } from '@/components/design/lottie-icon'
-import { animations } from '@/lib/utils/lottie-animations'
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 
 export function NavMain({
   items,
+  onItemClick,
 }: {
   items: {
     title: string
     url: string
     animation: object
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
   }[]
+  onItemClick?: () => void
 }) {
+  const pathname = usePathname()
+  const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
+        {items.map((item) => {
+          const isActive = pathname === item.url
+          const isHovered = hoveredItem === item.title
+
+          const handleClick = () => {
+            if (onItemClick) {
+              onItemClick()
+            }
+          }
+
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                isActive={isActive}
+                onMouseEnter={() => setHoveredItem(item.title)}
+                onMouseLeave={() => setHoveredItem(null)}
+                onClick={handleClick}
+              >
+                <Link href={item.url}>
                   <LottieIcon
                     animationData={item.animation}
                     size={16}
                     loop={false}
                     autoplay={false}
                     initialFrame={0}
+                    isHovered={isHovered}
                   />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
-              {item.items?.length ? (
-                <>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <LottieIcon
-                        animationData={animations.arrowDown}
-                        size={12}
-                        loop={false}
-                        autoplay={false}
-                        initialFrame={0}
-                      />
-                      <span className="sr-only">Toggle</span>
-                    </SidebarMenuAction>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </a>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </>
-              ) : null}
             </SidebarMenuItem>
-          </Collapsible>
-        ))}
+          )
+        })}
       </SidebarMenu>
     </SidebarGroup>
   )

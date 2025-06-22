@@ -78,7 +78,7 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="max-w-md mx-auto mt-12 p-6 rounded-lg text-center"
+                className="max-w-md mx-auto mt-12 p-6 rounded-sm text-center"
               >
                 <div className="inline-flex items-center justify-center p-1.5 rounded-full mb-4">
                   <Mail className="h-4 w-4" />
@@ -121,7 +121,7 @@ const FaqItem = React.forwardRef<
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.1 }}
       className={cn(
-        'group rounded-lg',
+        'group rounded-sm',
         'transition-all duration-200 ease-in-out',
         'border border-border/50',
         isOpen

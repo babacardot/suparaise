@@ -260,6 +260,7 @@ function SidebarTrigger({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar()
+  const [isHovered, setIsHovered] = React.useState(false)
 
   return (
     <Button
@@ -267,11 +268,13 @@ function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn('size-7', className)}
+      className={cn('size-7 text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent', className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       {...props}
     >
       <LottieIcon
@@ -280,6 +283,7 @@ function SidebarTrigger({
         loop={false}
         autoplay={false}
         initialFrame={0}
+        isHovered={isHovered}
       />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
@@ -546,6 +550,8 @@ function SidebarMenuButton({
         side="right"
         align="center"
         hidden={state !== 'collapsed' || isMobile}
+        className="bg-background text-foreground border border-border rounded-sm shadow-md px-3 py-2 before:hidden after:hidden [&>svg]:hidden [&>*[role='presentation']]:hidden"
+        sideOffset={18}
         {...tooltip}
       />
     </Tooltip>
@@ -576,7 +582,7 @@ function SidebarMenuAction({
         'peer-data-[size=lg]/menu-button:top-2.5',
         'group-data-[collapsible=icon]:hidden',
         showOnHover &&
-          'peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0',
+        'peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0',
         className,
       )}
       {...props}

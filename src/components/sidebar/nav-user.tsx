@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
@@ -36,6 +37,7 @@ export function NavUser({
   const router = useRouter()
   const supabase = createSupabaseBrowserClient()
   const { theme, setTheme } = useTheme()
+  const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -118,27 +120,42 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onMouseEnter={() => setHoveredItem('profile')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
+              >
                 <LottieIcon
                   animationData={animations.profile}
                   size={16}
                   loop={false}
                   autoplay={false}
                   initialFrame={0}
+                  isHovered={hoveredItem === 'profile'}
                 />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onMouseEnter={() => setHoveredItem('settings')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
+              >
                 <LottieIcon
                   animationData={animations.settings}
                   size={16}
                   loop={false}
                   autoplay={false}
                   initialFrame={0}
+                  isHovered={hoveredItem === 'settings'}
                 />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={toggleTheme}>
+              <DropdownMenuItem
+                onClick={toggleTheme}
+                onMouseEnter={() => setHoveredItem('theme')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
+              >
                 <LottieIcon
                   animationData={
                     theme === 'dark' ? animations.sun : animations.rain
@@ -147,18 +164,25 @@ export function NavUser({
                   loop={false}
                   autoplay={false}
                   initialFrame={0}
+                  isHovered={hoveredItem === 'theme'}
                 />
                 {theme === 'dark' ? 'Light' : 'Dark'} Mode
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              onMouseEnter={() => setHoveredItem('logout')}
+              onMouseLeave={() => setHoveredItem(null)}
+              className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
+            >
               <LottieIcon
                 animationData={animations.logout}
                 size={16}
                 loop={false}
                 autoplay={false}
                 initialFrame={0}
+                isHovered={hoveredItem === 'logout'}
               />
               Log out
             </DropdownMenuItem>

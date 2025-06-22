@@ -103,10 +103,11 @@ BEGIN
     FROM profiles p
     WHERE p.id = p_user_id;
 
-    -- Get startup data if it exists
+    -- Get startup data if it exists, including logo_url
     SELECT jsonb_build_object(
         'name', s.name,
-        'id', s.id
+        'id', s.id,
+        'logo_url', s.logo_url
     )
     INTO startup_data
     FROM startups s
@@ -151,5 +152,56 @@ BEGIN
         'profileName', COALESCE(profile_name, ''),
         'hasStartup', startup_exists
     );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- =================================================================
+-- MULTI-STARTUP FUNCTIONS
+-- =================================================================
+
+-- Function to get all startups for a user
+CREATE OR REPLACE FUNCTION get_user_startups(p_user_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    SELECT jsonb_agg(
+        jsonb_build_object(
+            'id', s.id,
+            'name', s.name,
+            'logo_url', s.logo_url,
+            'created_at', s.created_at
+        ) ORDER BY s.created_at DESC
+    )
+    INTO result
+    FROM startups s
+    WHERE s.user_id = p_user_id;
+
+    RETURN COALESCE(result, '[]'::jsonb);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to switch active startup (for session management)
+CREATE OR REPLACE FUNCTION get_startup_by_id(p_startup_id UUID, p_user_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    -- Verify the startup belongs to the user
+    SELECT jsonb_build_object(
+        'id', s.id,
+        'name', s.name,
+        'logo_url', s.logo_url,
+        'website', s.website,
+        'industry', s.industry,
+        'location', s.location,
+        'funding_round', s.funding_round,
+        'description_short', s.description_short
+    )
+    INTO result
+    FROM startups s
+    WHERE s.id = p_startup_id AND s.user_id = p_user_id;
+
+    RETURN result;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public; 

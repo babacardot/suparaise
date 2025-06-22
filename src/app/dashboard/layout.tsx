@@ -22,6 +22,12 @@ import Spinner from '@/components/ui/spinner'
 import { Profile } from '@/lib/types'
 import { User } from '@supabase/supabase-js'
 
+interface StartupData {
+  name: string
+  id: string
+  logo_url?: string
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -30,6 +36,7 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
+  const [startupData, setStartupData] = useState<StartupData | null>(null)
   const supabase = useMemo(() => createSupabaseBrowserClient(), [])
 
   const fetchInitialData = useCallback(
@@ -50,8 +57,14 @@ export default function DashboardLayout({
       console.log('Initial data fetched:', data)
       if (data) {
         const profile = (data as { profile: Profile | null }).profile
+        const startup = (data as { startup: StartupData | null }).startup
+
         if (profile && !profile.onboarded) {
           setNeedsOnboarding(true)
+        }
+
+        if (startup) {
+          setStartupData(startup)
         }
       }
     },
@@ -96,12 +109,23 @@ export default function DashboardLayout({
         user={
           user
             ? {
-                name: user.user_metadata?.full_name || user.email || '',
-                email: user.email || '',
-                avatar: user.user_metadata?.avatar_url,
-              }
+              name: user.user_metadata?.full_name || user.email || '',
+              email: user.email || '',
+              avatar: user.user_metadata?.avatar_url,
+              startupName: startupData?.name || undefined,
+              startupLogo: startupData?.logo_url || undefined,
+            }
             : null
         }
+        startups={[]} // TODO: Fetch user's startups from database
+        onStartupSelect={(startup) => {
+          console.log('Selected startup:', startup)
+          // TODO: Handle startup selection
+        }}
+        onCreateNewStartup={() => {
+          console.log('Create new startup')
+          // TODO: Handle new startup creation
+        }}
       />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">

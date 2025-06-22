@@ -1,5 +1,3 @@
 # suparaise.com
 
-## Overview
-
-[suparaise.com](https://suparaise.com) is a web-based agentic tool for automated VC fundraising and investor outreach.
+[suparaise.com](https://suparaise.com) is a web-based agentic tool for automating VC fundraising and investor outreach.

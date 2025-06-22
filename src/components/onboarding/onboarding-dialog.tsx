@@ -9,8 +9,9 @@ import {
   DialogTitle,
   DialogContent,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { Button as ExpandButton } from '@/components/design/button-expand'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Json } from '@/lib/types/database'
 import Spinner from '@/components/ui/spinner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -43,7 +44,7 @@ const WelcomeStep = () => {
     >
       <div className="relative w-48 h-48 mt-8">
         <Image
-          src="/random/okra_onboarding.svg"
+          src="/random/onboarding.svg"
           alt="Welcome to Suparaise"
           fill
           className="object-contain"
@@ -55,15 +56,13 @@ const WelcomeStep = () => {
         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           Welcome to suparaise.com
         </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md">
-          We&apos;ll help you create your startup profile and connect with the
-          right investors. Let&apos;s get started with some basic information
-          about you and your company.
+        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl">
+          We&apos;re about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.
         </p>
       </div>
 
       <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+        <div className="w-2 h-2 bg-green-500 rounded-sm animate-pulse"></div>
         <span>Onboarding</span>
       </div>
     </motion.div>
@@ -140,12 +139,73 @@ export function OnboardingDialog({
   const videoInputRef = useRef<HTMLInputElement>(null)
   const supabase = createSupabaseBrowserClient()
 
+  // Sound utility functions
+  const playSound = (soundFile: string) => {
+    try {
+      const audio = new Audio(soundFile)
+      audio.volume = 0.3 // Set volume to 30%
+      audio.play().catch((error) => {
+        console.log('Could not play sound:', error)
+      })
+    } catch (error) {
+      console.log('Error loading sound:', error)
+    }
+  }
+
+  const playNavigationSound = () => {
+    playSound('/sounds/light.mp3')
+  }
+
+  const playCompletionSound = () => {
+    playSound('/sounds/completion.mp3')
+  }
+
+  useEffect(() => {
+    const prefillFounderData = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (user) {
+        setFounders((currentFounders) => {
+          if (
+            currentFounders.length > 0 &&
+            !currentFounders[0].firstName &&
+            !currentFounders[0].lastName &&
+            !currentFounders[0].email
+          ) {
+            const newFounders = [...currentFounders]
+            const firstFounder = { ...newFounders[0] }
+
+            firstFounder.email = user.email || ''
+
+            const fullName =
+              user.user_metadata?.full_name || user.user_metadata?.name || ''
+            if (fullName) {
+              const nameParts = fullName.split(' ')
+              firstFounder.firstName = nameParts[0] || ''
+              firstFounder.lastName = nameParts.slice(1).join(' ') || ''
+            }
+
+            newFounders[0] = firstFounder
+            return newFounders
+          }
+          return currentFounders
+        })
+      }
+    }
+
+    if (isOpen) {
+      prefillFounderData()
+    }
+  }, [isOpen, supabase])
+
   // Auto-advance from welcome step after 10 seconds
   useEffect(() => {
     if (currentStep === 0 && isOpen) {
       const timer = setTimeout(() => {
         setCurrentStep(1)
-      }, 10000)
+      }, 9000)
 
       return () => clearTimeout(timer)
     }
@@ -186,10 +246,6 @@ export function OnboardingDialog({
             errors.push(`Phone for ${founderLabel} is required`)
           if (!founder.linkedin.trim())
             errors.push(`LinkedIn for ${founderLabel} is required`)
-          if (!founder.githubUrl.trim())
-            errors.push(`GitHub for ${founderLabel} is required`)
-          if (!founder.personalWebsiteUrl.trim())
-            errors.push(`Website for ${founderLabel} is required`)
 
           // Validate URL formats and email format
           if (
@@ -201,15 +257,6 @@ export function OnboardingDialog({
           if (founder.linkedin && !isValidUrl(founder.linkedin)) {
             errors.push(`LinkedIn URL for ${founderLabel} is invalid`)
           }
-          if (founder.githubUrl && !isValidUrl(founder.githubUrl)) {
-            errors.push(`GitHub URL for ${founderLabel} is invalid`)
-          }
-          if (
-            founder.personalWebsiteUrl &&
-            !isValidUrl(founder.personalWebsiteUrl)
-          ) {
-            errors.push(`Website URL for ${founderLabel} is invalid`)
-          }
         })
         break
 
@@ -217,9 +264,13 @@ export function OnboardingDialog({
         if (!startup.name.trim()) errors.push('Company name is required')
         if (!startup.descriptionShort.trim())
           errors.push('One-liner is required')
+        if (!startup.descriptionMedium.trim())
+          errors.push('Elevator pitch is required')
+        if (!startup.descriptionLong.trim())
+          errors.push('Full description is required')
         if (!startup.industry) errors.push('Industry is required')
         if (!startup.location.trim())
-          errors.push('Headquarters location is required')
+          errors.push('Country is required')
 
         // Validate company website URL
         if (startup.website && !isValidUrl(startup.website)) {
@@ -228,7 +279,13 @@ export function OnboardingDialog({
         break
 
       case 3:
-        // Step 3 is optional, no validation needed
+        // Step 3 validation - mandatory fields
+        if (!startup.fundingRound) errors.push('Funding round is required')
+        if (!startup.investmentInstrument) errors.push('Investment instrument is required')
+        if (startup.fundingAmountSought <= 0) errors.push('Funding amount is required')
+        if (!startup.employeeCount || startup.employeeCount <= 0) errors.push('Team size is required')
+        if (!startup.tractionSummary.trim()) errors.push('Traction is required')
+        if (!startup.marketSummary.trim()) errors.push('Market is required')
         break
 
       case 4:
@@ -255,9 +312,6 @@ export function OnboardingDialog({
         if (!founder.email.trim()) errors.email = 'Email is required'
         if (!founder.phone.trim()) errors.phone = 'Phone is required'
         if (!founder.linkedin.trim()) errors.linkedin = 'LinkedIn is required'
-        if (!founder.githubUrl.trim()) errors.githubUrl = 'GitHub is required'
-        if (!founder.personalWebsiteUrl.trim())
-          errors.personalWebsiteUrl = 'Website is required'
       }
 
       // Format validation - show immediately when user types invalid data
@@ -275,20 +329,6 @@ export function OnboardingDialog({
       ) {
         errors.linkedin = 'Invalid LinkedIn URL'
       }
-      if (
-        founder.githubUrl &&
-        founder.githubUrl.trim() &&
-        !isValidUrl(founder.githubUrl)
-      ) {
-        errors.githubUrl = 'Invalid GitHub URL'
-      }
-      if (
-        founder.personalWebsiteUrl &&
-        founder.personalWebsiteUrl.trim() &&
-        !isValidUrl(founder.personalWebsiteUrl)
-      ) {
-        errors.personalWebsiteUrl = 'Invalid website URL'
-      }
 
       return errors
     })
@@ -302,9 +342,13 @@ export function OnboardingDialog({
       if (!startup.name.trim()) errors.name = 'Company name is required'
       if (!startup.descriptionShort.trim())
         errors.descriptionShort = 'One-liner is required'
+      if (!startup.descriptionMedium.trim())
+        errors.descriptionMedium = 'Elevator pitch is required'
+      if (!startup.descriptionLong.trim())
+        errors.descriptionLong = 'Full description is required'
       if (!startup.industry) errors.industry = 'Industry is required'
       if (!startup.location.trim())
-        errors.location = 'Headquarters location is required'
+        errors.location = 'Country is required'
     }
 
     // Format validation - show immediately when user types invalid data
@@ -480,6 +524,9 @@ export function OnboardingDialog({
       return
     }
 
+    // Play completion sound on successful validation
+    playCompletionSound()
+
     setValidationErrors([])
     setLoading(true)
     try {
@@ -573,6 +620,9 @@ export function OnboardingDialog({
       return
     }
 
+    // Play navigation sound on successful step advancement
+    playNavigationSound()
+
     setValidationErrors([])
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1)
@@ -581,6 +631,9 @@ export function OnboardingDialog({
   }
 
   const prevStep = () => {
+    // Play navigation sound when going back
+    playNavigationSound()
+
     setValidationErrors([])
     setValidationAttempted(false) // Reset validation state when going back
     if (currentStep > 0) {
@@ -658,7 +711,7 @@ export function OnboardingDialog({
       <Dialog open={isOpen}>
         <DialogContent
           showCloseButton={false}
-          className="max-w-3xl max-h-[90vh] flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:duration-500 data-[state=closed]:duration-300"
+          className="max-w-2xl max-h-[85vh] flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:duration-500 data-[state=closed]:duration-300"
         >
           <DialogHeader className="sr-only">
             <DialogTitle>
@@ -676,7 +729,7 @@ export function OnboardingDialog({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
+                className="bg-red-50 border border-red-200 rounded-sm p-4 mb-4"
               >
                 <h4 className="text-red-800 font-medium mb-2">
                   Please fix the following errors:
@@ -684,7 +737,7 @@ export function OnboardingDialog({
                 <ul className="text-red-700 text-sm space-y-1">
                   {validationErrors.map((error, index) => (
                     <li key={index} className="flex items-center">
-                      <span className="w-1 h-1 bg-red-400 rounded-full mr-2"></span>
+                      <span className="w-1 h-1 bg-red-400 rounded-sm mr-2"></span>
                       {error}
                     </li>
                   ))}
@@ -777,26 +830,32 @@ export function OnboardingDialog({
               className="flex justify-between pt-6 border-t"
             >
               {currentStep > 1 && (
-                <ExpandButton
+                <Button
                   variant="outline"
                   onClick={prevStep}
                   disabled={loading}
+                  className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
                   Previous
-                </ExpandButton>
+                </Button>
               )}
               {currentStep < 4 ? (
                 <ExpandButton
                   onClick={nextStep}
                   disabled={!canProceedFromStep(currentStep) || loading}
-                  className="ml-auto"
+                  className="ml-auto bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                  Icon={ArrowRight}
+                  iconPlacement="right"
+                  justify="end"
                 >
                   Next
-                  <ArrowRight className="h-4 w-4 ml-2" />
                 </ExpandButton>
               ) : (
-                <ExpandButton onClick={submitData} disabled={loading}>
+                <ExpandButton
+                  onClick={submitData}
+                  disabled={loading}
+                  className="ml-auto bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                >
                   {loading ? <Spinner /> : 'Submit'}
                 </ExpandButton>
               )}

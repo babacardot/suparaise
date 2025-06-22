@@ -109,7 +109,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, InputProps>(
           className,
         )}
         {...props}
-        autoComplete="off"
+        autoComplete="one-time-code"
         data-lpignore="true"
         data-form-type="other"
       />

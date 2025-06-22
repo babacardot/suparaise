@@ -1,4 +1,5 @@
 import * as React from 'react'
+import Link from 'next/link'
 import { LottieIcon } from '@/components/design/lottie-icon'
 
 import {
@@ -11,6 +12,7 @@ import {
 
 export function NavSecondary({
   items,
+  onItemClick,
   ...props
 }: {
   items: {
@@ -18,27 +20,42 @@ export function NavSecondary({
     url: string
     animation: object
   }[]
+  onItemClick?: () => void
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
+
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild size="sm">
-                <a href={item.url}>
-                  <LottieIcon
-                    animationData={item.animation}
-                    size={14}
-                    loop={false}
-                    autoplay={false}
-                    initialFrame={0}
-                  />
-                  <span>{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            const isHovered = hoveredItem === item.title
+
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  size="sm"
+                  tooltip={item.title}
+                  onClick={onItemClick}
+                  onMouseEnter={() => setHoveredItem(item.title)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  <Link href={item.url}>
+                    <LottieIcon
+                      animationData={item.animation}
+                      size={14}
+                      loop={false}
+                      autoplay={false}
+                      initialFrame={0}
+                      isHovered={isHovered}
+                    />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

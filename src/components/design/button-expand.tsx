@@ -38,10 +38,16 @@ const buttonVariants = cva(
         lg: 'h-10 rounded-sm px-6',
         icon: 'h-4 w-4',
       },
+      justify: {
+        center: 'justify-center',
+        start: 'justify-start',
+        end: 'justify-end',
+      },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      justify: 'center',
     },
   },
 )
@@ -58,7 +64,7 @@ interface IconRefProps {
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean
 }
 
@@ -73,6 +79,7 @@ const Button = React.forwardRef<
       className,
       variant,
       size,
+      justify,
       asChild = false,
       Icon,
       iconPlacement,
@@ -83,19 +90,19 @@ const Button = React.forwardRef<
     const Comp = asChild ? Slot : 'button'
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, justify, className }))}
         ref={ref}
         {...props}
       >
         {Icon && iconPlacement === 'left' && (
-          <div className="w-0 translate-x-[0%] pr-0 opacity-0 transition-all duration-200 group-hover:w-4 group-hover:translate-x-100 group-hover:pr-2 group-hover:opacity-100">
-            <Icon className="h-4 w-4" />
+          <div className="w-0 translate-x-[-100%] pr-0 opacity-0 transition-all duration-200 group-hover:w-5 group-hover:-ml-2 group-hover:translate-x-0 group-hover:pr-3 group-hover:opacity-100">
+            <Icon className="h-5 w-5" />
           </div>
         )}
         <Slottable>{props.children}</Slottable>
         {Icon && iconPlacement === 'right' && (
-          <div className="w-0 translate-x-[100%] pl-0 opacity-0 transition-all duration-200 group-hover:w-4 group-hover:translate-x-0 group-hover:pl-2 group-hover:opacity-100">
-            <Icon className="h-4 w-4" />
+          <div className="w-0 translate-x-[100%] pl-0 opacity-0 transition-all duration-200 group-hover:w-5 group-hover:translate-x-0 group-hover:pl-3 group-hover:opacity-100">
+            <Icon className="h-5 w-5" />
           </div>
         )}
       </Comp>
