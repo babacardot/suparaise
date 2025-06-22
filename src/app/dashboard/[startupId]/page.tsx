@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation'
 
 interface DashboardPageProps {
-    params: { startupId: string }
+    params: Promise<{ startupId: string }>
 }
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
+    // Await the async params
+    const { startupId } = await params
+
     // Redirect to home by default
-    redirect(`/dashboard/${params.startupId}/home`)
+    redirect(`/dashboard/${startupId}/home`)
 } 
