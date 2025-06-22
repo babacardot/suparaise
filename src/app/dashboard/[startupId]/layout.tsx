@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 interface StartupLayoutProps {
     children: React.ReactNode
-    params: { startupId: string }
+    params: Promise<{ startupId: string }>
 }
 
 async function getStartupByIdAndUser(startupId: string, userId: string) {
@@ -26,6 +26,9 @@ async function getStartupByIdAndUser(startupId: string, userId: string) {
 export default async function StartupLayout({ children, params }: StartupLayoutProps) {
     const supabase = await createClient()
 
+    // Await the async params
+    const { startupId } = await params
+
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -34,7 +37,7 @@ export default async function StartupLayout({ children, params }: StartupLayoutP
     }
 
     // Verify startup belongs to user
-    const startup = await getStartupByIdAndUser(params.startupId, user.id)
+    const startup = await getStartupByIdAndUser(startupId, user.id)
 
     if (!startup) {
         notFound()
