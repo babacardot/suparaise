@@ -41,19 +41,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-        title: 'Welcome to suparaise.com',
-        subtitle:
-          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-        image: '/random/onboarding.svg',
-        statusText: 'Onboarding',
-      }
+      title: 'Welcome to suparaise.com',
+      subtitle:
+        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+      image: '/random/onboarding.svg',
+      statusText: 'Onboarding',
+    }
     : {
-        title: 'Ready to launch another venture?',
-        subtitle:
-          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-        image: '/random/test_your_app.svg',
-        statusText: 'New venture',
-      }
+      title: 'Ready to launch another venture?',
+      subtitle:
+        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+      image: '/random/test_your_app.svg',
+      statusText: 'New venture',
+    }
 
   return (
     <motion.div
@@ -153,6 +153,11 @@ export function OnboardingDialog({
     mrr: 0,
     arr: 0,
     employeeCount: 1,
+    foundedYear: new Date().getFullYear(),
+    revenueModel: '',
+    currentRunway: 0,
+    keyCustomers: '',
+    competitors: '',
     logoFile: null,
     pitchDeckFile: null,
     introVideoFile: null,
@@ -326,7 +331,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-                founder.email.trim().toLowerCase(),
+              founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -338,7 +343,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-              (user?.email || '').toLowerCase()
+            (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -357,6 +362,8 @@ export function OnboardingDialog({
           errors.push('Full description is required')
         if (!startup.industry) errors.push('Industry is required')
         if (!startup.location.trim()) errors.push('Country is required')
+        if (!startup.foundedYear || startup.foundedYear < 1900 || startup.foundedYear > new Date().getFullYear())
+          errors.push('Founded year is required and must be valid')
 
         // Validate company website URL
         if (startup.website && !isValidUrl(startup.website)) {
@@ -671,6 +678,11 @@ export function OnboardingDialog({
         mrr: startup.mrr,
         arr: startup.arr,
         employee_count: startup.employeeCount,
+        founded_year: startup.foundedYear,
+        revenue_model: startup.revenueModel,
+        current_runway: startup.currentRunway,
+        key_customers: startup.keyCustomers,
+        competitors: startup.competitors,
         logo_url: logoUrl,
         pitch_deck_url: pitchDeckUrl,
         intro_video_url: introVideoUrl,

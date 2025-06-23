@@ -192,11 +192,10 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                         playClickSound()
                         setSentiment(key)
                       }}
-                      className={`text-lg p-2 rounded-sm transition-all duration-200 hover:bg-background border-2 ${
-                        sentiment === key
-                          ? 'bg-background border-primary shadow-sm scale-110'
-                          : 'border-transparent hover:border-border'
-                      }`}
+                      className={`text-lg w-10 h-10 rounded-sm transition-all duration-200 hover:bg-background border ${sentiment === key
+                        ? 'bg-background border-border shadow-sm scale-105'
+                        : 'border-transparent hover:border-border/30'
+                        }`}
                     >
                       {emojis[key]}
                     </button>
@@ -214,24 +213,16 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                   <Eraser className="h-4 w-4" />
                 </Button>
 
-                {!message.trim() || isSubmitting ? (
-                  <Button
-                    disabled
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 rounded-sm opacity-50 px-4"
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
-                  </Button>
-                ) : (
-                  <ExpandButton
-                    onClick={handleSubmit}
-                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm shadow-none px-4 disabled:opacity-50 disabled:hover:bg-green-50 disabled:dark:hover:bg-green-900/30"
-                    Icon={ArrowRight}
-                    iconPlacement="right"
-                    size="default"
-                  >
-                    Submit
-                  </ExpandButton>
-                )}
+                <ExpandButton
+                  onClick={handleSubmit}
+                  disabled={!message.trim() || isSubmitting}
+                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm shadow-none px-4 disabled:opacity-50 disabled:hover:bg-green-50 disabled:dark:hover:bg-green-900/30"
+                  Icon={ArrowRight}
+                  iconPlacement="right"
+                  size="default"
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
+                </ExpandButton>
               </div>
             </div>
           </div>

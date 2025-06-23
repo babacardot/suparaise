@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/actions/utils'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
@@ -42,25 +43,32 @@ function NavItem({
                 'justify-start w-full text-left whitespace-nowrap rounded-sm transition-all duration-200 mb-1 h-10'
             )}
         >
-            <div className="flex items-center gap-3">
-                <span
-                    className={cn(
-                        'flex-shrink-0',
-                        isActive
-                            ? 'text-primary'
-                            : 'text-muted-foreground group-hover:text-primary'
-                    )}
-                >
-                    {animationData && (
-                        <LottieIcon
-                            animationData={animationData}
-                            size={18}
-                            className="translate-y-[2px]"
-                            isHovered={isHovered}
-                        />
-                    )}
-                </span>
-                <span className="font-medium text-sm">{item.title}</span>
+            <div className="flex items-center gap-3 justify-between w-full">
+                <div className="flex items-center gap-3">
+                    <span
+                        className={cn(
+                            'flex-shrink-0',
+                            isActive
+                                ? 'text-primary'
+                                : 'text-muted-foreground group-hover:text-primary'
+                        )}
+                    >
+                        {animationData && (
+                            <LottieIcon
+                                animationData={animationData}
+                                size={18}
+                                className="translate-y-[2px]"
+                                isHovered={isHovered}
+                            />
+                        )}
+                    </span>
+                    <span className="font-medium text-sm">{item.title}</span>
+                </div>
+                {item.title === 'Integrations' && (
+                    <Badge variant="secondary" className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800">
+                        BETA
+                    </Badge>
+                )}
             </div>
         </Link>
     )

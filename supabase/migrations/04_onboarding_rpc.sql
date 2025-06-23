@@ -18,6 +18,8 @@ BEGIN
         legal_structure, investment_instrument, funding_round, funding_amount_sought,
         pre_money_valuation, description_short, description_medium, description_long,
         traction_summary, market_summary, mrr, arr, employee_count,
+        founded_year, revenue_model, current_runway, 
+        key_customers, competitors,
         logo_url, pitch_deck_url, intro_video_url, onboarded
     )
     VALUES (
@@ -43,6 +45,11 @@ BEGIN
         (p_data->>'mrr')::NUMERIC,
         (p_data->>'arr')::NUMERIC,
         (p_data->>'employee_count')::INTEGER,
+        (p_data->>'founded_year')::INTEGER,
+        (p_data->>'revenue_model')::revenue_model_type,
+        (p_data->>'current_runway')::INTEGER,
+        p_data->>'key_customers',
+        p_data->>'competitors',
         p_data->>'logo_url',
         p_data->>'pitch_deck_url',
         p_data->>'intro_video_url',

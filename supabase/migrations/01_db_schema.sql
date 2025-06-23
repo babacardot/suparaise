@@ -71,6 +71,12 @@ CREATE TYPE legal_structure AS ENUM (
     'Other'
 );
 CREATE TYPE investment_instrument AS ENUM ('Equity', 'Debt', 'Convertible Note', 'SAFE', 'Other');
+CREATE TYPE revenue_model_type AS ENUM (
+    'Subscription', 'One-time purchase', 'Commission/Transaction fees', 'Advertising',
+    'Freemium', 'Usage-based', 'Licensing', 'Consulting',
+    'Affiliate', 'Marketplace fees', 'Data monetization', 'Hardware sales',
+    'Hybrid', 'Other'
+);
 
 -- --------------------------------------------------
 -- Auto-update `updated_at` column
@@ -175,13 +181,21 @@ CREATE TABLE startups (
     mrr NUMERIC(12, 2) DEFAULT 0,
     arr NUMERIC(12, 2) DEFAULT 0,
     employee_count INTEGER,
+    founded_year INTEGER,
+    revenue_model revenue_model_type,
+    current_runway INTEGER, -- in months
+    key_customers TEXT,
+    competitors TEXT,
     onboarded BOOLEAN DEFAULT FALSE NOT NULL,
     -- Asset URLs from Supabase Storage
     logo_url TEXT,
     pitch_deck_url TEXT,
     intro_video_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Constraints
+    CONSTRAINT chk_founded_year CHECK (founded_year >= 1900 AND founded_year <= EXTRACT(YEAR FROM NOW()) + 1),
+    CONSTRAINT chk_current_runway CHECK (current_runway >= 0)
 );
 
 CREATE TRIGGER set_startups_timestamp
@@ -275,6 +289,9 @@ CREATE INDEX IF NOT EXISTS idx_common_responses_startup_question ON common_respo
 
 -- Index for email lookups in founders (if used)
 CREATE INDEX IF NOT EXISTS idx_founders_email ON founders(email) WHERE email IS NOT NULL;
+
+-- Index for founded_year for filtering
+CREATE INDEX IF NOT EXISTS idx_startups_founded_year ON startups(founded_year) WHERE founded_year IS NOT NULL;
 
 -- Performance indexes for targets table (for filtering)
 CREATE INDEX IF NOT EXISTS idx_targets_stage_focus ON targets USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;

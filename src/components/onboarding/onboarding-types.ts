@@ -6,6 +6,7 @@ export type LegalStructure = Database['public']['Enums']['legal_structure']
 export type InvestmentStage = Database['public']['Enums']['investment_stage']
 export type InvestmentInstrument =
   Database['public']['Enums']['investment_instrument']
+export type RevenueModelType = Database['public']['Enums']['revenue_model_type']
 
 export interface FounderData {
   firstName: string
@@ -41,6 +42,11 @@ export interface StartupData {
   mrr: number
   arr: number
   employeeCount: number
+  foundedYear: number
+  revenueModel: string
+  currentRunway: number
+  keyCustomers: string
+  competitors: string
   logoFile: File | null
   pitchDeckFile: File | null
   introVideoFile: File | null
@@ -81,6 +87,11 @@ export interface StartupFieldErrors {
   descriptionShort?: string
   descriptionMedium?: string
   descriptionLong?: string
+  foundedYear?: string
+  revenueModel?: string
+  currentRunway?: string
+  keyCustomers?: string
+  competitors?: string
 }
 
 export interface FileUploadProps {
