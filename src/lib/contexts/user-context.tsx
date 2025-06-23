@@ -21,6 +21,14 @@ interface StartupData {
   created_at?: string
 }
 
+// Subscription-related interfaces
+interface SubscriptionData {
+  is_subscribed: boolean
+  subscription_status: string | null
+  subscription_current_period_end: string | null
+  stripe_customer_id: string | null
+}
+
 interface UserContextType {
   user: User | null
   supabase: SupabaseClient
@@ -36,6 +44,12 @@ interface UserContextType {
   startupsLoading: boolean
   startupsInitialized: boolean
   needsOnboarding: boolean
+
+  // Subscription management
+  subscription: SubscriptionData | null
+  subscriptionLoading: boolean
+  isSubscribed: boolean
+  fetchSubscription: () => Promise<void>
 
   // Startup actions
   fetchStartups: () => Promise<void>
@@ -72,6 +86,10 @@ export function UserProvider({ children }: UserProviderProps) {
   const [startupsInitialized, setStartupsInitialized] = useState(false)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
 
+  // Subscription state
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null)
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true)
+
   const router = useRouter()
   const pathname = usePathname()
 
@@ -83,6 +101,11 @@ export function UserProvider({ children }: UserProviderProps) {
     if (!currentStartupId) return null
     return startups.find((startup) => startup.id === currentStartupId) || null
   }, [startups, currentStartupId])
+
+  // Derive subscription status
+  const isSubscribed = useMemo(() => {
+    return subscription?.is_subscribed || false
+  }, [subscription])
 
   // Fetch user's startups
   const fetchStartups = useCallback(async () => {
@@ -115,6 +138,47 @@ export function UserProvider({ children }: UserProviderProps) {
       setStartupsInitialized(true)
     }
   }, [user, supabase, currentStartupId])
+
+  // Fetch subscription data
+  const fetchSubscription = useCallback(async () => {
+    if (!user) return
+
+    setSubscriptionLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_subscribed, subscription_status, subscription_current_period_end, stripe_customer_id')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        // If the columns don't exist yet, set default values
+        if (error.message?.includes('column') && error.message?.includes('does not exist')) {
+          setSubscription({
+            is_subscribed: false,
+            subscription_status: null,
+            subscription_current_period_end: null,
+            stripe_customer_id: null,
+          })
+        } else {
+          console.error('Error fetching subscription:', error)
+        }
+      } else {
+        setSubscription(data as unknown as SubscriptionData)
+      }
+    } catch (error) {
+      console.error('Error in fetchSubscription:', error)
+      // Set default values on error
+      setSubscription({
+        is_subscribed: false,
+        subscription_status: null,
+        subscription_current_period_end: null,
+        stripe_customer_id: null,
+      })
+    } finally {
+      setSubscriptionLoading(false)
+    }
+  }, [user, supabase])
 
   // Check onboarding status
   const checkOnboardingStatus = useCallback(async () => {
@@ -294,8 +358,9 @@ export function UserProvider({ children }: UserProviderProps) {
     if (user && !loading) {
       fetchStartups()
       checkOnboardingStatus()
+      fetchSubscription()
     }
-  }, [user, loading, fetchStartups, checkOnboardingStatus])
+  }, [user, loading, fetchStartups, checkOnboardingStatus, fetchSubscription])
 
   const value = useMemo(
     () => ({
@@ -313,6 +378,12 @@ export function UserProvider({ children }: UserProviderProps) {
       startupsLoading,
       startupsInitialized,
       needsOnboarding,
+
+      // Subscription state
+      subscription,
+      subscriptionLoading,
+      isSubscribed,
+      fetchSubscription,
 
       // Startup actions
       fetchStartups,
@@ -335,6 +406,10 @@ export function UserProvider({ children }: UserProviderProps) {
       startupsLoading,
       startupsInitialized,
       needsOnboarding,
+      subscription,
+      subscriptionLoading,
+      isSubscribed,
+      fetchSubscription,
       fetchStartups,
       selectStartup,
       setCurrentStartupFromUrl,

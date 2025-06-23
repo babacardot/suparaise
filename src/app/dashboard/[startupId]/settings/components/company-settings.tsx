@@ -16,6 +16,29 @@ import Spinner from '@/components/ui/spinner'
 // Import industry constants from onboarding types
 import { INDUSTRIES, LEGAL_STRUCTURES, FUNDING_ROUNDS, IndustryType, LegalStructure, InvestmentStage } from '@/components/onboarding/onboarding-types'
 
+// Helper function to format field names for display
+const formatFieldName = (fieldName: string): string => {
+    const fieldLabels: Record<string, string> = {
+        name: 'Company name',
+        website: 'Website',
+        industry: 'Industry',
+        location: 'Location',
+        descriptionShort: 'One-liner',
+        descriptionMedium: 'Elevator pitch',
+        descriptionLong: 'Full description',
+        fundingRound: 'Funding stage',
+        legalStructure: 'Legal structure',
+        employeeCount: 'Team size',
+        foundedYear: 'Founded year',
+        revenueModel: 'Revenue model',
+        currentRunway: 'Runway',
+        keyCustomers: 'Key customers',
+        competitors: 'Competitors',
+        logoUrl: 'Logo',
+    }
+    return fieldLabels[fieldName] || fieldName
+}
+
 export default function CompanySettings() {
     const { user, supabase, currentStartupId } = useUser()
     const { toast } = useToast()
@@ -151,14 +174,14 @@ export default function CompanySettings() {
             setEditingField(null)
             toast({
                 title: 'Company updated',
-                description: `${field} has been updated successfully.`,
+                description: `${formatFieldName(field)} has been updated successfully.`,
             })
         } catch (error) {
             console.error(`Error saving ${field}:`, error)
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: `Failed to update ${field}. Please try again.`,
+                description: `Failed to update ${formatFieldName(field)}. Please try again.`,
             })
         } finally {
             setIsLoading(false)
@@ -468,7 +491,9 @@ export default function CompanySettings() {
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
                             </div>
+                        </div>
 
+                        <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="location">Location</Label>
                                 <div className="relative">
@@ -496,6 +521,35 @@ export default function CompanySettings() {
                                             <CheckIcon className="h-4 w-4" />
                                         </button>
                                     )}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="employeeCount">Team size</Label>
+                                <div className="relative">
+                                    <select
+                                        id="employeeCount"
+                                        className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                                        value={formData.employeeCount}
+                                        onChange={async (e) => {
+                                            const newValue = parseInt(e.target.value) || 1
+                                            handleInputChange('employeeCount', newValue)
+                                            await handleFieldSave('employeeCount')
+                                        }}
+                                        disabled={isLoading}
+                                    >
+                                        <option value={1}>Just me</option>
+                                        <option value={2}>2 people</option>
+                                        <option value={3}>3 people</option>
+                                        <option value={4}>4 people</option>
+                                        <option value={5}>5 people</option>
+                                        <option value={10}>6-10 people</option>
+                                        <option value={20}>11-20 people</option>
+                                        <option value={50}>21-50 people</option>
+                                        <option value={100}>51-100 people</option>
+                                        <option value={200}>100+ people</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
                             </div>
                         </div>
@@ -707,34 +761,29 @@ export default function CompanySettings() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="currentRunway">Runway (in months)</Label>
+                            <Label htmlFor="currentRunway">Runway</Label>
                             <div className="relative">
-                                <Input
+                                <select
                                     id="currentRunway"
-                                    type="number"
+                                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                                     value={formData.currentRunway}
-                                    onChange={(e) => handleInputChange('currentRunway', parseInt(e.target.value) || 0)}
-                                    className={cn("rounded-sm pr-8", editingField !== 'currentRunway' && "bg-muted")}
-                                    readOnly={editingField !== 'currentRunway'}
-                                    min="0"
-                                    placeholder="18"
-                                />
-                                {editingField !== 'currentRunway' ? (
-                                    <button
-                                        onClick={() => handleFieldEdit('currentRunway')}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                                    >
-                                        <PencilIcon className="h-3 w-3" />
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleFieldSave('currentRunway')}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                                        disabled={isLoading}
-                                    >
-                                        <CheckIcon className="h-4 w-4" />
-                                    </button>
-                                )}
+                                    onChange={async (e) => {
+                                        const newValue = parseInt(e.target.value) || 0
+                                        handleInputChange('currentRunway', newValue)
+                                        await handleFieldSave('currentRunway')
+                                    }}
+                                    disabled={isLoading}
+                                >
+                                    <option value={0}>No runway</option>
+                                    <option value={3}>3 months</option>
+                                    <option value={6}>6 months</option>
+                                    <option value={9}>9 months</option>
+                                    <option value={12}>12 months</option>
+                                    <option value={15}>15 months</option>
+                                    <option value={18}>18 months</option>
+                                    <option value={24}>24 months</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                             </div>
                         </div>
 

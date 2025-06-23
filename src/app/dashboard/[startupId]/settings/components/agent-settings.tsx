@@ -12,6 +12,31 @@ import { cn } from '@/lib/actions/utils'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 
+// Helper function to format field names for display
+const formatFieldName = (fieldName: string): string => {
+    const fieldLabels: Record<string, string> = {
+        agentName: 'Agent name',
+        submissionDelay: 'Submission delay',
+        retryAttempts: 'Retry attempts',
+        maxSteps: 'Max steps per task',
+        maxParallelSubmissions: 'Max parallel submissions',
+        autoSubmit: 'Auto-submit',
+        requireReview: 'Require review',
+        skipComplexForms: 'Skip complex forms',
+        skipVideoRequirements: 'Skip video requirements',
+        maxFormFields: 'Max form fields',
+        enableDebugMode: 'Debug mode',
+        customInstructions: 'Custom instructions',
+        preferredTone: 'Communication tone',
+        targetFundStages: 'Target fund stages',
+        targetFundTypes: 'Target fund types',
+        browserProvider: 'Browser provider',
+        timeoutMinutes: 'Task timeout',
+        enableStealth: 'Stealth mode',
+    }
+    return fieldLabels[fieldName] || fieldName
+}
+
 export default function AgentSettings() {
     const { user, supabase, currentStartupId } = useUser()
     const { toast } = useToast()
@@ -134,14 +159,14 @@ export default function AgentSettings() {
             setEditingField(null)
             toast({
                 title: 'Agent settings updated',
-                description: `${field} has been updated successfully.`,
+                description: `${formatFieldName(field)} has been updated successfully.`,
             })
         } catch (error) {
             console.error(`Error saving ${field}:`, error)
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: `Failed to update ${field}. Please try again.`,
+                description: `Failed to update ${formatFieldName(field)}. Please try again.`,
             })
         } finally {
             setIsLoading(false)

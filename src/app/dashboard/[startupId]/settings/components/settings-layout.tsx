@@ -31,6 +31,11 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
             icon: 'bolt',
         },
         {
+            title: 'Billing',
+            href: `/dashboard/${startupId}/settings/billing`,
+            icon: 'creditCard',
+        },
+        {
             title: 'Integrations',
             href: `#`,
             icon: 'integration',

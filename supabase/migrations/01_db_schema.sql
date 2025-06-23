@@ -77,6 +77,7 @@ CREATE TYPE revenue_model_type AS ENUM (
     'Affiliate', 'Marketplace fees', 'Data monetization', 'Hardware sales',
     'Hybrid', 'Other'
 );
+CREATE TYPE subscription_status AS ENUM ('active', 'inactive', 'past_due', 'canceled', 'unpaid');
 
 -- --------------------------------------------------
 -- Auto-update `updated_at` column
@@ -144,7 +145,14 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 CREATE TABLE profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     full_name TEXT,
-    email TEXT
+    email TEXT,
+    is_subscribed BOOLEAN DEFAULT FALSE,
+    stripe_customer_id TEXT UNIQUE,
+    stripe_subscription_id TEXT UNIQUE,
+    subscription_status subscription_status,
+    subscription_current_period_end TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create trigger to auto-create profile when user signs up
@@ -152,6 +160,12 @@ CREATE TRIGGER create_profile_on_signup
     AFTER INSERT ON auth.users
     FOR EACH ROW
     EXECUTE FUNCTION create_profile_for_new_user();
+
+-- Create trigger to auto-update timestamp for profiles
+CREATE TRIGGER set_profiles_timestamp
+BEFORE UPDATE ON profiles
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- --------------------------------------------------
 -- Table: startups

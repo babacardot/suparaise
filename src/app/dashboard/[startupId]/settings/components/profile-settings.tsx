@@ -16,6 +16,22 @@ import { cn } from '@/lib/actions/utils'
 // Import founder role constants from onboarding types
 import { FOUNDER_ROLES, FounderRole } from '@/components/onboarding/onboarding-types'
 
+// Helper function to format field names for display
+const formatFieldName = (fieldName: string): string => {
+    const fieldLabels: Record<string, string> = {
+        firstName: 'First name',
+        lastName: 'Last name',
+        email: 'Email',
+        phone: 'Phone',
+        bio: 'Bio',
+        role: 'Role',
+        linkedin: 'LinkedIn',
+        githubUrl: 'GitHub',
+        personalWebsiteUrl: 'Personal website',
+    }
+    return fieldLabels[fieldName] || fieldName
+}
+
 export default function ProfileSettings() {
     const { user, supabase, currentStartupId } = useUser()
     const { toast } = useToast()
@@ -149,14 +165,14 @@ export default function ProfileSettings() {
             setEditingField(null)
             toast({
                 title: 'Profile updated',
-                description: `${field} has been updated successfully.`,
+                description: `${formatFieldName(field)} has been updated successfully.`,
             })
         } catch (error) {
             console.error(`Error saving ${field}:`, error)
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: `Failed to update ${field}. Please try again.`,
+                description: `Failed to update ${formatFieldName(field)}. Please try again.`,
             })
         } finally {
             setIsLoading(false)
@@ -184,7 +200,7 @@ export default function ProfileSettings() {
 
             <Separator className="flex-shrink-0" />
 
-            <div className="flex-1 overflow-auto pt-6 max-h-[62vh] hide-scrollbar">
+            <div className="flex-1 overflow-auto pt-6 max-h-[60vh] hide-scrollbar">
                 <div className="space-y-6 pr-2">
                     {/* Profile Picture */}
                     <div className="flex items-center space-x-4">
@@ -341,42 +357,24 @@ export default function ProfileSettings() {
                         <div className="space-y-2">
                             <Label htmlFor="role">Role</Label>
                             <div className="relative">
-                                {editingField !== 'role' ? (
-                                    <div className={cn("rounded-sm pr-8 bg-muted p-2 text-sm flex items-center justify-between")}>
-                                        <span>{formData.role}</span>
-                                        <button
-                                            onClick={() => handleFieldEdit('role')}
-                                            className="text-blue-500 hover:text-blue-600 ml-2"
-                                        >
-                                            <PencilIcon className="h-3 w-3" />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center space-x-2">
-                                        <div className="relative flex-1">
-                                            <select
-                                                id="role"
-                                                className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                                                value={formData.role}
-                                                onChange={(e) => handleInputChange('role', e.target.value as FounderRole)}
-                                            >
-                                                {FOUNDER_ROLES.map((role) => (
-                                                    <option key={role} value={role}>
-                                                        {role}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                        </div>
-                                        <button
-                                            onClick={() => handleFieldSave('role')}
-                                            className="text-green-500 hover:text-green-600"
-                                            disabled={isLoading}
-                                        >
-                                            <CheckIcon className="h-4 w-4" />
-                                        </button>
-                                    </div>
-                                )}
+                                <select
+                                    id="role"
+                                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                                    value={formData.role}
+                                    onChange={async (e) => {
+                                        const newValue = e.target.value as FounderRole
+                                        handleInputChange('role', newValue)
+                                        await handleFieldSave('role')
+                                    }}
+                                    disabled={isLoading}
+                                >
+                                    {FOUNDER_ROLES.map((role) => (
+                                        <option key={role} value={role}>
+                                            {role}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                             </div>
                         </div>
 
