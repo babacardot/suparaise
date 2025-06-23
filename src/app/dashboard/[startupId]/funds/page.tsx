@@ -4,7 +4,7 @@ import FundsTable from '@/components/dashboard/funds-table'
 import type { Metadata } from 'next'
 
 export async function generateMetadata({
-  params
+  params,
 }: {
   params: Promise<{ startupId: string }>
 }): Promise<Metadata> {

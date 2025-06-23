@@ -48,11 +48,11 @@ export const SUBSCRIPTION_PLANS = {
     interval: 'year' as const,
     features: [
       'Unlimited AI agent runs',
-      'Priority support', 
+      'Priority support',
       'Advanced targeting',
       'Custom instructions',
       'Analytics dashboard',
       '2 months free',
     ],
   },
-} 
+}

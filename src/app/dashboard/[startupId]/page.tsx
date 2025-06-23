@@ -7,7 +7,7 @@ interface DashboardPageProps {
 }
 
 export async function generateMetadata({
-  params
+  params,
 }: {
   params: Promise<{ startupId: string }>
 }): Promise<Metadata> {

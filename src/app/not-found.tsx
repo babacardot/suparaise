@@ -33,7 +33,8 @@ export default function NotFound() {
         {/* Help text */}
         <div className="mt-8 sm:mt-12 p-4 sm:p-6 mb-6 rounded-sm bg-muted/50 border">
           <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Looks like this page got lost in the fundraising process. If you think this is an error, please{' '}
+            Looks like this page got lost in the fundraising process. If you
+            think this is an error, please{' '}
             <a
               href="mailto:support@suparaise.com"
               className="text-primary hover:underline font-medium"
@@ -59,9 +60,7 @@ export default function NotFound() {
             size="lg"
             className="w-full sm:w-auto bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-sm px-4"
           >
-            <Link href="/dashboard">
-              Dashboard
-            </Link>
+            <Link href="/dashboard">Dashboard</Link>
           </Button>
         </div>
       </div>

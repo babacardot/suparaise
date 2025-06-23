@@ -173,119 +173,119 @@ const FileUploadComponent: React.FC<
   description,
   label,
 }) => {
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-    useEffect(() => {
-      if ((type === 'logo' || type === 'introVideo') && file) {
-        const url = URL.createObjectURL(file)
-        setPreviewUrl(url)
+  useEffect(() => {
+    if ((type === 'logo' || type === 'introVideo') && file) {
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
 
-        return () => {
-          URL.revokeObjectURL(url)
-          setPreviewUrl(null)
-        }
-      } else {
+      return () => {
+        URL.revokeObjectURL(url)
         setPreviewUrl(null)
       }
-    }, [file, type])
+    } else {
+      setPreviewUrl(null)
+    }
+  }, [file, type])
 
-    return (
-      <div className="space-y-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={(e) => {
-            const selectedFile = e.target.files?.[0]
-            if (selectedFile) onUpload(type, selectedFile)
-          }}
-          disabled={uploadStatus === 'uploading'}
-        />
-        {!file && (
-          <div className="flex flex-col space-y-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => inputRef.current?.click()}
-              disabled={uploadStatus === 'uploading'}
-              className="w-full"
-            >
-              {uploadStatus === 'uploading' ? (
-                <Spinner className="mr-2 h-3 w-3" />
+  return (
+    <div className="space-y-2">
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => {
+          const selectedFile = e.target.files?.[0]
+          if (selectedFile) onUpload(type, selectedFile)
+        }}
+        disabled={uploadStatus === 'uploading'}
+      />
+      {!file && (
+        <div className="flex flex-col space-y-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploadStatus === 'uploading'}
+            className="w-full"
+          >
+            {uploadStatus === 'uploading' ? (
+              <Spinner className="mr-2 h-3 w-3" />
+            ) : (
+              <FileUp className="mr-2 h-4 w-4" />
+            )}
+            {uploadStatus === 'uploading' ? 'Uploading...' : label}
+          </Button>
+          <p className="text-xs text-muted-foreground text-right">
+            {description} (max {maxSize})
+          </p>
+        </div>
+      )}
+      {file && (
+        <div className="border rounded-sm p-4 relative">
+          <div className="flex items-center space-x-3">
+            {previewUrl ? (
+              type === 'logo' ? (
+                <Image
+                  src={previewUrl}
+                  alt="Logo preview"
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-sm object-contain"
+                />
               ) : (
-                <FileUp className="mr-2 h-4 w-4" />
-              )}
-              {uploadStatus === 'uploading' ? 'Uploading...' : label}
-            </Button>
-            <p className="text-xs text-muted-foreground text-right">
-              {description} (max {maxSize})
-            </p>
-          </div>
-        )}
-        {file && (
-          <div className="border rounded-sm p-4 relative">
-            <div className="flex items-center space-x-3">
-              {previewUrl ? (
-                type === 'logo' ? (
-                  <Image
-                    src={previewUrl}
-                    alt="Logo preview"
-                    width={40}
-                    height={40}
-                    className="h-10 w-10 rounded-sm object-contain"
-                  />
-                ) : (
-                  <video
-                    src={previewUrl}
-                    muted
-                    playsInline
-                    className="h-12 w-16 rounded-sm object-contain"
-                  />
-                )
-              ) : (
-                <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
-                  <FileIcon className="h-6 w-6" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {uploadStatus === 'uploading'
-                    ? `${formatFileSize(
+                <video
+                  src={previewUrl}
+                  muted
+                  playsInline
+                  className="h-12 w-16 rounded-sm object-contain"
+                />
+              )
+            ) : (
+              <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
+                <FileIcon className="h-6 w-6" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{file.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {uploadStatus === 'uploading'
+                  ? `${formatFileSize(
                       (uploadProgress / 100) * file.size,
                     )} of ${formatFileSize(file.size)}`
-                    : formatFileSize(file.size)}
-                </p>
-              </div>
+                  : formatFileSize(file.size)}
+              </p>
             </div>
-            {uploadStatus === 'uploading' && (
-              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
-                <div
-                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            )}
-            {uploadStatus === 'failed' && (
-              <button
-                onClick={() => onUpload(type, file)}
-                className="mt-2 text-sm text-red-500 hover:underline"
-              >
-                Try again
-              </button>
-            )}
-            <button
-              onClick={onRemove}
-              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
-        )}
-      </div>
-    )
-  }
+          {uploadStatus === 'uploading' && (
+            <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+              <div
+                className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          )}
+          {uploadStatus === 'failed' && (
+            <button
+              onClick={() => onUpload(type, file)}
+              className="mt-2 text-sm text-red-500 hover:underline"
+            >
+              Try again
+            </button>
+          )}
+          <button
+            onClick={onRemove}
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const MultiSelectCountries: React.FC<{
   selected: string[]
@@ -311,8 +311,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -719,18 +720,25 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               type="number"
               value={startup.foundedYear || ''}
               onChange={(e) =>
-                setStartup({ ...startup, foundedYear: parseInt(e.target.value) || 0 })
+                setStartup({
+                  ...startup,
+                  foundedYear: parseInt(e.target.value) || 0,
+                })
               }
               placeholder="2023"
               min="1900"
               max={new Date().getFullYear()}
               required
               className={
-                fieldErrors.foundedYear ? 'border-red-500 focus:border-red-500' : ''
+                fieldErrors.foundedYear
+                  ? 'border-red-500 focus:border-red-500'
+                  : ''
               }
             />
             {fieldErrors.foundedYear && (
-              <p className="text-sm text-red-600 mt-1">{fieldErrors.foundedYear}</p>
+              <p className="text-sm text-red-600 mt-1">
+                {fieldErrors.foundedYear}
+              </p>
             )}
           </div>
           <div className="space-y-2">
@@ -745,26 +753,29 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               autoComplete="address-level2"
               required
               className={
-                fieldErrors.location ? 'border-red-500 focus:border-red-500' : ''
+                fieldErrors.location
+                  ? 'border-red-500 focus:border-red-500'
+                  : ''
               }
             />
             {fieldErrors.location && (
-              <p className="text-sm text-red-600 mt-1">{fieldErrors.location}</p>
+              <p className="text-sm text-red-600 mt-1">
+                {fieldErrors.location}
+              </p>
             )}
           </div>
         </div>
-
-
 
         <div className="space-y-2">
           <Label htmlFor="industry">Industry *</Label>
           <div className="relative">
             <select
               id="industry"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
-                ? 'border-red-500 focus:border-red-500'
-                : 'border-input'
-                }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
+                fieldErrors.industry
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-input'
+              }`}
               value={startup.industry || ''}
               onChange={(e) =>
                 setStartup({
@@ -1019,11 +1030,15 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             }
             placeholder="Subscription, Commission, Freemium..."
             className={
-              fieldErrors.revenueModel ? 'border-red-500 focus:border-red-500' : ''
+              fieldErrors.revenueModel
+                ? 'border-red-500 focus:border-red-500'
+                : ''
             }
           />
           {fieldErrors.revenueModel && (
-            <p className="text-sm text-red-600 mt-1">{fieldErrors.revenueModel}</p>
+            <p className="text-sm text-red-600 mt-1">
+              {fieldErrors.revenueModel}
+            </p>
           )}
         </div>
 
@@ -1631,7 +1646,10 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               </div>
             </div>
 
-            {(startup.tractionSummary || startup.marketSummary || startup.keyCustomers || startup.competitors) && (
+            {(startup.tractionSummary ||
+              startup.marketSummary ||
+              startup.keyCustomers ||
+              startup.competitors) && (
               <div className="pt-2 border-t space-y-2">
                 {startup.tractionSummary && (
                   <div>

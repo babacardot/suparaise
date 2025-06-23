@@ -227,36 +227,41 @@ export default function FundsTable({ targets }: FundsTableProps) {
                               {stage}
                             </Badge>
                           ))}
-                          {target.stage_focus && target.stage_focus.length > 2 && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
-                                  +{target.stage_focus.length - 2}
-                                </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <div className="space-y-1">
-                                  {target.stage_focus.slice(2).map((stage) => (
-                                    <div key={stage} className="text-xs">
-                                      {stage}
-                                    </div>
-                                  ))}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
+                          {target.stage_focus &&
+                            target.stage_focus.length > 2 && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
+                                    +{target.stage_focus.length - 2}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="space-y-1">
+                                    {target.stage_focus
+                                      .slice(2)
+                                      .map((stage) => (
+                                        <div key={stage} className="text-xs">
+                                          {stage}
+                                        </div>
+                                      ))}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                         </div>
                       </TableCell>
                       <TableCell className="p-2">
                         <div className="flex flex-wrap gap-1">
-                          {target.industry_focus?.slice(0, 2).map((industry) => (
-                            <Badge
-                              key={industry}
-                              className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs"
-                            >
-                              {industry}
-                            </Badge>
-                          ))}
+                          {target.industry_focus
+                            ?.slice(0, 2)
+                            .map((industry) => (
+                              <Badge
+                                key={industry}
+                                className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs"
+                              >
+                                {industry}
+                              </Badge>
+                            ))}
                           {target.industry_focus &&
                             target.industry_focus.length > 2 && (
                               <Tooltip>
@@ -293,18 +298,20 @@ export default function FundsTable({ targets }: FundsTableProps) {
                       </TableCell>
                       <TableCell className="p-2">
                         <div className="flex flex-wrap gap-1">
-                          {target.required_documents?.slice(0, 2).map((docType) => {
-                            const docBadge = getDocumentBadge(docType)
-                            return (
-                              <Badge
-                                key={docType}
-                                className={`rounded-sm text-xs ${docBadge.color}`}
-                              >
-                                {docBadge.icon}
-                                {docBadge.label}
-                              </Badge>
-                            )
-                          })}
+                          {target.required_documents
+                            ?.slice(0, 2)
+                            .map((docType) => {
+                              const docBadge = getDocumentBadge(docType)
+                              return (
+                                <Badge
+                                  key={docType}
+                                  className={`rounded-sm text-xs ${docBadge.color}`}
+                                >
+                                  {docBadge.icon}
+                                  {docBadge.label}
+                                </Badge>
+                              )
+                            })}
                           {target.required_documents &&
                             target.required_documents.length > 2 && (
                               <Tooltip>
@@ -318,7 +325,8 @@ export default function FundsTable({ targets }: FundsTableProps) {
                                     {target.required_documents
                                       .slice(2)
                                       .map((docType) => {
-                                        const docBadge = getDocumentBadge(docType)
+                                        const docBadge =
+                                          getDocumentBadge(docType)
                                         return (
                                           <div
                                             key={docType}
@@ -368,7 +376,9 @@ export default function FundsTable({ targets }: FundsTableProps) {
                                 animationData={animations.takeoff}
                                 size={14}
                                 className="mr-1"
-                                isHovered={hoveredButton === `apply-${target.id}`}
+                                isHovered={
+                                  hoveredButton === `apply-${target.id}`
+                                }
                               />
                               Apply
                             </Button>
@@ -390,7 +400,9 @@ export default function FundsTable({ targets }: FundsTableProps) {
                                   animationData={animations.mailopen}
                                   size={14}
                                   className="mr-1"
-                                  isHovered={hoveredButton === `email-${target.id}`}
+                                  isHovered={
+                                    hoveredButton === `email-${target.id}`
+                                  }
                                 />
                                 Send Email
                               </Button>
@@ -411,7 +423,9 @@ export default function FundsTable({ targets }: FundsTableProps) {
                                 animationData={animations.info}
                                 size={14}
                                 className="mr-1"
-                                isHovered={hoveredButton === `learn-${target.id}`}
+                                isHovered={
+                                  hoveredButton === `learn-${target.id}`
+                                }
                               />
                               Learn More
                             </Button>

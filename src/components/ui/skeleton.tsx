@@ -1,41 +1,41 @@
-import type React from "react";
-import { useEffect } from "react";
-import { useTheme } from "next-themes";
-import { cn } from "@/lib/actions/utils";
+import type React from 'react'
+import { useEffect } from 'react'
+import { useTheme } from 'next-themes'
+import { cn } from '@/lib/actions/utils'
 
 interface SkeletonProps {
-  className?: string;
-  gridSize?: number; // Size of grid cells in pixels
+  className?: string
+  gridSize?: number // Size of grid cells in pixels
 }
 
 export function Skeleton({
-  className = "",
+  className = '',
   gridSize = 16, // Default grid size based on the image
 }: SkeletonProps) {
-  const { theme } = useTheme(); // Get the current theme
+  const { theme } = useTheme() // Get the current theme
 
   // Determine colors based on theme (making grid less visible)
   const isDark =
-    theme === "dark" ||
-    (theme === "system" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
-  const bgColor = isDark ? "hsl(210 4% 15%)" : "#f8f9fa";
+    theme === 'dark' ||
+    (theme === 'system' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const bgColor = isDark ? 'hsl(210 4% 15%)' : '#f8f9fa'
   const gridColor = isDark
-    ? "rgba(80, 80, 80, 0.2)"
-    : "rgba(230, 230, 230, 0.4)"; // Less visible grid
+    ? 'rgba(80, 80, 80, 0.2)'
+    : 'rgba(230, 230, 230, 0.4)' // Less visible grid
   const overlayColor = isDark
-    ? "rgba(60, 60, 60, 0.5)"
-    : "rgba(255, 255, 255, 0.7)"; // Subtle overlay
+    ? 'rgba(60, 60, 60, 0.5)'
+    : 'rgba(255, 255, 255, 0.7)' // Subtle overlay
 
   useEffect(() => {
     // Inject necessary styles dynamically
-    const styleId = "skeleton-dynamic-styles";
-    let styleElement = document.getElementById(styleId);
+    const styleId = 'skeleton-dynamic-styles'
+    let styleElement = document.getElementById(styleId)
 
     if (!styleElement) {
-      styleElement = document.createElement("style");
-      styleElement.id = styleId;
-      document.head.appendChild(styleElement);
+      styleElement = document.createElement('style')
+      styleElement.id = styleId
+      document.head.appendChild(styleElement)
     }
 
     const style = `
@@ -64,39 +64,39 @@ export function Skeleton({
       mask-image: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.3) 100%);
       -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.3) 100%);
     }
-    `;
-    styleElement.textContent = style;
+    `
+    styleElement.textContent = style
 
     // No cleanup needed for static styles like keyframes
-  }, []); // Run only once to inject static parts
+  }, []) // Run only once to inject static parts
 
   return (
     <div
-      className={cn("skeleton", className)}
+      className={cn('skeleton', className)}
       style={{
-        position: "relative",
-        minHeight: "1rem",
+        position: 'relative',
+        minHeight: '1rem',
         backgroundColor: bgColor,
-        borderRadius: "0.325rem",
-        overflow: "hidden",
-        animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        borderRadius: '0.325rem',
+        overflow: 'hidden',
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       }}
     >
       <div
         className="skeleton-grid"
         style={
           {
-            position: "absolute",
+            position: 'absolute',
             top: 0,
             left: 0,
-            width: "100%",
-            height: "100%",
-            "--grid-size": `${gridSize}px`,
-            "--grid-color": gridColor,
-            "--overlay-color": overlayColor,
+            width: '100%',
+            height: '100%',
+            '--grid-size': `${gridSize}px`,
+            '--grid-color': gridColor,
+            '--overlay-color': overlayColor,
           } as React.CSSProperties
         }
       />
     </div>
-  );
+  )
 }

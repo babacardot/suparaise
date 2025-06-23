@@ -192,10 +192,11 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                         playClickSound()
                         setSentiment(key)
                       }}
-                      className={`text-lg w-10 h-10 rounded-sm transition-all duration-200 hover:bg-background border ${sentiment === key
-                        ? 'bg-background border-border shadow-sm scale-105'
-                        : 'border-transparent hover:border-border/30'
-                        }`}
+                      className={`text-lg w-10 h-10 rounded-sm transition-all duration-200 hover:bg-background border ${
+                        sentiment === key
+                          ? 'bg-background border-border shadow-sm scale-105'
+                          : 'border-transparent hover:border-border/30'
+                      }`}
                     >
                       {emojis[key]}
                     </button>

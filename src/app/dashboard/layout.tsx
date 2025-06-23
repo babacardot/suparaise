@@ -64,19 +64,28 @@ export default function DashboardLayout({
       if (pathname?.includes('/settings/company')) {
         return [
           { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Settings', href: `/dashboard/${currentStartupId}/settings` },
+          {
+            label: 'Settings',
+            href: `/dashboard/${currentStartupId}/settings`,
+          },
           { label: 'Company', isCurrentPage: true },
         ]
       } else if (pathname?.includes('/settings/agent')) {
         return [
           { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Settings', href: `/dashboard/${currentStartupId}/settings` },
+          {
+            label: 'Settings',
+            href: `/dashboard/${currentStartupId}/settings`,
+          },
           { label: 'Agents', isCurrentPage: true },
         ]
       } else {
         return [
           { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Settings', href: `/dashboard/${currentStartupId}/settings` },
+          {
+            label: 'Settings',
+            href: `/dashboard/${currentStartupId}/settings`,
+          },
           { label: 'Profile', isCurrentPage: true },
         ]
       }
@@ -152,12 +161,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-              name: user.user_metadata?.full_name || user.email || '',
-              email: user.email || '',
-              avatar: user.user_metadata?.avatar_url,
-              startupName: currentStartup?.name || undefined,
-              startupLogo: currentStartup?.logo_url || undefined,
-            }
+                name: user.user_metadata?.full_name || user.email || '',
+                email: user.email || '',
+                avatar: user.user_metadata?.avatar_url,
+                startupName: currentStartup?.name || undefined,
+                startupLogo: currentStartup?.logo_url || undefined,
+              }
             : null
         }
         startups={startups}

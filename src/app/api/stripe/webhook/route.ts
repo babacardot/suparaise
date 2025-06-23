@@ -5,7 +5,7 @@ import type Stripe from 'stripe'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
 export async function POST(req: NextRequest) {
@@ -15,10 +15,17 @@ export async function POST(req: NextRequest) {
   let event
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(
+      body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!,
+    )
   } catch (err) {
     console.error('Webhook signature verification failed.', err)
-    return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Webhook signature verification failed' },
+      { status: 400 },
+    )
   }
 
   // Handle the event
@@ -40,13 +47,16 @@ export async function POST(req: NextRequest) {
           p_subscription_id: subscriptionId,
           p_status: status,
           p_current_period_end: currentPeriodEnd.toISOString(),
-          p_is_subscribed: status === 'active'
-        }
+          p_is_subscribed: status === 'active',
+        },
       )
 
       if (error || !result?.success) {
         console.error('Error updating subscription:', error || result?.error)
-        return NextResponse.json({ error: 'Failed to update subscription' }, { status: 500 })
+        return NextResponse.json(
+          { error: 'Failed to update subscription' },
+          { status: 500 },
+        )
       }
 
       break
@@ -60,13 +70,16 @@ export async function POST(req: NextRequest) {
       const { data: result, error } = await supabase.rpc(
         'cancel_subscription',
         {
-          p_stripe_customer_id: customerId
-        }
+          p_stripe_customer_id: customerId,
+        },
       )
 
       if (error || !result?.success) {
         console.error('Error canceling subscription:', error || result?.error)
-        return NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 })
+        return NextResponse.json(
+          { error: 'Failed to cancel subscription' },
+          { status: 500 },
+        )
       }
 
       break
@@ -80,13 +93,16 @@ export async function POST(req: NextRequest) {
       const { data: result, error } = await supabase.rpc(
         'handle_payment_success',
         {
-          p_stripe_customer_id: customerId
-        }
+          p_stripe_customer_id: customerId,
+        },
       )
 
       if (error || !result?.success) {
         console.error('Error updating payment success:', error || result?.error)
-        return NextResponse.json({ error: 'Failed to update payment success' }, { status: 500 })
+        return NextResponse.json(
+          { error: 'Failed to update payment success' },
+          { status: 500 },
+        )
       }
 
       break
@@ -100,13 +116,16 @@ export async function POST(req: NextRequest) {
       const { data: result, error } = await supabase.rpc(
         'handle_payment_failure',
         {
-          p_stripe_customer_id: customerId
-        }
+          p_stripe_customer_id: customerId,
+        },
       )
 
       if (error || !result?.success) {
         console.error('Error updating payment failure:', error || result?.error)
-        return NextResponse.json({ error: 'Failed to update payment failure' }, { status: 500 })
+        return NextResponse.json(
+          { error: 'Failed to update payment failure' },
+          { status: 500 },
+        )
       }
 
       break
@@ -117,4 +136,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true })
-} 
+}

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 
 export async function generateMetadata({
-  params
+  params,
 }: {
   params: Promise<{ startupId: string }>
 }): Promise<Metadata> {
@@ -35,7 +35,9 @@ export default async function HomePage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight mt-1.5">Welcome back</h1>
+        <h1 className="text-3xl font-bold tracking-tight mt-1.5">
+          Welcome back
+        </h1>
       </div>
     </div>
   )

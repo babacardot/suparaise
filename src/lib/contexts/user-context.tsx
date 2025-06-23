@@ -87,7 +87,9 @@ export function UserProvider({ children }: UserProviderProps) {
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
 
   // Subscription state
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null)
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(
+    null,
+  )
   const [subscriptionLoading, setSubscriptionLoading] = useState(true)
 
   const router = useRouter()
@@ -147,13 +149,18 @@ export function UserProvider({ children }: UserProviderProps) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('is_subscribed, subscription_status, subscription_current_period_end, stripe_customer_id')
+        .select(
+          'is_subscribed, subscription_status, subscription_current_period_end, stripe_customer_id',
+        )
         .eq('id', user.id)
         .single()
 
       if (error) {
         // If the columns don't exist yet, set default values
-        if (error.message?.includes('column') && error.message?.includes('does not exist')) {
+        if (
+          error.message?.includes('column') &&
+          error.message?.includes('does not exist')
+        ) {
           setSubscription({
             is_subscribed: false,
             subscription_status: null,
