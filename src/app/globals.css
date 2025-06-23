@@ -117,8 +117,16 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    overflow-x: hidden;
+  }
+  
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    width: 100%;
+    min-width: 320px;
   }
 
   /* Remove focus outline globally */
@@ -127,4 +135,20 @@
     outline: none !important;
     box-shadow: none !important;
   }
+}
+
+/* Toast Progress Bar Animation */
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.progress-animation {
+  animation: progress 2000ms linear forwards;
+  transform-origin: left;
+  will-change: transform;
 }

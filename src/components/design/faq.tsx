@@ -46,7 +46,7 @@ interface FaqSectionProps extends React.HTMLAttributes<HTMLElement> {
 const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
   ({ className, contactInfo, ...props }, ref) => {
     return (
-      <section ref={ref} className={cn('py-32', className)} {...props}>
+      <section ref={ref} className={cn('pt-20 pb-32', className)} {...props}>
         <div className="mx-auto max-w-5xl px-6">
           <div className="flex flex-col items-center gap-6 text-center">
             <div className="flex justify-center">
@@ -132,12 +132,13 @@ const FaqItem = React.forwardRef<
       <Button
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-4 h-auto justify-between hover:bg-transparent"
+        className="w-full px-6 py-6 h-auto justify-between hover:bg-transparent items-start flex-wrap sm:flex-nowrap"
       >
         <h3
           className={cn(
-            'text-base font-medium transition-colors duration-200 text-left',
-            'text-gray-600 dark:text-gray-300',
+            'text-sm sm:text-base font-medium transition-colors duration-200 text-left leading-relaxed',
+            'text-gray-600 dark:text-white',
+            'break-words whitespace-normal word-break hyphens-auto flex-1 pr-3',
             isOpen && 'text-gray-900 dark:text-white',
           )}
         >
@@ -150,7 +151,7 @@ const FaqItem = React.forwardRef<
           }}
           transition={{ duration: 0.2 }}
           className={cn(
-            'p-0.5 rounded-full flex-shrink-0',
+            'p-0.5 rounded-full flex-shrink-0 mt-1',
             'transition-colors duration-200',
             isOpen ? 'text-primary' : 'text-muted-foreground',
           )}

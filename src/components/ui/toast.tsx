@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from "react";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import * as ToastPrimitives from "@radix-ui/react-toast";
@@ -51,7 +53,7 @@ const toastVariants = cva(
 
 interface BaseToastProps
   extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
-    VariantProps<typeof toastVariants> {
+  VariantProps<typeof toastVariants> {
   variant?: ToastVariant;
 }
 
@@ -170,17 +172,17 @@ const ToastDescription = React.forwardRef<
 
     switch (variant) {
       case "default":
-        return "text-orange-300/80 dark:text-orange-300/80";
+        return "text-orange-600/90 dark:text-orange-400/90";
       case "destructive":
-        return "text-red-300/80 dark:text-red-300/80";
+        return "text-red-600/90 dark:text-red-400/90";
       case "info":
-        return "text-blue-300/80 dark:text-blue-300/80";
+        return "text-blue-600/90 dark:text-blue-400/90";
       case "success":
-        return "text-green-300/80 dark:text-green-300/80";
+        return "text-green-600/90 dark:text-green-400/90";
       case "api":
-        return "text-cyan-300/80 dark:text-cyan-300/80";
+        return "text-cyan-600/90 dark:text-cyan-400/90";
       default:
-        return "text-orange-300/80 dark:text-orange-300/80";
+        return "text-orange-600/90 dark:text-orange-400/90";
     }
   };
 

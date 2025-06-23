@@ -1,6 +1,6 @@
-// Inspired by react-hot-toast library
-import * as React from "react";
+'use client'
 
+import * as React from "react";
 import type {
   ToastActionElement,
   ToastProps,
@@ -9,7 +9,7 @@ import type {
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
-const DEFAULT_TOAST_DURATION = 2000; // Add this to ensure consistency
+const DEFAULT_TOAST_DURATION = 2000;
 
 type ToasterToast = ToastProps & {
   id: string;

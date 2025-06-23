@@ -3,8 +3,7 @@
 import React from 'react'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useUser } from '@/lib/contexts/user-context'
 import { useTheme } from 'next-themes'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -34,8 +33,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const router = useRouter()
-  const supabase = createSupabaseBrowserClient()
+  const { signOut } = useUser()
   const { theme, setTheme } = useTheme()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
 
@@ -49,9 +47,7 @@ export function NavUser({
   }
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    await signOut()
   }
 
   const toggleTheme = () => {

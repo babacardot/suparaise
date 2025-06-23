@@ -3,6 +3,33 @@ CREATE TYPE submission_type AS ENUM ('form', 'email', 'other');
 CREATE TYPE submission_status AS ENUM ('pending', 'in_progress', 'completed', 'failed');
 CREATE TYPE form_complexity AS ENUM ('simple', 'standard', 'comprehensive');
 CREATE TYPE question_count_range AS ENUM ('1-5', '6-10', '11-20', '21+');
+CREATE TYPE required_document_type AS ENUM (
+    'pitch_deck', 
+    'video', 
+    'financial_projections', 
+    'business_plan', 
+    'traction_data', 
+    'legal_documents'
+);
+CREATE TYPE region_type AS ENUM (
+    'Global',
+    'North America', 
+    'South America', 
+    'LATAM',
+    'Europe', 
+    'Western Europe',
+    'Eastern Europe',
+    'Continental Europe',
+    'Middle East', 
+    'Africa', 
+    'Asia', 
+    'East Asia',
+    'South Asia',
+    'South East Asia', 
+    'Oceania',
+    'EMEA',
+    'Emerging Markets'
+);
 CREATE TYPE founder_role AS ENUM (
     'Founder', 
     'Co-founder', 
@@ -90,11 +117,10 @@ CREATE TABLE targets (
     submission_type submission_type DEFAULT 'form',
     stage_focus investment_stage[],
     industry_focus industry_type[],
-    region_focus TEXT[],
+    region_focus region_type[],
     form_complexity form_complexity,
     question_count_range question_count_range,
-    required_documents TEXT[],
-    requires_video BOOLEAN DEFAULT FALSE,
+    required_documents required_document_type[],
     notes TEXT, -- For special instructions
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -254,6 +280,7 @@ CREATE INDEX IF NOT EXISTS idx_founders_email ON founders(email) WHERE email IS 
 CREATE INDEX IF NOT EXISTS idx_targets_stage_focus ON targets USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_industry_focus ON targets USING GIN(industry_focus) WHERE industry_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_region_focus ON targets USING GIN(region_focus) WHERE region_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_targets_required_documents ON targets USING GIN(required_documents) WHERE required_documents IS NOT NULL;
 
 -- --------------------------------------------------
 -- Row Level Security (RLS) Policies

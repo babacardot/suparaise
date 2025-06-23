@@ -19,6 +19,7 @@ export function NavSecondary({
     title: string
     url: string
     animation: object
+    onClick?: () => void
   }[]
   onItemClick?: () => void
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
@@ -33,15 +34,17 @@ export function NavSecondary({
 
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  size="sm"
-                  tooltip={item.title}
-                  onClick={onItemClick}
-                  onMouseEnter={() => setHoveredItem(item.title)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <Link href={item.url}>
+                {item.onClick ? (
+                  <SidebarMenuButton
+                    size="sm"
+                    tooltip={item.title}
+                    onClick={() => {
+                      onItemClick?.()
+                      item.onClick?.()
+                    }}
+                    onMouseEnter={() => setHoveredItem(item.title)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
                     <LottieIcon
                       animationData={item.animation}
                       size={14}
@@ -51,8 +54,29 @@ export function NavSecondary({
                       isHovered={isHovered}
                     />
                     <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
+                  </SidebarMenuButton>
+                ) : (
+                  <SidebarMenuButton
+                    asChild
+                    size="sm"
+                    tooltip={item.title}
+                    onClick={onItemClick}
+                    onMouseEnter={() => setHoveredItem(item.title)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
+                    <Link href={item.url}>
+                      <LottieIcon
+                        animationData={item.animation}
+                        size={14}
+                        loop={false}
+                        autoplay={false}
+                        initialFrame={0}
+                        isHovered={isHovered}
+                      />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                )}
               </SidebarMenuItem>
             )
           })}

@@ -1,27 +1,32 @@
 'use client'
 
 import { SignupForm } from '@/components/auth/signup-form'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { useUser } from '@/lib/contexts/user-context'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import Spinner from '@/components/ui/spinner'
 
 export default function SignupPage() {
   const router = useRouter()
+  const { user, loading } = useUser()
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createSupabaseBrowserClient()
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (session) {
-        router.push('/dashboard')
-      }
+    // If user is already logged in, redirect to dashboard
+    if (!loading && user) {
+      router.push('/dashboard')
     }
+  }, [user, loading, router])
 
-    checkAuth()
-  }, [router])
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-20 pt-20">
+        <div className="text-center">
+          <Spinner />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-start bg-muted p-6 md:p-20 pt-20">

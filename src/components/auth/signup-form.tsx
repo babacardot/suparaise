@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { useUser } from '@/lib/contexts/user-context'
 import { getRedirectURL } from '@/lib/utils/auth'
 import { useState } from 'react'
 import Spinner from '../ui/spinner'
@@ -21,11 +21,12 @@ export function SignupForm({
   const [isSignedUp, setIsSignedUp] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const { supabase } = useUser()
+
   const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
     setIsSubmitting(true)
-    const supabase = createSupabaseBrowserClient()
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -62,7 +63,7 @@ export function SignupForm({
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card className="overflow-hidden rounded-sm w-[450px] mx-auto">
+      <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
         <CardContent className="p-0">
           <form onSubmit={handleSignup} className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
@@ -117,7 +118,6 @@ export function SignupForm({
                   onClick={async () => {
                     setIsSubmitting(true)
                     try {
-                      const supabase = createSupabaseBrowserClient()
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'github',
                         options: {
@@ -152,7 +152,6 @@ export function SignupForm({
                   onClick={async () => {
                     setIsSubmitting(true)
                     try {
-                      const supabase = createSupabaseBrowserClient()
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'google',
                         options: {

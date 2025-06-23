@@ -5,19 +5,36 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+  SheetClose,
+} from '@/components/ui/sheet'
 import { cn } from '@/lib/actions/utils'
 import { useScroll } from 'motion/react'
 import { useTheme } from 'next-themes'
 
-const menuItems = [
+interface MenuItem {
+  name: string
+  href: string
+  isGreen?: boolean
+}
+
+const menuItems: MenuItem[] = [
   { name: 'Features', href: '#features' },
-  { name: 'How it Works', href: '#how-it-works' },
+  { name: 'How it works', href: '#how-it-works' },
   { name: 'Pricing', href: '#pricing' },
   { name: 'About', href: '#about' },
 ]
 
+const authItems: MenuItem[] = [
+  { name: 'Login', href: '/login', isGreen: true },
+  { name: 'Sign up', href: '/signup' },
+]
+
 export const Header = () => {
-  const [menuState, setMenuState] = React.useState(false)
   const [scrolled, setScrolled] = React.useState(false)
 
   const { scrollYProgress } = useScroll()
@@ -42,9 +59,8 @@ export const Header = () => {
   return (
     <header>
       <nav
-        data-state={menuState && 'active'}
         className={cn(
-          'group fixed z-20 w-full border-b transition-colors duration-150',
+          'fixed z-20 w-full border-b transition-colors duration-150',
           scrolled && 'bg-background/50 backdrop-blur-3xl',
         )}
       >
@@ -59,15 +75,7 @@ export const Header = () => {
                 <Logo />
               </Link>
 
-              <button
-                onClick={() => setMenuState(!menuState)}
-                aria-label={menuState == true ? 'Close Menu' : 'Open Menu'}
-                className="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden"
-              >
-                <Menu className="group-data-[state=active]:rotate-180 group-data-[state=active]:scale-0 group-data-[state=active]:opacity-0 m-auto size-6 duration-200" />
-                <X className="group-data-[state=active]:rotate-0 group-data-[state=active]:scale-100 group-data-[state=active]:opacity-100 absolute inset-0 m-auto size-6 -rotate-180 scale-0 opacity-0 duration-200" />
-              </button>
-
+              {/* Desktop Menu */}
               <div className="hidden lg:block">
                 <ul className="flex gap-8 text-sm">
                   {menuItems.map((item, index) => (
@@ -82,46 +90,94 @@ export const Header = () => {
                   ))}
                 </ul>
               </div>
+
+              {/* Mobile Menu */}
+              <div className="lg:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative z-20 -m-1 -mr-2 cursor-pointer p-2 flex items-center justify-center"
+                    >
+                      <Menu className="size-7" />
+                      <span className="sr-only">Toggle menu</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="top"
+                    className="bg-card text-foreground h-screen w-screen p-0 duration-300 flex flex-col border-none"
+                  >
+                    <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+
+                    {/* Close button positioned exactly where menu icon was */}
+                    <div className="absolute top-3 right-6 z-50 lg:top-4">
+                      <SheetClose asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="relative z-20 -m-1 -mr-2 cursor-pointer p-2 flex items-center justify-center text-foreground hover:bg-muted"
+                        >
+                          <X className="size-7" />
+                          <span className="sr-only">Close menu</span>
+                        </Button>
+                      </SheetClose>
+                    </div>
+
+                    {/* Menu content */}
+                    <div className="flex flex-col items-start justify-start px-6 pt-20 pb-6 h-full">
+                      {/* Navigation items */}
+                      <div className="flex flex-col gap-8 text-left">
+                        {[...menuItems, ...authItems].map((item, index) => (
+                          <SheetClose asChild key={index}>
+                            <Link
+                              href={item.href}
+                              className={`text-3xl font-semibold transition-colors duration-200 ${item.isGreen
+                                ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
+                                : 'text-foreground hover:text-muted-foreground'
+                                }`}
+                            >
+                              {item.name}
+                            </Link>
+                          </SheetClose>
+                        ))}
+                      </div>
+
+                      {/* Quote */}
+                      <div className="mt-16">
+                        <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+                          Our AI agents automatically fill out application forms and send personalized outreach to hundreds of relevant funds, while you focus on what matters: growing your business.
+                        </p>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
             </div>
 
-            <div className="bg-background group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-sm border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
-              <div className="lg:hidden">
-                <ul className="space-y-6 text-base">
-                  {menuItems.map((item, index) => (
-                    <li key={index}>
-                      <Link
-                        href={item.href}
-                        className="text-muted-foreground hover:text-accent-foreground block duration-150"
-                      >
-                        <span>{item.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                <Button
-                  asChild
-                  variant="outline"
-                  size="default"
-                  onClick={playClickSound}
-                  className="rounded-sm px-4 text-sm"
-                >
-                  <Link href="/login" prefetch={true}>
-                    <span>Login</span>
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="default"
-                  onClick={playClickSound}
-                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
-                >
-                  <Link href="/signup" prefetch={true}>
-                    <span>Sign up</span>
-                  </Link>
-                </Button>
-              </div>
+            {/* Desktop Auth Buttons */}
+            <div className="hidden lg:flex lg:gap-2 lg:space-y-0">
+              <Button
+                asChild
+                variant="outline"
+                size="default"
+                onClick={playClickSound}
+                className="rounded-sm px-4 text-sm h-[37px]"
+              >
+                <Link href="/login" prefetch={true}>
+                  <span>Login</span>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="default"
+                onClick={playClickSound}
+                className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
+              >
+                <Link href="/signup" prefetch={true}>
+                  <span>Sign up</span>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

@@ -17,6 +17,11 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('intro_videos', 'intro_videos', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- 4. Create the 'support_request_images' bucket for support request attachments
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('support_request_images', 'support_request_images', true)
+ON CONFLICT (id) DO NOTHING;
+
 
 -- --------------------------------------------------
 -- Storage Security Policies
@@ -73,4 +78,20 @@ USING (bucket_id = 'intro_videos' AND auth.role() = 'authenticated');
 
 CREATE POLICY "Allow authenticated users to delete their own intro_videos"
 ON storage.objects FOR DELETE
-USING (bucket_id = 'intro_videos' AND auth.role() = 'authenticated'); 
+USING (bucket_id = 'intro_videos' AND auth.role() = 'authenticated');
+
+
+-- Support Request Images: Users can only access their own images
+CREATE POLICY "Users can upload support request images"
+ON storage.objects FOR INSERT
+WITH CHECK (
+    bucket_id = 'support_request_images' 
+    AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+CREATE POLICY "Users can view support request images"
+ON storage.objects FOR SELECT
+USING (
+    bucket_id = 'support_request_images' 
+    AND auth.uid()::text = (storage.foldername(name))[1]
+); 

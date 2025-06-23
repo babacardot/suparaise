@@ -44,6 +44,41 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sentiment: string | null
+          startup_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sentiment?: string | null
+          startup_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sentiment?: string | null
+          startup_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       founders: {
         Row: {
           bio: string | null
@@ -269,6 +304,56 @@ export type Database = {
           },
         ]
       }
+      support_requests: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          image_url: string | null
+          message: string
+          priority: string
+          startup_id: string | null
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message: string
+          priority?: string
+          startup_id?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message?: string
+          priority?: string
+          startup_id?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_requests_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       targets: {
         Row: {
           application_email: string | null
@@ -282,9 +367,10 @@ export type Database = {
           question_count_range:
             | Database["public"]["Enums"]["question_count_range"]
             | null
-          region_focus: string[] | null
-          required_documents: string[] | null
-          requires_video: boolean | null
+          region_focus: Database["public"]["Enums"]["region_type"][] | null
+          required_documents:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
           stage_focus: Database["public"]["Enums"]["investment_stage"][] | null
           submission_type: Database["public"]["Enums"]["submission_type"] | null
           updated_at: string | null
@@ -304,9 +390,10 @@ export type Database = {
           question_count_range?:
             | Database["public"]["Enums"]["question_count_range"]
             | null
-          region_focus?: string[] | null
-          required_documents?: string[] | null
-          requires_video?: boolean | null
+          region_focus?: Database["public"]["Enums"]["region_type"][] | null
+          required_documents?:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
           stage_focus?: Database["public"]["Enums"]["investment_stage"][] | null
           submission_type?:
             | Database["public"]["Enums"]["submission_type"]
@@ -328,9 +415,10 @@ export type Database = {
           question_count_range?:
             | Database["public"]["Enums"]["question_count_range"]
             | null
-          region_focus?: string[] | null
-          required_documents?: string[] | null
-          requires_video?: boolean | null
+          region_focus?: Database["public"]["Enums"]["region_type"][] | null
+          required_documents?:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
           stage_focus?: Database["public"]["Enums"]["investment_stage"][] | null
           submission_type?:
             | Database["public"]["Enums"]["submission_type"]
@@ -349,6 +437,15 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      create_feedback: {
+        Args: {
+          p_user_id: string
+          p_sentiment: string
+          p_message: string
+          p_startup_id?: string
+        }
+        Returns: string
+      }
       create_startup: {
         Args: { p_startup_data: Json }
         Returns: Json
@@ -356,6 +453,17 @@ export type Database = {
       create_startup_and_founders: {
         Args: { p_data: Json }
         Returns: Json
+      }
+      create_support_request: {
+        Args: {
+          p_user_id: string
+          p_startup_id: string
+          p_category: string
+          p_subject: string
+          p_message: string
+          p_image_url?: string
+        }
+        Returns: string
       }
       filter_targets: {
         Args: {
@@ -497,6 +605,31 @@ export type Database = {
         | "Non-profit"
         | "Other"
       question_count_range: "1-5" | "6-10" | "11-20" | "21+"
+      region_type:
+        | "Global"
+        | "North America"
+        | "South America"
+        | "LATAM"
+        | "Europe"
+        | "Western Europe"
+        | "Eastern Europe"
+        | "Continental Europe"
+        | "Middle East"
+        | "Africa"
+        | "Asia"
+        | "East Asia"
+        | "South Asia"
+        | "South East Asia"
+        | "Oceania"
+        | "EMEA"
+        | "Emerging Markets"
+      required_document_type:
+        | "pitch_deck"
+        | "video"
+        | "financial_projections"
+        | "business_plan"
+        | "traction_data"
+        | "legal_documents"
       submission_status: "pending" | "in_progress" | "completed" | "failed"
       submission_type: "form" | "email" | "other"
     }
@@ -705,6 +838,33 @@ export const Constants = {
         "Other",
       ],
       question_count_range: ["1-5", "6-10", "11-20", "21+"],
+      region_type: [
+        "Global",
+        "North America",
+        "South America",
+        "LATAM",
+        "Europe",
+        "Western Europe",
+        "Eastern Europe",
+        "Continental Europe",
+        "Middle East",
+        "Africa",
+        "Asia",
+        "East Asia",
+        "South Asia",
+        "South East Asia",
+        "Oceania",
+        "EMEA",
+        "Emerging Markets",
+      ],
+      required_document_type: [
+        "pitch_deck",
+        "video",
+        "financial_projections",
+        "business_plan",
+        "traction_data",
+        "legal_documents",
+      ],
       submission_status: ["pending", "in_progress", "completed", "failed"],
       submission_type: ["form", "email", "other"],
     },

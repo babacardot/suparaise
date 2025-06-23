@@ -49,7 +49,7 @@ const pricingTiers: PricingTier[] = [
 
 export const Pricing = () => {
   return (
-    <section className="py-32">
+    <section className="pt-32 pb-20">
       <div className="mx-auto max-w-5xl px-6">
         <div className="flex flex-col items-center gap-6 text-center">
           <div className="flex justify-center">
@@ -115,7 +115,7 @@ export const Pricing = () => {
             ))}
           </div>
 
-          <p className="text-sm text-muted-foreground mt-8">
+          <p className="text-sm text-muted-foreground mt-4">
             All plans include SSL encryption, GDPR compliance, and can be
             cancelled anytime.
           </p>

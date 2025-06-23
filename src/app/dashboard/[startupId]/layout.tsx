@@ -1,44 +1,61 @@
+'use client'
+
+import { useEffect } from 'react'
 import { notFound, redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { useParams } from 'next/navigation'
+import { useUser } from '@/lib/contexts/user-context'
+import Spinner from '@/components/ui/spinner'
 
 interface StartupLayoutProps {
     children: React.ReactNode
-    params: Promise<{ startupId: string }>
 }
 
-async function getStartupByIdAndUser(startupId: string, userId: string) {
-    const supabase = await createClient()
+export default function StartupLayout({ children }: StartupLayoutProps) {
+    const params = useParams()
+    const startupId = params.startupId as string
 
-    const { data, error } = await supabase
-        .rpc('get_startup_by_id', {
-            p_startup_id: startupId,
-            p_user_id: userId
-        })
+    const {
+        user,
+        loading,
+        startups,
+        startupsLoading,
+        startupsInitialized,
+        currentStartupId,
+        setCurrentStartupFromUrl
+    } = useUser()
 
-    if (error) {
-        console.error('Error fetching startup:', error)
-        return null
+    // Set current startup from URL when component mounts or startup ID changes
+    useEffect(() => {
+        if (startupId && startupId !== currentStartupId) {
+            setCurrentStartupFromUrl(startupId)
+        }
+    }, [startupId, currentStartupId, setCurrentStartupFromUrl])
+
+    // Show loading while auth is loading
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <Spinner className="h-5 w-5" />
+            </div>
+        )
     }
 
-    return data
-}
-
-export default async function StartupLayout({ children, params }: StartupLayoutProps) {
-    const supabase = await createClient()
-
-    // Await the async params
-    const { startupId } = await params
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    // Redirect to login if not authenticated
+    if (!user) {
         redirect('/login')
     }
 
-    // Verify startup belongs to user
-    const startup = await getStartupByIdAndUser(startupId, user.id)
+    // Show loading while startups are being fetched OR if startups haven't been initialized yet
+    if (startupsLoading || !startupsInitialized) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <Spinner className="h-5 w-5" />
+            </div>
+        )
+    }
 
+    // Check if startup exists and belongs to user (only after startups are loaded and initialized)
+    const startup = startups.find(s => s.id === startupId)
     if (!startup) {
         notFound()
     }

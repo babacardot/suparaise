@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { useUser } from '@/lib/contexts/user-context'
 import {
   Dialog,
   DialogDescription,
@@ -16,6 +16,7 @@ import { Json } from '@/lib/types/database'
 import Spinner from '@/components/ui/spinner'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
+import { useToast } from '@/lib/hooks/use-toast'
 import {
   FounderData,
   StartupData,
@@ -152,7 +153,10 @@ export function OnboardingDialog({
   const logoInputRef = useRef<HTMLInputElement>(null)
   const pitchDeckInputRef = useRef<HTMLInputElement>(null)
   const videoInputRef = useRef<HTMLInputElement>(null)
-  const supabase = createSupabaseBrowserClient()
+
+  // Use UserContext instead of creating new supabase client
+  const { user, supabase, refreshStartups, selectStartupById } = useUser()
+  const { toast } = useToast()
 
   // Sound utility functions
   const playSound = (soundFile: string) => {
@@ -177,10 +181,6 @@ export function OnboardingDialog({
 
   useEffect(() => {
     const prefillFounderData = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
       if (user) {
         setFounders((currentFounders) => {
           if (
@@ -192,7 +192,10 @@ export function OnboardingDialog({
             const newFounders = [...currentFounders]
             const firstFounder = { ...newFounders[0] }
 
-            firstFounder.email = user.email || ''
+            // Only prefill email for first startup to avoid conflicts
+            if (isFirstStartup) {
+              firstFounder.email = user.email || ''
+            }
 
             const fullName =
               user.user_metadata?.full_name || user.user_metadata?.name || ''
@@ -213,7 +216,7 @@ export function OnboardingDialog({
     if (isOpen) {
       prefillFounderData()
     }
-  }, [isOpen, supabase])
+  }, [isOpen, user, isFirstStartup])
 
   // Auto-advance from welcome step - longer for first startup, shorter for additional ones
   useEffect(() => {
@@ -305,6 +308,20 @@ export function OnboardingDialog({
           }
           if (founder.linkedin && !isValidUrl(founder.linkedin)) {
             errors.push(`LinkedIn URL for ${founderLabel} is invalid`)
+          }
+
+          // Check for duplicate emails within the current form
+          const duplicateIndex = founders.findIndex((otherFounder, otherIndex) =>
+            otherIndex !== index &&
+            otherFounder.email.trim().toLowerCase() === founder.email.trim().toLowerCase()
+          )
+          if (duplicateIndex !== -1) {
+            errors.push(`Email for ${founderLabel} is already used by another founder in this startup`)
+          }
+
+          // For non-first startups, warn if using the user's email (which likely conflicts)
+          if (!isFirstStartup && founder.email.trim().toLowerCase() === (user?.email || '').toLowerCase()) {
+            errors.push(`${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`)
           }
         })
         break
@@ -640,16 +657,47 @@ export function OnboardingDialog({
         ),
       }
 
-      const { error } = await supabase.rpc('create_startup_and_founders', {
+      const { data: newStartup, error } = await supabase.rpc('create_startup_and_founders', {
         p_data: submissionData as unknown as Json,
       })
 
       if (error) throw error
 
+      // Refresh startups in context and navigate to new startup
+      await refreshStartups()
+
+      // If we have a new startup ID, select it
+      if (newStartup?.id) {
+        selectStartupById(newStartup.id)
+      }
+
       onComplete()
     } catch (error) {
       console.error('Error submitting onboarding data:', error)
-      alert('There was an error saving your information. Please try again.')
+
+      // Show more specific error messages
+      if (error && typeof error === 'object' && 'message' in error) {
+        const errorMessage = (error as { message: string }).message
+        if (errorMessage.includes('409') || errorMessage.includes('conflict')) {
+          toast({
+            variant: "destructive",
+            title: "Email already in use",
+            description: "This email is already associated with another startup. Please use a different email address.",
+          })
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Submission failed",
+            description: errorMessage || "There was an error saving your information. Please try again.",
+          })
+        }
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Submission failed",
+          description: "There was an error saving your information. Please try again.",
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -821,6 +869,7 @@ export function OnboardingDialog({
                     founders={founders}
                     setFounders={setFounders}
                     fieldErrors={getFounderFieldErrors()}
+                    isFirstStartup={isFirstStartup}
                   />
                 </motion.div>
               )}
@@ -924,12 +973,12 @@ export function OnboardingDialog({
             <DialogHeader>
               <DialogTitle>Cancel creation?</DialogTitle>
               <DialogDescription>
-                Are you sure you want to cancel creating this new startup? All progress will be lost.
+                Are you sure you want to cancel registering this new company? All progress will be lost.
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={handleCancelExit}>
-                Nope
+                No
               </Button>
               <Button variant="destructive" onClick={handleConfirmExit}>
                 Yes

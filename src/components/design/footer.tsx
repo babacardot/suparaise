@@ -23,7 +23,7 @@ export const Footer = () => {
   return (
     <footer className="border-t bg-background rounded-sm">
       <div className="mx-auto max-w-5xl px-6 py-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
             <Link
               href="/privacy"

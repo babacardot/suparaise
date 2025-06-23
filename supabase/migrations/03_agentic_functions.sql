@@ -156,7 +156,7 @@ BEGIN
     FROM targets t
     WHERE (p_stages IS NULL OR t.stage_focus && p_stages::investment_stage[])
       AND (p_industries IS NULL OR t.industry_focus && p_industries::industry_type[])
-      AND (p_regions IS NULL OR t.region_focus && p_regions);
+      AND (p_regions IS NULL OR t.region_focus && p_regions::region_type[]);
 
     RETURN COALESCE(result, '[]'::jsonb);
 END;

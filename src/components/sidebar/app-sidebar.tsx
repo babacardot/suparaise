@@ -9,6 +9,8 @@ import { NavSecondary } from '@/components/sidebar/nav-secondary'
 import { NavUser } from '@/components/sidebar/nav-user'
 import { StartupSwitcher } from '@/components/sidebar/startup-switcher'
 import { Button } from '@/components/ui/button'
+import SupportModal from '@/components/dashboard/support-modal'
+import FeedbackModal from '@/components/dashboard/feedback-modal'
 import {
   Sidebar,
   SidebarContent,
@@ -57,6 +59,8 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const { state, toggleSidebar } = useSidebar()
   const [isToggleHovered, setIsToggleHovered] = React.useState(false)
+  const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false)
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false)
 
   // Create display text: FirstName+StartupName
   const firstName = user?.name?.split(' ')[0] || 'User'
@@ -99,6 +103,16 @@ export function AppSidebar({
     return currentStartupId ? `/dashboard/${currentStartupId}/${path}` : `/dashboard/${path}`
   }
 
+  const handleSupportClick = () => {
+    playClickSound()
+    setIsSupportModalOpen(true)
+  }
+
+  const handleFeedbackClick = () => {
+    playClickSound()
+    setIsFeedbackModalOpen(true)
+  }
+
   const data = {
     user: userData,
     navMain: [
@@ -123,11 +137,13 @@ export function AppSidebar({
         title: 'Support',
         url: '#',
         animation: animations.support,
+        onClick: handleSupportClick,
       },
       {
         title: 'Feedback',
         url: '#',
         animation: animations.mail,
+        onClick: handleFeedbackClick,
       },
     ],
   }
@@ -158,6 +174,18 @@ export function AppSidebar({
           <NavUser user={data.user} />
         </SidebarFooter>
       </Sidebar>
+
+      {/* Support Modal */}
+      <SupportModal
+        isOpen={isSupportModalOpen}
+        onClose={() => setIsSupportModalOpen(false)}
+      />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+      />
 
       {/* Collapse/Expand Button - Always visible, fixed to viewport center */}
       <Button

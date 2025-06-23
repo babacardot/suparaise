@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import Spinner from '@/components/ui/spinner'
 import {
   Plus,
   X,
@@ -210,7 +211,11 @@ const FileUploadComponent: React.FC<
               disabled={uploadStatus === 'uploading'}
               className="w-full"
             >
-              <FileUp className="mr-2 h-4 w-4" />
+              {uploadStatus === 'uploading' ? (
+                <Spinner className="mr-2" />
+              ) : (
+                <FileUp className="mr-2 h-4 w-4" />
+              )}
               {uploadStatus === 'uploading' ? 'Uploading...' : label}
             </Button>
             <p className="text-xs text-muted-foreground text-right">
@@ -359,11 +364,12 @@ const MultiSelectCountries: React.FC<{
   )
 }
 
-// Step 1: Team Information
-export const TeamStep: React.FC<TeamStepProps> = ({
+// Step 1: Team Information  
+export const TeamStep: React.FC<TeamStepProps & { isFirstStartup?: boolean }> = ({
   founders,
   setFounders,
   fieldErrors,
+  isFirstStartup = true,
 }) => {
   const addFounder = () => {
     setFounders([
@@ -405,6 +411,13 @@ export const TeamStep: React.FC<TeamStepProps> = ({
         <p className="text-sm text-muted-foreground mb-6">
           Share details about yourself (and your co-founders). Investors always want to know who&apos;s driving the vision and execution.
         </p>
+        {!isFirstStartup && (
+          <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-sm p-4 mb-4">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>Note:</strong> Since this is an additional company, you&apos;ll need to use a different email address.
+            </p>
+          </div>
+        )}
       </div>
 
       {founders.map((founder, index) => (
