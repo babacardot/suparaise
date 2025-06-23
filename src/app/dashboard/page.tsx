@@ -5,24 +5,32 @@ export default async function DashboardPage() {
   const supabase = await createClient()
 
   // Get current user
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
 
   if (authError || !user) {
     redirect('/login')
   }
 
   // Check user's onboarding status
-  const { data: onboardingStatus, error: onboardingError } = await supabase
-    .rpc('check_user_onboarding_status', {
-      p_user_id: user.id
-    })
+  const { data: onboardingStatus, error: onboardingError } = await supabase.rpc(
+    'check_user_onboarding_status',
+    {
+      p_user_id: user.id,
+    },
+  )
 
   if (onboardingError) {
     console.error('Error checking onboarding status:', onboardingError)
     return <div>Error loading dashboard</div>
   }
 
-  const statusData = onboardingStatus as { needsOnboarding: boolean; hasStartup: boolean }
+  const statusData = onboardingStatus as {
+    needsOnboarding: boolean
+    hasStartup: boolean
+  }
 
   // If user needs onboarding (no startups or incomplete startups), the layout will handle it
   // If user has no startups, show startup selection/creation UI
@@ -45,10 +53,12 @@ export default async function DashboardPage() {
   }
 
   // If user has startups, get them and redirect to the most recent one
-  const { data: startups, error } = await supabase
-    .rpc('get_user_startups_with_status', {
-      p_user_id: user.id
-    })
+  const { data: startups, error } = await supabase.rpc(
+    'get_user_startups_with_status',
+    {
+      p_user_id: user.id,
+    },
+  )
 
   if (error) {
     console.error('Error fetching startups:', error)

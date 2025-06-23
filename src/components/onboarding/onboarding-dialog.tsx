@@ -34,18 +34,26 @@ import {
 } from './onboarding-steps'
 
 // Welcome Step Component
-const WelcomeStep = ({ isFirstStartup = true }: { isFirstStartup?: boolean }) => {
-  const welcomeContent = isFirstStartup ? {
-    title: "Welcome to suparaise.com",
-    subtitle: "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-    image: "/random/onboarding.svg",
-    statusText: "Onboarding"
-  } : {
-    title: "Ready to launch another venture?",
-    subtitle: "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-    image: "/random/test_your_app.svg",
-    statusText: "New venture"
-  }
+const WelcomeStep = ({
+  isFirstStartup = true,
+}: {
+  isFirstStartup?: boolean
+}) => {
+  const welcomeContent = isFirstStartup
+    ? {
+        title: 'Welcome to suparaise.com',
+        subtitle:
+          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+        image: '/random/onboarding.svg',
+        statusText: 'Onboarding',
+      }
+    : {
+        title: 'Ready to launch another venture?',
+        subtitle:
+          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+        image: '/random/test_your_app.svg',
+        statusText: 'New venture',
+      }
 
   return (
     <motion.div
@@ -221,9 +229,12 @@ export function OnboardingDialog({
   // Auto-advance from welcome step - longer for first startup, shorter for additional ones
   useEffect(() => {
     if (currentStep === 0 && isOpen) {
-      const timer = setTimeout(() => {
-        setCurrentStep(1)
-      }, isFirstStartup ? 9000 : 5000) // 9s for first startup, 5s for additional ones
+      const timer = setTimeout(
+        () => {
+          setCurrentStep(1)
+        },
+        isFirstStartup ? 9000 : 5000,
+      ) // 9s for first startup, 5s for additional ones
 
       return () => clearTimeout(timer)
     }
@@ -311,17 +322,27 @@ export function OnboardingDialog({
           }
 
           // Check for duplicate emails within the current form
-          const duplicateIndex = founders.findIndex((otherFounder, otherIndex) =>
-            otherIndex !== index &&
-            otherFounder.email.trim().toLowerCase() === founder.email.trim().toLowerCase()
+          const duplicateIndex = founders.findIndex(
+            (otherFounder, otherIndex) =>
+              otherIndex !== index &&
+              otherFounder.email.trim().toLowerCase() ===
+                founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
-            errors.push(`Email for ${founderLabel} is already used by another founder in this startup`)
+            errors.push(
+              `Email for ${founderLabel} is already used by another founder in this startup`,
+            )
           }
 
           // For non-first startups, warn if using the user's email (which likely conflicts)
-          if (!isFirstStartup && founder.email.trim().toLowerCase() === (user?.email || '').toLowerCase()) {
-            errors.push(`${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`)
+          if (
+            !isFirstStartup &&
+            founder.email.trim().toLowerCase() ===
+              (user?.email || '').toLowerCase()
+          ) {
+            errors.push(
+              `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
+            )
           }
         })
         break
@@ -335,8 +356,7 @@ export function OnboardingDialog({
         if (!startup.descriptionLong.trim())
           errors.push('Full description is required')
         if (!startup.industry) errors.push('Industry is required')
-        if (!startup.location.trim())
-          errors.push('Country is required')
+        if (!startup.location.trim()) errors.push('Country is required')
 
         // Validate company website URL
         if (startup.website && !isValidUrl(startup.website)) {
@@ -347,9 +367,12 @@ export function OnboardingDialog({
       case 3:
         // Step 3 validation - mandatory fields
         if (!startup.fundingRound) errors.push('Funding round is required')
-        if (!startup.investmentInstrument) errors.push('Investment instrument is required')
-        if (startup.fundingAmountSought <= 0) errors.push('Funding amount is required')
-        if (!startup.employeeCount || startup.employeeCount <= 0) errors.push('Team size is required')
+        if (!startup.investmentInstrument)
+          errors.push('Investment instrument is required')
+        if (startup.fundingAmountSought <= 0)
+          errors.push('Funding amount is required')
+        if (!startup.employeeCount || startup.employeeCount <= 0)
+          errors.push('Team size is required')
         if (!startup.tractionSummary.trim()) errors.push('Traction is required')
         if (!startup.marketSummary.trim()) errors.push('Market is required')
         break
@@ -413,8 +436,7 @@ export function OnboardingDialog({
       if (!startup.descriptionLong.trim())
         errors.descriptionLong = 'Full description is required'
       if (!startup.industry) errors.industry = 'Industry is required'
-      if (!startup.location.trim())
-        errors.location = 'Country is required'
+      if (!startup.location.trim()) errors.location = 'Country is required'
     }
 
     // Format validation - show immediately when user types invalid data
@@ -657,9 +679,12 @@ export function OnboardingDialog({
         ),
       }
 
-      const { data: newStartup, error } = await supabase.rpc('create_startup_and_founders', {
-        p_data: submissionData as unknown as Json,
-      })
+      const { data: newStartup, error } = await supabase.rpc(
+        'create_startup_and_founders',
+        {
+          p_data: submissionData as unknown as Json,
+        },
+      )
 
       if (error) throw error
 
@@ -680,22 +705,26 @@ export function OnboardingDialog({
         const errorMessage = (error as { message: string }).message
         if (errorMessage.includes('409') || errorMessage.includes('conflict')) {
           toast({
-            variant: "destructive",
-            title: "Email already in use",
-            description: "This email is already associated with another startup. Please use a different email address.",
+            variant: 'destructive',
+            title: 'Email already in use',
+            description:
+              'This email is already associated with another startup. Please use a different email address.',
           })
         } else {
           toast({
-            variant: "destructive",
-            title: "Submission failed",
-            description: errorMessage || "There was an error saving your information. Please try again.",
+            variant: 'destructive',
+            title: 'Submission failed',
+            description:
+              errorMessage ||
+              'There was an error saving your information. Please try again.',
           })
         }
       } else {
         toast({
-          variant: "destructive",
-          title: "Submission failed",
-          description: "There was an error saving your information. Please try again.",
+          variant: 'destructive',
+          title: 'Submission failed',
+          description:
+            'There was an error saving your information. Please try again.',
         })
       }
     } finally {
@@ -805,7 +834,10 @@ export function OnboardingDialog({
           scrollbar-width: none;
         }
       `}</style>
-      <Dialog open={isOpen} onOpenChange={isFirstStartup ? handleOpenChange : undefined}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={isFirstStartup ? handleOpenChange : undefined}
+      >
         <DialogContent
           showCloseButton={!isFirstStartup}
           onCloseClick={!isFirstStartup ? handleCloseAttempt : undefined}
@@ -965,7 +997,10 @@ export function OnboardingDialog({
 
       {/* Exit Confirmation Dialog */}
       {showExitConfirmation && (
-        <Dialog open={showExitConfirmation} onOpenChange={(open) => !open && handleCancelExit()}>
+        <Dialog
+          open={showExitConfirmation}
+          onOpenChange={(open) => !open && handleCancelExit()}
+        >
           <DialogContent
             showCloseButton={false}
             className="max-w-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:duration-500 data-[state=closed]:duration-300"
@@ -973,7 +1008,8 @@ export function OnboardingDialog({
             <DialogHeader>
               <DialogTitle>Cancel creation?</DialogTitle>
               <DialogDescription>
-                Are you sure you want to cancel registering this new company? All progress will be lost.
+                Are you sure you want to cancel registering this new company?
+                All progress will be lost.
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end gap-3 pt-4">

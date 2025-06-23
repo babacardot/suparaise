@@ -137,7 +137,7 @@ const handleNumericChange = (
   setter(numericValue)
 }
 
-// Badge colors for operating countries  
+// Badge colors for operating countries
 const getBadgeColor = (index: number) => {
   const colors = [
     'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 dark:hover:bg-blue-900/40',
@@ -173,119 +173,119 @@ const FileUploadComponent: React.FC<
   description,
   label,
 }) => {
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-    useEffect(() => {
-      if ((type === 'logo' || type === 'introVideo') && file) {
-        const url = URL.createObjectURL(file)
-        setPreviewUrl(url)
+  useEffect(() => {
+    if ((type === 'logo' || type === 'introVideo') && file) {
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
 
-        return () => {
-          URL.revokeObjectURL(url)
-          setPreviewUrl(null)
-        }
-      } else {
+      return () => {
+        URL.revokeObjectURL(url)
         setPreviewUrl(null)
       }
-    }, [file, type])
+    } else {
+      setPreviewUrl(null)
+    }
+  }, [file, type])
 
-    return (
-      <div className="space-y-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={(e) => {
-            const selectedFile = e.target.files?.[0]
-            if (selectedFile) onUpload(type, selectedFile)
-          }}
-          disabled={uploadStatus === 'uploading'}
-        />
-        {!file && (
-          <div className="flex flex-col space-y-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => inputRef.current?.click()}
-              disabled={uploadStatus === 'uploading'}
-              className="w-full"
-            >
-              {uploadStatus === 'uploading' ? (
-                <Spinner className="mr-2 h-3 w-3" />
+  return (
+    <div className="space-y-2">
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => {
+          const selectedFile = e.target.files?.[0]
+          if (selectedFile) onUpload(type, selectedFile)
+        }}
+        disabled={uploadStatus === 'uploading'}
+      />
+      {!file && (
+        <div className="flex flex-col space-y-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploadStatus === 'uploading'}
+            className="w-full"
+          >
+            {uploadStatus === 'uploading' ? (
+              <Spinner className="mr-2 h-3 w-3" />
+            ) : (
+              <FileUp className="mr-2 h-4 w-4" />
+            )}
+            {uploadStatus === 'uploading' ? 'Uploading...' : label}
+          </Button>
+          <p className="text-xs text-muted-foreground text-right">
+            {description} (max {maxSize})
+          </p>
+        </div>
+      )}
+      {file && (
+        <div className="border rounded-sm p-4 relative">
+          <div className="flex items-center space-x-3">
+            {previewUrl ? (
+              type === 'logo' ? (
+                <Image
+                  src={previewUrl}
+                  alt="Logo preview"
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-sm object-contain"
+                />
               ) : (
-                <FileUp className="mr-2 h-4 w-4" />
-              )}
-              {uploadStatus === 'uploading' ? 'Uploading...' : label}
-            </Button>
-            <p className="text-xs text-muted-foreground text-right">
-              {description} (max {maxSize})
-            </p>
-          </div>
-        )}
-        {file && (
-          <div className="border rounded-sm p-4 relative">
-            <div className="flex items-center space-x-3">
-              {previewUrl ? (
-                type === 'logo' ? (
-                  <Image
-                    src={previewUrl}
-                    alt="Logo preview"
-                    width={40}
-                    height={40}
-                    className="h-10 w-10 rounded-sm object-contain"
-                  />
-                ) : (
-                  <video
-                    src={previewUrl}
-                    muted
-                    playsInline
-                    className="h-12 w-16 rounded-sm object-contain"
-                  />
-                )
-              ) : (
-                <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
-                  <FileIcon className="h-6 w-6" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {uploadStatus === 'uploading'
-                    ? `${formatFileSize(
+                <video
+                  src={previewUrl}
+                  muted
+                  playsInline
+                  className="h-12 w-16 rounded-sm object-contain"
+                />
+              )
+            ) : (
+              <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
+                <FileIcon className="h-6 w-6" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{file.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {uploadStatus === 'uploading'
+                  ? `${formatFileSize(
                       (uploadProgress / 100) * file.size,
                     )} of ${formatFileSize(file.size)}`
-                    : formatFileSize(file.size)}
-                </p>
-              </div>
+                  : formatFileSize(file.size)}
+              </p>
             </div>
-            {uploadStatus === 'uploading' && (
-              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
-                <div
-                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            )}
-            {uploadStatus === 'failed' && (
-              <button
-                onClick={() => onUpload(type, file)}
-                className="mt-2 text-sm text-red-500 hover:underline"
-              >
-                Try again
-              </button>
-            )}
-            <button
-              onClick={onRemove}
-              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
-        )}
-      </div>
-    )
-  }
+          {uploadStatus === 'uploading' && (
+            <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+              <div
+                className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          )}
+          {uploadStatus === 'failed' && (
+            <button
+              onClick={() => onUpload(type, file)}
+              className="mt-2 text-sm text-red-500 hover:underline"
+            >
+              Try again
+            </button>
+          )}
+          <button
+            onClick={onRemove}
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const MultiSelectCountries: React.FC<{
   selected: string[]
@@ -311,8 +311,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -364,13 +365,10 @@ const MultiSelectCountries: React.FC<{
   )
 }
 
-// Step 1: Team Information  
-export const TeamStep: React.FC<TeamStepProps & { isFirstStartup?: boolean }> = ({
-  founders,
-  setFounders,
-  fieldErrors,
-  isFirstStartup = true,
-}) => {
+// Step 1: Team Information
+export const TeamStep: React.FC<
+  TeamStepProps & { isFirstStartup?: boolean }
+> = ({ founders, setFounders, fieldErrors, isFirstStartup = true }) => {
   const addFounder = () => {
     setFounders([
       ...founders,
@@ -409,12 +407,14 @@ export const TeamStep: React.FC<TeamStepProps & { isFirstStartup?: boolean }> = 
       <div>
         <h3 className="text-lg font-semibold mb-4">Tell us about your team</h3>
         <p className="text-sm text-muted-foreground mb-6">
-          Share details about yourself (and your co-founders). Investors always want to know who&apos;s driving the vision and execution.
+          Share details about yourself (and your co-founders). Investors always
+          want to know who&apos;s driving the vision and execution.
         </p>
         {!isFirstStartup && (
           <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-sm p-4 mb-4">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Note:</strong> Since this is an additional company, you&apos;ll need to use a different email address.
+              <strong>Note:</strong> Since this is an additional company,
+              you&apos;ll need to use a different email address.
             </p>
           </div>
         )}
@@ -606,7 +606,9 @@ export const TeamStep: React.FC<TeamStepProps & { isFirstStartup?: boolean }> = 
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-website`}>Personal website</Label>
+                <Label htmlFor={`founder-${index}-website`}>
+                  Personal website
+                </Label>
                 <Input
                   id={`founder-${index}-website`}
                   value={founder.personalWebsiteUrl}
@@ -666,7 +668,8 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           Tell us about your company
         </h3>
         <p className="text-sm text-muted-foreground mb-6">
-          The more our agents know about your business, the more compelling and accurate they can be when representing you to investors.
+          The more our agents know about your business, the more compelling and
+          accurate they can be when representing you to investors.
         </p>
       </div>
 
@@ -734,10 +737,11 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="industry"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
-                ? 'border-red-500 focus:border-red-500'
-                : 'border-input'
-                }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
+                fieldErrors.industry
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-input'
+              }`}
               value={startup.industry || ''}
               onChange={(e) =>
                 setStartup({
@@ -1024,7 +1028,8 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
           Tell us about your current fundraising round
         </h3>
         <p className="text-sm text-muted-foreground mb-6">
-          These details help our agents tailor responses to each fund&apos;s questions and requirements, maximizing your chances of getting booked.
+          These details help our agents tailor responses to each fund&apos;s
+          questions and requirements, maximizing your chances of getting booked.
         </p>
       </div>
       <div className="space-y-6">
@@ -1266,48 +1271,68 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 <p>{startup.name || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Website</span>
+                <span className="font-medium text-muted-foreground">
+                  Website
+                </span>
                 <p>{startup.website || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Industry</span>
+                <span className="font-medium text-muted-foreground">
+                  Industry
+                </span>
                 <p>{startup.industry || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Country</span>
+                <span className="font-medium text-muted-foreground">
+                  Country
+                </span>
                 <p>{startup.location || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Legal structure</span>
+                <span className="font-medium text-muted-foreground">
+                  Legal structure
+                </span>
                 <p>{startup.legalStructure || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Incorporated</span>
+                <span className="font-medium text-muted-foreground">
+                  Incorporated
+                </span>
                 <p>{startup.isIncorporated ? 'Yes' : 'No'}</p>
               </div>
             </div>
 
-            {startup.isIncorporated && (startup.incorporationCountry || startup.incorporationCity) && (
-              <div className="pt-2 border-t">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium text-muted-foreground">Inc. country</span>
-                    <p>{startup.incorporationCountry || 'Not provided'}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-muted-foreground">Inc. city</span>
-                    <p>{startup.incorporationCity || 'Not provided'}</p>
+            {startup.isIncorporated &&
+              (startup.incorporationCountry || startup.incorporationCity) && (
+                <div className="pt-2 border-t">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-muted-foreground">
+                        Inc. country
+                      </span>
+                      <p>{startup.incorporationCountry || 'Not provided'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">
+                        Inc. city
+                      </span>
+                      <p>{startup.incorporationCity || 'Not provided'}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {startup.operatingCountries.length > 0 && (
               <div className="pt-2 border-t">
-                <span className="font-medium text-muted-foreground text-sm">Operating countries</span>
+                <span className="font-medium text-muted-foreground text-sm">
+                  Operating countries
+                </span>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {startup.operatingCountries.map((country, index) => (
-                    <Badge key={index} className={`text-xs border ${getBadgeColor(index)}`}>
+                    <Badge
+                      key={index}
+                      className={`text-xs border ${getBadgeColor(index)}`}
+                    >
                       {country}
                     </Badge>
                   ))}
@@ -1317,25 +1342,35 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 
             <div className="pt-2 border-t space-y-2">
               <div>
-                <span className="font-medium text-muted-foreground text-sm">One-liner</span>
-                <p className="text-sm">{startup.descriptionShort || 'Not provided'}</p>
+                <span className="font-medium text-muted-foreground text-sm">
+                  One-liner
+                </span>
+                <p className="text-sm">
+                  {startup.descriptionShort || 'Not provided'}
+                </p>
               </div>
               {startup.descriptionMedium && (
                 <div>
-                  <span className="font-medium text-muted-foreground text-sm">Elevator pitch</span>
+                  <span className="font-medium text-muted-foreground text-sm">
+                    Elevator pitch
+                  </span>
                   <p className="text-sm">{startup.descriptionMedium}</p>
                 </div>
               )}
               {startup.descriptionLong && (
                 <div>
-                  <span className="font-medium text-muted-foreground text-sm">Full description</span>
+                  <span className="font-medium text-muted-foreground text-sm">
+                    Full description
+                  </span>
                   <p className="text-sm">{startup.descriptionLong}</p>
                 </div>
               )}
             </div>
 
             <div className="pt-2 border-t">
-              <span className="font-medium text-muted-foreground text-sm">Assets</span>
+              <span className="font-medium text-muted-foreground text-sm">
+                Assets
+              </span>
               <div className="flex items-center gap-4 mt-1">
                 <div className="flex items-center gap-1">
                   <span className="text-sm">Logo</span>
@@ -1381,7 +1416,10 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           </CardHeader>
           <CardContent className="space-y-3">
             {founders.map((founder, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-sm">
+              <div
+                key={index}
+                className="flex items-start gap-3 p-3 bg-muted/30 rounded-sm"
+              >
                 <Badge variant="outline" className="text-xs mt-0.5">
                   {founder.role}
                 </Badge>
@@ -1394,8 +1432,14 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                     {founder.phone && <p>Phone: {founder.phone}</p>}
                     {founder.linkedin && <p>LinkedIn: {founder.linkedin}</p>}
                     {founder.githubUrl && <p>Github: {founder.githubUrl}</p>}
-                    {founder.personalWebsiteUrl && <p>Website: {founder.personalWebsiteUrl}</p>}
-                    {founder.bio && <p className="mt-1 text-xs leading-relaxed">{founder.bio}</p>}
+                    {founder.personalWebsiteUrl && (
+                      <p>Website: {founder.personalWebsiteUrl}</p>
+                    )}
+                    {founder.bio && (
+                      <p className="mt-1 text-xs leading-relaxed">
+                        {founder.bio}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1423,11 +1467,15 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 <p>{startup.fundingRound || 'Not specified'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Investment type</span>
+                <span className="font-medium text-muted-foreground">
+                  Investment type
+                </span>
                 <p>{startup.investmentInstrument || 'Not specified'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Amount seeking</span>
+                <span className="font-medium text-muted-foreground">
+                  Amount seeking
+                </span>
                 <p>
                   {startup.fundingAmountSought > 0
                     ? `$${formatCurrency(startup.fundingAmountSought)}`
@@ -1435,7 +1483,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Pre-money valuation</span>
+                <span className="font-medium text-muted-foreground">
+                  Pre-money valuation
+                </span>
                 <p>
                   {startup.preMoneyValuation > 0
                     ? `$${formatCurrency(startup.preMoneyValuation)}`
@@ -1443,7 +1493,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Team size</span>
+                <span className="font-medium text-muted-foreground">
+                  Team size
+                </span>
                 <p>
                   {startup.employeeCount === 1
                     ? 'Just me'
@@ -1472,13 +1524,17 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               <div className="pt-2 border-t space-y-2">
                 {startup.tractionSummary && (
                   <div>
-                    <span className="font-medium text-muted-foreground text-sm">Traction</span>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Traction
+                    </span>
                     <p className="text-sm">{startup.tractionSummary}</p>
                   </div>
                 )}
                 {startup.marketSummary && (
                   <div>
-                    <span className="font-medium text-muted-foreground text-sm">Market</span>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Market
+                    </span>
                     <p className="text-sm">{startup.marketSummary}</p>
                   </div>
                 )}

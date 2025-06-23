@@ -33,7 +33,7 @@ export default function DashboardLayout({
     currentStartup,
     currentStartupId,
     selectStartup,
-    refreshStartups
+    refreshStartups,
   } = useUser()
 
   // Add state for new startup creation dialog
@@ -93,12 +93,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-              name: user.user_metadata?.full_name || user.email || '',
-              email: user.email || '',
-              avatar: user.user_metadata?.avatar_url,
-              startupName: currentStartup?.name || undefined,
-              startupLogo: currentStartup?.logo_url || undefined,
-            }
+                name: user.user_metadata?.full_name || user.email || '',
+                email: user.email || '',
+                avatar: user.user_metadata?.avatar_url,
+                startupName: currentStartup?.name || undefined,
+                startupLogo: currentStartup?.logo_url || undefined,
+              }
             : null
         }
         startups={startups}

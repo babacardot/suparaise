@@ -54,7 +54,8 @@ export default function TermsPage() {
                     Suparaise is an AI agent powered platform that automates
                     venture capital fundraising processes, including form
                     submissions and outreach. Our service helps founders
-                    streamline their fundraising efforts through the use of browser automation.
+                    streamline their fundraising efforts through the use of
+                    browser automation.
                   </p>
                 </div>
               </div>
@@ -127,15 +128,16 @@ export default function TermsPage() {
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
                   <div className="mb-4">
-                    <h2 className="text-2xl font-semibold">
-                      Contact
-                    </h2>
+                    <h2 className="text-2xl font-semibold">Contact</h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
                     If you have any questions about these terms and conditions,
                     please contact us through our website or reach out to our
                     support team from the dashboard or via email at{' '}
-                    <a href="mailto:hello@suparaise.com" className="text-primary">
+                    <a
+                      href="mailto:hello@suparaise.com"
+                      className="text-primary"
+                    >
                       hello@suparaise.com
                     </a>
                     .

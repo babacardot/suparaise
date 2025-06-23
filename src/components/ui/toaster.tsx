@@ -9,8 +9,8 @@ import {
   ToastViewport,
   ToastProgressBar,
   ToastVariant,
-} from "@/components/ui/toast";
-import { useToast } from "@/lib/hooks/use-toast";
+} from '@/components/ui/toast'
+import { useToast } from '@/lib/hooks/use-toast'
 import {
   CheckCircle2,
   XCircle,
@@ -18,8 +18,8 @@ import {
   InfoIcon,
   Key,
   Rabbit,
-} from "lucide-react";
-import { cn } from "@/lib/actions/utils";
+} from 'lucide-react'
+import { cn } from '@/lib/actions/utils'
 
 const styles = `
 @keyframes iconSlideIn {
@@ -32,65 +32,65 @@ const styles = `
     opacity: 1;
   }
 }
-`;
+`
 
 // We accept string type to handle potential 'notice' value
 function getToastIcon(variant: string) {
   switch (variant) {
-    case "destructive":
+    case 'destructive':
       return (
         <XCircle
           className={cn(
-            "h-4 w-4 text-red-700 dark:text-red-300",
-            "animate-[iconSlideIn_0.3s_ease-in-out]",
+            'h-4 w-4 text-red-700 dark:text-red-300',
+            'animate-[iconSlideIn_0.3s_ease-in-out]',
           )}
         />
-      );
-    case "info":
+      )
+    case 'info':
       return (
         <AlertCircle
           className={cn(
-            "h-4 w-4 text-blue-700 dark:text-blue-300",
-            "animate-[iconSlideIn_0.3s_ease-in-out]",
+            'h-4 w-4 text-blue-700 dark:text-blue-300',
+            'animate-[iconSlideIn_0.3s_ease-in-out]',
           )}
         />
-      );
-    case "notice": // Fallback to info style for backwards compatibility
+      )
+    case 'notice': // Fallback to info style for backwards compatibility
       return (
         <InfoIcon
           className={cn(
-            "h-4 w-4 text-blue-700 dark:text-blue-300",
-            "animate-[iconSlideIn_0.3s_ease-in-out]",
+            'h-4 w-4 text-blue-700 dark:text-blue-300',
+            'animate-[iconSlideIn_0.3s_ease-in-out]',
           )}
         />
-      );
-    case "api":
+      )
+    case 'api':
       return (
         <Key
           className={cn(
-            "h-4 w-4 text-cyan-700 dark:text-cyan-300",
-            "animate-[iconSlideIn_0.3s_ease-in-out]",
+            'h-4 w-4 text-cyan-700 dark:text-cyan-300',
+            'animate-[iconSlideIn_0.3s_ease-in-out]',
           )}
         />
-      );
-    case "success":
+      )
+    case 'success':
       return (
         <CheckCircle2
           className={cn(
-            "h-4 w-4 text-green-700 dark:text-green-300",
-            "animate-[iconSlideIn_0.3s_ease-in-out]",
+            'h-4 w-4 text-green-700 dark:text-green-300',
+            'animate-[iconSlideIn_0.3s_ease-in-out]',
           )}
         />
-      );
+      )
     default:
       return (
         <Rabbit
           className={cn(
-            "h-4 w-4 text-orange-700 dark:text-orange-300",
-            "animate-[iconSlideIn_0.3s_ease-in-out]",
+            'h-4 w-4 text-orange-700 dark:text-orange-300',
+            'animate-[iconSlideIn_0.3s_ease-in-out]',
           )}
         />
-      );
+      )
   }
 }
 
@@ -98,22 +98,22 @@ function getToastIcon(variant: string) {
 function mapToValidVariant(variantStr: string): ToastVariant {
   // Check if the provided variant is already a valid ToastVariant
   if (
-    ["default", "destructive", "info", "success", "api"].includes(variantStr)
+    ['default', 'destructive', 'info', 'success', 'api'].includes(variantStr)
   ) {
-    return variantStr as ToastVariant;
+    return variantStr as ToastVariant
   }
 
   // Handle special cases
-  if (variantStr === "notice") {
-    return "info";
+  if (variantStr === 'notice') {
+    return 'info'
   }
 
   // Default fallback
-  return "default";
+  return 'default'
 }
 
 export function Toaster() {
-  const { toasts } = useToast();
+  const { toasts } = useToast()
 
   return (
     <ToastProvider>
@@ -123,11 +123,11 @@ export function Toaster() {
         title,
         description,
         action,
-        variant = "default",
+        variant = 'default',
         ...props
       }) {
         // Safely convert to a valid ToastVariant
-        const safeVariant = mapToValidVariant(variant);
+        const safeVariant = mapToValidVariant(variant)
 
         return (
           <Toast key={id} {...props} variant={safeVariant}>
@@ -148,9 +148,9 @@ export function Toaster() {
             <ToastClose />
             <ToastProgressBar variant={safeVariant} />
           </Toast>
-        );
+        )
       })}
       <ToastViewport />
     </ToastProvider>
-  );
+  )
 }

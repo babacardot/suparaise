@@ -166,7 +166,10 @@ export default function PrivacyPage() {
                     If you have any questions about this privacy policy, please
                     contact us through our website or reach out to our support
                     team for assistance from the dashboard or via email at{' '}
-                    <a href="mailto:hello@suparaise.com" className="text-primary">
+                    <a
+                      href="mailto:hello@suparaise.com"
+                      className="text-primary"
+                    >
                       hello@suparaise.com
                     </a>
                     .
