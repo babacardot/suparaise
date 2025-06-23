@@ -129,12 +129,48 @@
     min-width: 320px;
   }
 
+  /* Hide scrollbars globally while maintaining scroll functionality */
+  body, html {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+    overscroll-behavior: none;  /* Prevent overscroll/rubber band effect */
+    overscroll-behavior-y: none;  /* Specifically prevent vertical overscroll */
+  }
+
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+
+  /* Prevent scroll beyond page boundaries */
+  html {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: none;
+  }
+
+  body {
+    height: 100%;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+  }
+
   /* Remove focus outline globally */
   *:focus,
   *:focus-visible {
     outline: none !important;
     box-shadow: none !important;
   }
+}
+
+/* Hide scrollbars completely while maintaining scroll functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
 }
 
 /* Toast Progress Bar Animation */

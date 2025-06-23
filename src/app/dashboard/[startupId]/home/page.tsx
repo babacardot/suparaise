@@ -1,36 +1,41 @@
 import React from 'react'
+import { createClient } from '@/lib/supabase/server'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ startupId: string }>
+}): Promise<Metadata> {
+  const { startupId } = await params
+
+  try {
+    const supabase = await createClient()
+    const { data: startup } = await supabase
+      .from('startups')
+      .select('name')
+      .eq('id', startupId)
+      .single()
+
+    const startupName = startup?.name || 'Company'
+
+    return {
+      title: `${startupName} | Home`,
+      description: `Welcome to ${startupName} dashboard.`,
+    }
+  } catch {
+    return {
+      title: 'Suparaise | Home',
+      description: 'Automate fundraising with agents.',
+    }
+  }
+}
 
 export default async function HomePage() {
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
-        <p className="text-muted-foreground">
-          Here&apos;s what&apos;s happening with your startup.
-        </p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Dashboard metrics would go here */}
-        <div className="p-6 bg-card text-card-foreground rounded-sm border">
-          <h3 className="font-semibold">Total Applications</h3>
-          <p className="text-2xl font-bold mt-2">0</p>
-        </div>
-
-        <div className="p-6 bg-card text-card-foreground rounded-sm border">
-          <h3 className="font-semibold">In Progress</h3>
-          <p className="text-2xl font-bold mt-2">0</p>
-        </div>
-
-        <div className="p-6 bg-card text-card-foreground rounded-sm border">
-          <h3 className="font-semibold">Completed</h3>
-          <p className="text-2xl font-bold mt-2">0</p>
-        </div>
-
-        <div className="p-6 bg-card text-card-foreground rounded-sm border">
-          <h3 className="font-semibold">Success Rate</h3>
-          <p className="text-2xl font-bold mt-2">-</p>
-        </div>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight mt-1.5">Welcome back</h1>
       </div>
     </div>
   )

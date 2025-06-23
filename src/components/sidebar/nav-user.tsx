@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 import { useUser } from '@/lib/contexts/user-context'
@@ -33,15 +34,16 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { signOut } = useUser()
+  const { signOut, currentStartupId } = useUser()
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
 
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.3
-      audio.play().catch(() => {})
+      audio.play().catch(() => { })
     }
   }
 
@@ -130,23 +132,12 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                onClick={playClickSound}
-                onMouseEnter={() => setHoveredItem('profile')}
-                onMouseLeave={() => setHoveredItem(null)}
-                className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
-              >
-                <LottieIcon
-                  animationData={animations.profile}
-                  size={16}
-                  loop={false}
-                  autoplay={false}
-                  initialFrame={0}
-                  isHovered={hoveredItem === 'profile'}
-                />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={playClickSound}
+                onClick={() => {
+                  playClickSound()
+                  if (currentStartupId) {
+                    router.push(`/dashboard/${currentStartupId}/settings`)
+                  }
+                }}
                 onMouseEnter={() => setHoveredItem('settings')}
                 onMouseLeave={() => setHoveredItem(null)}
                 className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
@@ -172,7 +163,7 @@ export function NavUser({
               >
                 <LottieIcon
                   animationData={
-                    theme === 'dark' ? animations.sun : animations.rain
+                    theme === 'dark' ? animations.sun : animations.point
                   }
                   size={16}
                   loop={false}
@@ -180,7 +171,7 @@ export function NavUser({
                   initialFrame={0}
                   isHovered={hoveredItem === 'theme'}
                 />
-                {theme === 'dark' ? 'Light' : 'Dark'} Mode
+                {theme === 'dark' ? 'Light' : 'Dark'} mode
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

@@ -12,7 +12,6 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from '@/components/ui/command'
 import {
   Popover,
@@ -123,16 +122,16 @@ export function StartupSwitcher({
         >
           <CommandList>
             {startups.length > 0 && (
-              <CommandGroup>
+              <CommandGroup className="pb-0">
                 {startups.map((startup) => (
                   <CommandItem
                     key={startup.id}
                     value={formatStartupDisplayName(startup)}
                     onSelect={() => handleSelect(startup)}
-                    className="text-sm"
+                    className="text-sm p-0 m-1"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-sidebar-accent/20 overflow-hidden">
+                    <div className="flex items-center gap-2 min-w-0 w-full px-2 py-1.5">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-sidebar-accent/20 border border-sidebar-border overflow-hidden">
                         {startup.logo_url ? (
                           <Image
                             src={startup.logo_url}
@@ -154,21 +153,20 @@ export function StartupSwitcher({
                       <span className="truncate">
                         {formatStartupDisplayName(startup)}
                       </span>
+                      <Check
+                        className={cn(
+                          'ml-auto h-4 w-4 text-green-700 dark:text-green-300',
+                          currentStartupId === startup.id
+                            ? 'opacity-100'
+                            : 'opacity-0',
+                        )}
+                      />
                     </div>
-                    <Check
-                      className={cn(
-                        'ml-auto h-4 w-4',
-                        currentStartupId === startup.id
-                          ? 'opacity-100'
-                          : 'opacity-0',
-                      )}
-                    />
                   </CommandItem>
                 ))}
-                <CommandSeparator />
               </CommandGroup>
             )}
-            <CommandGroup>
+            <CommandGroup className="pt-0">
               <CommandItem
                 onSelect={handleCreateNew}
                 className="text-sm p-0 m-1 !bg-green-50 dark:!bg-green-900/30 !text-green-700 dark:!text-green-300 aria-selected:!bg-green-100 dark:aria-selected:!bg-green-900/40 data-[selected=true]:!bg-green-100 dark:data-[selected=true]:!bg-green-900/40 hover:!bg-green-100 dark:hover:!bg-green-900/40 hover:!text-green-800 dark:hover:!text-green-200 !border !border-green-200 dark:!border-green-800 !rounded-sm"
@@ -176,7 +174,7 @@ export function StartupSwitcher({
               >
                 <div className="flex items-center gap-2 min-w-0 w-full px-2 py-1.5">
                   <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-green-100 dark:bg-green-800/50 border border-green-200 dark:border-green-700">
-                    <Plus className="h-3 w-3 text-green-700 dark:text-green-300" />
+                    <Plus className="h-3 w-3text-green-700 dark:text-green-300" />
                   </div>
                   <span className="truncate group-data-[collapsible=icon]:hidden">
                     Create

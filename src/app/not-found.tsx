@@ -2,18 +2,24 @@
 
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { FuzzyText } from '@/components/design/fuzzy-text'
-import { ArrowLeft, Home } from 'lucide-react'
 
 export default function NotFound() {
+  const router = useRouter()
+
+  const handleGoBack = () => {
+    router.back()
+  }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-      <div className="max-w-2xl mx-auto px-6 text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4 sm:px-6">
+      <div className="max-w-2xl mx-auto w-full text-center">
         {/* Fuzzy 404 Text */}
-        <div className="mb-8 flex justify-center">
+        <div className="mb-6 sm:mb-8 flex justify-center">
           <FuzzyText
-            fontSize="clamp(4rem, 12vw, 10rem)"
+            fontSize="clamp(3rem, 15vw, 10rem)"
             fontWeight={900}
             enableHover={true}
             baseIntensity={0.15}
@@ -24,38 +30,10 @@ export default function NotFound() {
           </FuzzyText>
         </div>
 
-        {/* Main heading */}
-        <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
-          Looks like this page got lost in the fundraising process. Don&apos;t
-          worry, we&apos;ll help you get back on track.
-        </p>
-
-        {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button asChild size="lg" className="w-full sm:w-auto">
-            <Link href="/">
-              <Home className="w-4 h-4 mr-2" />
-              Homepage
-            </Link>
-          </Button>
-
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="w-full sm:w-auto"
-          >
-            <Link href="/dashboard">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go to dashboard
-            </Link>
-          </Button>
-        </div>
-
         {/* Help text */}
-        <div className="mt-12 p-6 rounded-sm bg-muted/50 border">
-          <p className="text-sm text-muted-foreground">
-            If you think this is an error, please{' '}
+        <div className="mt-8 sm:mt-12 p-4 sm:p-6 mb-6 rounded-sm bg-muted/50 border">
+          <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
+            Looks like this page got lost in the fundraising process. If you think this is an error, please{' '}
             <a
               href="mailto:support@suparaise.com"
               className="text-primary hover:underline font-medium"
@@ -65,10 +43,28 @@ export default function NotFound() {
             and we&apos;ll help you out.
           </p>
         </div>
-      </div>
 
-      {/* Decorative background gradient */}
-      <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]"></div>
+        {/* Action buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md mx-auto">
+          <Button
+            onClick={handleGoBack}
+            size="lg"
+            className="w-full sm:w-auto bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-sm px-4"
+          >
+            Go back
+          </Button>
+
+          <Button
+            asChild
+            size="lg"
+            className="w-full sm:w-auto bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-sm px-4"
+          >
+            <Link href="/dashboard">
+              Dashboard
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

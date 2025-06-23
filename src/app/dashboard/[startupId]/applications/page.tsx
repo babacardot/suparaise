@@ -1,20 +1,41 @@
 import React from 'react'
+import { createClient } from '@/lib/supabase/server'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ startupId: string }>
+}): Promise<Metadata> {
+  const { startupId } = await params
+
+  try {
+    const supabase = await createClient()
+    const { data: startup } = await supabase
+      .from('startups')
+      .select('name')
+      .eq('id', startupId)
+      .single()
+
+    const startupName = startup?.name || 'Company'
+
+    return {
+      title: `${startupName} | Applications`,
+      description: `Track and manage your applications.`,
+    }
+  } catch {
+    return {
+      title: 'Suparaise | Applications',
+      description: 'Track and manage your applications.',
+    }
+  }
+}
 
 export default async function ApplicationsPage() {
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">VC Applications</h1>
-        <p className="text-muted-foreground">
-          Track your venture capital funding applications.
-        </p>
-      </div>
-
-      <div className="rounded-sm border p-8 text-center">
-        <h3 className="text-lg font-semibold">No applications yet</h3>
-        <p className="text-muted-foreground mt-2">
-          Start your first VC application to see your progress here.
-        </p>
+    <div className="space-y-6 hide-scrollbar">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight mt-1.5">Applications</h1>
       </div>
     </div>
   )

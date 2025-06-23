@@ -1,7 +1,6 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { LottieIcon } from '@/components/design/lottie-icon'
-
 import {
   SidebarGroup,
   SidebarGroupContent,

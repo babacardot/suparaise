@@ -132,11 +132,10 @@ export const Header = () => {
                           <SheetClose asChild key={index}>
                             <Link
                               href={item.href}
-                              className={`text-3xl font-semibold transition-colors duration-200 ${
-                                item.isGreen
-                                  ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
-                                  : 'text-foreground hover:text-muted-foreground'
-                              }`}
+                              className={`text-3xl font-semibold transition-colors duration-200 ${item.isGreen
+                                ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
+                                : 'text-foreground hover:text-muted-foreground'
+                                }`}
                             >
                               {item.name}
                             </Link>
@@ -146,11 +145,11 @@ export const Header = () => {
 
                       {/* Quote */}
                       <div className="mt-16">
-                        <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+                        <p className="text-sm text-muted-foreground max-w-md leading-relaxed italic font-medium">
                           Our AI agents automatically fill out application forms
                           and send personalized outreach to hundreds of relevant
-                          funds, while you focus on what matters: growing your
-                          business.
+                          funds, while you focus on what matters: building and
+                          scaling your business.
                         </p>
                       </div>
                     </div>

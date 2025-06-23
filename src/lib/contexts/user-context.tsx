@@ -25,6 +25,7 @@ interface UserContextType {
   user: User | null
   supabase: SupabaseClient
   loading: boolean
+  signingOut: boolean
   signOut: () => Promise<void>
   refreshUser: () => Promise<void>
 
@@ -62,6 +63,7 @@ interface UserProviderProps {
 export function UserProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [signingOut, setSigningOut] = useState(false)
 
   // Startup state
   const [startups, setStartups] = useState<StartupData[]>([])
@@ -199,20 +201,29 @@ export function UserProvider({ children }: UserProviderProps) {
   // Sign out function
   const signOut = useCallback(async () => {
     try {
+      // Immediately clear user state to prevent showing dashboard without data
+      setUser(null)
+      setStartups([])
+      setCurrentStartupId(null)
+      setStartupsInitialized(false)
+      setNeedsOnboarding(false)
+      setSigningOut(true)
+
+      // Navigate immediately to prevent showing dashboard without data
+      router.push('/')
+
+      // Then sign out from Supabase
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('Error signing out:', error)
-      } else {
-        setUser(null)
-        setStartups([])
-        setCurrentStartupId(null)
-        setStartupsInitialized(false)
-        setNeedsOnboarding(false)
-        router.push('/')
-        router.refresh()
       }
+
+      // Force a hard refresh to clear any cached state
+      window.location.href = '/'
     } catch (error) {
       console.error('Error in signOut:', error)
+      // Even if there's an error, try to redirect
+      window.location.href = '/'
     }
   }, [supabase, router])
 
@@ -247,12 +258,27 @@ export function UserProvider({ children }: UserProviderProps) {
       const newUser = session?.user ?? null
       setUser(newUser)
 
+      // Handle different auth events
+      if (event === 'SIGNED_OUT') {
+        // Reset all state immediately when signed out
+        setStartups([])
+        setCurrentStartupId(null)
+        setStartupsInitialized(false)
+        setNeedsOnboarding(false)
+        setSigningOut(false)
+
+        // Redirect to home page
+        window.location.href = '/'
+        return
+      }
+
       // Reset startup state when user changes
       if (!newUser) {
         setStartups([])
         setCurrentStartupId(null)
         setStartupsInitialized(false)
         setNeedsOnboarding(false)
+        setSigningOut(false)
       }
 
       setLoading(false)
@@ -276,6 +302,7 @@ export function UserProvider({ children }: UserProviderProps) {
       user,
       supabase,
       loading,
+      signingOut,
       signOut,
       refreshUser,
 
@@ -299,6 +326,7 @@ export function UserProvider({ children }: UserProviderProps) {
       user,
       supabase,
       loading,
+      signingOut,
       signOut,
       refreshUser,
       startups,

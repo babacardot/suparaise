@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Suparaise | AI-Powered Fundraising Automation',
   description:
-    'Automate your startup fundraising with AI agents that fill out VC applications and handle investor outreach.',
+    'Automate your startup fundraising with agents that fill out VC applications and handle investor outreach.',
 }
 
 export const viewport: Viewport = {

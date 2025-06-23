@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { useUser } from '@/lib/contexts/user-context'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import {
@@ -24,9 +25,11 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
   const {
     user,
     loading,
+    signingOut,
     needsOnboarding,
     setNeedsOnboarding,
     startups,
@@ -38,6 +41,52 @@ export default function DashboardLayout({
 
   // Add state for new startup creation dialog
   const [isCreatingNewStartup, setIsCreatingNewStartup] = useState(false)
+
+  // Determine breadcrumbs based on current pathname
+  const getBreadcrumbs = () => {
+    if (pathname?.includes('/funds')) {
+      return [
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Funds', isCurrentPage: true },
+      ]
+    } else if (pathname?.includes('/applications')) {
+      return [
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Applications', isCurrentPage: true },
+      ]
+    } else if (pathname?.includes('/home')) {
+      return [
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Home', isCurrentPage: true },
+      ]
+    } else if (pathname?.includes('/settings')) {
+      // Settings breadcrumbs
+      if (pathname?.includes('/settings/company')) {
+        return [
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: `/dashboard/${currentStartupId}/settings` },
+          { label: 'Company', isCurrentPage: true },
+        ]
+      } else if (pathname?.includes('/settings/agent')) {
+        return [
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: `/dashboard/${currentStartupId}/settings` },
+          { label: 'Agents', isCurrentPage: true },
+        ]
+      } else {
+        return [
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: `/dashboard/${currentStartupId}/settings` },
+          { label: 'Profile', isCurrentPage: true },
+        ]
+      }
+    } else {
+      return [
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Overview', isCurrentPage: true },
+      ]
+    }
+  }
 
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
@@ -79,7 +128,17 @@ export default function DashboardLayout({
     setIsCreatingNewStartup(true)
   }
 
-  if (loading) {
+  if (loading || signingOut) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner className="h-5 w-5" />
+      </div>
+    )
+  }
+
+  // If user is null and not loading, redirect immediately
+  if (!user && !loading && !signingOut) {
+    window.location.href = '/'
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner className="h-5 w-5" />
@@ -93,12 +152,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-                name: user.user_metadata?.full_name || user.email || '',
-                email: user.email || '',
-                avatar: user.user_metadata?.avatar_url,
-                startupName: currentStartup?.name || undefined,
-                startupLogo: currentStartup?.logo_url || undefined,
-              }
+              name: user.user_metadata?.full_name || user.email || '',
+              email: user.email || '',
+              avatar: user.user_metadata?.avatar_url,
+              startupName: currentStartup?.name || undefined,
+              startupLogo: currentStartup?.logo_url || undefined,
+            }
             : null
         }
         startups={startups}
@@ -112,7 +171,7 @@ export default function DashboardLayout({
             <SidebarTrigger className="-ml-1" onClick={playClickSound} />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <div className="-ml-2">
-              <TopBanner />
+              <TopBanner breadcrumbs={getBreadcrumbs()} />
             </div>
           </div>
         </header>

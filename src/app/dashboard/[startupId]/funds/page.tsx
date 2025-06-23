@@ -1,6 +1,36 @@
 import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import FundsTable from '@/components/dashboard/funds-table'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ startupId: string }>
+}): Promise<Metadata> {
+  const { startupId } = await params
+
+  try {
+    const supabase = await createClient()
+    const { data: startup } = await supabase
+      .from('startups')
+      .select('name')
+      .eq('id', startupId)
+      .single()
+
+    const startupName = startup?.name || 'Company'
+
+    return {
+      title: `${startupName} | Funds`,
+      description: `Browse and apply to funds.`,
+    }
+  } catch {
+    return {
+      title: 'Suparaise | Funds',
+      description: 'Browse and apply to funds.',
+    }
+  }
+}
 
 type Target = {
   id: string
@@ -39,15 +69,13 @@ export default async function FundsPage() {
   const targets = await getTargets()
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Funds</h1>
-        <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
-          Find the right investors and apply with a click.
-        </p>
+    <div className="h-full flex flex-col overflow-hidden hide-scrollbar">
+      <div className="flex-shrink-0 pb-4">
+        <h1 className="text-3xl font-bold tracking-tight mt-1.5">Funds</h1>
       </div>
-
-      <FundsTable targets={targets} />
+      <div className="flex-1 overflow-hidden hide-scrollbar">
+        <FundsTable targets={targets} />
+      </div>
     </div>
   )
 }

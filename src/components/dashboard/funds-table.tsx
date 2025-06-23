@@ -25,8 +25,6 @@ import {
   FileText,
   Video,
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
   DollarSign,
   BarChart,
   Users,
@@ -54,16 +52,8 @@ interface FundsTableProps {
   targets: Target[]
 }
 
-const ITEMS_PER_PAGE = 200
-
 export default function FundsTable({ targets }: FundsTableProps) {
   const [hoveredButton, setHoveredButton] = React.useState<string | null>(null)
-  const [currentPage, setCurrentPage] = React.useState(1)
-
-  const totalPages = Math.ceil(targets.length / ITEMS_PER_PAGE)
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const currentTargets = targets.slice(startIndex, endIndex)
 
   const getSubmissionTypeColor = (type: string) => {
     switch (type) {
@@ -167,305 +157,274 @@ export default function FundsTable({ targets }: FundsTableProps) {
 
   return (
     <TooltipProvider>
-      <div className="space-y-4">
-        <div className="rounded-sm border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[180px]">Name</TableHead>
-                <TableHead className="w-[70px]">Type</TableHead>
-                <TableHead className="w-[100px]">Stage</TableHead>
-                <TableHead className="w-[100px]">Industry</TableHead>
-                <TableHead className="w-[90px]">Complexity</TableHead>
-                <TableHead className="w-[110px]">Requirements</TableHead>
-                <TableHead className="w-[60px]">X</TableHead>
-                <TableHead className="w-[60px]">Y</TableHead>
-                <TableHead className="w-[60px]">Z</TableHead>
-                <TableHead className="text-right w-[120px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {currentTargets.map((target) => (
-                <TableRow key={target.id}>
-                  <TableCell className="font-medium p-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{target.name}</span>
-                        {target.website && (
-                          <a
-                            href={target.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        )}
-                      </div>
-                      {target.notes && (
-                        <p className="text-xs text-muted-foreground leading-relaxed max-w-[160px]">
-                          {target.notes}
-                        </p>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-2">
-                    <Badge
-                      className={`rounded-sm text-xs ${getSubmissionTypeColor(target.submission_type)}`}
-                    >
-                      {target.submission_type === 'form' && (
-                        <FileText className="h-3 w-3 mr-1" />
-                      )}
-                      {target.submission_type === 'email' && (
-                        <Mail className="h-3 w-3 mr-1" />
-                      )}
-                      {target.submission_type === 'other' && (
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                      )}
-                      {target.submission_type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="p-2">
-                    <div className="flex flex-wrap gap-1">
-                      {target.stage_focus?.slice(0, 2).map((stage) => (
+      <div className="h-full flex flex-col">
+        <div className="flex-1 min-h-0">
+          <div className="h-full rounded-sm border overflow-hidden">
+            <div className="h-full overflow-auto hide-scrollbar">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background z-10 border-b">
+                  <TableRow>
+                    <TableHead className="w-[180px]">Name</TableHead>
+                    <TableHead className="w-[70px]">Type</TableHead>
+                    <TableHead className="w-[100px]">Stage</TableHead>
+                    <TableHead className="w-[100px]">Industry</TableHead>
+                    <TableHead className="w-[90px]">Complexity</TableHead>
+                    <TableHead className="w-[110px]">Requirements</TableHead>
+                    <TableHead className="w-[60px]">X</TableHead>
+                    <TableHead className="w-[60px]">Y</TableHead>
+                    <TableHead className="w-[60px]">Z</TableHead>
+                    <TableHead className="text-right w-[120px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {targets.map((target) => (
+                    <TableRow key={target.id}>
+                      <TableCell className="font-medium p-2">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{target.name}</span>
+                            {target.website && (
+                              <a
+                                href={target.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                          {target.notes && (
+                            <p className="text-xs text-muted-foreground leading-relaxed max-w-[160px]">
+                              {target.notes}
+                            </p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-2">
                         <Badge
-                          key={stage}
-                          className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs"
+                          className={`rounded-sm text-xs ${getSubmissionTypeColor(target.submission_type)}`}
                         >
-                          {stage}
+                          {target.submission_type === 'form' && (
+                            <FileText className="h-3 w-3 mr-1" />
+                          )}
+                          {target.submission_type === 'email' && (
+                            <Mail className="h-3 w-3 mr-1" />
+                          )}
+                          {target.submission_type === 'other' && (
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                          )}
+                          {target.submission_type}
                         </Badge>
-                      ))}
-                      {target.stage_focus && target.stage_focus.length > 2 && (
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
-                              +{target.stage_focus.length - 2}
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <div className="flex flex-wrap gap-1">
+                          {target.stage_focus?.slice(0, 2).map((stage) => (
+                            <Badge
+                              key={stage}
+                              className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs"
+                            >
+                              {stage}
                             </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <div className="space-y-1">
-                              {target.stage_focus.slice(2).map((stage) => (
-                                <div key={stage} className="text-xs">
-                                  {stage}
-                                </div>
-                              ))}
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-2">
-                    <div className="flex flex-wrap gap-1">
-                      {target.industry_focus?.slice(0, 2).map((industry) => (
-                        <Badge
-                          key={industry}
-                          className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs"
-                        >
-                          {industry}
-                        </Badge>
-                      ))}
-                      {target.industry_focus &&
-                        target.industry_focus.length > 2 && (
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
-                                +{target.industry_focus.length - 2}
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <div className="space-y-1">
-                                {target.industry_focus
-                                  .slice(2)
-                                  .map((industry) => (
-                                    <div key={industry} className="text-xs">
-                                      {industry}
+                          ))}
+                          {target.stage_focus && target.stage_focus.length > 2 && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
+                                  +{target.stage_focus.length - 2}
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <div className="space-y-1">
+                                  {target.stage_focus.slice(2).map((stage) => (
+                                    <div key={stage} className="text-xs">
+                                      {stage}
                                     </div>
                                   ))}
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-2">
-                    <div className="flex flex-wrap gap-1">
-                      {target.form_complexity && (
-                        <Badge
-                          className={`rounded-sm text-xs ${getComplexityColor(target.form_complexity)}`}
-                        >
-                          {capitalizeFirst(target.form_complexity)}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-2">
-                    <div className="flex flex-wrap gap-1">
-                      {target.required_documents?.slice(0, 2).map((docType) => {
-                        const docBadge = getDocumentBadge(docType)
-                        return (
-                          <Badge
-                            key={docType}
-                            className={`rounded-sm text-xs ${docBadge.color}`}
-                          >
-                            {docBadge.icon}
-                            {docBadge.label}
-                          </Badge>
-                        )
-                      })}
-                      {target.required_documents &&
-                        target.required_documents.length > 2 && (
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
-                                +{target.required_documents.length - 2}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <div className="flex flex-wrap gap-1">
+                          {target.industry_focus?.slice(0, 2).map((industry) => (
+                            <Badge
+                              key={industry}
+                              className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs"
+                            >
+                              {industry}
+                            </Badge>
+                          ))}
+                          {target.industry_focus &&
+                            target.industry_focus.length > 2 && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
+                                    +{target.industry_focus.length - 2}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="space-y-1">
+                                    {target.industry_focus
+                                      .slice(2)
+                                      .map((industry) => (
+                                        <div key={industry} className="text-xs">
+                                          {industry}
+                                        </div>
+                                      ))}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <div className="flex flex-wrap gap-1">
+                          {target.form_complexity && (
+                            <Badge
+                              className={`rounded-sm text-xs ${getComplexityColor(target.form_complexity)}`}
+                            >
+                              {capitalizeFirst(target.form_complexity)}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <div className="flex flex-wrap gap-1">
+                          {target.required_documents?.slice(0, 2).map((docType) => {
+                            const docBadge = getDocumentBadge(docType)
+                            return (
+                              <Badge
+                                key={docType}
+                                className={`rounded-sm text-xs ${docBadge.color}`}
+                              >
+                                {docBadge.icon}
+                                {docBadge.label}
                               </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <div className="space-y-1">
-                                {target.required_documents
-                                  .slice(2)
-                                  .map((docType) => {
-                                    const docBadge = getDocumentBadge(docType)
-                                    return (
-                                      <div
-                                        key={docType}
-                                        className="text-xs flex items-center gap-1"
-                                      >
-                                        {docBadge.icon}
-                                        {docBadge.label}
-                                      </div>
-                                    )
-                                  })}
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-2">
-                    <div className="text-xs text-muted-foreground">
-                      {/* Placeholder for X column */}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-2">
-                    <div className="text-xs text-muted-foreground">
-                      {/* Placeholder for Y column */}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-2">
-                    <div className="text-xs text-muted-foreground">
-                      {/* Placeholder for Z column */}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right p-2">
-                    <div className="flex justify-end">
-                      {target.submission_type === 'form' && (
-                        <Button
-                          size="sm"
-                          onClick={() =>
-                            handleApplyForm(target.application_url)
-                          }
-                          onMouseEnter={() =>
-                            setHoveredButton(`apply-${target.id}`)
-                          }
-                          onMouseLeave={() => setHoveredButton(null)}
-                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-3 text-sm h-8"
-                        >
-                          <LottieIcon
-                            animationData={animations.takeoff}
-                            size={14}
-                            className="mr-1"
-                            isHovered={hoveredButton === `apply-${target.id}`}
-                          />
-                          Apply
-                        </Button>
-                      )}
-                      {target.submission_type === 'email' &&
-                        target.application_email && (
-                          <Button
-                            size="sm"
-                            onClick={() =>
-                              handleSendEmail(target.application_email)
-                            }
-                            onMouseEnter={() =>
-                              setHoveredButton(`email-${target.id}`)
-                            }
-                            onMouseLeave={() => setHoveredButton(null)}
-                            className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 rounded-sm px-3 text-sm h-8"
-                          >
-                            <LottieIcon
-                              animationData={animations.mailopen}
-                              size={14}
-                              className="mr-1"
-                              isHovered={hoveredButton === `email-${target.id}`}
-                            />
-                            Send Email
-                          </Button>
-                        )}
-                      {target.submission_type === 'other' && (
-                        <Button
-                          size="sm"
-                          onClick={() =>
-                            handleLearnMore(target.application_url)
-                          }
-                          onMouseEnter={() =>
-                            setHoveredButton(`learn-${target.id}`)
-                          }
-                          onMouseLeave={() => setHoveredButton(null)}
-                          className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/40 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-800 rounded-sm px-3 text-sm h-8"
-                        >
-                          <LottieIcon
-                            animationData={animations.info}
-                            size={14}
-                            className="mr-1"
-                            isHovered={hoveredButton === `learn-${target.id}`}
-                          />
-                          Learn More
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              Showing {startIndex + 1} to {Math.min(endIndex, targets.length)}{' '}
-              of {targets.length} funds
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="h-8 w-8 p-0"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm font-medium">
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-                className="h-8 w-8 p-0"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+                            )
+                          })}
+                          {target.required_documents &&
+                            target.required_documents.length > 2 && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
+                                    +{target.required_documents.length - 2}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="space-y-1">
+                                    {target.required_documents
+                                      .slice(2)
+                                      .map((docType) => {
+                                        const docBadge = getDocumentBadge(docType)
+                                        return (
+                                          <div
+                                            key={docType}
+                                            className="text-xs flex items-center gap-1"
+                                          >
+                                            {docBadge.icon}
+                                            {docBadge.label}
+                                          </div>
+                                        )
+                                      })}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <div className="text-xs text-muted-foreground">
+                          {/* Placeholder for X column */}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <div className="text-xs text-muted-foreground">
+                          {/* Placeholder for Y column */}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <div className="text-xs text-muted-foreground">
+                          {/* Placeholder for Z column */}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right p-2">
+                        <div className="flex justify-end">
+                          {target.submission_type === 'form' && (
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleApplyForm(target.application_url)
+                              }
+                              onMouseEnter={() =>
+                                setHoveredButton(`apply-${target.id}`)
+                              }
+                              onMouseLeave={() => setHoveredButton(null)}
+                              className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-3 text-sm h-8"
+                            >
+                              <LottieIcon
+                                animationData={animations.takeoff}
+                                size={14}
+                                className="mr-1"
+                                isHovered={hoveredButton === `apply-${target.id}`}
+                              />
+                              Apply
+                            </Button>
+                          )}
+                          {target.submission_type === 'email' &&
+                            target.application_email && (
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  handleSendEmail(target.application_email)
+                                }
+                                onMouseEnter={() =>
+                                  setHoveredButton(`email-${target.id}`)
+                                }
+                                onMouseLeave={() => setHoveredButton(null)}
+                                className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 rounded-sm px-3 text-sm h-8"
+                              >
+                                <LottieIcon
+                                  animationData={animations.mailopen}
+                                  size={14}
+                                  className="mr-1"
+                                  isHovered={hoveredButton === `email-${target.id}`}
+                                />
+                                Send Email
+                              </Button>
+                            )}
+                          {target.submission_type === 'other' && (
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleLearnMore(target.application_url)
+                              }
+                              onMouseEnter={() =>
+                                setHoveredButton(`learn-${target.id}`)
+                              }
+                              onMouseLeave={() => setHoveredButton(null)}
+                              className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/40 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-800 rounded-sm px-3 text-sm h-8"
+                            >
+                              <LottieIcon
+                                animationData={animations.info}
+                                size={14}
+                                className="mr-1"
+                                isHovered={hoveredButton === `learn-${target.id}`}
+                              />
+                              Learn More
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </TooltipProvider>
   )

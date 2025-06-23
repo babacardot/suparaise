@@ -1,5 +1,11 @@
 import { Header } from '@/components/design/header'
 import { Footer } from '@/components/design/footer'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Suparaise | Terms',
+  description: 'Read the terms and conditions for using our services.',
+}
 
 export default function TermsPage() {
   return (

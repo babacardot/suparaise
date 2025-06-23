@@ -87,7 +87,9 @@ export const Footer = () => {
             }
           >
             <LottieIcon
-              animationData={animations.point}
+              animationData={
+                theme === 'dark' ? animations.sun : animations.point
+              }
               size={16}
               loop={false}
               autoplay={false}
