@@ -212,7 +212,7 @@ const FileUploadComponent: React.FC<
               className="w-full"
             >
               {uploadStatus === 'uploading' ? (
-                <Spinner className="mr-2" />
+                <Spinner className="mr-2 h-3 w-3" />
               ) : (
                 <FileUp className="mr-2 h-4 w-4" />
               )}

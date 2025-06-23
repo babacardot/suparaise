@@ -13,22 +13,22 @@ export default async function HomePage() {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {/* Dashboard metrics would go here */}
-                <div className="p-6 bg-card text-card-foreground rounded-lg border">
+                <div className="p-6 bg-card text-card-foreground rounded-sm border">
                     <h3 className="font-semibold">Total Applications</h3>
                     <p className="text-2xl font-bold mt-2">0</p>
                 </div>
 
-                <div className="p-6 bg-card text-card-foreground rounded-lg border">
+                <div className="p-6 bg-card text-card-foreground rounded-sm border">
                     <h3 className="font-semibold">In Progress</h3>
                     <p className="text-2xl font-bold mt-2">0</p>
                 </div>
 
-                <div className="p-6 bg-card text-card-foreground rounded-lg border">
+                <div className="p-6 bg-card text-card-foreground rounded-sm border">
                     <h3 className="font-semibold">Completed</h3>
                     <p className="text-2xl font-bold mt-2">0</p>
                 </div>
 
-                <div className="p-6 bg-card text-card-foreground rounded-lg border">
+                <div className="p-6 bg-card text-card-foreground rounded-sm border">
                     <h3 className="font-semibold">Success Rate</h3>
                     <p className="text-2xl font-bold mt-2">-</p>
                 </div>

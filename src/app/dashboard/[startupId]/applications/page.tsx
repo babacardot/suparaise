@@ -10,7 +10,7 @@ export default async function ApplicationsPage() {
                 </p>
             </div>
 
-            <div className="rounded-lg border p-8 text-center">
+            <div className="rounded-sm border p-8 text-center">
                 <h3 className="text-lg font-semibold">No applications yet</h3>
                 <p className="text-muted-foreground mt-2">
                     Start your first VC application to see your progress here.

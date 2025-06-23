@@ -955,7 +955,7 @@ export function OnboardingDialog({
                   disabled={loading}
                   className="ml-auto bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
                 >
-                  {loading ? <Spinner /> : 'Submit'}
+                  {loading ? <Spinner className="h-3 w-3" /> : 'Submit'}
                 </ExpandButton>
               )}
             </motion.div>
@@ -980,9 +980,15 @@ export function OnboardingDialog({
               <Button variant="outline" onClick={handleCancelExit}>
                 No
               </Button>
-              <Button variant="destructive" onClick={handleConfirmExit}>
+              <ExpandButton
+                onClick={handleConfirmExit}
+                className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-800 dark:hover:text-red-200 border border-red-200 dark:border-red-800"
+                Icon={ArrowRight}
+                iconPlacement="right"
+                justify="end"
+              >
                 Yes
-              </Button>
+              </ExpandButton>
             </div>
           </DialogContent>
         </Dialog>

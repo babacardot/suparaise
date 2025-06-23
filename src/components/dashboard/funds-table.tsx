@@ -136,7 +136,7 @@ export default function FundsTable({ targets }: FundsTableProps) {
     return (
         <TooltipProvider>
             <div className="space-y-4">
-                <div className="rounded-md border overflow-hidden">
+                <div className="rounded-sm border overflow-hidden">
                     <Table>
                         <TableHeader>
                             <TableRow>

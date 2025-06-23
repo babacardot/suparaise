@@ -13,14 +13,11 @@ export default function PrivacyPage() {
 
           <div className="mx-auto max-w-4xl px-6 py-16">
             {/* Header Section */}
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center justify-center rounded-full bg-muted px-3 py-1 text-sm font-medium mb-4">
-                Privacy & Security
-              </div>
+            <div className="text-start mb-16">
               <h1 className="text-5xl font-bold tracking-tight mb-6">
-                Privacy Policy
+                Privacy policy
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-5xl">
                 Your privacy is important to us. This policy explains how we
                 collect, use, and protect your information.
               </p>
@@ -31,18 +28,15 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      1
-                    </div>
+                  <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
-                      Information We Collect
+                      Information we collect
                     </h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
                     We collect information you provide directly to us, such as
-                    when you create an account, submit startup information, or
-                    contact us for support. This includes personal details,
+                    when you create an account, submit your startup information,
+                    or contact us for support. This includes personal details,
                     business information, and communication preferences.
                   </p>
                 </div>
@@ -51,12 +45,9 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      2
-                    </div>
+                  <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
-                      How We Use Your Information
+                      How we use your information
                     </h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
@@ -72,12 +63,9 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      3
-                    </div>
+                  <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
-                      Information Sharing
+                      Information sharing
                     </h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
@@ -92,11 +80,8 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      4
-                    </div>
-                    <h2 className="text-2xl font-semibold">Data Security</h2>
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold">Data security</h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
                     We implement appropriate security measures to protect your
@@ -110,11 +95,8 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      5
-                    </div>
-                    <h2 className="text-2xl font-semibold">Data Retention</h2>
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold">Data retention</h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
                     We retain your information for as long as your account is
@@ -128,11 +110,8 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      6
-                    </div>
-                    <h2 className="text-2xl font-semibold">Your Rights</h2>
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold">Your rights</h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
                     You have the right to access, update, or delete your
@@ -146,12 +125,9 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      7
-                    </div>
+                  <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
-                      Cookies and Tracking
+                      Cookies and tracking
                     </h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
@@ -166,12 +142,9 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      8
-                    </div>
+                  <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
-                      Changes to This Policy
+                      Changes to this policy
                     </h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
@@ -186,25 +159,26 @@ export default function PrivacyPage() {
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
                 <div className="pl-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      9
-                    </div>
-                    <h2 className="text-2xl font-semibold">Contact Us</h2>
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold">Contact</h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
-                    If you have any questions about this Privacy Policy, please
+                    If you have any questions about this privacy policy, please
                     contact us through our website or reach out to our support
-                    team for assistance.
+                    team for assistance from the dashboard or via email at{' '}
+                    <a href="mailto:hello@suparaise.com" className="text-primary">
+                      hello@suparaise.com
+                    </a>
+                    .
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Footer info */}
-            <div className="mt-20 pt-8 border-t border-border text-center">
+            <div className="mt-20 pt-8 border-t border-border text-end">
               <p className="text-sm text-muted-foreground">
-                Last updated:{' '}
+                {' '}
                 {new Date().toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
