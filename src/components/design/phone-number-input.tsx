@@ -102,7 +102,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         className={cn(
-          'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30',
+          'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-background',
           'flex h-9 w-full min-w-0 bg-transparent px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium',
           'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
           'border-0 shadow-none rounded-l-none rounded-r-sm',
@@ -141,7 +141,7 @@ const CountrySelect = ({
       className={cn(
         'PhoneInputCountry relative inline-flex items-center self-stretch bg-transparent text-foreground outline-none',
         'flex h-9 min-w-0 px-3 py-1 border-0 shadow-none rounded-l-sm rounded-r-none',
-        'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30',
+        'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-background',
         disabled && 'pointer-events-none cursor-not-allowed opacity-50',
       )}
     >

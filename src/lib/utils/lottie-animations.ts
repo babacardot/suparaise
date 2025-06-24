@@ -89,6 +89,7 @@ import upgradeAnimation from '@/assets/lottie/upgrade.json'
 import view2Animation from '@/assets/lottie/view2.json'
 import view3Animation from '@/assets/lottie/view3.json'
 import visibilityAnimation from '@/assets/lottie/visibility.json'
+import editAnimation from '@/assets/lottie/edit.json'
 
 // Lottie animation data type
 export interface LottieAnimationData {
@@ -197,6 +198,7 @@ export const animations = {
   view2: view2Animation,
   view3: view3Animation,
   visibility: visibilityAnimation,
+  edit: editAnimation,
 }
 
 // Also export individual animations for direct import
@@ -291,4 +293,5 @@ export {
   view2Animation,
   view3Animation,
   visibilityAnimation,
+  editAnimation,
 }

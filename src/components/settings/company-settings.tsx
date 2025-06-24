@@ -216,6 +216,7 @@ export default function CompanySettings() {
     currentRunway: 0,
     keyCustomers: '',
     competitors: '',
+    competitorsList: [],
     logoUrl: null as string | null,
   })
 
@@ -250,6 +251,7 @@ export default function CompanySettings() {
             currentRunway: data.currentRunway || 0,
             keyCustomers: data.keyCustomers || '',
             competitors: data.competitors || '',
+            competitorsList: data.competitors ? data.competitors.split(', ').filter(Boolean) : [],
             logoUrl: data.logoUrl || null,
           })
         }
@@ -546,8 +548,8 @@ export default function CompanySettings() {
                   formData.logoUrl ||
                   `https://avatar.vercel.sh/${encodeURIComponent(
                     formData.name.toLowerCase() ||
-                      currentStartupId ||
-                      'suparaise',
+                    currentStartupId ||
+                    'suparaise',
                   )}.png?size=80`
                 }
                 alt="Company logo"
@@ -1187,7 +1189,7 @@ export default function CompanySettings() {
                         disabled={
                           isLoading ||
                           startupDeleteConfirmation !==
-                            (formData.name || 'CONFIRM')
+                          (formData.name || 'CONFIRM')
                         }
                         className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                         onClick={handleStartupDelete}

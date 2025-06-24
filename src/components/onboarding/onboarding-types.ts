@@ -65,6 +65,7 @@ export interface StartupData {
   currentRunway: number
   keyCustomers: string
   competitors: string
+  competitorsList: string[]
   logoFile: File | null
   pitchDeckFile: File | null
   introVideoFile: File | null

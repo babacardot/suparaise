@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -154,6 +154,74 @@ const getBadgeColor = (index: number) => {
   return colors[index % colors.length]
 }
 
+// Competitor Input Component
+const CompetitorInput: React.FC<{
+  competitors: string[]
+  onChange: (competitors: string[]) => void
+}> = ({ competitors, onChange }) => {
+  const [inputValue, setInputValue] = useState('')
+
+  const addCompetitor = () => {
+    const trimmedValue = inputValue.trim()
+    if (trimmedValue && !competitors.includes(trimmedValue)) {
+      onChange([...competitors, trimmedValue])
+      setInputValue('')
+    }
+  }
+
+  const removeCompetitor = (competitorToRemove: string) => {
+    onChange(competitors.filter(c => c !== competitorToRemove))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addCompetitor()
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        <Input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type competitor name and press Enter..."
+        />
+        <Button
+          type="button"
+          variant="outline"
+          onClick={addCompetitor}
+          disabled={!inputValue.trim()}
+          className="shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+      {competitors.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {competitors.map((competitor, index) => (
+            <Badge
+              key={competitor}
+              className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
+            >
+              {competitor}
+              <button
+                onClick={() => removeCompetitor(competitor)}
+                className="ml-1.5"
+                aria-label={`Remove ${competitor}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // File Upload Component
 const FileUploadComponent: React.FC<
   FileUploadProps & {
@@ -175,119 +243,119 @@ const FileUploadComponent: React.FC<
   description,
   label,
 }) => {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  useEffect(() => {
-    if ((type === 'logo' || type === 'introVideo') && file) {
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
+    useEffect(() => {
+      if ((type === 'logo' || type === 'introVideo') && file) {
+        const url = URL.createObjectURL(file)
+        setPreviewUrl(url)
 
-      return () => {
-        URL.revokeObjectURL(url)
+        return () => {
+          URL.revokeObjectURL(url)
+          setPreviewUrl(null)
+        }
+      } else {
         setPreviewUrl(null)
       }
-    } else {
-      setPreviewUrl(null)
-    }
-  }, [file, type])
+    }, [file, type])
 
-  return (
-    <div className="space-y-2">
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => {
-          const selectedFile = e.target.files?.[0]
-          if (selectedFile) onUpload(type, selectedFile)
-        }}
-        disabled={uploadStatus === 'uploading'}
-      />
-      {!file && (
-        <div className="flex flex-col space-y-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => inputRef.current?.click()}
-            disabled={uploadStatus === 'uploading'}
-            className="w-full"
-          >
-            {uploadStatus === 'uploading' ? (
-              <Spinner className="mr-2 h-3 w-3" />
-            ) : (
-              <FileUp className="mr-2 h-4 w-4" />
-            )}
-            {uploadStatus === 'uploading' ? 'Uploading...' : label}
-          </Button>
-          <p className="text-xs text-muted-foreground text-right">
-            {description} (max {maxSize})
-          </p>
-        </div>
-      )}
-      {file && (
-        <div className="border rounded-sm p-4 relative">
-          <div className="flex items-center space-x-3">
-            {previewUrl ? (
-              type === 'logo' ? (
-                <Image
-                  src={previewUrl}
-                  alt="Logo preview"
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 rounded-sm object-contain"
-                />
+    return (
+      <div className="space-y-2">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => {
+            const selectedFile = e.target.files?.[0]
+            if (selectedFile) onUpload(type, selectedFile)
+          }}
+          disabled={uploadStatus === 'uploading'}
+        />
+        {!file && (
+          <div className="flex flex-col space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploadStatus === 'uploading'}
+              className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            >
+              {uploadStatus === 'uploading' ? (
+                <Spinner className="mr-2 h-3 w-3" />
               ) : (
-                <video
-                  src={previewUrl}
-                  muted
-                  playsInline
-                  className="h-12 w-16 rounded-sm object-contain"
-                />
-              )
-            ) : (
-              <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
-                <FileIcon className="h-6 w-6" />
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {uploadStatus === 'uploading'
-                  ? `${formatFileSize(
+                <FileUp className="mr-2 h-4 w-4" />
+              )}
+              {uploadStatus === 'uploading' ? 'Uploading...' : label}
+            </Button>
+            <p className="text-xs text-muted-foreground text-right">
+              {description} (max {maxSize})
+            </p>
+          </div>
+        )}
+        {file && (
+          <div className="border rounded-sm p-4 relative">
+            <div className="flex items-center space-x-3">
+              {previewUrl ? (
+                type === 'logo' ? (
+                  <Image
+                    src={previewUrl}
+                    alt="Logo preview"
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 rounded-sm object-contain"
+                  />
+                ) : (
+                  <video
+                    src={previewUrl}
+                    muted
+                    playsInline
+                    className="h-12 w-16 rounded-sm object-contain"
+                  />
+                )
+              ) : (
+                <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
+                  <FileIcon className="h-6 w-6" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{file.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {uploadStatus === 'uploading'
+                    ? `${formatFileSize(
                       (uploadProgress / 100) * file.size,
                     )} of ${formatFileSize(file.size)}`
-                  : formatFileSize(file.size)}
-              </p>
+                    : formatFileSize(file.size)}
+                </p>
+              </div>
             </div>
-          </div>
-          {uploadStatus === 'uploading' && (
-            <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
-              <div
-                className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                style={{ width: `${uploadProgress}%` }}
-              />
-            </div>
-          )}
-          {uploadStatus === 'failed' && (
+            {uploadStatus === 'uploading' && (
+              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+                <div
+                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+            {uploadStatus === 'failed' && (
+              <button
+                onClick={() => onUpload(type, file)}
+                className="mt-2 text-sm text-red-500 hover:underline"
+              >
+                Try again
+              </button>
+            )}
             <button
-              onClick={() => onUpload(type, file)}
-              className="mt-2 text-sm text-red-500 hover:underline"
+              onClick={onRemove}
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              Try again
+              <X className="h-4 w-4" />
             </button>
-          )}
-          <button
-            onClick={onRemove}
-            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
+          </div>
+        )}
+      </div>
+    )
+  }
 
 const MultiSelectCountries: React.FC<{
   selected: string[]
@@ -309,13 +377,12 @@ const MultiSelectCountries: React.FC<{
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between font-normal"
+          className="w-full justify-between font-normal hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -640,13 +707,23 @@ export const TeamStep: React.FC<
                 onChange={(e) => updateFounder(index, 'bio', e.target.value)}
                 placeholder="Former Google engineer with 8 years in ML. Built 3 products from 0 to 1M users, currently building a new startup: Happy AI."
                 rows={3}
+                enableAI={true}
+                aiFieldType="bio"
+                aiContext={{
+                  founderName:
+                    `${founder.firstName} ${founder.lastName}`.trim(),
+                  role: founder.role,
+                }}
+                onAIEnhance={(enhancedText) =>
+                  updateFounder(index, 'bio', enhancedText)
+                }
               />
             </div>
           </CardContent>
         </Card>
       ))}
 
-      <Button variant="outline" onClick={addFounder} className="w-full">
+      <Button variant="outline" onClick={addFounder} className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
         <Plus className="h-4 w-4 mr-2" />
         Add co-founder
       </Button>
@@ -773,11 +850,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="industry"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
-                fieldErrors.industry
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-input'
-              }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
+                ? 'border-red-500 focus:border-red-500'
+                : 'border-input'
+                }`}
               value={startup.industry || ''}
               onChange={(e) =>
                 setStartup({
@@ -945,7 +1021,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
         <div className="space-y-2">
           <Label htmlFor="one-liner">One-liner *</Label>
-          <Input
+          <Textarea
             id="one-liner"
             value={startup.descriptionShort}
             onChange={(e) =>
@@ -954,6 +1030,16 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             placeholder="AI workflow automation that saves teams 20+ hours weekly."
             maxLength={100}
             required
+            rows={2}
+            enableAI={true}
+            aiFieldType="description-short"
+            aiContext={{
+              companyName: startup.name,
+              industry: startup.industry || undefined,
+            }}
+            onAIEnhance={(enhancedText) =>
+              setStartup({ ...startup, descriptionShort: enhancedText })
+            }
             className={
               fieldErrors.descriptionShort
                 ? 'border-red-500 focus:border-red-500'
@@ -965,7 +1051,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               {fieldErrors.descriptionShort}
             </p>
           )}
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground text-right justify-end mt-1">
             {startup.descriptionShort.length}/100 characters
           </p>
         </div>
@@ -982,6 +1068,15 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             rows={3}
             maxLength={300}
             required
+            enableAI={true}
+            aiFieldType="description-medium"
+            aiContext={{
+              companyName: startup.name,
+              industry: startup.industry || undefined,
+            }}
+            onAIEnhance={(enhancedText) =>
+              setStartup({ ...startup, descriptionMedium: enhancedText })
+            }
             className={
               fieldErrors.descriptionMedium
                 ? 'border-red-500 focus:border-red-500'
@@ -993,7 +1088,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               {fieldErrors.descriptionMedium}
             </p>
           )}
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground text-right justify-end mt-1">
             {startup.descriptionMedium.length}/300 characters
           </p>
         </div>
@@ -1009,6 +1104,15 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             placeholder="Modern teams use 50+ different tools daily, creating chaos and wasted time. Our AI platform intelligently connects these tools, learns team patterns, and automates complex workflows. Unlike traditional automation tools that require technical setup, our solution works out-of-the-box with natural language commands..."
             rows={5}
             required
+            enableAI={true}
+            aiFieldType="description-long"
+            aiContext={{
+              companyName: startup.name,
+              industry: startup.industry || undefined,
+            }}
+            onAIEnhance={(enhancedText) =>
+              setStartup({ ...startup, descriptionLong: enhancedText })
+            }
             className={
               fieldErrors.descriptionLong
                 ? 'border-red-500 focus:border-red-500'
@@ -1027,11 +1131,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="revenue-model"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
-                fieldErrors.revenueModel
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-input'
-              }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.revenueModel
+                ? 'border-red-500 focus:border-red-500'
+                : 'border-input'
+                }`}
               value={startup.revenueModel || ''}
               onChange={(e) =>
                 setStartup({
@@ -1062,7 +1165,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             accept=".jpg,.jpeg,.png,.svg,.webp"
             maxSize="5MB"
             description="PNG, JPG, JPEG, SVG, or WebP"
-            label="Upload company logo"
+            label="Company logo"
           />
 
           <FileUploadComponent
@@ -1070,7 +1173,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             accept=".pdf,.ppt,.pptx"
             maxSize="5MB"
             description="PDF, PPT, or PPTX"
-            label="Upload pitch deck"
+            label="Pitch deck"
           />
 
           <FileUploadComponent
@@ -1078,7 +1181,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             accept=".mp4,.mov,.avi,.webm"
             maxSize="100MB"
             description="MP4, MOV, AVI, or WebM"
-            label="Upload product video"
+            label="Demo"
           />
         </div>
       </div>
@@ -1158,7 +1261,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="funding-amount">
-              How much are you raising? (in USD) *
+              How much are you raising? *
             </Label>
             <Input
               id="funding-amount"
@@ -1172,13 +1275,15 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 )
               }
               placeholder="500,000"
+              leftAddon="$"
+              rightAddon="USD"
               className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="pre-money-valuation">
-              Pre-money valuation (in USD)
+              Pre-money valuation
             </Label>
             <Input
               id="pre-money-valuation"
@@ -1192,6 +1297,8 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 )
               }
               placeholder="5,000,000"
+              leftAddon="$"
+              rightAddon="USD"
               className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
@@ -1243,6 +1350,8 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                   )
                 }
                 placeholder="25,000"
+                leftAddon="$"
+                rightAddon="USD"
                 className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 required
               />
@@ -1264,6 +1373,8 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                   )
                 }
                 placeholder="300,000"
+                leftAddon="$"
+                rightAddon="USD"
                 className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 required
               />
@@ -1315,6 +1426,15 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               placeholder="Key metrics, growth numbers, user adoption, partnerships, etc."
               rows={3}
               required
+              enableAI={true}
+              aiFieldType="traction"
+              aiContext={{
+                companyName: startup.name,
+                industry: startup.industry || undefined,
+              }}
+              onAIEnhance={(enhancedText) =>
+                setStartup({ ...startup, tractionSummary: enhancedText })
+              }
             />
           </div>
 
@@ -1329,6 +1449,15 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               placeholder="Market size, target customers, competitive landscape, etc."
               rows={3}
               required
+              enableAI={true}
+              aiFieldType="market"
+              aiContext={{
+                companyName: startup.name,
+                industry: startup.industry || undefined,
+              }}
+              onAIEnhance={(enhancedText) =>
+                setStartup({ ...startup, marketSummary: enhancedText })
+              }
             />
           </div>
 
@@ -1342,19 +1471,25 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               }
               placeholder="Notable customers, enterprise clients, early adopters..."
               rows={2}
+              enableAI={true}
+              aiFieldType="customers"
+              aiContext={{
+                companyName: startup.name,
+                industry: startup.industry || undefined,
+              }}
+              onAIEnhance={(enhancedText) =>
+                setStartup({ ...startup, keyCustomers: enhancedText })
+              }
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="competitors">Competitors</Label>
-            <Textarea
-              id="competitors"
-              value={startup.competitors}
-              onChange={(e) =>
-                setStartup({ ...startup, competitors: e.target.value })
+            <CompetitorInput
+              competitors={startup.competitorsList || []}
+              onChange={(competitors) =>
+                setStartup({ ...startup, competitorsList: competitors, competitors: competitors.join(', ') })
               }
-              placeholder="Direct and indirect competitors, and how you differentiate..."
-              rows={2}
             />
           </div>
         </div>
@@ -1371,7 +1506,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Review your information</h3>
+        <h3 className="text-lg font-semibold mb-2">Summary</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Take a moment to ensure everything looks perfect.
         </p>
@@ -1674,41 +1809,41 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               startup.marketSummary ||
               startup.keyCustomers ||
               startup.competitors) && (
-              <div className="pt-2 border-t space-y-2">
-                {startup.tractionSummary && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Traction
-                    </span>
-                    <p className="text-sm">{startup.tractionSummary}</p>
-                  </div>
-                )}
-                {startup.marketSummary && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Market
-                    </span>
-                    <p className="text-sm">{startup.marketSummary}</p>
-                  </div>
-                )}
-                {startup.keyCustomers && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Key customers
-                    </span>
-                    <p className="text-sm">{startup.keyCustomers}</p>
-                  </div>
-                )}
-                {startup.competitors && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Competitors
-                    </span>
-                    <p className="text-sm">{startup.competitors}</p>
-                  </div>
-                )}
-              </div>
-            )}
+                <div className="pt-2 border-t space-y-2">
+                  {startup.tractionSummary && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Traction
+                      </span>
+                      <p className="text-sm">{startup.tractionSummary}</p>
+                    </div>
+                  )}
+                  {startup.marketSummary && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Market
+                      </span>
+                      <p className="text-sm">{startup.marketSummary}</p>
+                    </div>
+                  )}
+                  {startup.keyCustomers && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Key customers
+                      </span>
+                      <p className="text-sm">{startup.keyCustomers}</p>
+                    </div>
+                  )}
+                  {startup.competitors && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Competitors
+                      </span>
+                      <p className="text-sm">{startup.competitors}</p>
+                    </div>
+                  )}
+                </div>
+              )}
           </CardContent>
         </Card>
       </div>

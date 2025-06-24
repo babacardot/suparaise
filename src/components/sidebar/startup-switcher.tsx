@@ -107,7 +107,7 @@ export function StartupSwitcher({
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate font-semibold">
-              {currentStartupDisplay?.name || 'Select startup'}
+              {currentStartupDisplay?.name || 'Onboarding'}
             </span>
           </div>
         </Button>
