@@ -43,7 +43,7 @@ export interface StartupData {
   arr: number
   employeeCount: number
   foundedYear: number
-  revenueModel: string
+  revenueModel: RevenueModelType | null
   currentRunway: number
   keyCustomers: string
   competitors: string
@@ -113,3 +113,4 @@ export const FUNDING_ROUNDS = Constants.public.Enums.investment_stage.filter(
 )
 export const INVESTMENT_INSTRUMENTS =
   Constants.public.Enums.investment_instrument
+export const REVENUE_MODELS = Constants.public.Enums.revenue_model_type

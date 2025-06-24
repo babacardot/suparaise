@@ -3,12 +3,49 @@ import { getServerStripe } from '@/lib/stripe/client'
 import { createClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
+// Helper function to create Supabase client
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing required Supabase environment variables')
+  }
+
+  return createClient(
+    supabaseUrl,
+    supabaseServiceKey,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  )
+}
 
 export async function POST(req: NextRequest) {
+  // Verify environment variables at runtime
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('Missing STRIPE_WEBHOOK_SECRET environment variable')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
+  // Initialize Supabase client
+  let supabase
+  try {
+    supabase = getSupabaseClient()
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error)
+    return NextResponse.json(
+      { error: 'Database configuration error' },
+      { status: 500 },
+    )
+  }
+
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')!
 
@@ -19,7 +56,7 @@ export async function POST(req: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!,
+      process.env.STRIPE_WEBHOOK_SECRET,
     )
   } catch (err) {
     console.error('Webhook signature verification failed.', err)

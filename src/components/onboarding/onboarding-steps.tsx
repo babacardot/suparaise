@@ -27,6 +27,7 @@ import {
   LegalStructure,
   InvestmentStage,
   InvestmentInstrument,
+  RevenueModelType,
   FileUploadProps,
   FounderFieldErrors,
   StartupFieldErrors,
@@ -35,6 +36,7 @@ import {
   LEGAL_STRUCTURES,
   FUNDING_ROUNDS,
   INVESTMENT_INSTRUMENTS,
+  REVENUE_MODELS,
 } from './onboarding-types'
 import {
   Popover,
@@ -559,7 +561,7 @@ export const TeamStep: React.FC<
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-linkedin`}>LinkedIn *</Label>
+                <Label htmlFor={`founder-${index}-linkedin`}>LinkedIn</Label>
                 <Input
                   id={`founder-${index}-linkedin`}
                   value={founder.linkedin}
@@ -1020,19 +1022,30 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
         <div className="space-y-2">
           <Label htmlFor="revenue-model">Revenue model</Label>
-          <Input
-            id="revenue-model"
-            value={startup.revenueModel}
-            onChange={(e) =>
-              setStartup({ ...startup, revenueModel: e.target.value })
-            }
-            placeholder="Subscription, Commission, Freemium..."
-            className={
-              fieldErrors.revenueModel
+          <div className="relative">
+            <select
+              id="revenue-model"
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.revenueModel
                 ? 'border-red-500 focus:border-red-500'
-                : ''
-            }
-          />
+                : 'border-input'
+                }`}
+              value={startup.revenueModel || ''}
+              onChange={(e) =>
+                setStartup({
+                  ...startup,
+                  revenueModel: e.target.value as RevenueModelType,
+                })
+              }
+            >
+              <option value="">Select a revenue model</option>
+              {REVENUE_MODELS.map((model) => (
+                <option key={model} value={model}>
+                  {model}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          </div>
           {fieldErrors.revenueModel && (
             <p className="text-sm text-red-600 mt-1">
               {fieldErrors.revenueModel}
@@ -1258,21 +1271,31 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="current-runway">Current runway (in months)</Label>
-            <Input
-              id="current-runway"
-              type="text"
-              inputMode="numeric"
-              value={formatCurrency(startup.currentRunway)}
-              onChange={(e) =>
-                handleNumericChange(
-                  (val) => setStartup({ ...startup, currentRunway: val }),
-                  e.target.value,
-                )
-              }
-              placeholder="18"
-              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
+            <Label htmlFor="current-runway">Current runway</Label>
+            <div className="relative">
+              <select
+                id="current-runway"
+                className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                value={startup.currentRunway}
+                onChange={(e) =>
+                  setStartup({
+                    ...startup,
+                    currentRunway: parseInt(e.target.value) || 0,
+                  })
+                }
+              >
+                <option value={0}>Select runway</option>
+                <option value={3}>3 months</option>
+                <option value={6}>6 months</option>
+                <option value={9}>9 months</option>
+                <option value={12}>12 months</option>
+                <option value={15}>15 months</option>
+                <option value={18}>18 months</option>
+                <option value={21}>21 months</option>
+                <option value={24}>24 months</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               How many months of funding you have left
             </p>
