@@ -25,11 +25,11 @@ ALTER TABLE support_requests ENABLE ROW LEVEL SECURITY;
 -- Create RLS policies
 CREATE POLICY "Users can view their own support requests"
     ON support_requests FOR SELECT
-    USING (auth.uid() = user_id);
+    USING ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can create their own support requests"
     ON support_requests FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK ((select auth.uid()) = user_id);
 
 -- Storage bucket and policies for support request images are defined in 02_buckets.sql
 
@@ -44,7 +44,7 @@ CREATE OR REPLACE FUNCTION create_support_request(
 )
 RETURNS uuid
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     request_id uuid;
@@ -105,13 +105,13 @@ CREATE POLICY "Allow authenticated users to insert their own feedback"
 ON feedback
 FOR INSERT
 TO authenticated
-WITH CHECK (auth.uid() = user_id);
+WITH CHECK ((select auth.uid()) = user_id);
 
 CREATE POLICY "Allow users to view their own feedback"
 ON feedback
 FOR SELECT
 TO authenticated
-USING (auth.uid() = user_id);
+USING ((select auth.uid()) = user_id);
 
 -- Create index for better performance
 CREATE INDEX IF NOT EXISTS idx_feedback_user_id ON feedback(user_id);
@@ -126,7 +126,7 @@ CREATE OR REPLACE FUNCTION create_feedback(
 )
 RETURNS uuid
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     feedback_id uuid;

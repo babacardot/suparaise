@@ -3,10 +3,10 @@
 import { LoginForm } from '@/components/auth/login-form'
 import { useUser } from '@/lib/contexts/user-context'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import Spinner from '@/components/ui/spinner'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
   const { user, loading } = useUser()
 
@@ -31,8 +31,22 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-start bg-muted p-6 md:p-20 pt-20">
       <div className="w-full max-w-sm md:max-w-3xl">
-        <LoginForm />
+        <Suspense
+          fallback={
+            <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-20 pt-20">
+              <div className="text-center">
+                <Spinner className="h-5 w-5" />
+              </div>
+            </div>
+          }
+        >
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   )
+}
+
+export default function LoginPage() {
+  return <LoginPageContent />
 }

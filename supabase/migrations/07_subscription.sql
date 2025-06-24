@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION get_or_create_stripe_customer(
 )
 RETURNS JSON
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     v_profile RECORD;
@@ -58,7 +58,7 @@ CREATE OR REPLACE FUNCTION update_subscription_status(
 )
 RETURNS JSON
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     v_affected_rows INTEGER;
@@ -103,7 +103,7 @@ CREATE OR REPLACE FUNCTION cancel_subscription(
 )
 RETURNS JSON
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     v_affected_rows INTEGER;
@@ -139,7 +139,7 @@ CREATE OR REPLACE FUNCTION handle_payment_success(
 )
 RETURNS JSON
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     v_affected_rows INTEGER;
@@ -174,7 +174,7 @@ CREATE OR REPLACE FUNCTION handle_payment_failure(
 )
 RETURNS JSON
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     v_affected_rows INTEGER;
@@ -209,7 +209,7 @@ CREATE OR REPLACE FUNCTION get_subscription_data(
 )
 RETURNS JSON
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     v_subscription RECORD;
