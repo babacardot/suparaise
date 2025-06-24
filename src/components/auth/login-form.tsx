@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useUser } from '@/lib/contexts/user-context'
 import { getRedirectURL } from '@/lib/utils/auth'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/actions/utils'
 import Spinner from '../ui/spinner'
 
@@ -17,12 +17,20 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { supabase } = useUser()
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      setError(errorParam)
+    }
+  }, [searchParams])
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -69,12 +77,12 @@ export function LoginForm({
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
+                  <Link
+                    href="/forgot-password"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <Input
                   id="password"
@@ -103,6 +111,7 @@ export function LoginForm({
                   type="button"
                   onClick={async () => {
                     setIsSubmitting(true)
+                    setError(null)
                     try {
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'github',
@@ -111,12 +120,13 @@ export function LoginForm({
                         },
                       })
                       if (error) {
+                        console.error('GitHub OAuth error:', error)
                         setError(error.message)
+                        setIsSubmitting(false)
                       }
                     } catch (err) {
                       console.error('GitHub login error:', err)
                       setError('Failed to sign in with GitHub')
-                    } finally {
                       setIsSubmitting(false)
                     }
                   }}
@@ -137,6 +147,7 @@ export function LoginForm({
                   type="button"
                   onClick={async () => {
                     setIsSubmitting(true)
+                    setError(null)
                     try {
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'google',
@@ -144,17 +155,17 @@ export function LoginForm({
                           redirectTo: getRedirectURL(),
                           queryParams: {
                             access_type: 'offline',
-                            prompt: 'consent',
                           },
                         },
                       })
                       if (error) {
+                        console.error('Google OAuth error:', error)
                         setError(error.message)
+                        setIsSubmitting(false)
                       }
                     } catch (err) {
                       console.error('Google login error:', err)
                       setError('Failed to sign in with Google')
-                    } finally {
                       setIsSubmitting(false)
                     }
                   }}

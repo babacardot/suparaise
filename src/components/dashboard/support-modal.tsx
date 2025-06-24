@@ -34,21 +34,19 @@ const CustomSelect = ({ value, onChange, options }: CustomSelectProps) => {
   return (
     <div ref={selectRef} className="relative">
       <div
-        className={`rounded-sm bg-background dark:bg-[#121317] text-foreground p-3 cursor-pointer border border-border hover:border-foreground/20 transition-colors duration-200 flex items-center justify-between ${
-          isOpen ? 'border-foreground/20' : ''
-        }`}
+        className={`rounded-sm bg-background dark:bg-[#121317] text-foreground p-3 cursor-pointer border border-border hover:border-foreground/20 transition-colors duration-200 flex items-center justify-between ${isOpen ? 'border-foreground/20' : ''
+          }`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="text-sm font-medium">
           {value
             ? options.find((opt: SelectOption) => opt.value === value)?.label ||
-              ''
+            ''
             : 'Select category'}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+            }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -288,7 +286,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
         >
           <div className="p-4">
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Contact support</h3>
+              <h3 className="text-lg font-medium mb-2">Support</h3>
               <p className="text-sm text-muted-foreground">
                 Need help? Send us a message and we&apos;ll get back to you.
               </p>
@@ -347,11 +345,10 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                 <div className="border rounded-sm p-2 relative bg-background max-w-full overflow-hidden">
                   <div className="flex items-center space-x-2">
                     <div
-                      className={`rounded-sm p-1.5 flex-shrink-0 ${
-                        image.type.includes('png')
+                      className={`rounded-sm p-1.5 flex-shrink-0 ${image.type.includes('png')
                           ? 'bg-green-100 text-green-500'
                           : 'bg-blue-100 text-blue-500'
-                      }`}
+                        }`}
                     >
                       <FileIcon className="h-4 w-4" />
                     </div>

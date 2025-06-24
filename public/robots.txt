@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Block auth-related pages
+Disallow: /api/
+Disallow: /callback
+Disallow: /dashboard
+
+# Sitemap
+Sitemap: https://suparaise.com/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1 

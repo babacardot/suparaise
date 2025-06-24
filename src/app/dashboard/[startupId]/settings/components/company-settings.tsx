@@ -337,7 +337,7 @@ export default function CompanySettings() {
 
       <Separator className="flex-shrink-0" />
 
-      <div className="flex-1 overflow-auto pt-6 max-h-[62vh] hide-scrollbar">
+      <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
           {/* Company Logo */}
           <div className="flex items-center space-x-4">

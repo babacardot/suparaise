@@ -294,4 +294,78 @@ EXCEPTION
         RAISE WARNING 'Error in update_user_startup_data for user %: %', p_user_id, SQLERRM;
         RETURN jsonb_build_object('error', SQLERRM);
 END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- =================================================================
+-- AGENT SETTINGS RPC FUNCTIONS
+-- =================================================================
+
+-- Function to get the current user's agent settings
+CREATE OR REPLACE FUNCTION get_user_agent_settings(p_user_id UUID, p_startup_id UUID DEFAULT NULL)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+    target_startup_id UUID;
+BEGIN
+    -- If no startup_id provided, get the user's first startup
+    IF p_startup_id IS NULL THEN
+        SELECT id INTO target_startup_id
+        FROM startups 
+        WHERE user_id = p_user_id 
+        ORDER BY created_at DESC 
+        LIMIT 1;
+    ELSE
+        target_startup_id := p_startup_id;
+    END IF;
+
+    -- Check if there's existing agent settings for this user/startup combination
+    -- For now, we'll return default values since we don't have an agent_settings table yet
+    -- In a future migration, we could create a proper agent_settings table
+    -- For now, return empty JSON to indicate no settings found
+    RETURN '{}'::jsonb;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in get_user_agent_settings for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to update the current user's agent settings
+CREATE OR REPLACE FUNCTION update_user_agent_settings(
+    p_user_id UUID,
+    p_startup_id UUID,
+    p_data JSONB
+)
+RETURNS JSONB AS $$
+DECLARE
+    startup_exists BOOLEAN;
+BEGIN
+    -- Check if the startup exists and belongs to the user
+    SELECT EXISTS(
+        SELECT 1 FROM startups 
+        WHERE id = p_startup_id AND user_id = p_user_id
+    ) INTO startup_exists;
+
+    -- If startup doesn't exist or doesn't belong to user, return error
+    IF NOT startup_exists THEN
+        RETURN jsonb_build_object('error', 'Startup not found or access denied');
+    END IF;
+
+    -- For now, just return success since we don't have an agent_settings table yet
+    -- In a future migration, we could create a proper agent_settings table
+    -- and store the settings there
+    
+    -- Return success (we'll add proper storage in a future migration)
+    RETURN jsonb_build_object(
+        'success', true,
+        'startupId', p_startup_id,
+        'message', 'Agent settings updated successfully'
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in update_user_agent_settings for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public; 

@@ -9,16 +9,17 @@ import Link from 'next/link'
 import { useUser } from '@/lib/contexts/user-context'
 import { getRedirectURL } from '@/lib/utils/auth'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Spinner from '../ui/spinner'
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [isSignedUp, setIsSignedUp] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { supabase } = useUser()
@@ -38,28 +39,12 @@ export function SignupForm({
     if (error) {
       setError(error.message)
     } else {
-      setIsSignedUp(true)
+      router.push(`/verify?email=${encodeURIComponent(email)}`)
     }
     setIsSubmitting(false)
   }
 
-  if (isSignedUp) {
-    return (
-      <div className={cn('flex flex-col gap-6', className)} {...props}>
-        <Card className="overflow-hidden rounded-sm">
-          <CardContent className="p-6 md:p-8">
-            <div className="flex flex-col items-center text-center gap-4">
-              <h1 className="text-2xl font-bold">Check your email</h1>
-              <p className="text-balance text-muted-foreground">
-                We&apos;ve sent a confirmation link to your email address.
-                Please click it to finish signing up.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -121,6 +106,7 @@ export function SignupForm({
                   type="button"
                   onClick={async () => {
                     setIsSubmitting(true)
+                    setError(null)
                     try {
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'github',
@@ -129,12 +115,14 @@ export function SignupForm({
                         },
                       })
                       if (error) {
+                        console.error('GitHub OAuth error:', error)
                         setError(error.message)
+                        setIsSubmitting(false)
                       }
+                      // Don't set setIsSubmitting(false) here if no error - redirect will happen
                     } catch (err) {
                       console.error('GitHub signup error:', err)
                       setError('Failed to sign up with GitHub')
-                    } finally {
                       setIsSubmitting(false)
                     }
                   }}
@@ -155,6 +143,7 @@ export function SignupForm({
                   type="button"
                   onClick={async () => {
                     setIsSubmitting(true)
+                    setError(null)
                     try {
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'google',
@@ -162,17 +151,18 @@ export function SignupForm({
                           redirectTo: getRedirectURL(),
                           queryParams: {
                             access_type: 'offline',
-                            prompt: 'consent',
                           },
                         },
                       })
                       if (error) {
+                        console.error('Google OAuth error:', error)
                         setError(error.message)
+                        setIsSubmitting(false)
                       }
+                      // Don't set setIsSubmitting(false) here if no error - redirect will happen
                     } catch (err) {
                       console.error('Google signup error:', err)
                       setError('Failed to sign up with Google')
-                    } finally {
                       setIsSubmitting(false)
                     }
                   }}

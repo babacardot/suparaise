@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { getServerStripe, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
   try {
     const { priceId, plan } = await req.json()
 
     // Get the authenticated user
-    const supabase = createServerComponentClient({ cookies })
+    const supabase = await createClient()
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
+    
+    // Initialize Stripe
+    const stripe = getServerStripe()
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -23,31 +25,47 @@ export async function POST(req: NextRequest) {
       'get_or_create_stripe_customer',
       {
         p_user_id: user.id,
-        p_email: user.email!,
-        p_full_name: null,
-        p_stripe_customer_id: null,
+        p_email: user.email || '',
+        p_full_name: undefined,
+        p_stripe_customer_id: undefined,
       },
     )
 
-    if (profileError || !profileResult?.success) {
-      console.error(
-        'Error getting profile:',
-        profileError || profileResult?.error,
-      )
+    if (profileError || !profileResult) {
+      console.error('Error getting profile:', profileError)
       return NextResponse.json(
         { error: 'User profile not found' },
         { status: 404 },
       )
     }
 
-    const profile = profileResult.profile
-    let customerId = profile.stripe_customer_id
+    // Type assertion for the RPC result
+    interface RPCResult {
+      success: boolean
+      error?: string
+      profile?: {
+        stripe_customer_id?: string
+        full_name?: string
+      }
+    }
+    
+    const result = profileResult as unknown as RPCResult
+    if (!result.success) {
+      console.error('Error getting profile:', result.error)
+      return NextResponse.json(
+        { error: 'User profile not found' },
+        { status: 404 },
+      )
+    }
+
+    const profile = result.profile
+    let customerId = profile?.stripe_customer_id
 
     // Create Stripe customer if doesn't exist
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email!,
-        name: profile.full_name || undefined,
+        name: profile?.full_name || undefined,
         metadata: {
           userId: user.id,
         },
@@ -59,17 +77,23 @@ export async function POST(req: NextRequest) {
         'get_or_create_stripe_customer',
         {
           p_user_id: user.id,
-          p_email: user.email!,
-          p_full_name: profile.full_name,
+          p_email: user.email || '',
+          p_full_name: profile?.full_name || undefined,
           p_stripe_customer_id: customerId,
         },
       )
 
-      if (updateError || !updateResult?.success) {
-        console.error(
-          'Error updating customer ID:',
-          updateError || updateResult?.error,
+      if (updateError || !updateResult) {
+        console.error('Error updating customer ID:', updateError)
+        return NextResponse.json(
+          { error: 'Failed to update customer' },
+          { status: 500 },
         )
+      }
+
+      const updateResultTyped = updateResult as unknown as RPCResult
+      if (!updateResultTyped.success) {
+        console.error('Error updating customer ID:', updateResultTyped.error)
         return NextResponse.json(
           { error: 'Failed to update customer' },
           { status: 500 },
@@ -80,6 +104,7 @@ export async function POST(req: NextRequest) {
     // Validate price ID
     const validPriceIds = Object.values(STRIPE_PRICE_IDS)
     if (!validPriceIds.includes(priceId)) {
+      console.error('Invalid price ID received:', priceId, 'Valid IDs:', validPriceIds)
       return NextResponse.json({ error: 'Invalid price ID' }, { status: 400 })
     }
 

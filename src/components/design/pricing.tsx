@@ -16,34 +16,48 @@ interface PricingTier {
 const pricingTiers: PricingTier[] = [
   {
     name: 'Starter',
-    price: 20,
-    priceSuffix: '/mo',
-    description:
-      'Perfect for early-stage founders getting started with fundraising',
+    price: 'Free',
+    priceSuffix: '',
+    description: 'Get started with agentic fundraising',
     features: [
-      'Up to 25 VC applications per month',
-      'State of the art form automation',
-      'Email support',
-      'Analytics',
+      '3 funds applications per month',
+      'Access to 100+ funds',
+      'Claude 3.7 sonnet',
     ],
-    buttonText: 'Start free trial',
+    buttonText: 'Get started',
     href: '/signup',
   },
   {
     name: 'Pro',
-    price: 50,
+    price: 25,
     priceSuffix: '/mo',
-    description: 'For startups actively fundraising with multiple rounds',
+    description: 'For startups actively fundraising',
     features: [
-      'Up to 100 VC applications per month',
-      'Advanced AI personalization',
-      'Email outreach automation',
-      'Priority support',
-      'Advanced analytics & tracking',
+      '100 runs per month',
+      'Access to 2000+ funds',
+      'Claude 4 sonnet',
+      'Agent personalization',
+      'Standard support',
     ],
     buttonText: 'Start free trial',
     href: '/signup',
     popular: true,
+  },
+  {
+    name: 'Max',
+    price: 120,
+    priceSuffix: '/mo',
+    description: 'For startups that need meetings now',
+    features: [
+      '500 runs per month',
+      'Full fund database',
+      'Claude 4 sonnet',
+      'Agent personalization',
+      'Integrations',
+      'Priority support',
+    ],
+    buttonText: 'Get started',
+    href: '/signup',
   },
 ]
 
@@ -63,7 +77,7 @@ export const Pricing = () => {
             a free trial.
           </p>
 
-          <div className="grid gap-8 lg:grid-cols-2 mt-12 w-full max-w-4xl">
+          <div className="grid gap-8 lg:grid-cols-3 mt-12 w-full max-w-6xl">
             {pricingTiers.map((tier, idx) => (
               <div
                 key={idx}
@@ -85,7 +99,9 @@ export const Pricing = () => {
                 </div>
 
                 <div className="flex items-baseline mt-6">
-                  <span className="text-lg font-semibold">$</span>
+                  {typeof tier.price === 'number' && (
+                    <span className="text-lg font-semibold">$</span>
+                  )}
                   <span className="text-4xl font-semibold">{tier.price}</span>
                   <span className="text-muted-foreground ml-1">
                     {tier.priceSuffix}
@@ -103,11 +119,10 @@ export const Pricing = () => {
 
                 <Button
                   asChild
-                  className={`mt-6 w-full ${
-                    tier.popular
-                      ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                      : ''
-                  }`}
+                  className={`mt-6 w-full ${tier.popular
+                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                    : ''
+                    }`}
                   variant={tier.popular ? 'outline' : 'outline'}
                 >
                   <Link href={tier.href}>{tier.buttonText}</Link>

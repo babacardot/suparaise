@@ -228,7 +228,7 @@ export default function AgentSettings() {
 
       <Separator className="flex-shrink-0" />
 
-      <div className="flex-1 overflow-auto pt-6 max-h-[62vh] hide-scrollbar">
+      <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
           {/* Basic Agent Settings */}
           <div className="space-y-4">
