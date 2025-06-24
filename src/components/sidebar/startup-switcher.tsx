@@ -35,6 +35,12 @@ interface StartupSwitcherProps {
   isCollapsed?: boolean
 }
 
+// Helper function to generate consistent avatar URLs
+const generateAvatarUrl = (name: string | undefined, size: number) => {
+  const normalizedName = name?.toLowerCase().trim() || 'startup'
+  return `https://avatar.vercel.sh/${encodeURIComponent(normalizedName)}.png?size=${size}`
+}
+
 export function StartupSwitcher({
   startups,
   currentStartupId,
@@ -46,6 +52,14 @@ export function StartupSwitcher({
   isCollapsed = false,
 }: StartupSwitcherProps) {
   const [open, setOpen] = React.useState(false)
+
+  // Find current startup from the startups array to ensure consistency
+  const currentStartup = currentStartupId
+    ? startups.find(s => s.id === currentStartupId)
+    : null
+
+  // Use currentStartup for consistency, fallback to currentStartupDisplay
+  const displayStartup = currentStartup || currentStartupDisplay
 
   // Format startup names for display in dropdown
   const formatStartupDisplayName = (startup: StartupDisplay) => {
@@ -85,20 +99,18 @@ export function StartupSwitcher({
           )}
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-sidebar-accent/20 text-sidebar-foreground overflow-hidden flex-shrink-0">
-            {currentStartupDisplay?.logo_url ? (
+            {displayStartup?.logo_url ? (
               <Image
-                src={currentStartupDisplay.logo_url}
-                alt={currentStartupDisplay.name}
+                src={displayStartup.logo_url}
+                alt={displayStartup.name}
                 className="w-full h-full object-contain"
                 width={32}
                 height={32}
               />
             ) : (
               <Image
-                src={`https://avatar.vercel.sh/${encodeURIComponent(
-                  currentStartupDisplay?.name?.toLowerCase() || 'startup',
-                )}.png?size=32`}
-                alt={currentStartupDisplay?.name || 'Startup'}
+                src={generateAvatarUrl(displayStartup?.name, 32)}
+                alt={displayStartup?.name || 'Startup'}
                 className="w-full h-full object-contain"
                 width={32}
                 height={32}
@@ -107,7 +119,7 @@ export function StartupSwitcher({
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate font-semibold">
-              {currentStartupDisplay?.name || 'Onboarding'}
+              {displayStartup?.name || 'Onboarding'}
             </span>
           </div>
         </Button>
@@ -131,22 +143,20 @@ export function StartupSwitcher({
                     className="text-sm p-0 m-1"
                   >
                     <div className="flex items-center gap-2 min-w-0 w-full px-2 py-1.5">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-sidebar-accent/20 border border-sidebar-border overflow-hidden">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-sidebar-accent/20 text-sidebar-foreground overflow-hidden flex-shrink-0">
                         {startup.logo_url ? (
                           <Image
                             src={startup.logo_url}
                             alt={startup.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                             width={20}
                             height={20}
                           />
                         ) : (
                           <Image
-                            src={`https://avatar.vercel.sh/${encodeURIComponent(
-                              startup.name?.toLowerCase() || 'startup',
-                            )}.png?size=20`}
+                            src={generateAvatarUrl(startup.name, 20)}
                             alt={startup.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                             width={20}
                             height={20}
                           />

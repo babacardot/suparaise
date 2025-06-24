@@ -61,8 +61,12 @@ const WelcomeStep = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col items-center justify-center h-full space-y-6 text-center"
+      className="flex flex-col items-center justify-center h-full space-y-6 text-center relative"
     >
+      <div className="absolute top-0 left-0 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-sm px-3 py-1 text-xs font-medium">
+        3 steps process · 5 minutes
+      </div>
+
       <div className="relative w-48 h-48 mt-8">
         <Image
           src={welcomeContent.image}
@@ -255,6 +259,7 @@ export function OnboardingDialog({
 
   // Handle close button click - show confirmation for additional startups
   const handleCloseAttempt = () => {
+    playNavigationSound()
     if (!isFirstStartup) {
       setShowExitConfirmation(true)
     } else {
@@ -264,12 +269,14 @@ export function OnboardingDialog({
 
   // Confirm exit
   const handleConfirmExit = () => {
+    playNavigationSound()
     setShowExitConfirmation(false)
     handleCancel()
   }
 
   // Cancel exit
   const handleCancelExit = () => {
+    playNavigationSound()
     setShowExitConfirmation(false)
   }
 
@@ -1020,7 +1027,7 @@ export function OnboardingDialog({
             className="max-w-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:duration-500 data-[state=closed]:duration-300"
           >
             <DialogHeader>
-              <DialogTitle>Cancel creation?</DialogTitle>
+              <DialogTitle>Cancel creation ?</DialogTitle>
               <DialogDescription>
                 Are you sure you want to cancel registering this new company?
                 All progress will be lost.

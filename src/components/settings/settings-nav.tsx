@@ -8,6 +8,23 @@ import { cn } from '@/lib/actions/utils'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 
+// Sound utility functions
+const playSound = (soundFile: string) => {
+  try {
+    const audio = new Audio(soundFile)
+    audio.volume = 0.3
+    audio.play().catch((error) => {
+      console.log('Could not play sound:', error)
+    })
+  } catch (error) {
+    console.log('Error loading sound:', error)
+  }
+}
+
+const playClickSound = () => {
+  playSound('/sounds/light.mp3')
+}
+
 interface SettingsNavProps extends React.HTMLAttributes<HTMLElement> {
   items: {
     href: string
@@ -33,6 +50,7 @@ function NavItem({
   return (
     <Link
       href={item.href}
+      onClick={playClickSound}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(

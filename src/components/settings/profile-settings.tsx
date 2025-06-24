@@ -36,6 +36,27 @@ import {
   FounderRole,
 } from '@/components/onboarding/onboarding-types'
 
+// Sound utility functions
+const playSound = (soundFile: string) => {
+  try {
+    const audio = new Audio(soundFile)
+    audio.volume = 0.3
+    audio.play().catch((error) => {
+      console.log('Could not play sound:', error)
+    })
+  } catch (error) {
+    console.log('Error loading sound:', error)
+  }
+}
+
+const playClickSound = () => {
+  playSound('/sounds/light.mp3')
+}
+
+const playCompletionSound = () => {
+  playSound('/sounds/completion.mp3')
+}
+
 // Define founder interface
 interface Founder {
   id: string
@@ -257,6 +278,7 @@ export default function ProfileSettings() {
   }
 
   const handleFieldEdit = (field: string, founderId?: string) => {
+    playClickSound()
     setEditingField(founderId ? `${founderId}-${field}` : field)
     setTimeout(() => {
       document
@@ -295,6 +317,7 @@ export default function ProfileSettings() {
       }
 
       setEditingField(null)
+      playCompletionSound()
       toast({
         title: 'Profile updated',
         description: `${formatFieldName(field)} has been updated successfully.`,
@@ -362,6 +385,7 @@ export default function ProfileSettings() {
 
       if (updateError) throw updateError
 
+      playCompletionSound()
       toast({
         title: 'Avatar updated',
         description: 'Your profile picture has been updated.',
@@ -390,6 +414,7 @@ export default function ProfileSettings() {
 
       if (updateError) throw updateError
 
+      playCompletionSound()
       toast({
         title: 'Avatar removed',
         description: 'Your profile picture has been removed.',
@@ -484,6 +509,7 @@ export default function ProfileSettings() {
       })
       setShowAddFounder(false)
 
+      playCompletionSound()
       toast({
         title: 'Founder added',
         description: 'The new founder has been added successfully.',
@@ -526,6 +552,7 @@ export default function ProfileSettings() {
       // Remove from local state
       setFounders((prev) => prev.filter((founder) => founder.id !== founderId))
 
+      playCompletionSound()
       toast({
         title: 'Founder removed',
         description: 'The founder has been removed successfully.',
@@ -646,13 +673,17 @@ export default function ProfileSettings() {
                       <DialogFooter>
                         <Button
                           variant="outline"
-                          onClick={() => setFounderToDelete(null)}
+                          onClick={() => {
+                            playClickSound()
+                            setFounderToDelete(null)
+                          }}
                         >
                           Cancel
                         </Button>
                         <Button
                           variant="destructive"
                           onClick={() => {
+                            playClickSound()
                             handleRemoveFounder(founder.id)
                             setFounderToDelete(null)
                           }}
@@ -735,7 +766,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-firstName` &&
-                          'bg-muted',
+                        'bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-firstName`}
                       placeholder="Enter first name"
@@ -960,6 +991,15 @@ export default function ProfileSettings() {
                     readOnly={editingField !== `${founder.id}-bio`}
                     placeholder="Tell us about this founder..."
                     rows={3}
+                    enableAI={editingField === `${founder.id}-bio`}
+                    aiFieldType="bio"
+                    aiContext={{
+                      founderName: `${founder.firstName} ${founder.lastName}`.trim(),
+                      role: founder.role,
+                    }}
+                    onAIEnhance={(enhancedText) =>
+                      handleInputChange(founder.id, 'bio', enhancedText)
+                    }
                   />
                   {editingField !== `${founder.id}-bio` ? (
                     <button
@@ -1000,7 +1040,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-linkedin` &&
-                            'bg-muted',
+                          'bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-linkedin`}
                         placeholder="https://linkedin.com/in/profile"
@@ -1044,7 +1084,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-githubUrl` &&
-                            'bg-muted',
+                          'bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-githubUrl`}
                         placeholder="https://github.com/username"
@@ -1090,7 +1130,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-personalWebsiteUrl` &&
-                            'bg-muted',
+                          'bg-muted',
                         )}
                         readOnly={
                           editingField !== `${founder.id}-personalWebsiteUrl`
@@ -1134,7 +1174,7 @@ export default function ProfileSettings() {
             <div className="mt-8">
               <Separator className="mb-6" />
               <div className="space-y-6">
-                <h3 className="text-lg font-medium">Add New Co-founder</h3>
+                <h3 className="text-lg font-medium">Co-founder</h3>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
@@ -1226,6 +1266,15 @@ export default function ProfileSettings() {
                     }
                     placeholder="Tell us about this co-founder..."
                     rows={3}
+                    enableAI={true}
+                    aiFieldType="bio"
+                    aiContext={{
+                      founderName: `${newFounderData.firstName} ${newFounderData.lastName}`.trim(),
+                      role: newFounderData.role,
+                    }}
+                    onAIEnhance={(enhancedText) =>
+                      handleNewFounderInputChange('bio', enhancedText)
+                    }
                   />
                 </div>
 
@@ -1278,10 +1327,11 @@ export default function ProfileSettings() {
                     disabled={isLoading}
                     className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
                   >
-                    Add co-founder
+                    Add
                   </Button>
                   <Button
                     variant="outline"
+                    className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800"
                     onClick={() => setShowAddFounder(false)}
                     disabled={isLoading}
                   >
@@ -1299,9 +1349,9 @@ export default function ProfileSettings() {
               <Button
                 onClick={() => setShowAddFounder(true)}
                 variant="outline"
-                className="w-full"
+                className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-2 " />
                 Add co-founder
               </Button>
             </div>

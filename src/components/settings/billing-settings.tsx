@@ -17,6 +17,23 @@ import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 import { SUBSCRIPTION_PLANS, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
 
+// Sound utility functions
+const playSound = (soundFile: string) => {
+  try {
+    const audio = new Audio(soundFile)
+    audio.volume = 0.3
+    audio.play().catch((error) => {
+      console.log('Could not play sound:', error)
+    })
+  } catch (error) {
+    console.log('Error loading sound:', error)
+  }
+}
+
+const playClickSound = () => {
+  playSound('/sounds/light.mp3')
+}
+
 // Skeleton loading component that mimics the form layout
 function BillingSettingsSkeleton() {
   return (
@@ -116,6 +133,7 @@ export default function BillingSettings() {
   const handleSubscribe = async (
     plan: 'pro_monthly' | 'pro_yearly' | 'max_monthly' | 'max_yearly',
   ) => {
+    playClickSound()
     setIsLoading(true)
     try {
       const priceId = STRIPE_PRICE_IDS[plan]
@@ -181,7 +199,7 @@ export default function BillingSettings() {
           <div className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold">Current plan</h3>
+                <h3 className="text-lg font-semibold -mt-1">Current plan</h3>
                 {isSubscribed && (
                   <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
                     <Crown className="h-3 w-3 mr-1" />
@@ -198,7 +216,7 @@ export default function BillingSettings() {
                   ` and renews on ${periodEndDate.toLocaleDateString()}`}
               </p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 -mt-2">
                 <p className="text-muted-foreground">
                   You&apos;re on the free plan.
                 </p>

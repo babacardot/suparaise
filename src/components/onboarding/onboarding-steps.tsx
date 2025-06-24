@@ -12,8 +12,6 @@ import {
   Plus,
   X,
   ChevronDown,
-  FileUp,
-  FileIcon,
   ChevronsUpDown,
   Check,
 } from 'lucide-react'
@@ -55,6 +53,23 @@ import { cn } from '@/lib/actions/utils'
 import Image from 'next/image'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
+
+// Sound utility functions
+const playSound = (soundFile: string) => {
+  try {
+    const audio = new Audio(soundFile)
+    audio.volume = 0.3
+    audio.play().catch((error) => {
+      console.log('Could not play sound:', error)
+    })
+  } catch (error) {
+    console.log('Error loading sound:', error)
+  }
+}
+
+const playClickSound = () => {
+  playSound('/sounds/light.mp3')
+}
 
 // Get all countries from react-phone-number-input library
 const COUNTRIES = RPNInput.getCountries()
@@ -170,6 +185,7 @@ const CompetitorInput: React.FC<{
   }
 
   const removeCompetitor = (competitorToRemove: string) => {
+    playClickSound()
     onChange(competitors.filter(c => c !== competitorToRemove))
   }
 
@@ -228,7 +244,6 @@ const FileUploadComponent: React.FC<
     accept: string
     maxSize: string
     description: string
-    label: string
   }
 > = ({
   type,
@@ -241,7 +256,6 @@ const FileUploadComponent: React.FC<
   accept,
   maxSize,
   description,
-  label,
 }) => {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
@@ -272,87 +286,128 @@ const FileUploadComponent: React.FC<
           }}
           disabled={uploadStatus === 'uploading'}
         />
-        {!file && (
-          <div className="flex flex-col space-y-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => inputRef.current?.click()}
-              disabled={uploadStatus === 'uploading'}
-              className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            >
-              {uploadStatus === 'uploading' ? (
-                <Spinner className="mr-2 h-3 w-3" />
-              ) : (
-                <FileUp className="mr-2 h-4 w-4" />
-              )}
-              {uploadStatus === 'uploading' ? 'Uploading...' : label}
-            </Button>
-            <p className="text-xs text-muted-foreground text-right">
-              {description} (max {maxSize})
-            </p>
+        {!file ? (
+          <div className="flex items-center space-x-4">
+            <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+              <LottieIcon
+                animationData={animations.fileplus}
+                size={32}
+                loop={false}
+                autoplay={false}
+              />
+            </div>
+            <div className="space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => inputRef.current?.click()}
+                disabled={uploadStatus === 'uploading'}
+                className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+              >
+                {uploadStatus === 'uploading' ? (
+                  <>
+                    <Spinner className="h-3 w-3 mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  'Upload'
+                )}
+              </Button>
+            </div>
           </div>
-        )}
-        {file && (
-          <div className="border rounded-sm p-4 relative">
-            <div className="flex items-center space-x-3">
+        ) : (
+          <div className="flex items-center space-x-4">
+            <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
               {previewUrl ? (
                 type === 'logo' ? (
                   <Image
                     src={previewUrl}
                     alt="Logo preview"
-                    width={40}
-                    height={40}
-                    className="h-10 w-10 rounded-sm object-contain"
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 rounded-sm object-contain"
                   />
                 ) : (
                   <video
                     src={previewUrl}
                     muted
                     playsInline
-                    className="h-12 w-16 rounded-sm object-contain"
+                    className="h-20 w-20 rounded-sm object-contain"
                   />
                 )
               ) : (
-                <div className={`p-2 rounded-sm ${getFileTypeColor(file.name)}`}>
-                  <FileIcon className="h-6 w-6" />
+                <div className={`h-20 w-20 p-2 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}>
+                  <LottieIcon
+                    animationData={animations.fileplus}
+                    size={32}
+                    loop={false}
+                    autoplay={false}
+                  />
                 </div>
               )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {uploadStatus === 'uploading'
-                    ? `${formatFileSize(
-                      (uploadProgress / 100) * file.size,
-                    )} of ${formatFileSize(file.size)}`
-                    : formatFileSize(file.size)}
-                </p>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{file.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {uploadStatus === 'uploading'
+                  ? `${formatFileSize(
+                    (uploadProgress / 100) * file.size,
+                  )} of ${formatFileSize(file.size)}`
+                  : formatFileSize(file.size)}
+              </p>
+              {uploadStatus === 'uploading' && (
+                <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+                  <div
+                    className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              )}
+              {uploadStatus === 'failed' && (
+                <button
+                  onClick={() => onUpload(type, file)}
+                  className="text-sm text-red-500 hover:underline"
+                >
+                  Try again
+                </button>
+              )}
+              <div className="space-x-2 mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => inputRef.current?.click()}
+                  disabled={uploadStatus === 'uploading'}
+                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                >
+                  {uploadStatus === 'uploading' ? (
+                    <>
+                      <Spinner className="h-3 w-3 mr-2" />
+                      Uploading...
+                    </>
+                  ) : (
+                    'Update'
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    playClickSound()
+                    onRemove()
+                  }}
+                  className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                >
+                  Remove
+                </Button>
               </div>
             </div>
-            {uploadStatus === 'uploading' && (
-              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
-                <div
-                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            )}
-            {uploadStatus === 'failed' && (
-              <button
-                onClick={() => onUpload(type, file)}
-                className="mt-2 text-sm text-red-500 hover:underline"
-              >
-                Try again
-              </button>
-            )}
-            <button
-              onClick={onRemove}
-              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
         )}
+        <p className="text-xs text-muted-foreground">
+          {description} (max {maxSize})
+        </p>
       </div>
     )
   }
@@ -456,6 +511,7 @@ export const TeamStep: React.FC<
   }
 
   const removeFounder = (index: number) => {
+    playClickSound()
     if (founders.length > 1) {
       setFounders(founders.filter((_, i) => i !== index))
     }
@@ -997,7 +1053,8 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                     >
                       {country}
                       <button
-                        onClick={() =>
+                        onClick={() => {
+                          playClickSound()
                           setStartup({
                             ...startup,
                             operatingCountries:
@@ -1005,7 +1062,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                                 (c) => c !== country,
                               ),
                           })
-                        }
+                        }}
                         className="ml-1.5"
                         aria-label={`Remove ${country}`}
                       >
@@ -1165,7 +1222,6 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             accept=".jpg,.jpeg,.png,.svg,.webp"
             maxSize="5MB"
             description="PNG, JPG, JPEG, SVG, or WebP"
-            label="Company logo"
           />
 
           <FileUploadComponent
@@ -1173,7 +1229,6 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             accept=".pdf,.ppt,.pptx"
             maxSize="5MB"
             description="PDF, PPT, or PPTX"
-            label="Pitch deck"
           />
 
           <FileUploadComponent
@@ -1181,7 +1236,6 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             accept=".mp4,.mov,.avi,.webm"
             maxSize="100MB"
             description="MP4, MOV, AVI, or WebM"
-            label="Demo"
           />
         </div>
       </div>
