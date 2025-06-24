@@ -8,6 +8,24 @@ export type InvestmentInstrument =
   Database['public']['Enums']['investment_instrument']
 export type RevenueModelType = Database['public']['Enums']['revenue_model_type']
 
+// AI Enhancement types
+export type AIFieldType =
+  | 'bio'
+  | 'description-short'
+  | 'description-medium'
+  | 'description-long'
+  | 'traction'
+  | 'market'
+  | 'customers'
+  | 'competitors'
+
+export interface AIContext {
+  companyName?: string
+  industry?: string
+  founderName?: string
+  role?: string
+}
+
 export interface FounderData {
   firstName: string
   lastName: string

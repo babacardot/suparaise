@@ -7,7 +7,30 @@
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
-  "categories": ["business", "finance", "productivity", "fundraising", "ai", "agentic", "funding", "investing", "venture capital", "venture capital funding", "venture capital applications", "venture capital outreach", "venture capital software", "venture capital automation", "venture capital tools", "startup", "startup funding", "startup applications", "startup outreach", "startup software", "startup automation", "startup tools"],
+  "categories": [
+    "business",
+    "finance",
+    "productivity",
+    "fundraising",
+    "ai",
+    "agentic",
+    "funding",
+    "investing",
+    "venture capital",
+    "venture capital funding",
+    "venture capital applications",
+    "venture capital outreach",
+    "venture capital software",
+    "venture capital automation",
+    "venture capital tools",
+    "startup",
+    "startup funding",
+    "startup applications",
+    "startup outreach",
+    "startup software",
+    "startup automation",
+    "startup tools"
+  ],
   "lang": "en",
   "dir": "ltr",
   "scope": "/",
@@ -34,4 +57,4 @@
   ],
   "related_applications": [],
   "prefer_related_applications": false
-} 
+}

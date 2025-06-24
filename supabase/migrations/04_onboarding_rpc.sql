@@ -112,7 +112,8 @@ BEGIN
     )
     INTO startup_data
     FROM startups s
-    WHERE s.user_id = p_user_id
+    WHERE s.user_id = p_user_id AND s.is_active = TRUE
+    ORDER BY s.created_at DESC
     LIMIT 1;
 
     -- Combine into a single result
@@ -139,14 +140,14 @@ DECLARE
     profile_name TEXT;
     has_incomplete_startups BOOLEAN;
 BEGIN
-    -- Check if user has any startups
+    -- Check if user has any active startups
     SELECT EXISTS(
-        SELECT 1 FROM startups WHERE user_id = p_user_id
+        SELECT 1 FROM startups WHERE user_id = p_user_id AND is_active = TRUE
     ) INTO startup_exists;
 
-    -- Check if user has any startups that need onboarding
+    -- Check if user has any active startups that need onboarding
     SELECT EXISTS(
-        SELECT 1 FROM startups WHERE user_id = p_user_id AND onboarded = FALSE
+        SELECT 1 FROM startups WHERE user_id = p_user_id AND onboarded = FALSE AND is_active = TRUE
     ) INTO has_incomplete_startups;
 
     -- Get profile info
@@ -184,7 +185,7 @@ BEGIN
     )
     INTO result
     FROM startups s
-    WHERE s.user_id = p_user_id;
+    WHERE s.user_id = p_user_id AND s.is_active = TRUE;
 
     RETURN COALESCE(result, '[]'::jsonb);
 END;
@@ -209,7 +210,7 @@ BEGIN
     )
     INTO result
     FROM startups s
-    WHERE s.id = p_startup_id AND s.user_id = p_user_id;
+    WHERE s.id = p_startup_id AND s.user_id = p_user_id AND s.is_active = TRUE;
 
     RETURN result;
 END;

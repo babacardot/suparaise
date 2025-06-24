@@ -147,6 +147,8 @@ CREATE TABLE profiles (
     full_name TEXT,
     email TEXT,
     is_subscribed BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    deleted_at TIMESTAMPTZ,
     stripe_customer_id TEXT UNIQUE,
     stripe_subscription_id TEXT UNIQUE,
     subscription_status subscription_status,
@@ -201,6 +203,8 @@ CREATE TABLE startups (
     key_customers TEXT,
     competitors TEXT,
     onboarded BOOLEAN DEFAULT FALSE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    deleted_at TIMESTAMPTZ,
     -- Asset URLs from Supabase Storage
     logo_url TEXT,
     pitch_deck_url TEXT,
@@ -323,15 +327,15 @@ CREATE POLICY "Allow public read access to targets" ON targets FOR SELECT USING 
 
 -- Users can only see their own profile (optimized with select auth.uid())
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow users to read their own profile" ON profiles FOR SELECT USING ((select auth.uid()) = id);
-CREATE POLICY "Allow users to update their own profile" ON profiles FOR UPDATE USING ((select auth.uid()) = id);
+CREATE POLICY "Allow users to read their own profile" ON profiles FOR SELECT USING ((select auth.uid()) = id AND is_active = TRUE);
+CREATE POLICY "Allow users to update their own profile" ON profiles FOR UPDATE USING ((select auth.uid()) = id AND is_active = TRUE);
 CREATE POLICY "Allow users to insert their own profile" ON profiles FOR INSERT WITH CHECK ((select auth.uid()) = id);
 
 -- Users can only manage their own startup (optimized with select auth.uid())
 ALTER TABLE startups ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow users to read their own startup" ON startups FOR SELECT USING ((select auth.uid()) = user_id);
-CREATE POLICY "Allow users to create their own startup" ON startups FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
-CREATE POLICY "Allow users to update their own startup" ON startups FOR UPDATE USING ((select auth.uid()) = user_id);
+CREATE POLICY "Allow users to read their own startup" ON startups FOR SELECT USING ((select auth.uid()) = user_id AND is_active = TRUE AND (SELECT is_active FROM profiles WHERE id = user_id) = TRUE);
+CREATE POLICY "Allow users to create their own startup" ON startups FOR INSERT WITH CHECK ((select auth.uid()) = user_id AND (SELECT is_active FROM profiles WHERE id = user_id) = TRUE);
+CREATE POLICY "Allow users to update their own startup" ON startups FOR UPDATE USING ((select auth.uid()) = user_id AND is_active = TRUE AND (SELECT is_active FROM profiles WHERE id = user_id) = TRUE);
 
 -- Users can only manage founders of their own startup (optimized with select auth.uid())
 ALTER TABLE founders ENABLE ROW LEVEL SECURITY;

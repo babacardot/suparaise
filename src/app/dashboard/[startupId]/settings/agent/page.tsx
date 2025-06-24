@@ -1,8 +1,8 @@
 import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
-import SettingsLayout from '../components/settings-layout'
-import AgentSettings from '../components/agent-settings'
+import SettingsLayout from '@/components/settings/settings-layout'
+import AgentSettings from '@/components/settings/agent-settings'
 
 export async function generateMetadata({
   params,

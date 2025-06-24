@@ -8,7 +8,7 @@ export const getServerStripe = () => {
   if (typeof window !== 'undefined') {
     throw new Error('This function can only be called on the server side')
   }
-  
+
   if (!_stripe) {
     _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: '2025-05-28.basil',
@@ -18,7 +18,7 @@ export const getServerStripe = () => {
       },
     })
   }
-  
+
   return _stripe
 }
 

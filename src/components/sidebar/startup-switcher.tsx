@@ -3,8 +3,6 @@
 import * as React from 'react'
 import { Check, Plus } from 'lucide-react'
 import Image from 'next/image'
-import { LottieIcon } from '@/components/design/lottie-icon'
-import { animations } from '@/lib/utils/lottie-animations'
 import { cn } from '@/lib/actions/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -96,12 +94,14 @@ export function StartupSwitcher({
                 height={32}
               />
             ) : (
-              <LottieIcon
-                animationData={animations.takeoff}
-                size={16}
-                loop={false}
-                autoplay={false}
-                initialFrame={0}
+              <Image
+                src={`https://avatar.vercel.sh/${encodeURIComponent(
+                  currentStartupDisplay?.name?.toLowerCase() || 'startup',
+                )}.png?size=32`}
+                alt={currentStartupDisplay?.name || 'Startup'}
+                className="w-full h-full object-contain"
+                width={32}
+                height={32}
               />
             )}
           </div>
@@ -141,12 +141,14 @@ export function StartupSwitcher({
                             height={20}
                           />
                         ) : (
-                          <LottieIcon
-                            animationData={animations.takeoff}
-                            size={10}
-                            loop={false}
-                            autoplay={false}
-                            initialFrame={0}
+                          <Image
+                            src={`https://avatar.vercel.sh/${encodeURIComponent(
+                              startup.name?.toLowerCase() || 'startup',
+                            )}.png?size=20`}
+                            alt={startup.name}
+                            className="w-full h-full object-cover"
+                            width={20}
+                            height={20}
                           />
                         )}
                       </div>
@@ -174,7 +176,7 @@ export function StartupSwitcher({
               >
                 <div className="flex items-center gap-2 min-w-0 w-full px-2 py-1.5">
                   <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-green-100 dark:bg-green-800/50 border border-green-200 dark:border-green-700">
-                    <Plus className="h-3 w-3text-green-700 dark:text-green-300" />
+                    <Plus className="h-3 w-3 text-green-700 dark:text-green-300" />
                   </div>
                   <span className="truncate group-data-[collapsible=icon]:hidden">
                     Create

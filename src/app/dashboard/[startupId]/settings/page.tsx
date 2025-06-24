@@ -1,8 +1,8 @@
 import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
-import SettingsLayout from './components/settings-layout'
-import ProfileSettings from './components/profile-settings'
+import SettingsLayout from '@/components/settings/settings-layout'
+import ProfileSettings from '@/components/settings/profile-settings'
 
 export async function generateMetadata({
   params,

@@ -37,7 +37,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Allow callback and auth routes to process without authentication check
-  if (pathname === '/callback' || pathname === '/verify' || pathname === '/forgot-password' || pathname === '/reset-password') {
+  if (
+    pathname === '/callback' ||
+    pathname === '/verify' ||
+    pathname === '/forgot-password' ||
+    pathname === '/reset-password'
+  ) {
     return response
   }
 
@@ -46,8 +51,14 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-         // Auth routes - where users go to login/signup/reset password
-     const authRoutes = ['/login', '/signup', '/verify', '/forgot-password', '/reset-password']
+    // Auth routes - where users go to login/signup/reset password
+    const authRoutes = [
+      '/login',
+      '/signup',
+      '/verify',
+      '/forgot-password',
+      '/reset-password',
+    ]
 
     // If user is logged in and tries to access auth routes, redirect to dashboard
     if (user && authRoutes.includes(pathname)) {
@@ -63,7 +74,6 @@ export async function middleware(request: NextRequest) {
     if (user && pathname === '/') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
-
   } catch (error) {
     console.error('Middleware auth error:', error)
     // On auth error, redirect to login for protected routes

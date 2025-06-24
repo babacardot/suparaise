@@ -14,7 +14,7 @@ BEGIN
     IF p_startup_id IS NULL THEN
         SELECT id INTO target_startup_id
         FROM startups 
-        WHERE user_id = p_user_id 
+        WHERE user_id = p_user_id AND is_active = TRUE
         ORDER BY created_at DESC 
         LIMIT 1;
     ELSE
@@ -163,7 +163,7 @@ BEGIN
     IF p_startup_id IS NULL THEN
         SELECT id INTO target_startup_id
         FROM startups 
-        WHERE user_id = p_user_id 
+        WHERE user_id = p_user_id AND is_active = TRUE
         ORDER BY created_at DESC 
         LIMIT 1;
     ELSE
@@ -232,7 +232,7 @@ BEGIN
     -- Check if the startup exists and belongs to the user
     SELECT EXISTS(
         SELECT 1 FROM startups 
-        WHERE id = p_startup_id AND user_id = p_user_id
+        WHERE id = p_startup_id AND user_id = p_user_id AND is_active = TRUE
     ) INTO startup_exists;
 
     -- If startup doesn't exist or doesn't belong to user, return error
@@ -296,6 +296,253 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
+-- Function to soft delete a startup
+CREATE OR REPLACE FUNCTION soft_delete_startup(
+    p_user_id UUID,
+    p_startup_id UUID
+)
+RETURNS JSONB AS $$
+DECLARE
+    startup_owner_valid BOOLEAN;
+BEGIN
+    -- Check if the startup belongs to the user and is active
+    SELECT EXISTS(
+        SELECT 1 FROM startups
+        WHERE id = p_startup_id AND user_id = p_user_id AND is_active = TRUE
+    ) INTO startup_owner_valid;
+
+    IF NOT startup_owner_valid THEN
+        RETURN jsonb_build_object('error', 'Startup not found, is already deleted, or access denied');
+    END IF;
+
+    -- Soft delete the startup
+    UPDATE startups
+    SET
+        is_active = FALSE,
+        deleted_at = NOW(),
+        updated_at = NOW()
+    WHERE id = p_startup_id AND user_id = p_user_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'startupId', p_startup_id,
+        'message', 'Startup has been deleted successfully.'
+    );
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in soft_delete_startup for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- =================================================================
+-- FOUNDERS SETTINGS RPC FUNCTIONS
+-- =================================================================
+
+-- Function to get all founders for a startup
+CREATE OR REPLACE FUNCTION get_startup_founders(p_user_id UUID, p_startup_id UUID DEFAULT NULL)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+    target_startup_id UUID;
+BEGIN
+    -- If no startup_id provided, get the user's first startup
+    IF p_startup_id IS NULL THEN
+        SELECT id INTO target_startup_id
+        FROM startups 
+        WHERE user_id = p_user_id AND is_active = TRUE
+        ORDER BY created_at DESC 
+        LIMIT 1;
+    ELSE
+        target_startup_id := p_startup_id;
+    END IF;
+
+    -- Get all founders for this startup
+    SELECT jsonb_agg(
+        jsonb_build_object(
+            'id', f.id,
+            'firstName', f.first_name,
+            'lastName', f.last_name,
+            'email', f.email,
+            'phone', f.phone,
+            'role', f.role,
+            'bio', f.bio,
+            'linkedin', f.linkedin,
+            'githubUrl', f.github_url,
+            'personalWebsiteUrl', f.personal_website_url,
+            'startupId', f.startup_id,
+            'createdAt', f.created_at
+        ) ORDER BY f.created_at ASC
+    )
+    INTO result
+    FROM founders f
+    JOIN startups s ON f.startup_id = s.id
+    WHERE s.id = target_startup_id 
+      AND s.user_id = p_user_id;
+
+    RETURN COALESCE(result, '[]'::jsonb);
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in get_startup_founders for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to update any founder's data by founder ID
+CREATE OR REPLACE FUNCTION update_founder_profile(
+    p_user_id UUID,
+    p_founder_id UUID,
+    p_data JSONB
+)
+RETURNS JSONB AS $$
+DECLARE
+    startup_owner_valid BOOLEAN;
+BEGIN
+    -- Check if the founder belongs to a startup owned by the user
+    SELECT EXISTS(
+        SELECT 1 FROM founders f
+        JOIN startups s ON f.startup_id = s.id
+        WHERE f.id = p_founder_id AND s.user_id = p_user_id AND s.is_active = TRUE
+    ) INTO startup_owner_valid;
+
+    -- If founder doesn't belong to user's startup, return error
+    IF NOT startup_owner_valid THEN
+        RETURN jsonb_build_object('error', 'Founder not found or access denied');
+    END IF;
+
+    -- Update the founder record
+    UPDATE founders
+    SET 
+        first_name = COALESCE(p_data->>'firstName', first_name),
+        last_name = COALESCE(p_data->>'lastName', last_name),
+        email = COALESCE(p_data->>'email', email),
+        phone = COALESCE(p_data->>'phone', phone),
+        role = COALESCE((p_data->>'role')::founder_role, role),
+        bio = COALESCE(p_data->>'bio', bio),
+        linkedin = COALESCE(p_data->>'linkedin', linkedin),
+        github_url = COALESCE(p_data->>'githubUrl', github_url),
+        personal_website_url = COALESCE(p_data->>'personalWebsiteUrl', personal_website_url),
+        updated_at = NOW()
+    WHERE id = p_founder_id;
+
+    -- Return success with updated data
+    RETURN jsonb_build_object(
+        'success', true,
+        'founderId', p_founder_id,
+        'message', 'Founder profile updated successfully'
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in update_founder_profile for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to add a new founder to a startup
+CREATE OR REPLACE FUNCTION add_startup_founder(
+    p_user_id UUID,
+    p_startup_id UUID,
+    p_data JSONB
+)
+RETURNS JSONB AS $$
+DECLARE
+    startup_owner_valid BOOLEAN;
+    new_founder_id UUID;
+BEGIN
+    -- Check if the startup belongs to the user
+    SELECT EXISTS(
+        SELECT 1 FROM startups 
+        WHERE id = p_startup_id AND user_id = p_user_id
+    ) INTO startup_owner_valid;
+
+    -- If startup doesn't belong to user, return error
+    IF NOT startup_owner_valid THEN
+        RETURN jsonb_build_object('error', 'Startup not found or access denied');
+    END IF;
+
+    -- Insert new founder
+    INSERT INTO founders (
+        startup_id, first_name, last_name, email, phone, role, bio, 
+        linkedin, github_url, personal_website_url
+    ) VALUES (
+        p_startup_id,
+        p_data->>'firstName',
+        p_data->>'lastName', 
+        p_data->>'email',
+        p_data->>'phone',
+        (p_data->>'role')::founder_role,
+        p_data->>'bio',
+        p_data->>'linkedin',
+        p_data->>'githubUrl',
+        p_data->>'personalWebsiteUrl'
+    ) RETURNING id INTO new_founder_id;
+
+    -- Return success with new founder ID
+    RETURN jsonb_build_object(
+        'success', true,
+        'founderId', new_founder_id,
+        'message', 'Founder added successfully'
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in add_startup_founder for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to remove a founder from a startup
+CREATE OR REPLACE FUNCTION remove_startup_founder(
+    p_user_id UUID,
+    p_founder_id UUID
+)
+RETURNS JSONB AS $$
+DECLARE
+    startup_owner_valid BOOLEAN;
+    founders_count INTEGER;
+BEGIN
+    -- Check if the founder belongs to a startup owned by the user
+    SELECT EXISTS(
+        SELECT 1 FROM founders f
+        JOIN startups s ON f.startup_id = s.id
+        WHERE f.id = p_founder_id AND s.user_id = p_user_id AND s.is_active = TRUE
+    ) INTO startup_owner_valid;
+
+    -- If founder doesn't belong to user's startup, return error
+    IF NOT startup_owner_valid THEN
+        RETURN jsonb_build_object('error', 'Founder not found or access denied');
+    END IF;
+
+    -- Check how many founders are in this startup
+    SELECT COUNT(*) INTO founders_count
+    FROM founders f
+    JOIN startups s ON f.startup_id = s.id
+    WHERE s.user_id = p_user_id 
+      AND f.startup_id = (SELECT startup_id FROM founders WHERE id = p_founder_id);
+
+    -- Don't allow removing the last founder
+    IF founders_count <= 1 THEN
+        RETURN jsonb_build_object('error', 'Cannot remove the last founder');
+    END IF;
+
+    -- Delete the founder
+    DELETE FROM founders WHERE id = p_founder_id;
+
+    -- Return success
+    RETURN jsonb_build_object(
+        'success', true,
+        'founderId', p_founder_id,
+        'message', 'Founder removed successfully'
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in remove_startup_founder for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- =================================================================
 -- AGENT SETTINGS RPC FUNCTIONS
 -- =================================================================
@@ -311,7 +558,7 @@ BEGIN
     IF p_startup_id IS NULL THEN
         SELECT id INTO target_startup_id
         FROM startups 
-        WHERE user_id = p_user_id 
+        WHERE user_id = p_user_id AND is_active = TRUE
         ORDER BY created_at DESC 
         LIMIT 1;
     ELSE
@@ -366,6 +613,121 @@ BEGIN
 EXCEPTION
     WHEN OTHERS THEN
         RAISE WARNING 'Error in update_user_agent_settings for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- =================================================================
+-- ACCOUNT MANAGEMENT RPC FUNCTIONS
+-- =================================================================
+
+-- Function to soft delete a user account (keeps all data but deactivates account)
+CREATE OR REPLACE FUNCTION soft_delete_user_account(p_user_id UUID)
+RETURNS JSONB AS $$
+BEGIN
+    -- Check if user exists and is active
+    IF NOT EXISTS(SELECT 1 FROM profiles WHERE id = p_user_id AND is_active = TRUE) THEN
+        RETURN jsonb_build_object('error', 'User not found or already deactivated');
+    END IF;
+
+    -- Soft delete the user profile
+    UPDATE profiles
+    SET 
+        is_active = FALSE,
+        deleted_at = NOW(),
+        updated_at = NOW()
+    WHERE id = p_user_id;
+
+    -- Return success
+    RETURN jsonb_build_object(
+        'success', true,
+        'userId', p_user_id,
+        'message', 'Account has been deactivated successfully. All data has been preserved.'
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in soft_delete_user_account for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to reactivate a soft-deleted user account
+CREATE OR REPLACE FUNCTION reactivate_user_account(p_user_id UUID)
+RETURNS JSONB AS $$
+BEGIN
+    -- Check if user exists and is inactive
+    IF NOT EXISTS(SELECT 1 FROM profiles WHERE id = p_user_id AND is_active = FALSE) THEN
+        RETURN jsonb_build_object('error', 'User not found or already active');
+    END IF;
+
+    -- Reactivate the user profile
+    UPDATE profiles
+    SET 
+        is_active = TRUE,
+        deleted_at = NULL,
+        updated_at = NOW()
+    WHERE id = p_user_id;
+
+    -- Return success
+    RETURN jsonb_build_object(
+        'success', true,
+        'userId', p_user_id,
+        'message', 'Account has been reactivated successfully.'
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in reactivate_user_account for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to check if an email can be used for signup (handles reactivation case)
+CREATE OR REPLACE FUNCTION can_email_be_used_for_signup(p_email TEXT)
+RETURNS JSONB AS $$
+DECLARE
+    existing_user_id UUID;
+    is_user_active BOOLEAN;
+BEGIN
+    -- Check if email exists in auth.users
+    SELECT id INTO existing_user_id
+    FROM auth.users 
+    WHERE email = p_email;
+
+    -- If no user exists with this email, it's available
+    IF existing_user_id IS NULL THEN
+        RETURN jsonb_build_object(
+            'available', true,
+            'message', 'Email is available for signup'
+        );
+    END IF;
+
+    -- Check if the user profile is active
+    SELECT is_active INTO is_user_active
+    FROM profiles 
+    WHERE id = existing_user_id;
+
+    -- If user exists but is deactivated, they can reactivate
+    IF is_user_active = FALSE THEN
+        RETURN jsonb_build_object(
+            'available', false,
+            'can_reactivate', true,
+            'user_id', existing_user_id,
+            'message', 'Account with this email exists but is deactivated. You can reactivate it.'
+        );
+    END IF;
+
+    -- User exists and is active
+    RETURN jsonb_build_object(
+        'available', false,
+        'can_reactivate', false,
+        'message', 'Email is already in use by an active account'
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in can_email_be_used_for_signup for email %: %', p_email, SQLERRM;
         RETURN jsonb_build_object('error', SQLERRM);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public; 

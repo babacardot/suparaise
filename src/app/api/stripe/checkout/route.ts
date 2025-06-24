@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
-    
+
     // Initialize Stripe
     const stripe = getServerStripe()
 
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         full_name?: string
       }
     }
-    
+
     const result = profileResult as unknown as RPCResult
     if (!result.success) {
       console.error('Error getting profile:', result.error)
@@ -104,7 +104,12 @@ export async function POST(req: NextRequest) {
     // Validate price ID
     const validPriceIds = Object.values(STRIPE_PRICE_IDS)
     if (!validPriceIds.includes(priceId)) {
-      console.error('Invalid price ID received:', priceId, 'Valid IDs:', validPriceIds)
+      console.error(
+        'Invalid price ID received:',
+        priceId,
+        'Valid IDs:',
+        validPriceIds,
+      )
       return NextResponse.json({ error: 'Invalid price ID' }, { status: 400 })
     }
 

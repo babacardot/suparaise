@@ -422,6 +422,7 @@ export function UserProvider({ children }: UserProviderProps) {
       setCurrentStartupFromUrl,
       refreshStartups,
       selectStartupById,
+      setNeedsOnboarding,
     ],
   )
 

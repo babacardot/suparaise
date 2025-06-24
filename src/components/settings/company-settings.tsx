@@ -7,6 +7,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { PencilIcon, CheckIcon, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import { useUser } from '@/lib/contexts/user-context'
@@ -46,13 +56,148 @@ const formatFieldName = (fieldName: string): string => {
   return fieldLabels[fieldName] || fieldName
 }
 
+// Skeleton loading component that mimics the form layout
+function CompanySettingsSkeleton() {
+  return (
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 pb-4">
+        <h2 className="text-2xl font-semibold -mt-2 mb-2">Company</h2>
+        <p className="text-muted-foreground">
+          Tell us about your startup, what you&apos;re building and why it
+          matters.
+        </p>
+      </div>
+
+      <Separator className="flex-shrink-0" />
+
+      <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
+        <div className="space-y-6 pr-2">
+          {/* Company Logo Skeleton */}
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-20 w-20 rounded-full" />
+            <div className="space-x-2">
+              <Skeleton className="h-8 w-24 inline-block" />
+              <Skeleton className="h-8 w-16 inline-block" />
+            </div>
+          </div>
+
+          {/* Basic Information Skeleton */}
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+          </div>
+
+          {/* Company Details Skeleton */}
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          </div>
+
+          {/* Danger Zone */}
+          <div className="mt-8">
+            <Separator className="my-8" />
+            <div className="space-y-3 p-6 bg-muted/50 border border-border/50 rounded-sm">
+              <Skeleton className="h-7 w-36" />
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-11/12" />
+              </div>
+              <Skeleton className="h-9 w-[160px] mt-1" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function CompanySettings() {
-  const { user, supabase, currentStartupId } = useUser()
+  const { user, supabase, currentStartupId, startups } = useUser()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [editingField, setEditingField] = useState<string | null>(null)
   const [dataLoading, setDataLoading] = useState(true)
   const [logoUploading, setLogoUploading] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
+  const [startupDeleteConfirmation, setStartupDeleteConfirmation] = useState('')
   const logoInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState({
@@ -128,18 +273,7 @@ export default function CompanySettings() {
   }
 
   if (dataLoading) {
-    return (
-      <div className="h-full flex flex-col overflow-hidden">
-        <div className="flex-shrink-0 pb-4">
-          <h2 className="text-2xl font-semibold -mt-2 mb-2">Company</h2>
-          <p className="text-muted-foreground">
-            Tell us about your startup, what you&apos;re building and why it
-            matters.
-          </p>
-        </div>
-        <Separator className="flex-shrink-0" />
-      </div>
-    )
+    return <CompanySettingsSkeleton />
   }
 
   const handleInputChange = (
@@ -323,7 +457,72 @@ export default function CompanySettings() {
     }
   }
 
+  const handleStartupDelete = async () => {
+    if (!currentStartupId || !user) return
+
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.rpc('soft_delete_startup', {
+        p_user_id: user.id,
+        p_startup_id: currentStartupId,
+      })
+
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+
+      toast({
+        title: 'Startup deleted',
+        description: `The startup "${formData.name}" has been deleted.`,
+      })
+
+      // Reload the page to refresh the user's startups and context
+      window.location.reload()
+    } catch (error) {
+      console.error('Error deleting startup:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete startup. Please try again.',
+      })
+    } finally {
+      setIsLoading(false)
+      setStartupDeleteConfirmation('')
+    }
+  }
+
   const companyInitial = formData.name?.charAt(0)?.toUpperCase() || 'C'
+
+  const handleAccountDelete = async () => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase.rpc('soft_delete_user_account', {
+        p_user_id: user.id,
+      })
+
+      if (error) throw error
+
+      if (data?.error) {
+        throw new Error(data.error)
+      }
+
+      toast({
+        title: 'Account Deactivated',
+        description:
+          'Your account has been deactivated. All data has been preserved.',
+      })
+
+      // Sign out the user
+      await supabase.auth.signOut({ scope: 'global' })
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to deactivate account. Please try again.',
+      })
+    }
+  }
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -341,14 +540,21 @@ export default function CompanySettings() {
         <div className="space-y-6 pr-2">
           {/* Company Logo */}
           <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20">
-              {formData.logoUrl ? (
-                <AvatarImage src={formData.logoUrl} alt="Company logo" />
-              ) : (
-                <AvatarFallback className="text-lg">
-                  {companyInitial}
-                </AvatarFallback>
-              )}
+            <Avatar className="h-20 w-20 rounded-sm">
+              <AvatarImage
+                src={
+                  formData.logoUrl ||
+                  `https://avatar.vercel.sh/${encodeURIComponent(
+                    formData.name.toLowerCase() ||
+                      currentStartupId ||
+                      'suparaise',
+                  )}.png?size=80`
+                }
+                alt="Company logo"
+              />
+              <AvatarFallback className="rounded-sm text-lg">
+                {companyInitial}
+              </AvatarFallback>
             </Avatar>
             <div className="space-x-2">
               <input
@@ -375,7 +581,7 @@ export default function CompanySettings() {
                     Uploading...
                   </>
                 ) : (
-                  <>{formData.logoUrl ? 'Update' : 'Upload logo'}</>
+                  <>{formData.logoUrl ? 'Update' : 'Update'}</>
                 )}
               </Button>
               {formData.logoUrl && (
@@ -919,6 +1125,136 @@ export default function CompanySettings() {
                     <CheckIcon className="h-4 w-4" />
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+
+          {/* Danger Zone */}
+          <div className="mt-8">
+            <Separator className="my-8" />
+            <div className="space-y-6">
+              <div className="space-y-3 p-6 bg-pink-50/50 dark:bg-pink-950/50 border border-pink-200 dark:border-pink-800/50 rounded-sm">
+                <h2 className="text-xl font-semibold text-pink-600 dark:text-pink-400">
+                  Delete company
+                </h2>
+                <p className="text-sm text-pink-600/80 dark:text-pink-400/80">
+                  Permanently delete{' '}
+                  <span className="font-semibold">{formData.name} </span>
+                  and all its associated data. This action cannot be undone.
+                </p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="bg-pink-600 hover:bg-pink-700 dark:bg-pink-900 dark:hover:bg-pink-800 text-white rounded-sm"
+                      disabled={startups.length <= 1}
+                    >
+                      Delete
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Are you sure ?</DialogTitle>
+                      <DialogDescription>
+                        This action will permanently delete this company and all
+                        its data from our servers. This cannot be undone.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 pt-0">
+                      <Label
+                        htmlFor="startup-confirm"
+                        className="text-sm font-medium"
+                      >
+                        Please type{' '}
+                        <span className="font-semibold text-red-500 pt-1">
+                          {formData.name || 'CONFIRM'}
+                        </span>{' '}
+                        to confirm
+                      </Label>
+                      <Input
+                        id="startup-confirm"
+                        className="rounded-sm"
+                        placeholder={formData.name || 'CONFIRM'}
+                        value={startupDeleteConfirmation}
+                        onChange={(e) =>
+                          setStartupDeleteConfirmation(e.target.value)
+                        }
+                      />
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="destructive"
+                        disabled={
+                          isLoading ||
+                          startupDeleteConfirmation !==
+                            (formData.name || 'CONFIRM')
+                        }
+                        className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
+                        onClick={handleStartupDelete}
+                      >
+                        {isLoading && <Spinner className="h-3 w-3 mr-2" />}
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="space-y-3 p-6 bg-red-50/50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/50 rounded-sm">
+                <h2 className="text-xl font-semibold text-red-600 dark:text-red-400">
+                  Delete account
+                </h2>
+                <p className="text-sm text-red-600/80 dark:text-red-400/80">
+                  Permanently delete your account and all associated data. This
+                  action cannot be undone. Any active subscriptions will be
+                  cancelled.
+                </p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="bg-red-600 hover:bg-red-700 dark:bg-red-900 dark:hover:bg-red-800 text-white rounded-sm"
+                    >
+                      Delete account
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Are you sure ?</DialogTitle>
+                      <DialogDescription>
+                        This action will permanently delete your account. All
+                        your startup data will be preserved for a short period
+                        before being deleted.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 pt-0">
+                      <Label htmlFor="confirm" className="text-sm font-medium">
+                        Please type{' '}
+                        <span className="font-semibold pt-1 text-red-500">
+                          DELETE
+                        </span>{' '}
+                        to confirm
+                      </Label>
+                      <Input
+                        id="confirm"
+                        className="rounded-sm"
+                        placeholder="DELETE"
+                        value={deleteConfirmation}
+                        onChange={(e) => setDeleteConfirmation(e.target.value)}
+                      />
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="destructive"
+                        disabled={deleteConfirmation !== 'DELETE'}
+                        className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50"
+                        onClick={handleAccountDelete}
+                      >
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>

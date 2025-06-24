@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/sidebar'
 
 export function NavUser({
-  user,
+  user: propUser,
 }: {
   user: {
     name: string
@@ -34,7 +34,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { signOut, currentStartupId } = useUser()
+  const { user, signOut, currentStartupId } = useUser()
   const { theme, setTheme } = useTheme()
   const router = useRouter()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
@@ -55,10 +55,38 @@ export function NavUser({
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
-  // Generate avatar URL using the provided logic
-  const avatarUrl =
-    user.avatar ||
-    `https://avatar.vercel.sh/${encodeURIComponent(user.email?.toLowerCase() || '')}?rounded=60`
+  // Determine user data, prioritizing live context user
+  const name = user?.user_metadata?.name || propUser.name || 'User'
+  const email = user?.email || propUser.email || ''
+
+  // Generate avatar URL using the logic that respects custom uploads and removals
+  const getAvatarUrl = () => {
+    // Prioritize live user from context
+    if (user && user.user_metadata) {
+      const { avatar_url, avatar_removed } = user.user_metadata
+      if (avatar_removed) {
+        return `https://avatar.vercel.sh/${encodeURIComponent(
+          email.toLowerCase(),
+        )}.png?size=80`
+      }
+      return (
+        avatar_url ||
+        `https://avatar.vercel.sh/${encodeURIComponent(
+          email.toLowerCase(),
+        )}.png?size=80`
+      )
+    }
+
+    // Fallback to prop user if context user isn't available
+    return (
+      propUser.avatar ||
+      `https://avatar.vercel.sh/${encodeURIComponent(
+        email.toLowerCase(),
+      )}.png?size=80`
+    )
+  }
+
+  const avatarUrl = getAvatarUrl()
 
   // Generate fallback initials
   const getInitials = (name: string, email: string) => {
@@ -73,7 +101,7 @@ export function NavUser({
     return email.split('@')[0].slice(0, 2).toUpperCase()
   }
 
-  const initials = getInitials(user.name, user.email)
+  const initials = getInitials(name, email)
 
   return (
     <SidebarMenu>
@@ -92,7 +120,7 @@ export function NavUser({
               <Avatar className="h-8 w-8 rounded-sm">
                 <AvatarImage
                   src={avatarUrl}
-                  alt={user.name}
+                  alt={name}
                   className="h-full w-full rounded-sm"
                 />
                 <AvatarFallback className="rounded-sm">
@@ -100,8 +128,8 @@ export function NavUser({
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-semibold">{name}</span>
+                <span className="truncate text-xs">{email}</span>
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -116,7 +144,7 @@ export function NavUser({
                 <Avatar className="h-8 w-8 rounded-sm">
                   <AvatarImage
                     src={avatarUrl}
-                    alt={user.name}
+                    alt={name}
                     className="h-full w-full rounded-sm"
                   />
                   <AvatarFallback className="rounded-sm">
@@ -124,8 +152,8 @@ export function NavUser({
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-semibold">{name}</span>
+                  <span className="truncate text-xs">{email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

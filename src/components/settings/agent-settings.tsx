@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Skeleton } from '@/components/ui/skeleton'
 import { PencilIcon, CheckIcon, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import { useUser } from '@/lib/contexts/user-context'
@@ -35,6 +36,137 @@ const formatFieldName = (fieldName: string): string => {
     enableStealth: 'Stealth mode',
   }
   return fieldLabels[fieldName] || fieldName
+}
+
+// Skeleton loading component that mimics the form layout
+function AgentSettingsSkeleton() {
+  return (
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 pb-4">
+        <h2 className="text-2xl font-semibold -mt-2 mb-2">Agent</h2>
+        <p className="text-muted-foreground">
+          Customize how your AI agents represent you to investors.
+        </p>
+      </div>
+
+      <Separator className="flex-shrink-0" />
+
+      <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
+        <div className="space-y-6 pr-2">
+          {/* Basic Agent Settings Skeleton */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            </div>
+          </div>
+
+          {/* Automation Preferences Skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-80" />
+
+            <div className="space-y-4">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-3 p-3 border rounded-sm"
+                >
+                  <Skeleton className="h-4 w-4" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-64" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Target Preferences Skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-72" />
+
+            <div className="space-y-4">
+              <div>
+                <Skeleton className="h-4 w-24 mb-2" />
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: 7 }).map((_, index) => (
+                    <Skeleton key={index} className="h-6 w-16" />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Skeleton className="h-4 w-20 mb-2" />
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: 7 }).map((_, index) => (
+                    <Skeleton key={index} className="h-6 w-20" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Communication Style Skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-12" />
+            <Skeleton className="h-4 w-64" />
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          </div>
+
+          {/* Technical Settings Skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-3 w-40" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function AgentSettings() {
@@ -110,17 +242,7 @@ export default function AgentSettings() {
   }
 
   if (dataLoading) {
-    return (
-      <div className="h-full flex flex-col overflow-hidden">
-        <div className="flex-shrink-0 pb-4">
-          <h2 className="text-2xl font-semibold -mt-2 mb-2">Agent</h2>
-          <p className="text-muted-foreground">
-            Customize how your AI agents represent you to investors.
-          </p>
-        </div>
-        <Separator className="flex-shrink-0" />
-      </div>
-    )
+    return <AgentSettingsSkeleton />
   }
 
   const handleInputChange = (

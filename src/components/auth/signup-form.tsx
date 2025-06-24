@@ -44,8 +44,6 @@ export function SignupForm({
     setIsSubmitting(false)
   }
 
-
-
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">

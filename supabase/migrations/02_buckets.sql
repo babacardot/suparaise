@@ -22,6 +22,10 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('support_request_images', 'support_request_images', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- 5. Create the 'avatars' bucket for user profile pictures
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- --------------------------------------------------
 -- Storage Security Policies
@@ -94,4 +98,35 @@ ON storage.objects FOR SELECT
 USING (
     bucket_id = 'support_request_images' 
     AND auth.uid()::text = (storage.foldername(name))[1]
+); 
+
+-- Avatars: Public can read. Authenticated users can upload, update, and delete their own avatar.
+-- The avatar file path will be prefixed with the user's UID. e.g., 'public/a1b2c3d4/avatar.png'
+
+CREATE POLICY "Allow public read on avatars"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'avatars');
+
+CREATE POLICY "Allow users to upload their own avatar"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'avatars' AND
+  auth.uid() = (storage.foldername(name))[1]::uuid
+);
+
+CREATE POLICY "Allow users to update their own avatar"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'avatars' AND
+  auth.uid() = (storage.foldername(name))[1]::uuid
+);
+
+CREATE POLICY "Allow users to delete their own avatar"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'avatars' AND
+  auth.uid() = (storage.foldername(name))[1]::uuid
 ); 

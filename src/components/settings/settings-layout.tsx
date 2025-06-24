@@ -1,9 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import SettingsNav from './settings-nav'
 import { Separator } from '@/components/ui/separator'
+import { useUser } from '@/lib/contexts/user-context'
 
 interface SettingsLayoutProps {
   children: React.ReactNode
@@ -13,12 +14,36 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const params = useParams()
   const pathname = usePathname()
   const startupId = params.startupId as string
+  const { user, supabase } = useUser()
+  const [foundersCount, setFoundersCount] = useState(1)
+
+  // Fetch founders count to determine icon and title
+  useEffect(() => {
+    const fetchFoundersCount = async () => {
+      if (!user || !startupId) return
+
+      try {
+        const { data, error } = await supabase.rpc('get_startup_founders', {
+          p_user_id: user.id,
+          p_startup_id: startupId,
+        })
+
+        if (!error && data && Array.isArray(data)) {
+          setFoundersCount(data.length)
+        }
+      } catch (error) {
+        console.error('Error fetching founders count:', error)
+      }
+    }
+
+    fetchFoundersCount()
+  }, [user, startupId, supabase])
 
   const sidebarItems = [
     {
-      title: 'Profile',
+      title: foundersCount > 1 ? 'Founders' : 'Founder',
       href: `/dashboard/${startupId}/settings`,
-      icon: 'profile',
+      icon: foundersCount > 1 ? 'group' : 'profile',
     },
     {
       title: 'Company',
