@@ -1,6 +1,7 @@
 import { VerifyForm } from '@/components/auth/verify-form'
 import { Suspense } from 'react'
 import Spinner from '@/components/ui/spinner'
+import { TopBanner } from '@/components/design/top-banner'
 
 export default function VerifyPage() {
   return (
@@ -13,6 +14,7 @@ export default function VerifyPage() {
         </div>
       }
     >
+      <TopBanner />
       <VerifyForm />
     </Suspense>
   )

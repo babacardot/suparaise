@@ -132,11 +132,10 @@ export const Header = () => {
                           <SheetClose asChild key={index}>
                             <Link
                               href={item.href}
-                              className={`text-3xl font-semibold transition-colors duration-200 ${
-                                item.isGreen
-                                  ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
-                                  : 'text-foreground hover:text-muted-foreground'
-                              }`}
+                              className={`text-3xl font-semibold transition-colors duration-200 ${item.isGreen
+                                ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
+                                : 'text-foreground hover:text-muted-foreground'
+                                }`}
                             >
                               {item.name}
                             </Link>

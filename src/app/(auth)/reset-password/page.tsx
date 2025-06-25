@@ -1,6 +1,7 @@
 import { ResetPasswordForm } from '@/components/auth/reset-password-form'
 import { Suspense } from 'react'
 import Spinner from '@/components/ui/spinner'
+import { TopBanner } from '@/components/design/top-banner'
 
 export default function ResetPasswordPage() {
   return (
@@ -13,6 +14,7 @@ export default function ResetPasswordPage() {
         </div>
       }
     >
+      <TopBanner />
       <ResetPasswordForm />
     </Suspense>
   )

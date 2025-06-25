@@ -2371,7 +2371,10 @@ export default function CompanySettings() {
                         variant="destructive"
                         disabled={deleteConfirmation !== 'DELETE'}
                         className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50"
-                        onClick={handleAccountDelete}
+                        onClick={() => {
+                          playClickSound()
+                          handleAccountDelete()
+                        }}
                       >
                         Delete
                       </Button>

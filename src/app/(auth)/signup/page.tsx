@@ -5,6 +5,7 @@ import { useUser } from '@/lib/contexts/user-context'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Spinner from '@/components/ui/spinner'
+import { TopBanner } from '@/components/design/top-banner'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -29,10 +30,13 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-start bg-muted p-6 md:p-20 pt-20">
-      <div className="w-full max-w-sm md:max-w-3xl">
-        <SignupForm />
+    <>
+      <TopBanner />
+      <div className="flex min-h-svh flex-col items-center justify-start bg-muted p-6 md:p-20 pt-20">
+        <div className="w-full max-w-sm md:max-w-3xl">
+          <SignupForm />
+        </div>
       </div>
-    </div>
+    </>
   )
 }

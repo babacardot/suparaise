@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PencilIcon, CheckIcon, ChevronDown } from 'lucide-react'
@@ -16,24 +15,14 @@ import { useToast } from '@/lib/hooks/use-toast'
 // Helper function to format field names for display
 const formatFieldName = (fieldName: string): string => {
   const fieldLabels: Record<string, string> = {
-    agentName: 'Agent name',
     submissionDelay: 'Submission delay',
     retryAttempts: 'Retry attempts',
-    maxSteps: 'Max steps per task',
-    maxParallelSubmissions: 'Max parallel submissions',
-    autoSubmit: 'Auto-submit',
-    requireReview: 'Require review',
-    skipComplexForms: 'Skip complex forms',
-    skipVideoRequirements: 'Skip video requirements',
-    maxFormFields: 'Max form fields',
+    maxParallelSubmissions: 'Parallel submissions',
     enableDebugMode: 'Debug mode',
     customInstructions: 'Custom instructions',
-    preferredTone: 'Communication tone',
-    targetFundStages: 'Target fund stages',
-    targetFundTypes: 'Target fund types',
-    browserProvider: 'Browser provider',
-    timeoutMinutes: 'Task timeout',
-    enableStealth: 'Stealth mode',
+    preferredTone: 'Tone',
+    timeoutMinutes: 'Timeout',
+    enableStealth: 'Stealth',
   }
   return fieldLabels[fieldName] || fieldName
 }
@@ -43,7 +32,7 @@ function AgentSettingsSkeleton() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
-        <h2 className="text-2xl font-semibold -mt-2 mb-2">Agent</h2>
+        <h2 className="text-2xl font-semibold -mt-2 mb-2">Agents</h2>
         <p className="text-muted-foreground">
           Customize how your AI agents represent you to investors.
         </p>
@@ -53,13 +42,8 @@ function AgentSettingsSkeleton() {
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
-          {/* Basic Agent Settings Skeleton */}
+          {/* Basic Agents Settings Skeleton */}
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-9 w-full" />
-            </div>
-
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Skeleton className="h-4 w-40" />
@@ -83,13 +67,10 @@ function AgentSettingsSkeleton() {
             </div>
           </div>
 
-          {/* Automation Preferences Skeleton */}
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="h-4 w-80" />
-
+          {/* Preferences Skeleton */}
+          <div className="space-y-2">
             <div className="space-y-4">
-              {Array.from({ length: 6 }).map((_, index) => (
+              {Array.from({ length: 2 }).map((_, index) => (
                 <div
                   key={index}
                   className="flex items-center space-x-3 p-3 border rounded-sm"
@@ -104,63 +85,16 @@ function AgentSettingsSkeleton() {
             </div>
           </div>
 
-          {/* Target Preferences Skeleton */}
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-72" />
-
-            <div className="space-y-4">
-              <div>
-                <Skeleton className="h-4 w-24 mb-2" />
-                <div className="flex flex-wrap gap-2">
-                  {Array.from({ length: 7 }).map((_, index) => (
-                    <Skeleton key={index} className="h-6 w-16" />
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Skeleton className="h-4 w-20 mb-2" />
-                <div className="flex flex-wrap gap-2">
-                  {Array.from({ length: 7 }).map((_, index) => (
-                    <Skeleton key={index} className="h-6 w-20" />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Communication Style Skeleton */}
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-12" />
-            <Skeleton className="h-4 w-64" />
-
+          {/* Style Skeleton */}
+          <div className="space-y-2">
             <div className="space-y-2">
-              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-12" />
               <Skeleton className="h-9 w-full" />
             </div>
 
             <div className="space-y-2">
-              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-32" />
               <Skeleton className="h-24 w-full" />
-            </div>
-          </div>
-
-          {/* Technical Settings Skeleton */}
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-48" />
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-9 w-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-9 w-full" />
-                <Skeleton className="h-3 w-40" />
-              </div>
             </div>
           </div>
         </div>
@@ -177,16 +111,9 @@ export default function AgentSettings() {
   const [dataLoading, setDataLoading] = useState(true)
 
   const [formData, setFormData] = useState({
-    agentName: 'Suparaise Agent',
     submissionDelay: 30, // seconds between submissions
     retryAttempts: 3,
-    maxSteps: 50, // maximum steps per task
     maxParallelSubmissions: 3,
-    autoSubmit: false,
-    requireReview: true,
-    skipComplexForms: false,
-    skipVideoRequirements: true,
-    maxFormFields: 25, // skip forms with more than this many fields
     enableDebugMode: false,
     customInstructions: '',
     preferredTone: 'professional' as
@@ -194,9 +121,6 @@ export default function AgentSettings() {
       | 'enthusiastic'
       | 'concise'
       | 'detailed',
-    targetFundStages: [] as string[],
-    targetFundTypes: [] as string[],
-    browserProvider: 'Local' as 'Local' | 'Hyperbrowser',
     timeoutMinutes: 10, // task timeout in minutes
     enableStealth: true, // avoid detection
   })
@@ -287,7 +211,7 @@ export default function AgentSettings() {
 
       setEditingField(null)
       toast({
-        title: 'Agent settings updated',
+        title: 'Agents settings updated',
         description: `${formatFieldName(field)} has been updated successfully.`,
       })
     } catch (error) {
@@ -302,47 +226,10 @@ export default function AgentSettings() {
     }
   }
 
-  const fundStages = [
-    'Pre-Seed',
-    'Seed',
-    'Series A',
-    'Series B',
-    'Series C+',
-    'Growth',
-    'Late Stage',
-  ]
-  const fundTypes = [
-    'Venture Capital',
-    'Angel Group',
-    'Corporate VC',
-    'Accelerator',
-    'Government Grant',
-    'Family Office',
-    'Strategic Investor',
-  ]
-
-  const toggleFundStage = (stage: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      targetFundStages: prev.targetFundStages.includes(stage)
-        ? prev.targetFundStages.filter((s) => s !== stage)
-        : [...prev.targetFundStages, stage],
-    }))
-  }
-
-  const toggleFundType = (type: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      targetFundTypes: prev.targetFundTypes.includes(type)
-        ? prev.targetFundTypes.filter((t) => t !== type)
-        : [...prev.targetFundTypes, type],
-    }))
-  }
-
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
-        <h2 className="text-2xl font-semibold -mt-2 mb-2">Agent</h2>
+        <h2 className="text-2xl font-semibold -mt-2 mb-2">Agents</h2>
         <p className="text-muted-foreground">
           Customize how your AI agents represent you to investors.
         </p>
@@ -352,47 +239,12 @@ export default function AgentSettings() {
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
-          {/* Basic Agent Settings */}
+          {/* Basic Agents Settings */}
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="agentName">Agent name</Label>
-              <div className="relative">
-                <Input
-                  id="agentName"
-                  value={formData.agentName}
-                  onChange={(e) =>
-                    handleInputChange('agentName', e.target.value)
-                  }
-                  className={cn(
-                    'rounded-sm pr-8',
-                    editingField !== 'agentName' && 'bg-muted',
-                  )}
-                  readOnly={editingField !== 'agentName'}
-                  placeholder="Give your agent a name"
-                />
-                {editingField !== 'agentName' ? (
-                  <button
-                    onClick={() => handleFieldEdit('agentName')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                  >
-                    <PencilIcon className="h-3 w-3" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleFieldSave('agentName')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                    disabled={isLoading}
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="submissionDelay">
-                  Delay between submissions (seconds)
+                  Delay between submissions
                 </Label>
                 <div className="relative">
                   <Input
@@ -434,7 +286,7 @@ export default function AgentSettings() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="retryAttempts">Retry attempts on failure</Label>
+                <Label htmlFor="retryAttempts">Retry attempts</Label>
                 <div className="relative">
                   <Input
                     id="retryAttempts"
@@ -478,7 +330,7 @@ export default function AgentSettings() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="maxParallelSubmissions">
-                  Max parallel submissions
+                  Parallel submissions
                 </Label>
                 <div className="relative">
                   <Input
@@ -520,7 +372,7 @@ export default function AgentSettings() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timeoutMinutes">Task timeout (minutes)</Label>
+                <Label htmlFor="timeoutMinutes">Task timeout</Label>
                 <div className="relative">
                   <Input
                     id="timeoutMinutes"
@@ -562,89 +414,9 @@ export default function AgentSettings() {
             </div>
           </div>
 
-          {/* Automation Preferences */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Automation Preferences</h3>
-            <p className="text-sm text-muted-foreground">
-              Control how autonomous you want the agent to be.
-            </p>
-
+          {/* Preferences */}
+          <div className="space-y-2">
             <div className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 border rounded-sm hover:bg-muted/50 transition-colors">
-                <Checkbox
-                  id="autoSubmit"
-                  checked={formData.autoSubmit}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('autoSubmit', checked)
-                  }
-                />
-                <div className="grid gap-1.5 leading-none flex-1">
-                  <Label htmlFor="autoSubmit" className="font-medium">
-                    Auto-submit applications
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Automatically submit applications without manual review
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 border rounded-sm hover:bg-muted/50 transition-colors">
-                <Checkbox
-                  id="requireReview"
-                  checked={formData.requireReview}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('requireReview', checked)
-                  }
-                />
-                <div className="grid gap-1.5 leading-none flex-1">
-                  <Label htmlFor="requireReview" className="font-medium">
-                    Require review before submission
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Show filled forms for approval before submitting
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 border rounded-sm hover:bg-muted/50 transition-colors">
-                <Checkbox
-                  id="skipComplexForms"
-                  checked={formData.skipComplexForms}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('skipComplexForms', checked)
-                  }
-                />
-                <div className="grid gap-1.5 leading-none flex-1">
-                  <Label htmlFor="skipComplexForms" className="font-medium">
-                    Skip complex forms
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Skip forms with more than {formData.maxFormFields} fields
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 border rounded-sm hover:bg-muted/50 transition-colors">
-                <Checkbox
-                  id="skipVideoRequirements"
-                  checked={formData.skipVideoRequirements}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('skipVideoRequirements', checked)
-                  }
-                />
-                <div className="grid gap-1.5 leading-none flex-1">
-                  <Label
-                    htmlFor="skipVideoRequirements"
-                    className="font-medium"
-                  >
-                    Skip video requirements
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Skip applications that require video submissions
-                  </p>
-                </div>
-              </div>
-
               <div className="flex items-center space-x-3 p-3 border rounded-sm hover:bg-muted/50 transition-colors">
                 <Checkbox
                   id="enableStealth"
@@ -655,7 +427,7 @@ export default function AgentSettings() {
                 />
                 <div className="grid gap-1.5 leading-none flex-1">
                   <Label htmlFor="enableStealth" className="font-medium">
-                    Enable stealth mode
+                    Stealth mode
                   </Label>
                   <p className="text-sm text-muted-foreground">
                     Use built-in patches to avoid bot detection
@@ -673,7 +445,7 @@ export default function AgentSettings() {
                 />
                 <div className="grid gap-1.5 leading-none flex-1">
                   <Label htmlFor="enableDebugMode" className="font-medium">
-                    Enable debug mode
+                    Debug mode
                   </Label>
                   <p className="text-sm text-muted-foreground">
                     Save detailed logs and screenshots for troubleshooting
@@ -683,69 +455,10 @@ export default function AgentSettings() {
             </div>
           </div>
 
-          {/* Target Preferences */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Target Preferences</h3>
-            <p className="text-sm text-muted-foreground">
-              Configure which types of funding opportunities to target.
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-medium mb-2 block">
-                  Funding stages
-                </Label>
-                <div className="flex flex-wrap gap-2">
-                  {fundStages.map((stage) => (
-                    <Badge
-                      key={stage}
-                      variant={
-                        formData.targetFundStages.includes(stage)
-                          ? 'default'
-                          : 'outline'
-                      }
-                      className="cursor-pointer hover:scale-105 transition-transform"
-                      onClick={() => toggleFundStage(stage)}
-                    >
-                      {stage}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium mb-2 block">
-                  Fund types
-                </Label>
-                <div className="flex flex-wrap gap-2">
-                  {fundTypes.map((type) => (
-                    <Badge
-                      key={type}
-                      variant={
-                        formData.targetFundTypes.includes(type)
-                          ? 'default'
-                          : 'outline'
-                      }
-                      className="cursor-pointer hover:scale-105 transition-transform"
-                      onClick={() => toggleFundType(type)}
-                    >
-                      {type}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Communication Style */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Style</h3>
-            <p className="text-sm text-muted-foreground">
-              Customize how the agent communicates in applications.
-            </p>
-
+          {/* Style */}
+          <div className="space-y-2">
             <div className="space-y-2">
-              <Label htmlFor="preferredTone">Communication tone</Label>
+              <Label htmlFor="preferredTone">Tone</Label>
               <div className="relative">
                 <select
                   id="preferredTone"
@@ -801,84 +514,6 @@ export default function AgentSettings() {
                     <CheckIcon className="h-4 w-4" />
                   </button>
                 )}
-              </div>
-            </div>
-          </div>
-
-          {/* Technical Settings */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Technical Settings</h3>
-            <p className="text-sm text-muted-foreground">
-              Advanced configuration for the AI agent.
-            </p>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="maxSteps">Max steps per task</Label>
-                <div className="relative">
-                  <Input
-                    id="maxSteps"
-                    type="number"
-                    value={formData.maxSteps}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'maxSteps',
-                        parseInt(e.target.value) || 50,
-                      )
-                    }
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'maxSteps' && 'bg-muted',
-                    )}
-                    readOnly={editingField !== 'maxSteps'}
-                    min="10"
-                    max="200"
-                    placeholder="50"
-                  />
-                  {editingField !== 'maxSteps' ? (
-                    <button
-                      onClick={() => handleFieldEdit('maxSteps')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('maxSteps')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="browserProvider">Browser provider</Label>
-                <div className="relative">
-                  <select
-                    id="browserProvider"
-                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={formData.browserProvider}
-                    onChange={async (e) => {
-                      const newValue = e.target
-                        .value as typeof formData.browserProvider
-                      handleInputChange('browserProvider', newValue)
-                      await handleFieldSave('browserProvider')
-                    }}
-                    disabled={isLoading}
-                  >
-                    <option value="Local">Local (Playwright)</option>
-                    <option value="Hyperbrowser">Hyperbrowser (Cloud)</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {formData.browserProvider === 'Local'
-                    ? 'Uses local Playwright instance'
-                    : 'Uses cloud browsers with proxy support'}
-                </p>
               </div>
             </div>
           </div>

@@ -11,6 +11,7 @@ interface PricingTier {
   buttonText: string
   href: string
   popular?: boolean
+  permissionLevel: 'FREE' | 'PRO' | 'MAX'
 }
 
 const pricingTiers: PricingTier[] = [
@@ -20,12 +21,13 @@ const pricingTiers: PricingTier[] = [
     priceSuffix: '',
     description: 'Get started with agentic fundraising',
     features: [
-      '3 funds applications per month',
+      '3 fund applications per month',
       'Access to 100+ funds',
       'Claude 3.7 sonnet',
     ],
-    buttonText: 'Get started',
+    buttonText: '',
     href: '/signup',
+    permissionLevel: 'FREE',
   },
   {
     name: 'Pro',
@@ -34,14 +36,15 @@ const pricingTiers: PricingTier[] = [
     description: 'For startups actively fundraising',
     features: [
       '100 runs per month',
-      'Access to 2000+ funds',
+      'Access to 1200+ global funds',
       'Claude 4 sonnet',
-      'Agent personalization',
+      '5 parallel submissions',
       'Standard support',
     ],
     buttonText: 'Start free trial',
     href: '/signup',
     popular: true,
+    permissionLevel: 'PRO',
   },
   {
     name: 'Max',
@@ -50,14 +53,15 @@ const pricingTiers: PricingTier[] = [
     description: 'For startups that need meetings now',
     features: [
       '500 runs per month',
-      'Full fund database',
+      'Access to 2000+ global funds',
       'Claude 4 sonnet',
-      'Agent personalization',
-      'Integrations',
+      '15 parallel submissions',
+      'Enhanced agent customization',
       'Priority support',
     ],
     buttonText: 'Get started',
     href: '/signup',
+    permissionLevel: 'MAX',
   },
 ]
 
@@ -117,17 +121,20 @@ export const Pricing = () => {
                   ))}
                 </ul>
 
-                <Button
-                  asChild
-                  className={`mt-6 w-full ${
-                    tier.popular
+                {tier.buttonText && (
+                  <Button
+                    asChild
+                    className={`mt-6 w-full ${tier.popular
                       ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                      : ''
-                  }`}
-                  variant={tier.popular ? 'outline' : 'outline'}
-                >
-                  <Link href={tier.href}>{tier.buttonText}</Link>
-                </Button>
+                      : tier.permissionLevel === 'MAX'
+                        ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800'
+                        : ''
+                      }`}
+                    variant="outline"
+                  >
+                    <Link href={tier.href}>{tier.buttonText}</Link>
+                  </Button>
+                )}
               </div>
             ))}
           </div>

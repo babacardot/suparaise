@@ -88,7 +88,7 @@ export function ResetPasswordForm({
 
   if (isCheckingToken) {
     return (
-      <div className={cn('flex flex-col gap-6', className)} {...props}>
+      <div className={cn('flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center', className)} {...props}>
         <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col items-center text-center gap-4">
@@ -97,13 +97,17 @@ export function ResetPasswordForm({
             </div>
           </CardContent>
         </Card>
+        <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
+          By using this service, you agree to our <a href="/terms">Terms</a> and{' '}
+          <a href="/privacy">Privacy Policy</a>.
+        </div>
       </div>
     )
   }
 
   if (!isValidToken) {
     return (
-      <div className={cn('flex flex-col gap-6', className)} {...props}>
+      <div className={cn('flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center', className)} {...props}>
         <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col items-center text-center gap-6">
@@ -123,12 +127,16 @@ export function ResetPasswordForm({
             </div>
           </CardContent>
         </Card>
+        <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
+          By using this service, you agree to our <a href="/terms">Terms</a> and{' '}
+          <a href="/privacy">Privacy Policy</a>.
+        </div>
       </div>
     )
   }
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div className={cn('flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center', className)} {...props}>
       <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
         <CardContent className="p-0">
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
@@ -183,6 +191,10 @@ export function ResetPasswordForm({
           </form>
         </CardContent>
       </Card>
+      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
+        By using this service, you agree to our <a href="/terms">Terms</a> and{' '}
+        <a href="/privacy">Privacy Policy</a>.
+      </div>
     </div>
   )
 }
