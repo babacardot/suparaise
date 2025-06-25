@@ -8,13 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Spinner from '@/components/ui/spinner'
-import {
-  Plus,
-  X,
-  ChevronDown,
-  ChevronsUpDown,
-  Check,
-} from 'lucide-react'
+import { Plus, X, ChevronDown, ChevronsUpDown, Check } from 'lucide-react'
 import PhoneNumberInput from '@/components/design/phone-number-input'
 import * as RPNInput from 'react-phone-number-input'
 import {
@@ -186,7 +180,7 @@ const CompetitorInput: React.FC<{
 
   const removeCompetitor = (competitorToRemove: string) => {
     playClickSound()
-    onChange(competitors.filter(c => c !== competitorToRemove))
+    onChange(competitors.filter((c) => c !== competitorToRemove))
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -257,46 +251,124 @@ const FileUploadComponent: React.FC<
   maxSize,
   description,
 }) => {
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-    useEffect(() => {
-      if ((type === 'logo' || type === 'introVideo') && file) {
-        const url = URL.createObjectURL(file)
-        setPreviewUrl(url)
+  useEffect(() => {
+    if ((type === 'logo' || type === 'introVideo') && file) {
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
 
-        return () => {
-          URL.revokeObjectURL(url)
-          setPreviewUrl(null)
-        }
-      } else {
+      return () => {
+        URL.revokeObjectURL(url)
         setPreviewUrl(null)
       }
-    }, [file, type])
+    } else {
+      setPreviewUrl(null)
+    }
+  }, [file, type])
 
-    return (
-      <div className="space-y-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={(e) => {
-            const selectedFile = e.target.files?.[0]
-            if (selectedFile) onUpload(type, selectedFile)
-          }}
-          disabled={uploadStatus === 'uploading'}
-        />
-        {!file ? (
-          <div className="flex items-center space-x-4">
-            <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-              <LottieIcon
-                animationData={animations.fileplus}
-                size={32}
-                loop={false}
-                autoplay={false}
-              />
-            </div>
-            <div className="space-x-2">
+  return (
+    <div className="space-y-2">
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => {
+          const selectedFile = e.target.files?.[0]
+          if (selectedFile) onUpload(type, selectedFile)
+        }}
+        disabled={uploadStatus === 'uploading'}
+      />
+      {!file ? (
+        <div className="flex items-center space-x-4">
+          <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+            <LottieIcon
+              animationData={animations.fileplus}
+              size={32}
+              loop={false}
+              autoplay={false}
+            />
+          </div>
+          <div className="space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploadStatus === 'uploading'}
+              className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+            >
+              {uploadStatus === 'uploading' ? (
+                <>
+                  <Spinner className="h-3 w-3 mr-2" />
+                  Uploading...
+                </>
+              ) : (
+                'Upload'
+              )}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center space-x-4">
+          <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
+            {previewUrl ? (
+              type === 'logo' ? (
+                <Image
+                  src={previewUrl}
+                  alt="Logo preview"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 rounded-sm object-contain"
+                />
+              ) : (
+                <video
+                  src={previewUrl}
+                  muted
+                  playsInline
+                  className="h-20 w-20 rounded-sm object-contain"
+                />
+              )
+            ) : (
+              <div
+                className={`h-20 w-20 p-2 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}
+              >
+                <LottieIcon
+                  animationData={animations.fileplus}
+                  size={32}
+                  loop={false}
+                  autoplay={false}
+                />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{file.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {uploadStatus === 'uploading'
+                ? `${formatFileSize(
+                    (uploadProgress / 100) * file.size,
+                  )} of ${formatFileSize(file.size)}`
+                : formatFileSize(file.size)}
+            </p>
+            {uploadStatus === 'uploading' && (
+              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+                <div
+                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+            {uploadStatus === 'failed' && (
+              <button
+                onClick={() => onUpload(type, file)}
+                className="text-sm text-red-500 hover:underline"
+              >
+                Try again
+              </button>
+            )}
+            <div className="space-x-2 mt-2">
               <Button
                 type="button"
                 variant="outline"
@@ -311,106 +383,30 @@ const FileUploadComponent: React.FC<
                     Uploading...
                   </>
                 ) : (
-                  'Upload'
+                  'Update'
                 )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  playClickSound()
+                  onRemove()
+                }}
+                className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+              >
+                Remove
               </Button>
             </div>
           </div>
-        ) : (
-          <div className="flex items-center space-x-4">
-            <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
-              {previewUrl ? (
-                type === 'logo' ? (
-                  <Image
-                    src={previewUrl}
-                    alt="Logo preview"
-                    width={80}
-                    height={80}
-                    className="h-20 w-20 rounded-sm object-contain"
-                  />
-                ) : (
-                  <video
-                    src={previewUrl}
-                    muted
-                    playsInline
-                    className="h-20 w-20 rounded-sm object-contain"
-                  />
-                )
-              ) : (
-                <div className={`h-20 w-20 p-2 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}>
-                  <LottieIcon
-                    animationData={animations.fileplus}
-                    size={32}
-                    loop={false}
-                    autoplay={false}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {uploadStatus === 'uploading'
-                  ? `${formatFileSize(
-                    (uploadProgress / 100) * file.size,
-                  )} of ${formatFileSize(file.size)}`
-                  : formatFileSize(file.size)}
-              </p>
-              {uploadStatus === 'uploading' && (
-                <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
-                  <div
-                    className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              )}
-              {uploadStatus === 'failed' && (
-                <button
-                  onClick={() => onUpload(type, file)}
-                  className="text-sm text-red-500 hover:underline"
-                >
-                  Try again
-                </button>
-              )}
-              <div className="space-x-2 mt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => inputRef.current?.click()}
-                  disabled={uploadStatus === 'uploading'}
-                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                >
-                  {uploadStatus === 'uploading' ? (
-                    <>
-                      <Spinner className="h-3 w-3 mr-2" />
-                      Uploading...
-                    </>
-                  ) : (
-                    'Update'
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    playClickSound()
-                    onRemove()
-                  }}
-                  className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-                >
-                  Remove
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-        <p className="text-xs text-muted-foreground">
-          {description} (max {maxSize})
-        </p>
-      </div>
-    )
-  }
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">
+        {description} (max {maxSize})
+      </p>
+    </div>
+  )
+}
 
 const MultiSelectCountries: React.FC<{
   selected: string[]
@@ -436,8 +432,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -779,7 +776,11 @@ export const TeamStep: React.FC<
         </Card>
       ))}
 
-      <Button variant="outline" onClick={addFounder} className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+      <Button
+        variant="outline"
+        onClick={addFounder}
+        className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      >
         <Plus className="h-4 w-4 mr-2" />
         Add co-founder
       </Button>
@@ -906,10 +907,11 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="industry"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
-                ? 'border-red-500 focus:border-red-500'
-                : 'border-input'
-                }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
+                fieldErrors.industry
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-input'
+              }`}
               value={startup.industry || ''}
               onChange={(e) =>
                 setStartup({
@@ -1188,10 +1190,11 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="revenue-model"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.revenueModel
-                ? 'border-red-500 focus:border-red-500'
-                : 'border-input'
-                }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
+                fieldErrors.revenueModel
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-input'
+              }`}
               value={startup.revenueModel || ''}
               onChange={(e) =>
                 setStartup({
@@ -1314,9 +1317,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="funding-amount">
-              How much are you raising? *
-            </Label>
+            <Label htmlFor="funding-amount">How much are you raising? *</Label>
             <Input
               id="funding-amount"
               type="text"
@@ -1336,9 +1337,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pre-money-valuation">
-              Pre-money valuation
-            </Label>
+            <Label htmlFor="pre-money-valuation">Pre-money valuation</Label>
             <Input
               id="pre-money-valuation"
               type="text"
@@ -1542,7 +1541,11 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
             <CompetitorInput
               competitors={startup.competitorsList || []}
               onChange={(competitors) =>
-                setStartup({ ...startup, competitorsList: competitors, competitors: competitors.join(', ') })
+                setStartup({
+                  ...startup,
+                  competitorsList: competitors,
+                  competitors: competitors.join(', '),
+                })
               }
             />
           </div>
@@ -1863,41 +1866,41 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               startup.marketSummary ||
               startup.keyCustomers ||
               startup.competitors) && (
-                <div className="pt-2 border-t space-y-2">
-                  {startup.tractionSummary && (
-                    <div>
-                      <span className="font-medium text-muted-foreground text-sm">
-                        Traction
-                      </span>
-                      <p className="text-sm">{startup.tractionSummary}</p>
-                    </div>
-                  )}
-                  {startup.marketSummary && (
-                    <div>
-                      <span className="font-medium text-muted-foreground text-sm">
-                        Market
-                      </span>
-                      <p className="text-sm">{startup.marketSummary}</p>
-                    </div>
-                  )}
-                  {startup.keyCustomers && (
-                    <div>
-                      <span className="font-medium text-muted-foreground text-sm">
-                        Key customers
-                      </span>
-                      <p className="text-sm">{startup.keyCustomers}</p>
-                    </div>
-                  )}
-                  {startup.competitors && (
-                    <div>
-                      <span className="font-medium text-muted-foreground text-sm">
-                        Competitors
-                      </span>
-                      <p className="text-sm">{startup.competitors}</p>
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className="pt-2 border-t space-y-2">
+                {startup.tractionSummary && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Traction
+                    </span>
+                    <p className="text-sm">{startup.tractionSummary}</p>
+                  </div>
+                )}
+                {startup.marketSummary && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Market
+                    </span>
+                    <p className="text-sm">{startup.marketSummary}</p>
+                  </div>
+                )}
+                {startup.keyCustomers && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Key customers
+                    </span>
+                    <p className="text-sm">{startup.keyCustomers}</p>
+                  </div>
+                )}
+                {startup.competitors && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Competitors
+                    </span>
+                    <p className="text-sm">{startup.competitors}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

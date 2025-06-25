@@ -7,7 +7,14 @@ export function TopBanner() {
   const pathname = usePathname()
 
   // Show on landing page and auth pages
-  const allowedPaths = ['/', '/login', '/signup', '/forgot-password', '/reset-password', '/verify']
+  const allowedPaths = [
+    '/',
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+    '/verify',
+  ]
   if (!allowedPaths.includes(pathname)) return null
 
   return (
@@ -22,7 +29,9 @@ export function TopBanner() {
       >
         <div className="max-w-7xl mx-auto px-4 h-6 flex items-center justify-end pr-12">
           <span className="text-xs text-black/80 dark:text-white/80 font-medium tracking-wide pointer-events-none transition-all duration-300">
-            <span className="font-semibold">We&apos;re live on Product Hunt | </span>
+            <span className="font-semibold">
+              We&apos;re live on Product Hunt |{' '}
+            </span>
             <span className="font-bold">Support us!</span>
           </span>
         </div>

@@ -88,7 +88,13 @@ export function ResetPasswordForm({
 
   if (isCheckingToken) {
     return (
-      <div className={cn('flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center', className)} {...props}>
+      <div
+        className={cn(
+          'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center',
+          className,
+        )}
+        {...props}
+      >
         <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col items-center text-center gap-4">
@@ -107,7 +113,13 @@ export function ResetPasswordForm({
 
   if (!isValidToken) {
     return (
-      <div className={cn('flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center', className)} {...props}>
+      <div
+        className={cn(
+          'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center',
+          className,
+        )}
+        {...props}
+      >
         <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col items-center text-center gap-6">
@@ -136,7 +148,13 @@ export function ResetPasswordForm({
   }
 
   return (
-    <div className={cn('flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center', className)} {...props}>
+    <div
+      className={cn(
+        'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center',
+        className,
+      )}
+      {...props}
+    >
       <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
         <CardContent className="p-0">
           <form onSubmit={handleSubmit} className="p-6 md:p-8">

@@ -42,7 +42,8 @@ export function NavMain({
 
           // Check if this item requires PRO permission
           const requiresProPermission = item.requiresPro || false
-          const hasProAccess = permissionLevel === 'PRO' || permissionLevel === 'MAX'
+          const hasProAccess =
+            permissionLevel === 'PRO' || permissionLevel === 'MAX'
           const isLockedForFreeUser = requiresProPermission && !hasProAccess
 
           const handleClick = (e: React.MouseEvent) => {
@@ -65,9 +66,9 @@ export function NavMain({
               <SidebarMenuItem key={item.title}>
                 <div
                   className={cn(
-                    "flex items-center gap-2 rounded-md p-2 text-left text-sm transition-colors",
-                    "cursor-not-allowed opacity-70 hover:bg-accent hover:text-accent-foreground",
-                    isActive && "bg-accent text-accent-foreground"
+                    'flex items-center gap-2 rounded-md p-2 text-left text-sm transition-colors',
+                    'cursor-not-allowed opacity-70 hover:bg-accent hover:text-accent-foreground',
+                    isActive && 'bg-accent text-accent-foreground',
                   )}
                   onMouseEnter={() => setHoveredItem(item.title)}
                   onMouseLeave={() => setHoveredItem(null)}

@@ -9,6 +9,62 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      agent_settings: {
+        Row: {
+          created_at: string | null
+          custom_instructions: string | null
+          debug_mode: boolean
+          id: string
+          max_parallel_submissions: Database["public"]["Enums"]["agent_parallel_submissions"]
+          preferred_tone: Database["public"]["Enums"]["agent_tone"]
+          retry_attempts: Database["public"]["Enums"]["agent_retry_attempts"]
+          startup_id: string
+          stealth: boolean
+          submission_delay: Database["public"]["Enums"]["agent_submission_delay"]
+          timeout_minutes: Database["public"]["Enums"]["agent_timeout_minutes"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_instructions?: string | null
+          debug_mode?: boolean
+          id?: string
+          max_parallel_submissions?: Database["public"]["Enums"]["agent_parallel_submissions"]
+          preferred_tone?: Database["public"]["Enums"]["agent_tone"]
+          retry_attempts?: Database["public"]["Enums"]["agent_retry_attempts"]
+          startup_id: string
+          stealth?: boolean
+          submission_delay?: Database["public"]["Enums"]["agent_submission_delay"]
+          timeout_minutes?: Database["public"]["Enums"]["agent_timeout_minutes"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_instructions?: string | null
+          debug_mode?: boolean
+          id?: string
+          max_parallel_submissions?: Database["public"]["Enums"]["agent_parallel_submissions"]
+          preferred_tone?: Database["public"]["Enums"]["agent_tone"]
+          retry_attempts?: Database["public"]["Enums"]["agent_retry_attempts"]
+          startup_id?: string
+          stealth?: boolean
+          submission_delay?: Database["public"]["Enums"]["agent_submission_delay"]
+          timeout_minutes?: Database["public"]["Enums"]["agent_timeout_minutes"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_settings_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: true
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       common_responses: {
         Row: {
           answer: string | null
@@ -144,6 +200,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_subscribed: boolean | null
+          monthly_submissions_limit: number
+          monthly_submissions_used: number
+          permission_level: Database["public"]["Enums"]["permission_level"]
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_current_period_end: string | null
@@ -160,6 +219,9 @@ export type Database = {
           id: string
           is_active?: boolean | null
           is_subscribed?: boolean | null
+          monthly_submissions_limit?: number
+          monthly_submissions_used?: number
+          permission_level?: Database["public"]["Enums"]["permission_level"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_current_period_end?: string | null
@@ -176,6 +238,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_subscribed?: boolean | null
+          monthly_submissions_limit?: number
+          monthly_submissions_used?: number
+          permission_level?: Database["public"]["Enums"]["permission_level"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_current_period_end?: string | null
@@ -505,6 +570,10 @@ export type Database = {
         Args: { p_stripe_customer_id: string }
         Returns: Json
       }
+      check_submission_limit: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       check_user_onboarding_status: {
         Args: { p_user_id: string }
         Returns: Json
@@ -614,12 +683,20 @@ export type Database = {
         Args: { p_stripe_customer_id: string }
         Returns: Json
       }
+      increment_submission_count: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       reactivate_user_account: {
         Args: { p_user_id: string }
         Returns: Json
       }
       remove_startup_founder: {
         Args: { p_user_id: string; p_founder_id: string }
+        Returns: Json
+      }
+      reset_monthly_submissions: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       search_targets: {
@@ -653,6 +730,7 @@ export type Database = {
           p_status: string
           p_current_period_end?: string
           p_is_subscribed?: boolean
+          p_plan_name?: string
         }
         Returns: Json
       }
@@ -670,6 +748,40 @@ export type Database = {
       }
     }
     Enums: {
+      agent_parallel_submissions:
+        | "1"
+        | "2"
+        | "3"
+        | "4"
+        | "5"
+        | "6"
+        | "7"
+        | "8"
+        | "9"
+        | "10"
+      agent_retry_attempts:
+        | "1"
+        | "2"
+        | "3"
+        | "4"
+        | "5"
+        | "6"
+        | "7"
+        | "8"
+        | "9"
+        | "10"
+      agent_submission_delay:
+        | "10"
+        | "15"
+        | "30"
+        | "45"
+        | "60"
+        | "90"
+        | "120"
+        | "180"
+        | "300"
+      agent_timeout_minutes: "5" | "10" | "15" | "20" | "30" | "45" | "60"
+      agent_tone: "professional" | "enthusiastic" | "concise" | "detailed"
       form_complexity: "simple" | "standard" | "comprehensive"
       founder_role:
         | "Founder"
@@ -755,6 +867,7 @@ export type Database = {
         | "S-Corp"
         | "Non-profit"
         | "Other"
+      permission_level: "FREE" | "PRO" | "MAX"
       question_count_range: "1-5" | "6-10" | "11-20" | "21+"
       region_type:
         | "Global"
@@ -919,6 +1032,32 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      agent_parallel_submissions: [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+      ],
+      agent_retry_attempts: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+      agent_submission_delay: [
+        "10",
+        "15",
+        "30",
+        "45",
+        "60",
+        "90",
+        "120",
+        "180",
+        "300",
+      ],
+      agent_timeout_minutes: ["5", "10", "15", "20", "30", "45", "60"],
+      agent_tone: ["professional", "enthusiastic", "concise", "detailed"],
       form_complexity: ["simple", "standard", "comprehensive"],
       founder_role: [
         "Founder",
@@ -1009,6 +1148,7 @@ export const Constants = {
         "Non-profit",
         "Other",
       ],
+      permission_level: ["FREE", "PRO", "MAX"],
       question_count_range: ["1-5", "6-10", "11-20", "21+"],
       region_type: [
         "Global",

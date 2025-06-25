@@ -17,7 +17,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { PencilIcon, CheckIcon, ChevronDown, Plus, X, Check, ChevronsUpDown } from 'lucide-react'
+import {
+  PencilIcon,
+  CheckIcon,
+  ChevronDown,
+  Plus,
+  X,
+  Check,
+  ChevronsUpDown,
+} from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -99,8 +107,6 @@ const getBadgeColor = (index: number) => {
   ]
   return colors[index % colors.length]
 }
-
-
 
 const formatCurrency = (value: number) => {
   if (value === 0) return ''
@@ -308,8 +314,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -378,7 +385,7 @@ const CompetitorInput: React.FC<{
 
   const removeCompetitor = (competitorToRemove: string) => {
     playClickSound()
-    onChange(competitors.filter(c => c !== competitorToRemove))
+    onChange(competitors.filter((c) => c !== competitorToRemove))
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -511,14 +518,18 @@ export default function CompanySettings() {
             currentRunway: data.currentRunway || 0,
             keyCustomers: data.keyCustomers || '',
             competitors: data.competitors || '',
-            competitorsList: data.competitors ? data.competitors.split(', ').filter(Boolean) : [],
+            competitorsList: data.competitors
+              ? data.competitors.split(', ').filter(Boolean)
+              : [],
             logoUrl: data.logoUrl || null,
             isIncorporated: data.isIncorporated || false,
             incorporationCountry: data.incorporationCountry || '',
             incorporationCity: data.incorporationCity || '',
             operatingCountries: Array.isArray(data.operatingCountries)
               ? data.operatingCountries
-              : (typeof data.operatingCountries === 'string' ? data.operatingCountries.split(',').filter(Boolean) : []),
+              : typeof data.operatingCountries === 'string'
+                ? data.operatingCountries.split(',').filter(Boolean)
+                : [],
             investmentInstrument: data.investmentInstrument || null,
             fundingAmountSought: data.fundingAmountSought || 0,
             preMoneyValuation: data.preMoneyValuation || 0,
@@ -832,7 +843,11 @@ export default function CompanySettings() {
     }
 
     // File type validation
-    const allowedTypes = ['application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    ]
     if (!allowedTypes.includes(file.type)) {
       toast({
         variant: 'destructive',
@@ -1045,8 +1060,8 @@ export default function CompanySettings() {
                   formData.logoUrl ||
                   `https://avatar.vercel.sh/${encodeURIComponent(
                     formData.name.toLowerCase() ||
-                    currentStartupId ||
-                    'suparaise',
+                      currentStartupId ||
+                      'suparaise',
                   )}.png?size=80`
                 }
                 alt="Company logo"
@@ -1626,7 +1641,10 @@ export default function CompanySettings() {
                       className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                       value={formData.incorporationCountry}
                       onChange={async (e) => {
-                        handleInputChange('incorporationCountry', e.target.value)
+                        handleInputChange(
+                          'incorporationCountry',
+                          e.target.value,
+                        )
                         await handleFieldSave('incorporationCountry')
                       }}
                       disabled={isLoading}
@@ -1700,10 +1718,14 @@ export default function CompanySettings() {
                         {country}
                         <button
                           onClick={async () => {
-                            const newCountries = formData.operatingCountries.filter(
-                              (c) => c !== country,
+                            const newCountries =
+                              formData.operatingCountries.filter(
+                                (c) => c !== country,
+                              )
+                            handleInputChange(
+                              'operatingCountries',
+                              newCountries,
                             )
-                            handleInputChange('operatingCountries', newCountries)
                             await handleFieldSave('operatingCountries')
                           }}
                           className="ml-1.5"
@@ -2209,8 +2231,8 @@ export default function CompanySettings() {
                       <DialogHeader>
                         <DialogTitle>Are you sure ?</DialogTitle>
                         <DialogDescription>
-                          This action will permanently delete this company and all
-                          its data from our servers. This cannot be undone.
+                          This action will permanently delete this company and
+                          all its data from our servers. This cannot be undone.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-2 pt-0">
@@ -2240,7 +2262,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                            (formData.name || 'CONFIRM')
+                              (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {
@@ -2261,9 +2283,9 @@ export default function CompanySettings() {
                     Delete account
                   </h2>
                   <p className="text-sm text-red-600/80 dark:text-red-400/80">
-                    Permanently delete your account and all associated data. This
-                    action cannot be undone. Any active subscriptions will be
-                    cancelled.
+                    Permanently delete your account and all associated data.
+                    This action cannot be undone. Any active subscriptions will
+                    be cancelled.
                   </p>
                   <Dialog>
                     <DialogTrigger asChild>
@@ -2284,7 +2306,10 @@ export default function CompanySettings() {
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-2 pt-0">
-                        <Label htmlFor="confirm" className="text-sm font-medium">
+                        <Label
+                          htmlFor="confirm"
+                          className="text-sm font-medium"
+                        >
                           Please type{' '}
                           <span className="font-semibold pt-1 text-red-500">
                             DELETE
@@ -2296,7 +2321,9 @@ export default function CompanySettings() {
                           className="rounded-sm"
                           placeholder="DELETE"
                           value={deleteConfirmation}
-                          onChange={(e) => setDeleteConfirmation(e.target.value)}
+                          onChange={(e) =>
+                            setDeleteConfirmation(e.target.value)
+                          }
                         />
                       </div>
                       <DialogFooter>

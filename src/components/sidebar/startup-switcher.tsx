@@ -55,7 +55,7 @@ export function StartupSwitcher({
 
   // Find current startup from the startups array to ensure consistency
   const currentStartup = currentStartupId
-    ? startups.find(s => s.id === currentStartupId)
+    ? startups.find((s) => s.id === currentStartupId)
     : null
 
   // Use currentStartup for consistency, fallback to currentStartupDisplay

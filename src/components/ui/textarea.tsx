@@ -32,14 +32,14 @@ const MIN_CHAR_REQUIREMENTS = {
 interface TextareaProps extends React.ComponentProps<'textarea'> {
   enableAI?: boolean
   aiFieldType?:
-  | 'bio'
-  | 'description-short'
-  | 'description-medium'
-  | 'description-long'
-  | 'traction'
-  | 'market'
-  | 'customers'
-  | 'competitors'
+    | 'bio'
+    | 'description-short'
+    | 'description-medium'
+    | 'description-long'
+    | 'traction'
+    | 'market'
+    | 'customers'
+    | 'competitors'
   aiContext?: {
     companyName?: string
     industry?: string
@@ -62,7 +62,8 @@ function Textarea({
   ...props
 }: TextareaProps) {
   const [isEnhancing, setIsEnhancing] = React.useState(false)
-  const [enhancementType, setEnhancementType] = React.useState<EnhancementType | null>(null)
+  const [enhancementType, setEnhancementType] =
+    React.useState<EnhancementType | null>(null)
   const [suggestion, setSuggestion] = React.useState<string>('')
   const [showSuggestion, setShowSuggestion] = React.useState(false)
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
@@ -120,9 +121,14 @@ function Textarea({
     setShowSuggestion(false)
   }
 
-  const currentLength = value && typeof value === 'string' ? value.trim().length : 0
-  const grammarMinLength = aiFieldType ? MIN_CHAR_REQUIREMENTS.grammar[aiFieldType] : 0
-  const fullMinLength = aiFieldType ? MIN_CHAR_REQUIREMENTS.full[aiFieldType] : 0
+  const currentLength =
+    value && typeof value === 'string' ? value.trim().length : 0
+  const grammarMinLength = aiFieldType
+    ? MIN_CHAR_REQUIREMENTS.grammar[aiFieldType]
+    : 0
+  const fullMinLength = aiFieldType
+    ? MIN_CHAR_REQUIREMENTS.full[aiFieldType]
+    : 0
 
   const canUseGrammar = currentLength >= grammarMinLength
   const canUseFullEnhancement = currentLength >= fullMinLength
@@ -181,13 +187,15 @@ function Textarea({
 
           {!canUseGrammar && !canUseFullEnhancement && (
             <p className="text-xs text-muted-foreground">
-              {grammarMinLength - currentLength} more characters needed for grammar correction
+              {grammarMinLength - currentLength} more characters needed for
+              grammar correction
             </p>
           )}
 
           {canUseGrammar && !canUseFullEnhancement && (
             <p className="text-xs text-muted-foreground">
-              {fullMinLength - currentLength} more characters needed for enhancement
+              {fullMinLength - currentLength} more characters needed for
+              enhancement
             </p>
           )}
         </div>
@@ -197,7 +205,10 @@ function Textarea({
         <div className="border border-blue-200 dark:border-blue-800 rounded-sm p-3 bg-blue-50/50 dark:bg-blue-900/20">
           <div className="flex items-start justify-between mb-2">
             <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              {enhancementType === 'grammar' ? 'Grammar correction' : 'Enhancement'} suggestion
+              {enhancementType === 'grammar'
+                ? 'Grammar correction'
+                : 'Enhancement'}{' '}
+              suggestion
             </h4>
           </div>
 

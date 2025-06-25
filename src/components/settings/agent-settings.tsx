@@ -180,7 +180,8 @@ export default function AgentSettings() {
         toast({
           variant: 'destructive',
           title: 'Feature locked',
-          description: 'Stealth and debug modes are only available for MAX users. Please upgrade your plan.',
+          description:
+            'Stealth and debug modes are only available for MAX users. Please upgrade your plan.',
         })
         return
       }
@@ -191,7 +192,8 @@ export default function AgentSettings() {
         toast({
           variant: 'destructive',
           title: 'Feature locked',
-          description: 'Tone selection is only available for PRO and MAX users. Please upgrade your plan.',
+          description:
+            'Tone selection is only available for PRO and MAX users. Please upgrade your plan.',
         })
         return
       }
@@ -280,7 +282,8 @@ export default function AgentSettings() {
     return [{ value: 1, label: '1 submission' }] // FREE tier
   }
 
-  const isToneFeatureAvailable = () => formData.permissionLevel === 'PRO' || formData.permissionLevel === 'MAX'
+  const isToneFeatureAvailable = () =>
+    formData.permissionLevel === 'PRO' || formData.permissionLevel === 'MAX'
   const isAdvancedFeatureAvailable = () => formData.permissionLevel === 'MAX'
 
   return (
@@ -363,12 +366,17 @@ export default function AgentSettings() {
               <div className="space-y-2">
                 <Label htmlFor="maxParallelSubmissions">
                   Parallel submissions
-                  <span className={cn(
-                    "ml-2 text-xs px-1.5 py-0.5 rounded",
-                    formData.permissionLevel === 'FREE' && "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300",
-                    formData.permissionLevel === 'PRO' && "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
-                    formData.permissionLevel === 'MAX' && "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
-                  )}>
+                  <span
+                    className={cn(
+                      'ml-2 text-xs px-1.5 py-0.5 rounded',
+                      formData.permissionLevel === 'FREE' &&
+                        'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300',
+                      formData.permissionLevel === 'PRO' &&
+                        'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+                      formData.permissionLevel === 'MAX' &&
+                        'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+                    )}
+                  >
                     {formData.permissionLevel === 'FREE' && 'Max 1'}
                     {formData.permissionLevel === 'PRO' && 'Max 5'}
                     {formData.permissionLevel === 'MAX' && 'Max 10'}
@@ -427,12 +435,14 @@ export default function AgentSettings() {
           {/* Preferences */}
           <div className="space-y-2">
             <div className="space-y-4">
-              <div className={cn(
-                "flex items-center space-x-3 p-3 border rounded-sm transition-colors",
-                !isAdvancedFeatureAvailable()
-                  ? "bg-muted/30 border-muted cursor-not-allowed"
-                  : "hover:bg-muted/50"
-              )}>
+              <div
+                className={cn(
+                  'flex items-center space-x-3 p-3 border rounded-sm transition-colors',
+                  !isAdvancedFeatureAvailable()
+                    ? 'bg-muted/30 border-muted cursor-not-allowed'
+                    : 'hover:bg-muted/50',
+                )}
+              >
                 <Checkbox
                   id="enableStealth"
                   checked={formData.enableStealth}
@@ -445,8 +455,8 @@ export default function AgentSettings() {
                   <Label
                     htmlFor="enableStealth"
                     className={cn(
-                      "font-medium",
-                      !isAdvancedFeatureAvailable() && "text-muted-foreground"
+                      'font-medium',
+                      !isAdvancedFeatureAvailable() && 'text-muted-foreground',
                     )}
                   >
                     Stealth mode
@@ -456,10 +466,14 @@ export default function AgentSettings() {
                       </span>
                     )}
                   </Label>
-                  <p className={cn(
-                    "text-sm",
-                    !isAdvancedFeatureAvailable() ? "text-muted-foreground/60" : "text-muted-foreground"
-                  )}>
+                  <p
+                    className={cn(
+                      'text-sm',
+                      !isAdvancedFeatureAvailable()
+                        ? 'text-muted-foreground/60'
+                        : 'text-muted-foreground',
+                    )}
+                  >
                     Use built-in patches to avoid bot detection
                     {!isAdvancedFeatureAvailable() && (
                       <span className="block text-xs mt-1 text-orange-600 dark:text-orange-400">
@@ -470,12 +484,14 @@ export default function AgentSettings() {
                 </div>
               </div>
 
-              <div className={cn(
-                "flex items-center space-x-3 p-3 border rounded-sm transition-colors",
-                !isAdvancedFeatureAvailable()
-                  ? "bg-muted/30 border-muted cursor-not-allowed"
-                  : "hover:bg-muted/50"
-              )}>
+              <div
+                className={cn(
+                  'flex items-center space-x-3 p-3 border rounded-sm transition-colors',
+                  !isAdvancedFeatureAvailable()
+                    ? 'bg-muted/30 border-muted cursor-not-allowed'
+                    : 'hover:bg-muted/50',
+                )}
+              >
                 <Checkbox
                   id="enableDebugMode"
                   checked={formData.enableDebugMode}
@@ -488,8 +504,8 @@ export default function AgentSettings() {
                   <Label
                     htmlFor="enableDebugMode"
                     className={cn(
-                      "font-medium",
-                      !isAdvancedFeatureAvailable() && "text-muted-foreground"
+                      'font-medium',
+                      !isAdvancedFeatureAvailable() && 'text-muted-foreground',
                     )}
                   >
                     Debug mode
@@ -499,10 +515,14 @@ export default function AgentSettings() {
                       </span>
                     )}
                   </Label>
-                  <p className={cn(
-                    "text-sm",
-                    !isAdvancedFeatureAvailable() ? "text-muted-foreground/60" : "text-muted-foreground"
-                  )}>
+                  <p
+                    className={cn(
+                      'text-sm',
+                      !isAdvancedFeatureAvailable()
+                        ? 'text-muted-foreground/60'
+                        : 'text-muted-foreground',
+                    )}
+                  >
                     Save detailed logs and screenshots for troubleshooting
                     {!isAdvancedFeatureAvailable() && (
                       <span className="block text-xs mt-1 text-orange-600 dark:text-orange-400">
@@ -530,8 +550,9 @@ export default function AgentSettings() {
                 <select
                   id="preferredTone"
                   className={cn(
-                    "w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm",
-                    !isToneFeatureAvailable() && "bg-muted/50 text-muted-foreground cursor-not-allowed"
+                    'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
+                    !isToneFeatureAvailable() &&
+                      'bg-muted/50 text-muted-foreground cursor-not-allowed',
                   )}
                   value={formData.preferredTone}
                   onChange={async (e) => {
@@ -539,7 +560,8 @@ export default function AgentSettings() {
                       toast({
                         variant: 'destructive',
                         title: 'Feature locked',
-                        description: 'Tone selection is only available for PRO and MAX users. Please upgrade your plan.',
+                        description:
+                          'Tone selection is only available for PRO and MAX users. Please upgrade your plan.',
                       })
                       return
                     }

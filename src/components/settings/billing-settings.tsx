@@ -221,8 +221,8 @@ export default function BillingSettings() {
                   You&apos;re on the free plan.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Upgrade to Pro for 100 runs per month, access to 1200+ global funds,
-                  and advanced features.
+                  Upgrade to Pro for 100 runs per month, access to 1200+ global
+                  funds, and advanced features.
                 </p>
               </div>
             )}

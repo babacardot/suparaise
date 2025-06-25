@@ -7,7 +7,13 @@ interface InputProps extends React.ComponentProps<'input'> {
   rightAddon?: string
 }
 
-function Input({ className, type, leftAddon, rightAddon, ...props }: InputProps) {
+function Input({
+  className,
+  type,
+  leftAddon,
+  rightAddon,
+  ...props
+}: InputProps) {
   // If no addons, render the original input
   if (!leftAddon && !rightAddon) {
     return (

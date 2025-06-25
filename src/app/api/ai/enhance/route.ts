@@ -151,7 +151,8 @@ Text to enhance: "${text}"`,
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, fieldType, context, enhancementType }: EnhanceRequest = await req.json()
+    const { text, fieldType, context, enhancementType }: EnhanceRequest =
+      await req.json()
 
     if (!text?.trim()) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 })

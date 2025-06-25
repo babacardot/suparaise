@@ -766,7 +766,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-firstName` &&
-                        'bg-muted',
+                          'bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-firstName`}
                       placeholder="Enter first name"
@@ -994,7 +994,8 @@ export default function ProfileSettings() {
                     enableAI={editingField === `${founder.id}-bio`}
                     aiFieldType="bio"
                     aiContext={{
-                      founderName: `${founder.firstName} ${founder.lastName}`.trim(),
+                      founderName:
+                        `${founder.firstName} ${founder.lastName}`.trim(),
                       role: founder.role,
                     }}
                     onAIEnhance={(enhancedText) =>
@@ -1040,7 +1041,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-linkedin` &&
-                          'bg-muted',
+                            'bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-linkedin`}
                         placeholder="https://linkedin.com/in/profile"
@@ -1084,7 +1085,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-githubUrl` &&
-                          'bg-muted',
+                            'bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-githubUrl`}
                         placeholder="https://github.com/username"
@@ -1130,7 +1131,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-personalWebsiteUrl` &&
-                          'bg-muted',
+                            'bg-muted',
                         )}
                         readOnly={
                           editingField !== `${founder.id}-personalWebsiteUrl`
@@ -1269,7 +1270,8 @@ export default function ProfileSettings() {
                     enableAI={true}
                     aiFieldType="bio"
                     aiContext={{
-                      founderName: `${newFounderData.firstName} ${newFounderData.lastName}`.trim(),
+                      founderName:
+                        `${newFounderData.firstName} ${newFounderData.lastName}`.trim(),
                       role: newFounderData.role,
                     }}
                     onAIEnhance={(enhancedText) =>
