@@ -1710,7 +1710,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   )}
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-sm">Pitch deck</span>
+                  <span className="text-sm">Deck</span>
                   {startup.pitchDeckFile ? (
                     <Check className="h-3 w-3 pt-1 text-green-500" />
                   ) : (

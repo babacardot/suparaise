@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/actions/utils'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
+import { useUser } from '@/lib/contexts/user-context'
+import { useToast } from '@/lib/hooks/use-toast'
 
 // Sound utility functions
 const playSound = (soundFile: string) => {
@@ -38,19 +40,91 @@ interface SettingsNavProps extends React.HTMLAttributes<HTMLElement> {
 function NavItem({
   item,
   isActive,
+  permissionLevel,
 }: {
   item: { href: string; title: string; icon: string }
   isActive: boolean
+  permissionLevel: 'FREE' | 'PRO' | 'MAX'
 }) {
   const [isHovered, setIsHovered] = useState(false)
+  const { toast } = useToast()
 
   // Get the animation from the animations object
   const animationData = animations[item.icon as keyof typeof animations]
 
+  // Check if this item requires PRO permission
+  const requiresProPermission = item.title === 'Integrations'
+  const hasProAccess = permissionLevel === 'PRO' || permissionLevel === 'MAX'
+  const isLockedForFreeUser = requiresProPermission && !hasProAccess
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isLockedForFreeUser) {
+      e.preventDefault()
+      toast({
+        variant: 'destructive',
+        title: 'Feature locked',
+        description: `${item.title} is only available for PRO and MAX users. Please upgrade your plan.`,
+      })
+      return
+    }
+    playClickSound()
+  }
+
+  if (isLockedForFreeUser) {
+    return (
+      <div
+        onClick={handleClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={cn(
+          buttonVariants({ variant: 'ghost' }),
+          isActive
+            ? 'bg-[#E9EAEF] dark:bg-[#2A2B30] text-accent-foreground'
+            : 'hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30] hover:text-primary',
+          'justify-start w-full text-left whitespace-nowrap rounded-sm transition-all duration-200 mb-1 h-10',
+          'cursor-not-allowed opacity-70',
+        )}
+      >
+        <div className="flex items-center gap-3 justify-between w-full">
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                'flex-shrink-0',
+                isActive
+                  ? 'text-primary'
+                  : 'text-muted-foreground group-hover:text-primary',
+              )}
+            >
+              {animationData && (
+                <LottieIcon
+                  animationData={animationData}
+                  size={18}
+                  className="translate-y-[2px]"
+                  isHovered={isHovered}
+                />
+              )}
+            </span>
+            <span className="font-medium text-sm">{item.title}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {requiresProPermission && (
+              <Badge
+                variant="secondary"
+                className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+              >
+                PRO
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Link
       href={item.href}
-      onClick={playClickSound}
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
@@ -82,14 +156,16 @@ function NavItem({
           </span>
           <span className="font-medium text-sm">{item.title}</span>
         </div>
-        {item.title === 'Integrations' && (
-          <Badge
-            variant="secondary"
-            className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
-          >
-            BETA
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {item.title === 'Integrations' && (
+            <Badge
+              variant="secondary"
+              className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
+            >
+              BETA
+            </Badge>
+          )}
+        </div>
       </div>
     </Link>
   )
@@ -101,6 +177,11 @@ export default function SettingsNav({
   currentPath,
   ...props
 }: SettingsNavProps) {
+  const { subscription } = useUser()
+
+  // Get permission level, defaulting to FREE if not available
+  const permissionLevel = subscription?.permission_level || 'FREE'
+
   return (
     <div className="w-full bg-background border rounded-sm">
       <nav className={cn('flex flex-col p-2', className)} {...props}>
@@ -124,7 +205,14 @@ export default function SettingsNav({
             }
           })()
 
-          return <NavItem key={item.href} item={item} isActive={isActive} />
+          return (
+            <NavItem
+              key={item.href}
+              item={item}
+              isActive={isActive}
+              permissionLevel={permissionLevel}
+            />
+          )
         })}
       </nav>
     </div>

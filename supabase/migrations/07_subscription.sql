@@ -54,7 +54,8 @@ CREATE OR REPLACE FUNCTION update_subscription_status(
     p_subscription_id TEXT,
     p_status TEXT,
     p_current_period_end TIMESTAMPTZ DEFAULT NULL,
-    p_is_subscribed BOOLEAN DEFAULT NULL
+    p_is_subscribed BOOLEAN DEFAULT NULL,
+    p_plan_name TEXT DEFAULT NULL
 )
 RETURNS JSON
 LANGUAGE plpgsql
@@ -63,12 +64,38 @@ AS $$
 DECLARE
     v_affected_rows INTEGER;
     v_calculated_is_subscribed BOOLEAN;
+    v_permission_level permission_level;
+    v_monthly_limit INTEGER;
 BEGIN
     -- Calculate is_subscribed if not provided
     IF p_is_subscribed IS NULL THEN
         v_calculated_is_subscribed := (p_status = 'active');
     ELSE
         v_calculated_is_subscribed := p_is_subscribed;
+    END IF;
+    
+    -- Determine permission level and monthly limits based on plan
+    IF p_plan_name IS NOT NULL THEN
+        CASE 
+            WHEN LOWER(p_plan_name) LIKE '%pro%' THEN
+                v_permission_level := 'PRO';
+                v_monthly_limit := 100;
+            WHEN LOWER(p_plan_name) LIKE '%max%' THEN
+                v_permission_level := 'MAX';
+                v_monthly_limit := 500;
+            ELSE
+                v_permission_level := 'FREE';
+                v_monthly_limit := 3;
+        END CASE;
+    ELSE
+        -- Default based on subscription status
+        IF v_calculated_is_subscribed THEN
+            v_permission_level := 'PRO'; -- Default paid tier
+            v_monthly_limit := 100;
+        ELSE
+            v_permission_level := 'FREE';
+            v_monthly_limit := 3;
+        END IF;
     END IF;
     
     -- Update profile subscription data
@@ -78,6 +105,8 @@ BEGIN
         stripe_subscription_id = p_subscription_id,
         subscription_status = p_status,
         subscription_current_period_end = p_current_period_end,
+        permission_level = v_permission_level,
+        monthly_submissions_limit = v_monthly_limit,
         updated_at = NOW()
     WHERE stripe_customer_id = p_stripe_customer_id;
     
@@ -92,7 +121,9 @@ BEGIN
     
     RETURN json_build_object(
         'success', true,
-        'affected_rows', v_affected_rows
+        'affected_rows', v_affected_rows,
+        'permission_level', v_permission_level,
+        'monthly_limit', v_monthly_limit
     );
 END;
 $$;
@@ -114,6 +145,8 @@ BEGIN
         is_subscribed = false,
         subscription_status = 'canceled',
         stripe_subscription_id = NULL,
+        permission_level = 'FREE',
+        monthly_submissions_limit = 3,
         updated_at = NOW()
     WHERE stripe_customer_id = p_stripe_customer_id;
     
@@ -184,6 +217,8 @@ BEGIN
     SET 
         is_subscribed = false,
         subscription_status = 'past_due',
+        permission_level = 'FREE',
+        monthly_submissions_limit = 3,
         updated_at = NOW()
     WHERE stripe_customer_id = p_stripe_customer_id;
     
@@ -220,7 +255,10 @@ BEGIN
         subscription_status,
         subscription_current_period_end,
         stripe_customer_id,
-        stripe_subscription_id
+        stripe_subscription_id,
+        permission_level,
+        monthly_submissions_used,
+        monthly_submissions_limit
     INTO v_subscription
     FROM profiles
     WHERE id = p_user_id;
@@ -239,18 +277,129 @@ BEGIN
 END;
 $$;
 
+-- Function to check if user can make a submission (rate limiting)
+CREATE OR REPLACE FUNCTION check_submission_limit(
+    p_user_id UUID
+)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+    v_profile RECORD;
+    v_can_submit BOOLEAN;
+    v_remaining INTEGER;
+BEGIN
+    -- Get user profile
+    SELECT 
+        monthly_submissions_used,
+        monthly_submissions_limit,
+        permission_level
+    INTO v_profile
+    FROM profiles
+    WHERE id = p_user_id AND is_active = TRUE;
+    
+    IF NOT FOUND THEN
+        RETURN json_build_object(
+            'success', false,
+            'error', 'User not found'
+        );
+    END IF;
+    
+    -- Check if user can submit
+    v_can_submit := v_profile.monthly_submissions_used < v_profile.monthly_submissions_limit;
+    v_remaining := v_profile.monthly_submissions_limit - v_profile.monthly_submissions_used;
+    
+    RETURN json_build_object(
+        'success', true,
+        'can_submit', v_can_submit,
+        'remaining_submissions', v_remaining,
+        'total_limit', v_profile.monthly_submissions_limit,
+        'used_submissions', v_profile.monthly_submissions_used,
+        'permission_level', v_profile.permission_level
+    );
+END;
+$$;
+
+-- Function to increment submission count
+CREATE OR REPLACE FUNCTION increment_submission_count(
+    p_user_id UUID
+)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+    v_affected_rows INTEGER;
+    v_new_count INTEGER;
+BEGIN
+    -- Increment submission count
+    UPDATE profiles 
+    SET 
+        monthly_submissions_used = monthly_submissions_used + 1,
+        updated_at = NOW()
+    WHERE id = p_user_id
+    RETURNING monthly_submissions_used INTO v_new_count;
+    
+    GET DIAGNOSTICS v_affected_rows = ROW_COUNT;
+    
+    IF v_affected_rows = 0 THEN
+        RETURN json_build_object(
+            'success', false,
+            'error', 'User not found'
+        );
+    END IF;
+    
+    RETURN json_build_object(
+        'success', true,
+        'new_count', v_new_count
+    );
+END;
+$$;
+
+-- Function to reset monthly submission counts (to be called monthly)
+CREATE OR REPLACE FUNCTION reset_monthly_submissions()
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+    v_affected_rows INTEGER;
+BEGIN
+    -- Reset all monthly submission counts
+    UPDATE profiles 
+    SET 
+        monthly_submissions_used = 0,
+        updated_at = NOW()
+    WHERE is_active = TRUE;
+    
+    GET DIAGNOSTICS v_affected_rows = ROW_COUNT;
+    
+    RETURN json_build_object(
+        'success', true,
+        'affected_rows', v_affected_rows
+    );
+END;
+$$;
+
 -- Grant execute permissions
 GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT, TEXT, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, TEXT, TIMESTAMPTZ, BOOLEAN) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, TEXT, TIMESTAMPTZ, BOOLEAN, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION cancel_subscription(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION handle_payment_success(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION handle_payment_failure(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_subscription_data(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION check_submission_limit(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION increment_submission_count(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION reset_monthly_submissions() TO authenticated;
 
 -- Also grant to service role for webhook operations
 GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT, TEXT, TEXT) TO service_role;
-GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, TEXT, TIMESTAMPTZ, BOOLEAN) TO service_role;
+GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, TEXT, TIMESTAMPTZ, BOOLEAN, TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION cancel_subscription(TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION handle_payment_success(TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION handle_payment_failure(TEXT) TO service_role;
-GRANT EXECUTE ON FUNCTION get_subscription_data(UUID) TO service_role; 
+GRANT EXECUTE ON FUNCTION get_subscription_data(UUID) TO service_role;
+GRANT EXECUTE ON FUNCTION check_submission_limit(UUID) TO service_role;
+GRANT EXECUTE ON FUNCTION increment_submission_count(UUID) TO service_role;
+GRANT EXECUTE ON FUNCTION reset_monthly_submissions() TO service_role; 

@@ -78,6 +78,14 @@ CREATE TYPE revenue_model_type AS ENUM (
     'Hybrid', 'Other'
 );
 CREATE TYPE subscription_status AS ENUM ('active', 'inactive', 'past_due', 'canceled', 'unpaid');
+CREATE TYPE permission_level AS ENUM ('FREE', 'PRO', 'MAX');
+CREATE TYPE agent_tone AS ENUM ('professional', 'enthusiastic', 'concise', 'detailed');
+
+-- Agent settings enums
+CREATE TYPE agent_submission_delay AS ENUM ('10', '15', '30', '45', '60', '90', '120', '180', '300');
+CREATE TYPE agent_retry_attempts AS ENUM ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10');
+CREATE TYPE agent_parallel_submissions AS ENUM ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10');
+CREATE TYPE agent_timeout_minutes AS ENUM ('5', '10', '15', '20', '30', '45', '60');
 
 -- --------------------------------------------------
 -- Auto-update `updated_at` column
@@ -153,8 +161,13 @@ CREATE TABLE profiles (
     stripe_subscription_id TEXT UNIQUE,
     subscription_status subscription_status,
     subscription_current_period_end TIMESTAMPTZ,
+    permission_level permission_level DEFAULT 'FREE' NOT NULL,
+    monthly_submissions_used INTEGER DEFAULT 0 NOT NULL,
+    monthly_submissions_limit INTEGER DEFAULT 3 NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT chk_monthly_submissions_used CHECK (monthly_submissions_used >= 0),
+    CONSTRAINT chk_monthly_submissions_limit CHECK (monthly_submissions_limit > 0)
 );
 
 -- Create trigger to auto-create profile when user signs up
@@ -280,6 +293,32 @@ CREATE TABLE submissions (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- --------------------------------------------------
+-- Table: agent_settings
+-- Stores agent configuration settings per startup.
+-- --------------------------------------------------
+CREATE TABLE agent_settings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
+    retry_attempts agent_retry_attempts DEFAULT '3' NOT NULL,
+    max_parallel_submissions agent_parallel_submissions DEFAULT '3' NOT NULL,
+    timeout_minutes agent_timeout_minutes DEFAULT '10' NOT NULL,
+    preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
+    debug_mode BOOLEAN DEFAULT FALSE NOT NULL,
+    stealth BOOLEAN DEFAULT TRUE NOT NULL,
+    custom_instructions TEXT DEFAULT '',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(startup_id)
+);
+
+CREATE TRIGGER set_agent_settings_timestamp
+BEFORE UPDATE ON agent_settings
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
 -- =================================================================
 -- PERFORMANCE OPTIMIZATION INDEXES
 -- =================================================================
@@ -317,6 +356,13 @@ CREATE INDEX IF NOT EXISTS idx_targets_industry_focus ON targets USING GIN(indus
 CREATE INDEX IF NOT EXISTS idx_targets_region_focus ON targets USING GIN(region_focus) WHERE region_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_required_documents ON targets USING GIN(required_documents) WHERE required_documents IS NOT NULL;
 
+-- Performance indexes for agent_settings table
+CREATE INDEX IF NOT EXISTS idx_agent_settings_startup_id ON agent_settings(startup_id);
+CREATE INDEX IF NOT EXISTS idx_agent_settings_user_id ON agent_settings(user_id);
+CREATE INDEX IF NOT EXISTS idx_agent_settings_startup_user ON agent_settings(startup_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_permission_level ON profiles(permission_level);
+CREATE INDEX IF NOT EXISTS idx_profiles_is_subscribed ON profiles(is_subscribed);
+
 -- --------------------------------------------------
 -- Row Level Security (RLS) Policies
 -- --------------------------------------------------
@@ -352,6 +398,11 @@ ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage submissions for their own startup" ON submissions FOR ALL
 USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
 
+-- Row Level Security for agent_settings
+ALTER TABLE agent_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow users to manage agent settings for their own startup" ON agent_settings FOR ALL
+USING ((select auth.uid()) = user_id AND (SELECT is_active FROM profiles WHERE id = user_id) = TRUE);
+
 -- =================================================================
 -- ANALYZE TABLES FOR OPTIMAL QUERY PLANNING
 -- =================================================================
@@ -362,3 +413,4 @@ ANALYZE founders;
 ANALYZE common_responses;
 ANALYZE submissions;
 ANALYZE targets; 
+ANALYZE agent_settings;

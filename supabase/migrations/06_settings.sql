@@ -553,6 +553,7 @@ RETURNS JSONB AS $$
 DECLARE
     result JSONB;
     target_startup_id UUID;
+    user_permission permission_level;
 BEGIN
     -- If no startup_id provided, get the user's first startup
     IF p_startup_id IS NULL THEN
@@ -565,11 +566,70 @@ BEGIN
         target_startup_id := p_startup_id;
     END IF;
 
-    -- Check if there's existing agent settings for this user/startup combination
-    -- For now, we'll return default values since we don't have an agent_settings table yet
-    -- In a future migration, we could create a proper agent_settings table
-    -- For now, return empty JSON to indicate no settings found
-    RETURN '{}'::jsonb;
+    -- Get user's permission level
+    SELECT permission_level INTO user_permission
+    FROM profiles
+    WHERE id = p_user_id AND is_active = TRUE;
+
+    -- Get the agent settings for this user/startup combination
+    SELECT jsonb_build_object(
+        'submissionDelay', ags.submission_delay::text::integer,
+        'retryAttempts', ags.retry_attempts::text::integer,
+        'maxParallelSubmissions', ags.max_parallel_submissions::text::integer,
+        'timeoutMinutes', ags.timeout_minutes::text::integer,
+        'preferredTone', CASE 
+            WHEN user_permission IN ('PRO', 'MAX') THEN ags.preferred_tone
+            ELSE 'professional'
+        END,
+        'enableDebugMode', CASE 
+            WHEN user_permission = 'MAX' THEN ags.debug_mode
+            ELSE false
+        END,
+        'enableStealth', CASE 
+            WHEN user_permission = 'MAX' THEN ags.stealth
+            ELSE true
+        END,
+        'customInstructions', ags.custom_instructions,
+        'permissionLevel', user_permission
+    )
+    INTO result
+    FROM agent_settings ags
+    WHERE ags.startup_id = target_startup_id 
+      AND ags.user_id = p_user_id;
+
+    -- If no settings found, return defaults based on permission level
+    IF result IS NULL THEN
+        result := jsonb_build_object(
+            'submissionDelay', 30,
+            'retryAttempts', 3,
+            'maxParallelSubmissions', CASE 
+                WHEN user_permission = 'FREE' THEN 1
+                WHEN user_permission = 'PRO' THEN 3
+                WHEN user_permission = 'MAX' THEN 5
+                ELSE 3
+            END,
+            'timeoutMinutes', 10,
+            'preferredTone', CASE 
+                WHEN user_permission IN ('PRO', 'MAX') THEN 'professional'
+                ELSE 'professional'
+            END,
+            'enableDebugMode', CASE 
+                WHEN user_permission = 'MAX' THEN false
+                ELSE false
+            END,
+            'enableStealth', CASE 
+                WHEN user_permission = 'MAX' THEN true
+                ELSE true
+            END,
+            'customInstructions', '',
+            'permissionLevel', user_permission
+        );
+    ELSE
+        -- Add permission level to existing result
+        result := result || jsonb_build_object('permissionLevel', user_permission);
+    END IF;
+
+    RETURN result;
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -587,11 +647,14 @@ CREATE OR REPLACE FUNCTION update_user_agent_settings(
 RETURNS JSONB AS $$
 DECLARE
     startup_exists BOOLEAN;
+    user_permission permission_level;
+    settings_exist BOOLEAN;
+    max_parallel_allowed INTEGER;
 BEGIN
     -- Check if the startup exists and belongs to the user
     SELECT EXISTS(
         SELECT 1 FROM startups 
-        WHERE id = p_startup_id AND user_id = p_user_id
+        WHERE id = p_startup_id AND user_id = p_user_id AND is_active = TRUE
     ) INTO startup_exists;
 
     -- If startup doesn't exist or doesn't belong to user, return error
@@ -599,15 +662,113 @@ BEGIN
         RETURN jsonb_build_object('error', 'Startup not found or access denied');
     END IF;
 
-    -- For now, just return success since we don't have an agent_settings table yet
-    -- In a future migration, we could create a proper agent_settings table
-    -- and store the settings there
+    -- Get user's permission level
+    SELECT permission_level INTO user_permission
+    FROM profiles
+    WHERE id = p_user_id AND is_active = TRUE;
+
+    -- Set max parallel submissions based on permission level
+    max_parallel_allowed := CASE 
+        WHEN user_permission = 'FREE' THEN 1
+        WHEN user_permission = 'PRO' THEN 5
+        WHEN user_permission = 'MAX' THEN 10
+        ELSE 3
+    END;
+
+    -- Validate max parallel submissions doesn't exceed permission limit
+    IF p_data ? 'maxParallelSubmissions' AND 
+       (p_data->>'maxParallelSubmissions')::INTEGER > max_parallel_allowed THEN
+        RETURN jsonb_build_object(
+            'error', 
+            format('Maximum parallel submissions exceeded. Your plan allows up to %s.', max_parallel_allowed)
+        );
+    END IF;
+
+    -- Validate premium features based on permission level
+    IF p_data ? 'preferredTone' AND user_permission NOT IN ('PRO', 'MAX') THEN
+        RETURN jsonb_build_object(
+            'error', 
+            'Tone selection is only available for PRO and MAX users. Please upgrade your plan.'
+        );
+    END IF;
+
+    IF (p_data ? 'enableDebugMode' OR p_data ? 'enableStealth') AND user_permission != 'MAX' THEN
+        RETURN jsonb_build_object(
+            'error', 
+            'Debug mode and stealth settings are only available for MAX users. Please upgrade your plan.'
+        );
+    END IF;
+
+    -- Check if settings already exist
+    SELECT EXISTS(
+        SELECT 1 FROM agent_settings 
+        WHERE startup_id = p_startup_id AND user_id = p_user_id
+    ) INTO settings_exist;
+
+    IF settings_exist THEN
+        -- Update existing settings
+        UPDATE agent_settings
+        SET 
+            submission_delay = COALESCE((p_data->>'submissionDelay')::agent_submission_delay, submission_delay),
+            retry_attempts = COALESCE((p_data->>'retryAttempts')::agent_retry_attempts, retry_attempts),
+            max_parallel_submissions = COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, max_parallel_submissions),
+            timeout_minutes = COALESCE((p_data->>'timeoutMinutes')::agent_timeout_minutes, timeout_minutes),
+            preferred_tone = CASE 
+                WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
+                THEN (p_data->>'preferredTone')::agent_tone
+                ELSE preferred_tone
+            END,
+            debug_mode = CASE 
+                WHEN user_permission = 'MAX' AND p_data ? 'enableDebugMode' 
+                THEN (p_data->>'enableDebugMode')::BOOLEAN
+                ELSE debug_mode
+            END,
+            stealth = CASE 
+                WHEN user_permission = 'MAX' AND p_data ? 'enableStealth' 
+                THEN (p_data->>'enableStealth')::BOOLEAN
+                ELSE stealth
+            END,
+            custom_instructions = COALESCE(p_data->>'customInstructions', custom_instructions),
+            updated_at = NOW()
+        WHERE startup_id = p_startup_id AND user_id = p_user_id;
+    ELSE
+        -- Insert new settings
+        INSERT INTO agent_settings (
+            startup_id, user_id, submission_delay, retry_attempts, 
+            max_parallel_submissions, timeout_minutes, preferred_tone,
+            debug_mode, stealth, custom_instructions
+        ) VALUES (
+            p_startup_id, p_user_id,
+            COALESCE((p_data->>'submissionDelay')::agent_submission_delay, '30'),
+            COALESCE((p_data->>'retryAttempts')::agent_retry_attempts, '3'),
+            COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, LEAST('3', max_parallel_allowed::text)::agent_parallel_submissions),
+            COALESCE((p_data->>'timeoutMinutes')::agent_timeout_minutes, '10'),
+            CASE 
+                WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
+                THEN (p_data->>'preferredTone')::agent_tone
+                ELSE 'professional'
+            END,
+            CASE 
+                WHEN user_permission = 'MAX' AND p_data ? 'enableDebugMode' 
+                THEN (p_data->>'enableDebugMode')::BOOLEAN
+                ELSE false
+            END,
+            CASE 
+                WHEN user_permission = 'MAX' AND p_data ? 'enableStealth' 
+                THEN (p_data->>'enableStealth')::BOOLEAN
+                ELSE true
+            END,
+            COALESCE(p_data->>'customInstructions', '')
+        );
+    END IF;
     
-    -- Return success (we'll add proper storage in a future migration)
+    -- Return success
     RETURN jsonb_build_object(
         'success', true,
         'startupId', p_startup_id,
-        'message', 'Agent settings updated successfully'
+        'message', 'Agent settings updated successfully',
+        'permissionLevel', user_permission,
+        'maxParallelAllowed', max_parallel_allowed
     );
 
 EXCEPTION
@@ -730,4 +891,20 @@ EXCEPTION
         RAISE WARNING 'Error in can_email_be_used_for_signup for email %: %', p_email, SQLERRM;
         RETURN jsonb_build_object('error', SQLERRM);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public; 
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Grant execute permissions for all settings functions
+GRANT EXECUTE ON FUNCTION get_user_founder_profile(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_user_founder_profile(UUID, UUID, JSONB) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_user_startup_data(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_user_startup_data(UUID, UUID, JSONB) TO authenticated;
+GRANT EXECUTE ON FUNCTION soft_delete_startup(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_startup_founders(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_founder_profile(UUID, UUID, JSONB) TO authenticated;
+GRANT EXECUTE ON FUNCTION add_startup_founder(UUID, UUID, JSONB) TO authenticated;
+GRANT EXECUTE ON FUNCTION remove_startup_founder(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_user_agent_settings(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_user_agent_settings(UUID, UUID, JSONB) TO authenticated;
+GRANT EXECUTE ON FUNCTION soft_delete_user_account(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION reactivate_user_account(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION can_email_be_used_for_signup(TEXT) TO authenticated; 

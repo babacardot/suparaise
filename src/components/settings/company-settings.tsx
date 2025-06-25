@@ -146,7 +146,7 @@ const formatFieldName = (fieldName: string): string => {
     tractionSummary: 'Traction',
     marketSummary: 'Market',
     pitchDeckUrl: 'Pitch deck',
-    introVideoUrl: 'Demo video',
+    introVideoUrl: 'Demo',
   }
   return fieldLabels[fieldName] || fieldName
 }
@@ -1989,7 +1989,7 @@ export default function CompanySettings() {
           <div className="space-y-6">
             {/* Pitch Deck Upload */}
             <div className="space-y-2">
-              <Label>Pitch deck</Label>
+              <Label>Deck</Label>
               <input
                 ref={pitchDeckInputRef}
                 type="file"
@@ -2086,7 +2086,7 @@ export default function CompanySettings() {
 
             {/* Video Upload */}
             <div className="space-y-2">
-              <Label>Demo video</Label>
+              <Label>Demo</Label>
               <input
                 ref={videoInputRef}
                 type="file"

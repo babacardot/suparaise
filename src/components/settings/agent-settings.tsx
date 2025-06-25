@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
@@ -123,6 +122,7 @@ export default function AgentSettings() {
       | 'detailed',
     timeoutMinutes: 10, // task timeout in minutes
     enableStealth: true, // avoid detection
+    permissionLevel: 'FREE' as 'FREE' | 'PRO' | 'MAX', // user's subscription level
   })
 
   // Fetch agent settings when component mounts or startup changes
@@ -144,6 +144,7 @@ export default function AgentSettings() {
           setFormData((prev) => ({
             ...prev,
             ...data,
+            permissionLevel: data.permissionLevel || 'FREE',
           }))
         }
       } catch (error) {
@@ -173,6 +174,29 @@ export default function AgentSettings() {
     field: string,
     value: string | boolean | number | string[],
   ) => {
+    // Check permissions for advanced features
+    if (field === 'enableStealth' || field === 'enableDebugMode') {
+      if (!isAdvancedFeatureAvailable()) {
+        toast({
+          variant: 'destructive',
+          title: 'Feature locked',
+          description: 'Stealth and debug modes are only available for MAX users. Please upgrade your plan.',
+        })
+        return
+      }
+    }
+
+    if (field === 'preferredTone') {
+      if (!isToneFeatureAvailable()) {
+        toast({
+          variant: 'destructive',
+          title: 'Feature locked',
+          description: 'Tone selection is only available for PRO and MAX users. Please upgrade your plan.',
+        })
+        return
+      }
+    }
+
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -226,6 +250,39 @@ export default function AgentSettings() {
     }
   }
 
+  // Helper functions for permission-based features
+  const getMaxParallelOptions = () => {
+    const baseOptions = [
+      { value: 1, label: '1 submission' },
+      { value: 2, label: '2 submissions' },
+      { value: 3, label: '3 submissions' },
+    ]
+
+    if (formData.permissionLevel === 'PRO') {
+      return [
+        ...baseOptions,
+        { value: 4, label: '4 submissions' },
+        { value: 5, label: '5 submissions' },
+      ]
+    } else if (formData.permissionLevel === 'MAX') {
+      return [
+        ...baseOptions,
+        { value: 4, label: '4 submissions' },
+        { value: 5, label: '5 submissions' },
+        { value: 6, label: '6 submissions' },
+        { value: 7, label: '7 submissions' },
+        { value: 8, label: '8 submissions' },
+        { value: 9, label: '9 submissions' },
+        { value: 10, label: '10 submissions' },
+      ]
+    }
+
+    return [{ value: 1, label: '1 submission' }] // FREE tier
+  }
+
+  const isToneFeatureAvailable = () => formData.permissionLevel === 'PRO' || formData.permissionLevel === 'MAX'
+  const isAdvancedFeatureAvailable = () => formData.permissionLevel === 'MAX'
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
@@ -247,82 +304,57 @@ export default function AgentSettings() {
                   Delay between submissions
                 </Label>
                 <div className="relative">
-                  <Input
+                  <select
                     id="submissionDelay"
-                    type="number"
+                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                     value={formData.submissionDelay}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'submissionDelay',
-                        parseInt(e.target.value) || 30,
-                      )
-                    }
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'submissionDelay' && 'bg-muted',
-                    )}
-                    readOnly={editingField !== 'submissionDelay'}
-                    min="10"
-                    max="300"
-                    placeholder="30"
-                  />
-                  {editingField !== 'submissionDelay' ? (
-                    <button
-                      onClick={() => handleFieldEdit('submissionDelay')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('submissionDelay')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
+                    onChange={async (e) => {
+                      const newValue = parseInt(e.target.value) || 30
+                      handleInputChange('submissionDelay', newValue)
+                      await handleFieldSave('submissionDelay')
+                    }}
+                    disabled={isLoading}
+                  >
+                    <option value={10}>10 seconds</option>
+                    <option value={15}>15 seconds</option>
+                    <option value={30}>30 seconds</option>
+                    <option value={45}>45 seconds</option>
+                    <option value={60}>1 minute</option>
+                    <option value={90}>1.5 minutes</option>
+                    <option value={120}>2 minutes</option>
+                    <option value={180}>3 minutes</option>
+                    <option value={300}>5 minutes</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="retryAttempts">Retry attempts</Label>
                 <div className="relative">
-                  <Input
+                  <select
                     id="retryAttempts"
-                    type="number"
+                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                     value={formData.retryAttempts}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'retryAttempts',
-                        parseInt(e.target.value) || 3,
-                      )
-                    }
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'retryAttempts' && 'bg-muted',
-                    )}
-                    readOnly={editingField !== 'retryAttempts'}
-                    min="1"
-                    max="10"
-                    placeholder="3"
-                  />
-                  {editingField !== 'retryAttempts' ? (
-                    <button
-                      onClick={() => handleFieldEdit('retryAttempts')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('retryAttempts')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
+                    onChange={async (e) => {
+                      const newValue = parseInt(e.target.value) || 3
+                      handleInputChange('retryAttempts', newValue)
+                      await handleFieldSave('retryAttempts')
+                    }}
+                    disabled={isLoading}
+                  >
+                    <option value={1}>1 attempt</option>
+                    <option value={2}>2 attempts</option>
+                    <option value={3}>3 attempts</option>
+                    <option value={4}>4 attempts</option>
+                    <option value={5}>5 attempts</option>
+                    <option value={6}>6 attempts</option>
+                    <option value={7}>7 attempts</option>
+                    <option value={8}>8 attempts</option>
+                    <option value={9}>9 attempts</option>
+                    <option value={10}>10 attempts</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
             </div>
@@ -331,84 +363,62 @@ export default function AgentSettings() {
               <div className="space-y-2">
                 <Label htmlFor="maxParallelSubmissions">
                   Parallel submissions
+                  <span className={cn(
+                    "ml-2 text-xs px-1.5 py-0.5 rounded",
+                    formData.permissionLevel === 'FREE' && "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300",
+                    formData.permissionLevel === 'PRO' && "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
+                    formData.permissionLevel === 'MAX' && "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                  )}>
+                    {formData.permissionLevel === 'FREE' && 'Max 1'}
+                    {formData.permissionLevel === 'PRO' && 'Max 5'}
+                    {formData.permissionLevel === 'MAX' && 'Max 10'}
+                  </span>
                 </Label>
                 <div className="relative">
-                  <Input
+                  <select
                     id="maxParallelSubmissions"
-                    type="number"
+                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                     value={formData.maxParallelSubmissions}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'maxParallelSubmissions',
-                        parseInt(e.target.value) || 3,
-                      )
-                    }
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'maxParallelSubmissions' && 'bg-muted',
-                    )}
-                    readOnly={editingField !== 'maxParallelSubmissions'}
-                    min="1"
-                    max="10"
-                    placeholder="3"
-                  />
-                  {editingField !== 'maxParallelSubmissions' ? (
-                    <button
-                      onClick={() => handleFieldEdit('maxParallelSubmissions')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('maxParallelSubmissions')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
+                    onChange={async (e) => {
+                      const newValue = parseInt(e.target.value) || 3
+                      handleInputChange('maxParallelSubmissions', newValue)
+                      await handleFieldSave('maxParallelSubmissions')
+                    }}
+                    disabled={isLoading}
+                  >
+                    {getMaxParallelOptions().map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="timeoutMinutes">Task timeout</Label>
                 <div className="relative">
-                  <Input
+                  <select
                     id="timeoutMinutes"
-                    type="number"
+                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                     value={formData.timeoutMinutes}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'timeoutMinutes',
-                        parseInt(e.target.value) || 10,
-                      )
-                    }
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'timeoutMinutes' && 'bg-muted',
-                    )}
-                    readOnly={editingField !== 'timeoutMinutes'}
-                    min="5"
-                    max="60"
-                    placeholder="10"
-                  />
-                  {editingField !== 'timeoutMinutes' ? (
-                    <button
-                      onClick={() => handleFieldEdit('timeoutMinutes')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('timeoutMinutes')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
+                    onChange={async (e) => {
+                      const newValue = parseInt(e.target.value) || 10
+                      handleInputChange('timeoutMinutes', newValue)
+                      await handleFieldSave('timeoutMinutes')
+                    }}
+                    disabled={isLoading}
+                  >
+                    <option value={5}>5 minutes</option>
+                    <option value={10}>10 minutes</option>
+                    <option value={15}>15 minutes</option>
+                    <option value={20}>20 minutes</option>
+                    <option value={30}>30 minutes</option>
+                    <option value={45}>45 minutes</option>
+                    <option value={60}>1 hour</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
             </div>
@@ -417,38 +427,88 @@ export default function AgentSettings() {
           {/* Preferences */}
           <div className="space-y-2">
             <div className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 border rounded-sm hover:bg-muted/50 transition-colors">
+              <div className={cn(
+                "flex items-center space-x-3 p-3 border rounded-sm transition-colors",
+                !isAdvancedFeatureAvailable()
+                  ? "bg-muted/30 border-muted cursor-not-allowed"
+                  : "hover:bg-muted/50"
+              )}>
                 <Checkbox
                   id="enableStealth"
                   checked={formData.enableStealth}
                   onCheckedChange={(checked) =>
                     handleInputChange('enableStealth', checked)
                   }
+                  disabled={!isAdvancedFeatureAvailable()}
                 />
                 <div className="grid gap-1.5 leading-none flex-1">
-                  <Label htmlFor="enableStealth" className="font-medium">
+                  <Label
+                    htmlFor="enableStealth"
+                    className={cn(
+                      "font-medium",
+                      !isAdvancedFeatureAvailable() && "text-muted-foreground"
+                    )}
+                  >
                     Stealth mode
+                    {!isAdvancedFeatureAvailable() && (
+                      <span className="ml-2 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded">
+                        MAX only
+                      </span>
+                    )}
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className={cn(
+                    "text-sm",
+                    !isAdvancedFeatureAvailable() ? "text-muted-foreground/60" : "text-muted-foreground"
+                  )}>
                     Use built-in patches to avoid bot detection
+                    {!isAdvancedFeatureAvailable() && (
+                      <span className="block text-xs mt-1 text-orange-600 dark:text-orange-400">
+                        Upgrade to MAX to access stealth features
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 p-3 border rounded-sm hover:bg-muted/50 transition-colors">
+              <div className={cn(
+                "flex items-center space-x-3 p-3 border rounded-sm transition-colors",
+                !isAdvancedFeatureAvailable()
+                  ? "bg-muted/30 border-muted cursor-not-allowed"
+                  : "hover:bg-muted/50"
+              )}>
                 <Checkbox
                   id="enableDebugMode"
                   checked={formData.enableDebugMode}
                   onCheckedChange={(checked) =>
                     handleInputChange('enableDebugMode', checked)
                   }
+                  disabled={!isAdvancedFeatureAvailable()}
                 />
                 <div className="grid gap-1.5 leading-none flex-1">
-                  <Label htmlFor="enableDebugMode" className="font-medium">
+                  <Label
+                    htmlFor="enableDebugMode"
+                    className={cn(
+                      "font-medium",
+                      !isAdvancedFeatureAvailable() && "text-muted-foreground"
+                    )}
+                  >
                     Debug mode
+                    {!isAdvancedFeatureAvailable() && (
+                      <span className="ml-2 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded">
+                        MAX only
+                      </span>
+                    )}
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className={cn(
+                    "text-sm",
+                    !isAdvancedFeatureAvailable() ? "text-muted-foreground/60" : "text-muted-foreground"
+                  )}>
                     Save detailed logs and screenshots for troubleshooting
+                    {!isAdvancedFeatureAvailable() && (
+                      <span className="block text-xs mt-1 text-orange-600 dark:text-orange-400">
+                        Upgrade to MAX to access debug features
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -458,19 +518,37 @@ export default function AgentSettings() {
           {/* Style */}
           <div className="space-y-2">
             <div className="space-y-2">
-              <Label htmlFor="preferredTone">Tone</Label>
+              <Label htmlFor="preferredTone">
+                Tone
+                {!isToneFeatureAvailable() && (
+                  <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
+                    PRO+
+                  </span>
+                )}
+              </Label>
               <div className="relative">
                 <select
                   id="preferredTone"
-                  className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                  className={cn(
+                    "w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm",
+                    !isToneFeatureAvailable() && "bg-muted/50 text-muted-foreground cursor-not-allowed"
+                  )}
                   value={formData.preferredTone}
                   onChange={async (e) => {
+                    if (!isToneFeatureAvailable()) {
+                      toast({
+                        variant: 'destructive',
+                        title: 'Feature locked',
+                        description: 'Tone selection is only available for PRO and MAX users. Please upgrade your plan.',
+                      })
+                      return
+                    }
                     const newValue = e.target
                       .value as typeof formData.preferredTone
                     handleInputChange('preferredTone', newValue)
                     await handleFieldSave('preferredTone')
                   }}
-                  disabled={isLoading}
+                  disabled={isLoading || !isToneFeatureAvailable()}
                 >
                   <option value="professional">Professional</option>
                   <option value="enthusiastic">Enthusiastic</option>
@@ -479,6 +557,11 @@ export default function AgentSettings() {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
+              {!isToneFeatureAvailable() && (
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                  Upgrade to PRO or MAX to customize agent tone
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

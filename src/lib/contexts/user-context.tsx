@@ -27,6 +27,7 @@ interface SubscriptionData {
   subscription_status: string | null
   subscription_current_period_end: string | null
   stripe_customer_id: string | null
+  permission_level: 'FREE' | 'PRO' | 'MAX'
 }
 
 interface UserContextType {
@@ -150,7 +151,7 @@ export function UserProvider({ children }: UserProviderProps) {
       const { data, error } = await supabase
         .from('profiles')
         .select(
-          'is_subscribed, subscription_status, subscription_current_period_end, stripe_customer_id',
+          'is_subscribed, subscription_status, subscription_current_period_end, stripe_customer_id, permission_level',
         )
         .eq('id', user.id)
         .single()
@@ -166,6 +167,7 @@ export function UserProvider({ children }: UserProviderProps) {
             subscription_status: null,
             subscription_current_period_end: null,
             stripe_customer_id: null,
+            permission_level: 'FREE',
           })
         } else {
           console.error('Error fetching subscription:', error)
@@ -181,6 +183,7 @@ export function UserProvider({ children }: UserProviderProps) {
         subscription_status: null,
         subscription_current_period_end: null,
         stripe_customer_id: null,
+        permission_level: 'FREE',
       })
     } finally {
       setSubscriptionLoading(false)

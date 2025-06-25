@@ -11,6 +11,7 @@ import { StartupSwitcher } from '@/components/sidebar/startup-switcher'
 import { Button } from '@/components/ui/button'
 import SupportModal from '@/components/dashboard/support-modal'
 import FeedbackModal from '@/components/dashboard/feedback-modal'
+import { useUser } from '@/lib/contexts/user-context'
 import {
   Sidebar,
   SidebarContent,
@@ -62,9 +63,13 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const { state, toggleSidebar } = useSidebar()
+  const { subscription } = useUser()
   const [isToggleHovered, setIsToggleHovered] = React.useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false)
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false)
+
+  // Get permission level, defaulting to FREE if not available
+  const permissionLevel = subscription?.permission_level || 'FREE'
 
   // Create display text: FirstName+StartupName
   const firstName = user?.name?.split(' ')[0] || 'User'
@@ -83,10 +88,10 @@ export function AppSidebar({
   // Create display startup object for the switcher with formatted name
   const displayStartupForSwitcher = currentStartup
     ? {
-        id: currentStartup.id,
-        name: displayText, // Use formatted display text
-        logo_url: currentStartup.logo_url,
-      }
+      id: currentStartup.id,
+      name: displayText, // Use formatted display text
+      logo_url: currentStartup.logo_url,
+    }
     : null
 
   // Debug logging
@@ -135,6 +140,18 @@ export function AppSidebar({
         animation: animations.cash,
       },
       {
+        title: 'Angels',
+        url: getNavUrl('angels'),
+        animation: animations.coin,
+        requiresPro: true,
+      },
+      {
+        title: 'Accelerators',
+        url: getNavUrl('accelerators'),
+        animation: animations.speed,
+        requiresPro: true,
+      },
+      {
         title: 'Applications',
         url: getNavUrl('applications'),
         animation: animations.view,
@@ -154,6 +171,7 @@ export function AppSidebar({
         onClick: handleFeedbackClick,
       },
     ],
+    permissionLevel,
   }
 
   return (
@@ -167,15 +185,19 @@ export function AppSidebar({
                 currentStartupId={currentStartupId}
                 currentStartupDisplay={displayStartupForSwitcher}
                 firstName={firstName}
-                onStartupSelect={onStartupSelect || (() => {})}
-                onCreateNew={onCreateNewStartup || (() => {})}
+                onStartupSelect={onStartupSelect || (() => { })}
+                onCreateNew={onCreateNewStartup || (() => { })}
                 isCollapsed={state === 'collapsed'}
               />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <NavMain items={data.navMain} onItemClick={playClickSound} />
+          <NavMain
+            items={data.navMain}
+            onItemClick={playClickSound}
+            permissionLevel={permissionLevel}
+          />
           <NavSecondary
             items={data.navSecondary}
             className="mt-auto"
@@ -209,11 +231,10 @@ export function AppSidebar({
         onMouseLeave={() => setIsToggleHovered(false)}
         variant="ghost"
         size="sm"
-        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-[2px] bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
-          state === 'collapsed'
-            ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
-            : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
-        }`}
+        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-[2px] bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
+          ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
+          : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
+          }`}
       >
         <LottieIcon
           animationData={animations.nineGrid}
