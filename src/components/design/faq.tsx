@@ -10,27 +10,73 @@ const faqData = [
   {
     question: 'How does Suparaise automate my fundraising process?',
     answer:
-      'Suparaise uses AI agents to automatically fill out VC application forms and handle outreach emails. Simply provide your startup information once, and our agents will handle the repetitive tasks of applying to multiple funds.',
+      'Suparaise uses AI agents and more specifically browser automation to automatically fill out investment application forms on your behalf. Simply provide your startup information once, and our agents will handle the repetitive tasks of applying to multiple funds.',
   },
   {
     question: 'Is my startup data secure with Suparaise?',
     answer:
-      'Yes, we take security seriously. All your data is encrypted in transit and at rest. We never share your information with third parties without your explicit consent, and you maintain full control over your data.',
-  },
-  {
-    question: 'How many VC applications can I submit?',
-    answer:
-      'The number of applications depends on your plan. Our Starter plan includes 50 applications per month, while our Pro plan offers unlimited applications. You can always upgrade as your fundraising needs grow.',
+      'Yes, we take security seriously. All your data is encrypted in transit and at rest. We never share your information with third parties.',
   },
   {
     question: 'Can I customize the information sent to each VC?',
     answer:
-      'Absolutely! While our AI handles the automation, you can customize your pitch and responses for different types of investors. Our platform learns your preferences and adapts submissions accordingly.',
+      'Absolutely! While our agents handle the automation, you can customize your pitch and responses for different types of investors. Our platform learns your preferences and adapts submissions accordingly, with built-in features that can help you tailor the outreach to each specific investor.',
+  },
+  {
+    question: 'How many VC applications can I submit?',
+    answer:
+      'The number of applications depends on your plan. Our Starter plan includes 3 applications per month, while our Pro plan offers 100 applications. The Max plan offers 500 applications. If you need more runs, you can always contact us.',
+  },
+  {
+    question: 'Will Suparaise steal my startup idea ?',
+    answer:
+      'Absolutely not. We built Suparaise because fundraising is hard and time-consuming. We have our hands already full building this product and no interest in copying your product or using your materials for competitive purposes. We lack both the bandwidth and desire to replicate what you do. Your ideas and data are yours and we will never use them for any other purpose.',
   },
   {
     question: 'How quickly can I start using Suparaise?',
     answer:
-      'You can get started immediately! Simply sign up, upload your startup information and pitch deck, and our agents can begin submitting applications within minutes. No complex setup required.',
+      'You can get started immediately! Simply sign up, share your startup information with us, and our agents can begin submitting applications within minutes. No complex setup required.',
+  },
+  {
+    question: 'What types of investors are in your database?',
+    answer:
+      'Our database includes VCs, angels, accelerators, and incubators from all around the world. We cover early-stage to growth-stage investors across all industries and geographies. We are also constantly updating our database to ensure we have the most up-to-date information.',
+  },
+  {
+    question: 'Do you guarantee meetings or funding success?',
+    answer:
+      'We automate the application process, but we cannot guarantee meetings or funding outcomes. Success depends on your startup\'s fit with investor criteria, market conditions, and timing. We help you reach more investors efficiently.',
+  },
+  {
+    question: 'Can I track which applications have been submitted?',
+    answer:
+      'Yes! Our dashboard shows you exactly which investors you\'ve applied to, submission dates, and the data provided by the agents. Full transparency on all activity.',
+  },
+
+  {
+    question: 'What happens if an investor responds to my application?',
+    answer:
+      'All investor responses come directly to your email. We don\'t intercept or handle communications - you maintain direct contact with interested investors from the first response onward.',
+  },
+  {
+    question: 'Do you work with startups at any stage?',
+    answer:
+      'Suparaise works best for pre-seed to Series A startups. If you\'re at the idea stage without an MVP, 70% of the investors in our database won\'t be a good fit yet.',
+  },
+  {
+    question: 'How accurate is the AI when filling out applications?',
+    answer:
+      'Our AI agents are highly accurate when filling out applications based on the information you provide. The quality of outputs directly correlates with the quality of your input data. We include customization features that let you refine your startup information and tailor responses for different investor types and funds, ensuring maximum accuracy for your most important applications.',
+  },
+  {
+    question: 'Can I cancel my subscription anytime?',
+    answer:
+      'Yes, you have complete control over your subscription. Cancel anytime directly from your dashboard with no penalties or fees. You\'ll retain full access until your current billing period ends. You can also permanently delete your account and all associated data from our system at any time.',
+  },
+  {
+    question: 'Can I get a refund if I am not satisfied?',
+    answer:
+      'Yes, we offer refunds within 7 days of purchase if our service fails to meet the technical specifications promised or if there are significant technical issues preventing you from using our platform. If you experience other issues with our service, please contact us with details and we will work together to find a solution that works for you.',
   },
 ]
 
