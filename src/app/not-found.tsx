@@ -9,7 +9,25 @@ import { FuzzyText } from '@/components/design/fuzzy-text'
 export default function NotFound() {
   const router = useRouter()
 
+  // Sound utility function
+  const playSound = (soundFile: string) => {
+    try {
+      const audio = new Audio(soundFile)
+      audio.volume = 0.3
+      audio.play().catch((error) => {
+        console.log('Could not play sound:', error)
+      })
+    } catch (error) {
+      console.log('Error loading sound:', error)
+    }
+  }
+
+  const playClickSound = () => {
+    playSound('/sounds/light.mp3')
+  }
+
   const handleGoBack = () => {
+    playClickSound()
     router.back()
   }
 
@@ -50,7 +68,7 @@ export default function NotFound() {
           <Button
             onClick={handleGoBack}
             size="lg"
-            className="w-full sm:w-auto bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-sm px-4"
+            className="w-full sm:w-auto bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-slate-200 dark:border-slate-800 rounded-sm px-4"
           >
             Go back
           </Button>
@@ -58,7 +76,8 @@ export default function NotFound() {
           <Button
             asChild
             size="lg"
-            className="w-full sm:w-auto bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-sm px-4"
+            className="w-full sm:w-auto bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-slate-200 dark:border-slate-800 rounded-sm px-4"
+            onClick={playClickSound}
           >
             <Link href="/dashboard">Dashboard</Link>
           </Button>

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'Suparaise | Home',
@@ -41,17 +42,24 @@ export default async function DashboardPage() {
   // If user needs onboarding (no startups or incomplete startups), the layout will handle it
   // If user has no startups, show startup selection/creation UI
   if (!statusData.hasStartup) {
-    // For now, redirect to landing page or show create startup dialog
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="flex flex-1 items-center justify-center rounded-sm border border-dashed shadow-sm">
-          <div className="flex flex-col items-center gap-1 text-center">
-            <h3 className="text-2xl font-bold tracking-tight">
-              Create Your First Startup
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Get started by creating your startup profile
-            </p>
+          <div className="flex flex-col items-center gap-6 text-center max-w-md">
+            <div className="relative w-48 h-48">
+              <Image
+                src="/placeholder/empty_functions.webp"
+                alt="No startups yet"
+                fill
+                className="object-contain opacity-80"
+                priority
+              />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold tracking-tight">
+                Ready to raise funds ?
+              </h3>
+            </div>
           </div>
         </div>
       </div>

@@ -37,26 +37,24 @@ import {
 // Welcome Step Component
 const WelcomeStep = ({
   isFirstStartup = true,
-  onSkip,
 }: {
   isFirstStartup?: boolean
-  onSkip?: () => void
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-        title: 'Welcome to suparaise.com',
-        subtitle:
-          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-        image: '/random/onboarding.svg',
-        statusText: 'Onboarding',
-      }
+      title: 'Welcome to suparaise.com',
+      subtitle:
+        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+      image: '/random/onboarding.svg',
+      statusText: 'Onboarding',
+    }
     : {
-        title: 'Ready to launch another venture?',
-        subtitle:
-          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-        image: '/random/test_your_app.svg',
-        statusText: 'New venture',
-      }
+      title: 'Ready to launch another venture?',
+      subtitle:
+        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+      image: '/random/test_your_app.svg',
+      statusText: 'New venture',
+    }
 
   return (
     <motion.div
@@ -71,19 +69,6 @@ const WelcomeStep = ({
           ? '3 steps process · 5 minutes'
           : '3 steps process · 5 minutes'}
       </div>
-
-      {/* Skip button for first-time users */}
-      {isFirstStartup && onSkip && (
-        <div className="absolute top-0 right-0">
-          <Button
-            variant="ghost"
-            onClick={onSkip}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm"
-          >
-            Skip for now
-          </Button>
-        </div>
-      )}
 
       <div className="relative w-48 h-48 mt-8">
         <Image
@@ -102,11 +87,6 @@ const WelcomeStep = ({
         <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl">
           {welcomeContent.subtitle}
         </p>
-        {isFirstStartup && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            You can always complete this setup later from your dashboard
-          </p>
-        )}
       </div>
 
       <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
@@ -252,6 +232,11 @@ export function OnboardingDialog({
               firstFounder.linkedin = user.user_metadata.linkedin_url
             }
 
+            // Pre-populate Twitter URL if available from OAuth
+            if (user.user_metadata?.twitter_url && !firstFounder.twitterUrl) {
+              firstFounder.twitterUrl = user.user_metadata.twitter_url
+            }
+
             newFounders[0] = firstFounder
             return newFounders
           }
@@ -361,7 +346,7 @@ export function OnboardingDialog({
             errors.push(`LinkedIn URL for ${founderLabel} is invalid`)
           }
           if (founder.twitterUrl && !isValidUrl(founder.twitterUrl)) {
-            errors.push(`X (Twitter) URL for ${founderLabel} is invalid`)
+            errors.push(`X URL for ${founderLabel} is invalid`)
           }
 
           // Check for duplicate emails within the current form
@@ -369,7 +354,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-                founder.email.trim().toLowerCase(),
+              founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -381,7 +366,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-              (user?.email || '').toLowerCase()
+            (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -471,7 +456,7 @@ export function OnboardingDialog({
         founder.twitterUrl.trim() &&
         !isValidUrl(founder.twitterUrl)
       ) {
-        errors.twitterUrl = 'Invalid X (Twitter) URL'
+        errors.twitterUrl = 'Invalid X URL'
       }
 
       return errors
@@ -1019,10 +1004,7 @@ export function OnboardingDialog({
                   exit={{ opacity: 0, y: -30 }}
                   transition={{ duration: 0.4, ease: 'easeInOut' }}
                 >
-                  <WelcomeStep
-                    isFirstStartup={isFirstStartup}
-                    onSkip={isFirstStartup ? skipOnboarding : undefined}
-                  />
+                  <WelcomeStep isFirstStartup={isFirstStartup} />
                 </motion.div>
               )}
 
@@ -1097,21 +1079,38 @@ export function OnboardingDialog({
               transition={{ duration: 0.3 }}
               className="flex justify-between pt-6 border-t"
             >
-              {currentStep > 1 && (
-                <Button
-                  variant="outline"
-                  onClick={prevStep}
-                  disabled={loading}
-                  className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800"
-                >
-                  Previous
-                </Button>
-              )}
+              {/* Left side buttons */}
+              <div className="flex gap-3">
+                {/* Skip for now button - only on step 1 for first startup */}
+                {currentStep === 1 && isFirstStartup && (
+                  <Button
+                    variant="outline"
+                    onClick={skipOnboarding}
+                    disabled={loading}
+                    className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800"
+                  >
+                    Skip for now
+                  </Button>
+                )}
+                {/* Previous button - only from step 2 onwards */}
+                {currentStep > 1 && (
+                  <Button
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={loading}
+                    className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800"
+                  >
+                    Previous
+                  </Button>
+                )}
+              </div>
+
+              {/* Right side buttons */}
               {currentStep < 4 ? (
                 <ExpandButton
                   onClick={nextStep}
                   disabled={!canProceedFromStep(currentStep) || loading}
-                  className="ml-auto bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
                   Icon={ArrowRight}
                   iconPlacement="right"
                   justify="end"
@@ -1122,7 +1121,7 @@ export function OnboardingDialog({
                 <ExpandButton
                   onClick={submitData}
                   disabled={loading}
-                  className="ml-auto bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
                 >
                   {loading ? <Spinner className="h-3 w-3" /> : 'Submit'}
                 </ExpandButton>

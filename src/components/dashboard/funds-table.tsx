@@ -372,7 +372,6 @@ export default function FundsTable({ targets }: FundsTableProps) {
                               requirements={
                                 VALIDATION_PRESETS.BASIC_APPLICATION
                               }
-                              actionName="apply to this fund"
                               onValidationPass={() =>
                                 handleApplyForm(target.application_url)
                               }
@@ -403,7 +402,6 @@ export default function FundsTable({ targets }: FundsTableProps) {
                                 requirements={
                                   VALIDATION_PRESETS.BASIC_APPLICATION
                                 }
-                                actionName="send email to this fund"
                                 onValidationPass={() =>
                                   handleSendEmail(target.application_email)
                                 }
