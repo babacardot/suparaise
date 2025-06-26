@@ -42,19 +42,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-      title: 'Welcome to suparaise.com',
-      subtitle:
-        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-      image: '/random/onboarding.svg',
-      statusText: 'Onboarding',
-    }
+        title: 'Welcome to suparaise.com',
+        subtitle:
+          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+        image: '/random/onboarding.svg',
+        statusText: 'Onboarding',
+      }
     : {
-      title: 'Ready to launch another venture?',
-      subtitle:
-        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-      image: '/random/test_your_app.svg',
-      statusText: 'New venture',
-    }
+        title: 'Ready to launch another venture?',
+        subtitle:
+          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+        image: '/random/test_your_app.svg',
+        statusText: 'New venture',
+      }
 
   return (
     <motion.div
@@ -354,7 +354,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-              founder.email.trim().toLowerCase(),
+                founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -366,7 +366,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-            (user?.email || '').toLowerCase()
+              (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -784,46 +784,15 @@ export function OnboardingDialog({
     playNavigationSound()
     setLoading(true)
     try {
-      // Create minimal startup data using existing function
-      const userName =
-        user?.user_metadata?.full_name || user?.user_metadata?.name || 'Founder'
-      const userEmail = user?.email || ''
+      // Generate a creative company name using our utility
+      const companyName = generateRandomCompanyName()
 
-      const minimalSubmissionData = {
-        user_id: userId,
-        name: generateRandomCompanyName(),
-        description_short: '', // Leave empty to trigger validation
-        description_medium: '', // Leave empty to trigger validation
-        description_long: '', // Leave empty - not required for validation
-        industry: null, // Leave null to trigger validation
-        location: '', // Leave empty to trigger validation
-        employee_count: 1,
-        founded_year: new Date().getFullYear(),
-        funding_round: null, // Leave null to trigger validation
-        funding_amount_sought: 0, // Leave 0 to trigger validation
-        investment_instrument: null, // Leave null to trigger validation
-        traction_summary: '', // Leave empty - not required for validation
-        market_summary: '', // Leave empty - not required for validation
-        onboarded: false, // Mark as incomplete to show reminders
-        founders: [
-          {
-            firstName: userName.split(' ')[0] || 'Founder',
-            lastName: userName.split(' ').slice(1).join(' ') || '',
-            email: userEmail,
-            phone: '', // Leave empty to trigger validation
-            role: 'Founder',
-            bio: '', // Leave empty to trigger validation
-            linkedin: '',
-            githubUrl: '',
-            personalWebsiteUrl: '',
-          },
-        ],
-      }
-
+      // Use the dedicated skip function with the generated name
       const { data: newStartup, error } = await supabase.rpc(
-        'create_startup_and_founders',
+        'create_minimal_startup_for_skip',
         {
-          p_data: minimalSubmissionData as unknown as Json,
+          p_user_id: userId,
+          p_company_name: companyName,
         },
       )
 
@@ -836,6 +805,9 @@ export function OnboardingDialog({
       if (newStartup?.id) {
         selectStartupById(newStartup.id)
       }
+
+      // Play completion sound on successful skip
+      playCompletionSound()
 
       onComplete()
     } catch (error) {
@@ -1081,7 +1053,7 @@ export function OnboardingDialog({
             >
               {/* Left side buttons */}
               <div className="flex gap-3">
-                {/* Skip for now button - only on step 1 for first startup */}
+                {/* Skip button - only on step 1 for first startup */}
                 {currentStep === 1 && isFirstStartup && (
                   <Button
                     variant="outline"
@@ -1089,7 +1061,7 @@ export function OnboardingDialog({
                     disabled={loading}
                     className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800"
                   >
-                    Skip for now
+                    Skip
                   </Button>
                 )}
                 {/* Previous button - only from step 2 onwards */}

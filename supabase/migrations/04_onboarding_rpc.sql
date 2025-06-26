@@ -76,7 +76,7 @@ BEGIN
                 founder_data->>'linkedin',
                 founder_data->>'githubUrl',
                 founder_data->>'personalWebsiteUrl',
-                founder_data->>'twitterUrl'
+                COALESCE(founder_data->>'twitterUrl', '')
             );
         END LOOP;
     END IF;
@@ -88,12 +88,14 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- NEW: Creates a minimal startup when user skips onboarding
-CREATE OR REPLACE FUNCTION create_minimal_startup_for_skip(p_user_id UUID)
+CREATE OR REPLACE FUNCTION create_minimal_startup_for_skip(p_user_id UUID, p_company_name TEXT)
 RETURNS JSONB AS $$
 DECLARE
     new_startup_id UUID;
     user_name TEXT;
     user_email TEXT;
+    first_name TEXT;
+    last_name TEXT;
     result JSONB;
 BEGIN
     -- Get user info for defaults
@@ -101,12 +103,21 @@ BEGIN
         COALESCE(
             (raw_user_meta_data::jsonb)->>'full_name',
             (raw_user_meta_data::jsonb)->>'name',
+            TRIM(CONCAT((raw_user_meta_data::jsonb)->>'first_name', ' ', (raw_user_meta_data::jsonb)->>'last_name')),
             split_part(email, '@', 1)
         ),
         email
     INTO user_name, user_email
     FROM auth.users 
     WHERE id = p_user_id;
+
+    -- Parse first and last name properly
+    first_name := COALESCE(split_part(user_name, ' ', 1), 'Founder');
+    last_name := CASE 
+        WHEN array_length(string_to_array(user_name, ' '), 1) > 1 
+        THEN array_to_string((string_to_array(user_name, ' '))[2:array_length(string_to_array(user_name, ' '), 1)], ' ')
+        ELSE ''
+    END;
 
     -- Insert minimal startup record
     INSERT INTO startups (
@@ -119,7 +130,7 @@ BEGIN
     )
     VALUES (
         p_user_id,
-        COALESCE(user_name, 'My Startup') || '''s Company',
+        p_company_name,
         'Complete your profile to get started with fundraising automation',
         1,
         EXTRACT(YEAR FROM NOW())::INTEGER,
@@ -127,20 +138,32 @@ BEGIN
     )
     RETURNING id INTO new_startup_id;
 
-    -- Create a minimal founder record
+    -- Create a minimal founder record with all required fields including twitter_url
     INSERT INTO founders (
         startup_id, 
         first_name, 
         last_name, 
         email,
-        role
+        phone,
+        role,
+        bio,
+        linkedin,
+        github_url,
+        personal_website_url,
+        twitter_url
     )
     VALUES (
         new_startup_id,
-        COALESCE(split_part(user_name, ' ', 1), 'Founder'),
-        COALESCE(split_part(user_name, ' ', 2), ''),
+        first_name,
+        last_name,
         user_email,
-        'Founder'
+        '', -- Empty phone to trigger validation later
+        'Founder',
+        '', -- Empty bio to trigger validation later
+        '', -- Empty linkedin
+        '', -- Empty github
+        '', -- Empty website
+        ''  -- Empty twitter
     );
 
     -- Return the new startup ID
@@ -285,4 +308,4 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant execute permissions for the new function
-GRANT EXECUTE ON FUNCTION create_minimal_startup_for_skip(UUID) TO authenticated; 
+GRANT EXECUTE ON FUNCTION create_minimal_startup_for_skip(UUID, TEXT) TO authenticated; 
