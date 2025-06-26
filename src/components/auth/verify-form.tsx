@@ -51,7 +51,7 @@ export function VerifyForm({
     >
       <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
         <CardContent className="p-6 md:p-8">
-          <div className="flex flex-col items-center text-center gap-6">
+          <div className="flex flex-col items-start text-start gap-6">
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-bold">Check your email</h1>
               <p className="text-balance text-muted-foreground">
@@ -63,9 +63,6 @@ export function VerifyForm({
                 ) : (
                   "We've sent a verification link to your email address."
                 )}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Click the link in the email to complete your account setup.
               </p>
             </div>
 
@@ -110,10 +107,6 @@ export function VerifyForm({
           </div>
         </CardContent>
       </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
-        By using this service, you agree to our <a href="/terms">Terms</a> and{' '}
-        <a href="/privacy">Privacy Policy</a>.
-      </div>
     </div>
   )
 }

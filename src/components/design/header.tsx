@@ -133,9 +133,11 @@ export const Header = () => {
                             <Link
                               href={item.href}
                               className={`text-3xl font-semibold transition-colors duration-200 ${
-                                item.isGreen
-                                  ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
-                                  : 'text-foreground hover:text-muted-foreground'
+                                item.name === 'Login'
+                                  ? 'text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200'
+                                  : item.isGreen
+                                    ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
+                                    : 'text-foreground hover:text-muted-foreground'
                               }`}
                             >
                               {item.name}
@@ -166,7 +168,7 @@ export const Header = () => {
                 variant="outline"
                 size="default"
                 onClick={playClickSound}
-                className="rounded-sm px-4 text-sm h-[37px]"
+                className="rounded-sm px-4 text-sm h-[37px] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               >
                 <Link href="/login" prefetch={true}>
                   <span>Login</span>
@@ -211,7 +213,7 @@ const Logo = ({ className }: { className?: string }) => {
           priority
           style={{ width: 'auto', height: '32px' }}
         />
-        <span className="text-xl font-semibold text-foreground">suparaise</span>
+        <span className="text-xl font-semibold text-foreground">Suparaise</span>
       </div>
     )
   }

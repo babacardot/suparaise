@@ -7,6 +7,7 @@ import React, {
   useState,
   useMemo,
   useCallback,
+  useRef,
 } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { User, SupabaseClient } from '@supabase/supabase-js'
@@ -93,11 +94,81 @@ export function UserProvider({ children }: UserProviderProps) {
   )
   const [subscriptionLoading, setSubscriptionLoading] = useState(true)
 
+  // Add scroll position preservation
+  const scrollPositions = useRef<Map<string, number>>(new Map())
+
   const router = useRouter()
   const pathname = usePathname()
 
+  // Save scroll position for current page
+  const saveScrollPosition = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const scrollElements = document.querySelectorAll('[data-scroll-preserve]')
+      scrollElements.forEach((element) => {
+        const scrollKey = element.getAttribute('data-scroll-preserve')
+        if (scrollKey) {
+          scrollPositions.current.set(scrollKey, element.scrollTop)
+        }
+      })
+
+      // Also save main window scroll
+      scrollPositions.current.set(`window-${pathname}`, window.scrollY)
+    }
+  }, [pathname])
+
+  // Restore scroll position for current page
+  const restoreScrollPosition = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        const scrollElements = document.querySelectorAll(
+          '[data-scroll-preserve]',
+        )
+        scrollElements.forEach((element) => {
+          const scrollKey = element.getAttribute('data-scroll-preserve')
+          if (scrollKey) {
+            const savedPosition = scrollPositions.current.get(scrollKey)
+            if (savedPosition !== undefined) {
+              element.scrollTop = savedPosition
+            }
+          }
+        })
+
+        // Restore main window scroll
+        const savedWindowPosition = scrollPositions.current.get(
+          `window-${pathname}`,
+        )
+        if (savedWindowPosition !== undefined) {
+          window.scrollTo(0, savedWindowPosition)
+        }
+      })
+    }
+  }, [pathname])
+
+  // Save scroll position before auth state changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveScrollPosition()
+      } else if (document.visibilityState === 'visible') {
+        // Small delay to ensure everything is rendered
+        setTimeout(restoreScrollPosition, 100)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [saveScrollPosition, restoreScrollPosition])
+
   // Create a single supabase client instance that will be reused
   const supabase = useMemo(() => createSupabaseBrowserClient(), [])
+
+  // Use ref to track current user for auth callbacks without triggering re-renders
+  const userRef = useRef(user)
+  userRef.current = user
 
   // Derive current startup from currentStartupId
   const currentStartup = useMemo(() => {
@@ -292,12 +363,12 @@ export function UserProvider({ children }: UserProviderProps) {
         console.error('Error signing out:', error)
       }
 
-      // Force a hard refresh to clear any cached state
-      window.location.href = '/'
+      // Use router for navigation instead of window.location
+      // window.location.href = '/'
     } catch (error) {
       console.error('Error in signOut:', error)
-      // Even if there's an error, try to redirect
-      window.location.href = '/'
+      // Even if there's an error, try to redirect with router
+      router.push('/')
     }
   }, [supabase, router])
 
@@ -324,12 +395,38 @@ export function UserProvider({ children }: UserProviderProps) {
 
     getInitialSession()
 
-    // Listen for auth changes
+    // Prevent unnecessary checks on window focus
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && userRef.current) {
+        // User is already authenticated, don't trigger re-auth
+        return
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Listen for auth changes - optimize to prevent unnecessary loading states
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event)
       const newUser = session?.user ?? null
+
+      // Determine if this is just a token refresh (common on window focus)
+      const isTokenRefresh = event === 'TOKEN_REFRESHED'
+      const isSignedIn = event === 'SIGNED_IN'
+
+      // If it's just a token refresh and we already have the same user, don't reset loading states
+      if (
+        isTokenRefresh &&
+        userRef.current &&
+        newUser &&
+        userRef.current.id === newUser.id
+      ) {
+        setUser(newUser) // Update with fresh token
+        return // Don't reset any loading states
+      }
+
       setUser(newUser)
 
       // Handle different auth events
@@ -341,13 +438,23 @@ export function UserProvider({ children }: UserProviderProps) {
         setNeedsOnboarding(false)
         setSigningOut(false)
 
-        // Redirect to home page
-        window.location.href = '/'
+        // Use router for redirect instead of window.location
+        router.push('/')
         return
       }
 
-      // Reset startup state when user changes
-      if (!newUser) {
+      // For sign in events, don't show loading if we already have data
+      if (
+        isSignedIn &&
+        userRef.current &&
+        newUser &&
+        userRef.current.id === newUser.id
+      ) {
+        return // Don't reset loading states for same user
+      }
+
+      // Reset startup state when user changes (but not for token refresh)
+      if (!newUser && !isTokenRefresh) {
         setStartups([])
         setCurrentStartupId(null)
         setStartupsInitialized(false)
@@ -355,23 +462,35 @@ export function UserProvider({ children }: UserProviderProps) {
         setSigningOut(false)
       }
 
-      setLoading(false)
+      // Only set loading to false for actual auth changes, not token refreshes
+      if (!isTokenRefresh) {
+        setLoading(false)
+      }
     })
 
     return () => {
       subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [supabase])
+  }, [supabase, router])
 
-  // Fetch startup data when user is available
+  // Fetch startup data when user is available and on dashboard
   useEffect(() => {
-    if (user && !loading) {
+    if (user && !loading && pathname.startsWith('/dashboard')) {
       fetchStartups()
       checkOnboardingStatus()
       fetchSubscription()
     }
-  }, [user, loading, fetchStartups, checkOnboardingStatus, fetchSubscription])
+  }, [
+    user,
+    loading,
+    pathname,
+    fetchStartups,
+    checkOnboardingStatus,
+    fetchSubscription,
+  ])
 
+  // Optimize memoized value to prevent unnecessary re-renders
   const value = useMemo(
     () => ({
       user,

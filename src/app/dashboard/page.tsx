@@ -59,12 +59,9 @@ export default async function DashboardPage() {
   }
 
   // If user has startups, get them and redirect to the most recent one
-  const { data: startups, error } = await supabase.rpc(
-    'get_user_startups',
-    {
-      p_user_id: user.id,
-    },
-  )
+  const { data: startups, error } = await supabase.rpc('get_user_startups', {
+    p_user_id: user.id,
+  })
 
   if (error) {
     console.error('Error fetching startups:', error)

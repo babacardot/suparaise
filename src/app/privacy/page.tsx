@@ -32,7 +32,7 @@ export default function PrivacyPage() {
             {/* Content Sections */}
             <div className="space-y-12">
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
@@ -49,7 +49,7 @@ export default function PrivacyPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Data security</h2>
@@ -99,7 +99,7 @@ export default function PrivacyPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Data retention</h2>
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Your rights</h2>
@@ -129,7 +129,7 @@ export default function PrivacyPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
@@ -146,7 +146,7 @@ export default function PrivacyPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">
@@ -163,7 +163,7 @@ export default function PrivacyPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-full"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Contact</h2>

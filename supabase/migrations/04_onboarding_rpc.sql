@@ -63,7 +63,7 @@ BEGIN
         LOOP
             INSERT INTO founders (
                 startup_id, first_name, last_name, role, bio, email, phone,
-                linkedin, github_url, personal_website_url
+                linkedin, github_url, personal_website_url, twitter_url
             )
             VALUES (
                 new_startup_id,
@@ -75,7 +75,8 @@ BEGIN
                 founder_data->>'phone',
                 founder_data->>'linkedin',
                 founder_data->>'githubUrl',
-                founder_data->>'personalWebsiteUrl'
+                founder_data->>'personalWebsiteUrl',
+                founder_data->>'twitterUrl'
             );
         END LOOP;
     END IF;

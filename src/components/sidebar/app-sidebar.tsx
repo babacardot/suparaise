@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
@@ -48,11 +49,25 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 const playClickSound = () => {
   if (typeof window !== 'undefined') {
-    const audio = new Audio('/sounds/light.mp3')
-    audio.volume = 0.3
-    audio.play().catch(() => {
-      // Silently handle audio play errors (autoplay policies, etc.)
-    })
+    // Use requestIdleCallback or setTimeout to ensure audio doesn't block navigation
+    const playAudio = () => {
+      try {
+        const audio = new Audio('/sounds/light.mp3')
+        audio.volume = 0.3
+        audio.play().catch(() => {
+          // Silently handle audio play errors (autoplay policies, etc.)
+        })
+      } catch {
+        // Silently handle audio creation errors
+      }
+    }
+
+    // Use requestIdleCallback if available, otherwise setTimeout
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(playAudio)
+    } else {
+      setTimeout(playAudio, 0)
+    }
   }
 }
 
@@ -64,6 +79,7 @@ export function AppSidebar({
   onCreateNewStartup,
   ...props
 }: AppSidebarProps) {
+  const router = useRouter()
   const { state, toggleSidebar } = useSidebar()
   const { subscription } = useUser()
   const [isToggleHovered, setIsToggleHovered] = React.useState(false)
@@ -136,9 +152,9 @@ export function AppSidebar({
 
   const handleCompleteProfileClick = () => {
     playClickSound()
-    // Navigate to settings page
+    // Navigate to settings page using router instead of window.location
     if (currentStartupId) {
-      window.location.href = `/dashboard/${currentStartupId}/settings`
+      router.push(`/dashboard/${currentStartupId}/settings`)
     }
   }
 
@@ -156,16 +172,16 @@ export function AppSidebar({
         animation: animations.cash,
       },
       {
-        title: 'Angels',
-        url: getNavUrl('angels'),
-        animation: animations.coin,
-        requiresPro: true,
-      },
-      {
         title: 'Accelerators',
         url: getNavUrl('accelerators'),
         animation: animations.speed,
         requiresPro: true,
+      },
+      {
+        title: 'Angels',
+        url: getNavUrl('angels'),
+        animation: animations.coin,
+        requiresMax: true,
       },
       {
         title: 'Applications',
@@ -175,13 +191,17 @@ export function AppSidebar({
     ],
     navSecondary: [
       // Show Complete your onboarding if profile is incomplete
-      ...(!isProfileComplete && currentStartupId ? [{
-        title: 'Complete your onboarding',
-        url: '#',
-        animation: animations.checkmark,
-        onClick: handleCompleteProfileClick,
-        isSpecial: true,
-      }] : []),
+      ...(!isProfileComplete && currentStartupId
+        ? [
+          {
+            title: 'Complete your onboarding',
+            url: '#',
+            animation: animations.checkmark,
+            onClick: handleCompleteProfileClick,
+            isSpecial: true,
+          },
+        ]
+        : []),
       {
         title: 'Support',
         url: '#',
@@ -193,6 +213,11 @@ export function AppSidebar({
         url: '#',
         animation: animations.chat,
         onClick: handleFeedbackClick,
+      },
+      {
+        title: 'Settings',
+        url: currentStartupId ? `/dashboard/${currentStartupId}/settings` : '/dashboard/settings',
+        animation: animations.settings,
       },
     ],
     permissionLevel,

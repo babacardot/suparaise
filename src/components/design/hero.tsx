@@ -87,7 +87,7 @@ export function HeroSection() {
                       size="lg"
                       variant="outline"
                       onClick={playClickSound}
-                      className="rounded-sm px-5 text-base h-[42px]"
+                      className="rounded-sm px-5 text-base h-[42px] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     >
                       <Link href="/login" prefetch={true}>
                         <span className="text-nowrap">Login</span>

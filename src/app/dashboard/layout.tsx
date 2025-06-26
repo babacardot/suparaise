@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useUser } from '@/lib/contexts/user-context'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import {
@@ -26,6 +26,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const {
     user,
     loading,
@@ -41,8 +42,6 @@ export default function DashboardLayout({
 
   // Add state for new startup creation dialog
   const [isCreatingNewStartup, setIsCreatingNewStartup] = useState(false)
-
-
 
   // Determine breadcrumbs based on current pathname
   const getBreadcrumbs = () => {
@@ -101,11 +100,17 @@ export default function DashboardLayout({
 
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
-      const audio = new Audio('/sounds/light.mp3')
-      audio.volume = 0.3
-      audio.play().catch(() => {
-        // Silently handle audio play errors (autoplay policies, etc.)
-      })
+      // Optimize audio playback to not block navigation
+      try {
+        const audio = new Audio('/sounds/light.mp3')
+        audio.volume = 0.3
+        // Use a promise that won't block navigation
+        audio.play().catch(() => {
+          // Silently handle audio play errors (autoplay policies, etc.)
+        })
+      } catch {
+        // Silently handle any audio creation errors
+      }
     }
   }
 
@@ -139,9 +144,8 @@ export default function DashboardLayout({
     setIsCreatingNewStartup(true)
   }
 
-
-
-  if (loading || signingOut) {
+  // Only show loading spinner if we truly don't have a user and are loading for the first time
+  if (loading && !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner className="h-5 w-5" />
@@ -149,9 +153,17 @@ export default function DashboardLayout({
     )
   }
 
-  // If user is null and not loading, redirect immediately
+  if (signingOut) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner className="h-5 w-5" />
+      </div>
+    )
+  }
+
+  // If user is null and not loading, redirect immediately using router
   if (!user && !loading && !signingOut) {
-    window.location.href = '/'
+    router.push('/')
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner className="h-5 w-5" />
@@ -165,12 +177,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-              name: user.user_metadata?.full_name || user.email || '',
-              email: user.email || '',
-              avatar: user.user_metadata?.avatar_url,
-              startupName: currentStartup?.name || undefined,
-              startupLogo: currentStartup?.logo_url || undefined,
-            }
+                name: user.user_metadata?.full_name || user.email || '',
+                email: user.email || '',
+                avatar: user.user_metadata?.avatar_url,
+                startupName: currentStartup?.name || undefined,
+                startupLogo: currentStartup?.logo_url || undefined,
+              }
             : null
         }
         startups={startups}
@@ -188,9 +200,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {children}
-        </div>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
 
       {/* First-time onboarding dialog */}

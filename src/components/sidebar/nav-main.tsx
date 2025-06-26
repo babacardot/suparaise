@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
-import { usePathname } from 'next/navigation'
+import React, { useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { Badge } from '@/components/ui/badge'
@@ -31,14 +31,27 @@ export function NavMain({
     url: string
     animation: object
     requiresPro?: boolean
+    requiresMax?: boolean
   }[]
   onItemClick?: () => void
   permissionLevel?: 'FREE' | 'PRO' | 'MAX'
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
   const { toast } = useToast()
   const { isMobile, state } = useSidebar()
+
+  // Prefetch all navigation links for faster navigation
+  useEffect(() => {
+    items.forEach((item) => {
+      try {
+        router.prefetch(item.url)
+      } catch {
+        // Silently handle prefetch errors
+      }
+    })
+  }, [items, router])
 
   return (
     <SidebarGroup>
@@ -47,28 +60,39 @@ export function NavMain({
           const isActive = pathname === item.url
           const isHovered = hoveredItem === item.title
 
-          // Check if this item requires PRO permission
+          // Check if this item requires special permissions
           const requiresProPermission = item.requiresPro || false
+          const requiresMaxPermission = item.requiresMax || false
           const hasProAccess =
             permissionLevel === 'PRO' || permissionLevel === 'MAX'
-          const isLockedForFreeUser = requiresProPermission && !hasProAccess
+          const hasMaxAccess = permissionLevel === 'MAX'
+
+          const isLockedForUser =
+            (requiresProPermission && !hasProAccess) ||
+            (requiresMaxPermission && !hasMaxAccess)
 
           const handleClick = (e: React.MouseEvent) => {
-            if (isLockedForFreeUser) {
+            if (isLockedForUser) {
               e.preventDefault()
+              const upgradeMessage = requiresMaxPermission
+                ? `${item.title} is only available for MAX users. Please upgrade your plan.`
+                : `${item.title} is only available for PRO and MAX users. Please upgrade your plan.`
               toast({
                 variant: 'destructive',
                 title: 'Feature locked',
-                description: `${item.title} is only available for PRO and MAX users. Please upgrade your plan.`,
+                description: upgradeMessage,
               })
               return
             }
             if (onItemClick) {
-              onItemClick()
+              // Use setTimeout to prevent click sound from blocking navigation
+              setTimeout(() => {
+                onItemClick()
+              }, 0)
             }
           }
 
-          if (isLockedForFreeUser) {
+          if (isLockedForUser) {
             const lockedButton = (
               <div
                 className={cn(
@@ -76,7 +100,8 @@ export function NavMain({
                   'cursor-not-allowed opacity-70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2',
                   'h-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!',
                   '[&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
-                  isActive && 'bg-sidebar-accent text-sidebar-accent-foreground',
+                  isActive &&
+                    'bg-sidebar-accent text-sidebar-accent-foreground',
                 )}
                 onMouseEnter={() => setHoveredItem(item.title)}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -91,12 +116,19 @@ export function NavMain({
                   isHovered={isHovered}
                   className="opacity-60"
                 />
-                <span className="flex-1 group-data-[collapsible=icon]:sr-only">{item.title}</span>
+                <span className="flex-1 group-data-[collapsible=icon]:sr-only">
+                  {item.title}
+                </span>
                 <Badge
                   variant="secondary"
-                  className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 group-data-[collapsible=icon]:sr-only"
+                  className={cn(
+                    'text-xs border group-data-[collapsible=icon]:sr-only',
+                    requiresMaxPermission
+                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                  )}
                 >
-                  PRO+
+                  {requiresMaxPermission ? 'MAX' : 'PRO'}
                 </Badge>
               </div>
             )

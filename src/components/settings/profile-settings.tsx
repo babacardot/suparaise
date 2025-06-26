@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import Spinner from '@/components/ui/spinner'
+import PhoneNumberInput from '@/components/design/phone-number-input-settings'
 
 // Import founder role constants from onboarding types
 import {
@@ -69,6 +70,7 @@ interface Founder {
   linkedin: string
   githubUrl: string
   personalWebsiteUrl: string
+  twitterUrl: string
   startupId: string
   createdAt: string
 }
@@ -83,8 +85,9 @@ const formatFieldName = (fieldName: string): string => {
     bio: 'Bio',
     role: 'Role',
     linkedin: 'LinkedIn',
-    githubUrl: 'GitHub',
+    githubUrl: 'Github',
     personalWebsiteUrl: 'Personal website',
+    twitterUrl: 'X',
   }
   return fieldLabels[fieldName] || fieldName
 }
@@ -106,7 +109,7 @@ function ProfileSettingsSkeleton() {
         <div className="space-y-6 pr-2">
           {/* Profile Picture Skeleton */}
           <div className="flex items-center space-x-4">
-            <Skeleton className="h-20 w-20 rounded-full" />
+            <Skeleton className="h-20 w-20 rounded-sm" />
             <div className="space-x-2">
               <Skeleton className="h-8 w-16 inline-block" />
               <Skeleton className="h-8 w-16 inline-block" />
@@ -199,7 +202,10 @@ export default function ProfileSettings() {
     linkedin: '',
     githubUrl: '',
     personalWebsiteUrl: '',
+    twitterUrl: '',
   })
+
+  // Note: Scroll position preservation removed to prevent re-rendering issues
 
   // Fetch all founders when component mounts or startup changes
   useEffect(() => {
@@ -230,6 +236,7 @@ export default function ProfileSettings() {
             linkedin: user.user_metadata?.linkedin || '',
             githubUrl: user.user_metadata?.githubUrl || '',
             personalWebsiteUrl: user.user_metadata?.personalWebsiteUrl || '',
+            twitterUrl: user.user_metadata?.twitterUrl || '',
             startupId: currentStartupId,
             createdAt: new Date().toISOString(),
           }
@@ -287,6 +294,33 @@ export default function ProfileSettings() {
     }, 0)
   }
 
+  const validateUrl = (url: string, field: string): boolean => {
+    if (!url.trim()) return true // Empty URLs are allowed
+
+    // Check if URL starts with https://
+    if (!url.startsWith('https://')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: `${formatFieldName(field)} must start with https://`,
+      })
+      return false
+    }
+
+    // Basic URL validation
+    try {
+      new URL(url)
+      return true
+    } catch {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: `Please enter a valid ${formatFieldName(field)} URL`,
+      })
+      return false
+    }
+  }
+
   const handleFieldSave = async (founderId: string, field: string) => {
     if (!currentStartupId) {
       toast({
@@ -297,11 +331,23 @@ export default function ProfileSettings() {
       return
     }
 
+    const founder = founders.find((f) => f.id === founderId)
+    if (!founder) return
+
+    // Validate URLs for specific fields
+    if (
+      ['linkedin', 'githubUrl', 'personalWebsiteUrl', 'twitterUrl'].includes(
+        field,
+      )
+    ) {
+      const fieldValue = founder[field as keyof Founder] as string
+      if (!validateUrl(fieldValue, field)) {
+        return // Don't save if validation fails
+      }
+    }
+
     setIsLoading(true)
     try {
-      const founder = founders.find((f) => f.id === founderId)
-      if (!founder) throw new Error('Founder not found')
-
       const updateData = { [field]: founder[field as keyof Founder] }
 
       const { data, error } = await supabase.rpc('update_founder_profile', {
@@ -468,6 +514,28 @@ export default function ProfileSettings() {
       return
     }
 
+    // Validate URLs
+    if (
+      newFounderData.linkedin &&
+      !validateUrl(newFounderData.linkedin, 'linkedin')
+    )
+      return
+    if (
+      newFounderData.githubUrl &&
+      !validateUrl(newFounderData.githubUrl, 'githubUrl')
+    )
+      return
+    if (
+      newFounderData.personalWebsiteUrl &&
+      !validateUrl(newFounderData.personalWebsiteUrl, 'personalWebsiteUrl')
+    )
+      return
+    if (
+      newFounderData.twitterUrl &&
+      !validateUrl(newFounderData.twitterUrl, 'twitterUrl')
+    )
+      return
+
     setIsLoading(true)
     try {
       const { data, error } = await supabase.rpc('add_startup_founder', {
@@ -506,6 +574,7 @@ export default function ProfileSettings() {
         linkedin: '',
         githubUrl: '',
         personalWebsiteUrl: '',
+        twitterUrl: '',
       })
       setShowAddFounder(false)
 
@@ -622,7 +691,10 @@ export default function ProfileSettings() {
 
       <Separator className="flex-shrink-0" />
 
-      <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
+      <div
+        className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar"
+        data-scroll-preserve="profile-settings-scroll"
+      >
         <div className="space-y-6 pr-2">
           {/* Render each founder */}
           {founders.map((founder, founderIndex) => (
@@ -766,7 +838,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-firstName` &&
-                          'bg-muted',
+                        'bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-firstName`}
                       placeholder="Enter first name"
@@ -868,39 +940,16 @@ export default function ProfileSettings() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`${founder.id}-phone`}>Phone</Label>
-                  <div className="relative">
-                    <Input
-                      id={`${founder.id}-phone`}
-                      type="tel"
-                      value={founder.phone}
-                      onChange={(e) =>
-                        handleInputChange(founder.id, 'phone', e.target.value)
-                      }
-                      className={cn(
-                        'rounded-sm pr-8',
-                        editingField !== `${founder.id}-phone` && 'bg-muted',
-                      )}
-                      readOnly={editingField !== `${founder.id}-phone`}
-                      placeholder="Enter phone number"
-                    />
-                    {editingField !== `${founder.id}-phone` ? (
-                      <button
-                        onClick={() => handleFieldEdit('phone', founder.id)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                      >
-                        <PencilIcon className="h-3 w-3" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleFieldSave(founder.id, 'phone')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                        disabled={isLoading}
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+                  <PhoneNumberInput
+                    value={founder.phone}
+                    onChange={(value) =>
+                      handleInputChange(founder.id, 'phone', value || '')
+                    }
+                    onSave={() => handleFieldSave(founder.id, 'phone')}
+                    label="Phone"
+                    isLoading={isLoading}
+                    placeholder="Enter phone number"
+                  />
                 </div>
               </div>
 
@@ -941,10 +990,12 @@ export default function ProfileSettings() {
                         className="rounded-l-sm rounded-r-none bg-muted"
                       />
                       <Button
-                        variant={isCopied ? 'default' : 'outline'}
+                        variant="outline"
                         className={cn(
                           'rounded-r-sm rounded-l-none h-9 w-24',
-                          isCopied && 'bg-blue-500 hover:bg-blue-600',
+                          isCopied
+                            ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                            : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                         )}
                         onClick={copyUserId}
                       >
@@ -1041,7 +1092,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-linkedin` &&
-                            'bg-muted',
+                          'bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-linkedin`}
                         placeholder="https://linkedin.com/in/profile"
@@ -1070,7 +1121,7 @@ export default function ProfileSettings() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`${founder.id}-githubUrl`}>GitHub</Label>
+                    <Label htmlFor={`${founder.id}-githubUrl`}>Github</Label>
                     <div className="relative">
                       <Input
                         id={`${founder.id}-githubUrl`}
@@ -1085,7 +1136,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-githubUrl` &&
-                            'bg-muted',
+                          'bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-githubUrl`}
                         placeholder="https://github.com/username"
@@ -1113,7 +1164,7 @@ export default function ProfileSettings() {
                     </div>
                   </div>
 
-                  <div className="space-y-2 md:col-span-2">
+                  <div className="space-y-2">
                     <Label htmlFor={`${founder.id}-personalWebsiteUrl`}>
                       Personal website
                     </Label>
@@ -1131,7 +1182,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-personalWebsiteUrl` &&
-                            'bg-muted',
+                          'bg-muted',
                         )}
                         readOnly={
                           editingField !== `${founder.id}-personalWebsiteUrl`
@@ -1151,6 +1202,50 @@ export default function ProfileSettings() {
                         <button
                           onClick={() =>
                             handleFieldSave(founder.id, 'personalWebsiteUrl')
+                          }
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
+                          disabled={isLoading}
+                        >
+                          <CheckIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`${founder.id}-twitterUrl`}>X</Label>
+                    <div className="relative">
+                      <Input
+                        id={`${founder.id}-twitterUrl`}
+                        value={founder.twitterUrl}
+                        onChange={(e) =>
+                          handleInputChange(
+                            founder.id,
+                            'twitterUrl',
+                            e.target.value,
+                          )
+                        }
+                        className={cn(
+                          'rounded-sm pr-8',
+                          editingField !== `${founder.id}-twitterUrl` &&
+                          'bg-muted',
+                        )}
+                        readOnly={editingField !== `${founder.id}-twitterUrl`}
+                        placeholder="https://x.com/username"
+                      />
+                      {editingField !== `${founder.id}-twitterUrl` ? (
+                        <button
+                          onClick={() =>
+                            handleFieldEdit('twitterUrl', founder.id)
+                          }
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
+                        >
+                          <PencilIcon className="h-3 w-3" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() =>
+                            handleFieldSave(founder.id, 'twitterUrl')
                           }
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
                           disabled={isLoading}
@@ -1218,14 +1313,12 @@ export default function ProfileSettings() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="new-phone">Phone</Label>
-                    <Input
-                      id="new-phone"
-                      type="tel"
+                    <PhoneNumberInput
                       value={newFounderData.phone}
-                      onChange={(e) =>
-                        handleNewFounderInputChange('phone', e.target.value)
+                      onChange={(value) =>
+                        handleNewFounderInputChange('phone', value || '')
                       }
+                      label="Phone"
                       placeholder="Enter phone number"
                     />
                   </div>
@@ -1294,7 +1387,7 @@ export default function ProfileSettings() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="new-githubUrl">GitHub</Label>
+                    <Label htmlFor="new-githubUrl">Github</Label>
                     <Input
                       id="new-githubUrl"
                       value={newFounderData.githubUrl}
@@ -1305,7 +1398,7 @@ export default function ProfileSettings() {
                     />
                   </div>
 
-                  <div className="space-y-2 md:col-span-2">
+                  <div className="space-y-2">
                     <Label htmlFor="new-personalWebsiteUrl">
                       Personal website
                     </Label>
@@ -1319,6 +1412,21 @@ export default function ProfileSettings() {
                         )
                       }
                       placeholder="https://website.com"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="new-twitterUrl">X</Label>
+                    <Input
+                      id="new-twitterUrl"
+                      value={newFounderData.twitterUrl}
+                      onChange={(e) =>
+                        handleNewFounderInputChange(
+                          'twitterUrl',
+                          e.target.value,
+                        )
+                      }
+                      placeholder="https://x.com/username"
                     />
                   </div>
                 </div>

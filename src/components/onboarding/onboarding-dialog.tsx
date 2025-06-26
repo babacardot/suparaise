@@ -17,6 +17,7 @@ import Spinner from '@/components/ui/spinner'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { useToast } from '@/lib/hooks/use-toast'
+import { generateRandomCompanyName } from '@/lib/actions/utils'
 import {
   FounderData,
   StartupData,
@@ -43,19 +44,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-      title: 'Welcome to suparaise.com',
-      subtitle:
-        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-      image: '/random/onboarding.svg',
-      statusText: 'Onboarding',
-    }
+        title: 'Welcome to suparaise.com',
+        subtitle:
+          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+        image: '/random/onboarding.svg',
+        statusText: 'Onboarding',
+      }
     : {
-      title: 'Ready to launch another venture?',
-      subtitle:
-        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-      image: '/random/test_your_app.svg',
-      statusText: 'New venture',
-    }
+        title: 'Ready to launch another venture?',
+        subtitle:
+          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+        image: '/random/test_your_app.svg',
+        statusText: 'New venture',
+      }
 
   return (
     <motion.div
@@ -66,7 +67,9 @@ const WelcomeStep = ({
       className="flex flex-col items-center justify-center h-full space-y-6 text-center relative"
     >
       <div className="absolute top-0 left-0 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-sm px-3 py-1 text-xs font-medium">
-        {isFirstStartup ? '3 steps process · 5 minutes' : '3 steps process · 5 minutes'}
+        {isFirstStartup
+          ? '3 steps process · 5 minutes'
+          : '3 steps process · 5 minutes'}
       </div>
 
       {/* Skip button for first-time users */}
@@ -152,6 +155,7 @@ export function OnboardingDialog({
       linkedin: '',
       githubUrl: '',
       personalWebsiteUrl: '',
+      twitterUrl: '',
     },
   ])
 
@@ -241,6 +245,11 @@ export function OnboardingDialog({
               const nameParts = fullName.split(' ')
               firstFounder.firstName = nameParts[0] || ''
               firstFounder.lastName = nameParts.slice(1).join(' ') || ''
+            }
+
+            // Pre-populate LinkedIn URL if available from OAuth
+            if (user.user_metadata?.linkedin_url && !firstFounder.linkedin) {
+              firstFounder.linkedin = user.user_metadata.linkedin_url
             }
 
             newFounders[0] = firstFounder
@@ -351,13 +360,16 @@ export function OnboardingDialog({
           if (founder.linkedin && !isValidUrl(founder.linkedin)) {
             errors.push(`LinkedIn URL for ${founderLabel} is invalid`)
           }
+          if (founder.twitterUrl && !isValidUrl(founder.twitterUrl)) {
+            errors.push(`X (Twitter) URL for ${founderLabel} is invalid`)
+          }
 
           // Check for duplicate emails within the current form
           const duplicateIndex = founders.findIndex(
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-              founder.email.trim().toLowerCase(),
+                founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -369,7 +381,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-            (user?.email || '').toLowerCase()
+              (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -453,6 +465,13 @@ export function OnboardingDialog({
         !isValidUrl(founder.linkedin)
       ) {
         errors.linkedin = 'Invalid LinkedIn URL'
+      }
+      if (
+        founder.twitterUrl &&
+        founder.twitterUrl.trim() &&
+        !isValidUrl(founder.twitterUrl)
+      ) {
+        errors.twitterUrl = 'Invalid X (Twitter) URL'
       }
 
       return errors
@@ -781,36 +800,39 @@ export function OnboardingDialog({
     setLoading(true)
     try {
       // Create minimal startup data using existing function
-      const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'Founder'
+      const userName =
+        user?.user_metadata?.full_name || user?.user_metadata?.name || 'Founder'
       const userEmail = user?.email || ''
 
       const minimalSubmissionData = {
         user_id: userId,
-        name: `${userName}'s Company`,
-        description_short: 'Complete your profile to get started with fundraising automation',
-        description_medium: 'We help startups automate their VC outreach process',
-        description_long: 'Please complete your startup profile to unlock the full potential of our AI-powered fundraising agents.',
-        industry: 'Other',
-        location: 'United States',
+        name: generateRandomCompanyName(),
+        description_short: '', // Leave empty to trigger validation
+        description_medium: '', // Leave empty to trigger validation
+        description_long: '', // Leave empty - not required for validation
+        industry: null, // Leave null to trigger validation
+        location: '', // Leave empty to trigger validation
         employee_count: 1,
         founded_year: new Date().getFullYear(),
-        funding_round: 'Pre-seed',
-        funding_amount_sought: 100000,
-        investment_instrument: 'Equity',
-        traction_summary: 'Just getting started',
-        market_summary: 'Growing market opportunity',
+        funding_round: null, // Leave null to trigger validation
+        funding_amount_sought: 0, // Leave 0 to trigger validation
+        investment_instrument: null, // Leave null to trigger validation
+        traction_summary: '', // Leave empty - not required for validation
+        market_summary: '', // Leave empty - not required for validation
         onboarded: false, // Mark as incomplete to show reminders
-        founders: [{
-          firstName: userName.split(' ')[0] || 'Founder',
-          lastName: userName.split(' ').slice(1).join(' ') || '',
-          email: userEmail,
-          phone: '',
-          role: 'Founder',
-          bio: '',
-          linkedin: '',
-          githubUrl: '',
-          personalWebsiteUrl: ''
-        }]
+        founders: [
+          {
+            firstName: userName.split(' ')[0] || 'Founder',
+            lastName: userName.split(' ').slice(1).join(' ') || '',
+            email: userEmail,
+            phone: '', // Leave empty to trigger validation
+            role: 'Founder',
+            bio: '', // Leave empty to trigger validation
+            linkedin: '',
+            githubUrl: '',
+            personalWebsiteUrl: '',
+          },
+        ],
       }
 
       const { data: newStartup, error } = await supabase.rpc(
@@ -836,7 +858,8 @@ export function OnboardingDialog({
       toast({
         variant: 'destructive',
         title: 'Skip failed',
-        description: 'There was an error skipping onboarding. Please try again.',
+        description:
+          'There was an error skipping onboarding. Please try again.',
       })
     } finally {
       setLoading(false)

@@ -97,8 +97,7 @@ export function ForgotPasswordForm({
               <div className="flex flex-col items-start text-start">
                 <h1 className="text-2xl font-bold">Reset your password</h1>
                 <p className="text-balance text-muted-foreground">
-                  Enter your email address and we&apos;ll send you a link to
-                  reset your password.
+                  We&apos;ll send you a link to reset your password.
                 </p>
               </div>
 
@@ -139,10 +138,6 @@ export function ForgotPasswordForm({
           </form>
         </CardContent>
       </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
-        By using this service, you agree to our <a href="/terms">Terms</a> and{' '}
-        <a href="/privacy">Privacy Policy</a>.
-      </div>
     </div>
   )
 }

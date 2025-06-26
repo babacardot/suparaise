@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
-import { notFound, redirect } from 'next/navigation'
-import { useParams } from 'next/navigation'
+import { useEffect, useMemo } from 'react'
+import { notFound } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useUser } from '@/lib/contexts/user-context'
 import Spinner from '@/components/ui/spinner'
 
@@ -13,6 +13,7 @@ interface StartupLayoutProps {
 export default function StartupLayout({ children }: StartupLayoutProps) {
   const params = useParams()
   const startupId = params.startupId as string
+  const router = useRouter()
 
   const {
     user,
@@ -24,6 +25,12 @@ export default function StartupLayout({ children }: StartupLayoutProps) {
     setCurrentStartupFromUrl,
   } = useUser()
 
+  // Memoize startup lookup for performance
+  const startup = useMemo(() => {
+    if (!startupsInitialized || startupsLoading) return null
+    return startups.find((s) => s.id === startupId) || null
+  }, [startups, startupId, startupsInitialized, startupsLoading])
+
   // Set current startup from URL when component mounts or startup ID changes
   useEffect(() => {
     if (startupId && startupId !== currentStartupId) {
@@ -31,8 +38,8 @@ export default function StartupLayout({ children }: StartupLayoutProps) {
     }
   }, [startupId, currentStartupId, setCurrentStartupFromUrl])
 
-  // Show loading while auth is loading
-  if (loading) {
+  // Only show loading while auth is loading and we don't have a user
+  if (loading && !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner className="h-5 w-5" />
@@ -40,9 +47,14 @@ export default function StartupLayout({ children }: StartupLayoutProps) {
     )
   }
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated using router instead of redirect()
   if (!user) {
-    redirect('/login')
+    router.push('/login')
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner className="h-5 w-5" />
+      </div>
+    )
   }
 
   // Show loading while startups are being fetched OR if startups haven't been initialized yet
@@ -55,7 +67,6 @@ export default function StartupLayout({ children }: StartupLayoutProps) {
   }
 
   // Check if startup exists and belongs to user (only after startups are loaded and initialized)
-  const startup = startups.find((s) => s.id === startupId)
   if (!startup) {
     notFound()
   }

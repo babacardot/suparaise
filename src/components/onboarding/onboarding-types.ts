@@ -36,6 +36,7 @@ export interface FounderData {
   linkedin: string
   githubUrl: string
   personalWebsiteUrl: string
+  twitterUrl: string
 }
 
 export interface StartupData {
@@ -96,6 +97,7 @@ export interface FounderFieldErrors {
   linkedin?: string
   githubUrl?: string
   personalWebsiteUrl?: string
+  twitterUrl?: string
 }
 
 export interface StartupFieldErrors {

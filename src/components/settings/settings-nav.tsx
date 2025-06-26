@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/actions/utils'
@@ -10,17 +11,20 @@ import { animations } from '@/lib/utils/lottie-animations'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 
-// Sound utility functions
+// Optimized sound utility functions - don't block navigation
 const playSound = (soundFile: string) => {
-  try {
-    const audio = new Audio(soundFile)
-    audio.volume = 0.3
-    audio.play().catch((error) => {
-      console.log('Could not play sound:', error)
-    })
-  } catch (error) {
-    console.log('Error loading sound:', error)
-  }
+  // Use setTimeout to ensure sound doesn't block navigation
+  setTimeout(() => {
+    try {
+      const audio = new Audio(soundFile)
+      audio.volume = 0.3
+      audio.play().catch(() => {
+        // Silently handle audio play errors
+      })
+    } catch {
+      // Silently handle any audio creation errors
+    }
+  }, 0)
 }
 
 const playClickSound = () => {
@@ -49,33 +53,45 @@ function NavItem({
   const [isHovered, setIsHovered] = useState(false)
   const { toast } = useToast()
 
-  // Get the animation from the animations object
-  const animationData = animations[item.icon as keyof typeof animations]
+  // Get the animation from the animations object - memoize for performance
+  const animationData = useMemo(
+    () => animations[item.icon as keyof typeof animations],
+    [item.icon],
+  )
 
   // Check if this item requires PRO permission
   const requiresProPermission = item.title === 'Integrations'
   const hasProAccess = permissionLevel === 'PRO' || permissionLevel === 'MAX'
   const isLockedForFreeUser = requiresProPermission && !hasProAccess
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (isLockedForFreeUser) {
-      e.preventDefault()
-      toast({
-        variant: 'destructive',
-        title: 'Feature locked',
-        description: `${item.title} is only available for PRO and MAX users. Please upgrade your plan.`,
-      })
-      return
-    }
-    playClickSound()
-  }
+  // Optimize click handler with useCallback
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isLockedForFreeUser) {
+        e.preventDefault()
+        toast({
+          variant: 'destructive',
+          title: 'Feature locked',
+          description: `${item.title} is only available for PRO and MAX users. Please upgrade your plan.`,
+        })
+        return
+      }
+      // Play sound asynchronously to not block navigation
+      playClickSound()
+    },
+    [isLockedForFreeUser, item.title, toast],
+  )
+
+  // Optimize hover handlers with useCallback
+  const handleMouseEnter = useCallback(() => setIsHovered(true), [])
+  const handleMouseLeave = useCallback(() => setIsHovered(false), [])
 
   if (isLockedForFreeUser) {
     return (
       <div
         onClick={handleClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={cn(
           buttonVariants({ variant: 'ghost' }),
           isActive
@@ -112,7 +128,7 @@ function NavItem({
                 variant="secondary"
                 className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
               >
-                PRO
+                PRO+
               </Badge>
             )}
           </div>
@@ -125,8 +141,8 @@ function NavItem({
     <Link
       href={item.href}
       onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={cn(
         buttonVariants({ variant: 'ghost' }),
         isActive
@@ -178,42 +194,63 @@ export default function SettingsNav({
   ...props
 }: SettingsNavProps) {
   const { subscription } = useUser()
+  const router = useRouter()
 
-  // Get permission level, defaulting to FREE if not available
-  const permissionLevel = subscription?.permission_level || 'FREE'
+  // Get permission level, defaulting to FREE if not available - memoize for performance
+  const permissionLevel = useMemo(
+    () => subscription?.permission_level || 'FREE',
+    [subscription?.permission_level],
+  )
+
+  // Prefetch all navigation links for faster navigation
+  useEffect(() => {
+    items.forEach((item) => {
+      try {
+        router.prefetch(item.href)
+      } catch {
+        // Silently handle prefetch errors
+      }
+    })
+  }, [items, router])
+
+  // Memoize the items processing for better performance
+  const processedItems = useMemo(
+    () =>
+      items.map((item) => ({
+        ...item,
+        isActive: (() => {
+          // More precise active state logic
+          // Exact match for the current path
+          if (currentPath === item.href) return true
+
+          // For sub-routes, only consider them active if they start with the href
+          // but exclude the base settings path from this logic
+          if (item.href.endsWith('/settings')) {
+            // For the base settings path, only active if exact match
+            return currentPath === item.href
+          } else {
+            // For sub-routes like /settings/company, /settings/agent
+            return (
+              currentPath.startsWith(item.href + '/') ||
+              currentPath === item.href
+            )
+          }
+        })(),
+      })),
+    [items, currentPath],
+  )
 
   return (
     <div className="w-full bg-background border rounded-sm">
       <nav className={cn('flex flex-col p-2', className)} {...props}>
-        {items.map((item) => {
-          // More precise active state logic
-          const isActive = (() => {
-            // Exact match for the current path
-            if (currentPath === item.href) return true
-
-            // For sub-routes, only consider them active if they start with the href
-            // but exclude the base settings path from this logic
-            if (item.href.endsWith('/settings')) {
-              // For the base settings path, only active if exact match
-              return currentPath === item.href
-            } else {
-              // For sub-routes like /settings/company, /settings/agent
-              return (
-                currentPath.startsWith(item.href + '/') ||
-                currentPath === item.href
-              )
-            }
-          })()
-
-          return (
-            <NavItem
-              key={item.href}
-              item={item}
-              isActive={isActive}
-              permissionLevel={permissionLevel}
-            />
-          )
-        })}
+        {processedItems.map((item) => (
+          <NavItem
+            key={item.href}
+            item={item}
+            isActive={item.isActive}
+            permissionLevel={permissionLevel}
+          />
+        ))}
       </nav>
     </div>
   )

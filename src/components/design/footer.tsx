@@ -17,7 +17,18 @@ export const Footer = () => {
     setMounted(true)
   }, [])
 
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.3
+      audio.play().catch(() => {
+        // Silently handle audio play errors (autoplay policies, etc.)
+      })
+    }
+  }
+
   const toggleTheme = () => {
+    playClickSound()
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
@@ -29,6 +40,7 @@ export const Footer = () => {
             <Link
               href="/privacy"
               prefetch={true}
+              onClick={playClickSound}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Privacy
@@ -36,6 +48,7 @@ export const Footer = () => {
             <Link
               href="/terms"
               prefetch={true}
+              onClick={playClickSound}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Terms
@@ -47,6 +60,7 @@ export const Footer = () => {
               href="https://twitter.com/suparaise"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={playClickSound}
               className="text-muted-foreground hover:text-[#000000] dark:hover:text-[#FFFFFF] transition-colors"
               aria-label="Follow us on X"
             >
@@ -56,8 +70,9 @@ export const Footer = () => {
               href="https://github.com/princemuichkine"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={playClickSound}
               className="text-muted-foreground hover:text-[#6f42c1] dark:hover:text-[#6f42c1] transition-colors"
-              aria-label="Follow us on GitHub"
+              aria-label="Follow us on Github"
             >
               <GitHubIcon className="h-5 w-5" />
             </Link>
@@ -65,6 +80,7 @@ export const Footer = () => {
               href="https://www.producthunt.com/posts/suparaise"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={playClickSound}
               className="text-muted-foreground hover:text-[#DA552F] dark:hover:text-[#DA552F] transition-colors"
               aria-label="Check us out on Product Hunt"
             >
@@ -86,16 +102,20 @@ export const Footer = () => {
                 : 'Toggle theme'
             }
           >
-            <LottieIcon
-              animationData={
-                theme === 'dark' ? animations.sun : animations.point
-              }
-              size={16}
-              loop={false}
-              autoplay={false}
-              initialFrame={0}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            />
+            {mounted ? (
+              <LottieIcon
+                animationData={
+                  theme === 'dark' ? animations.sun : animations.point
+                }
+                size={16}
+                loop={false}
+                autoplay={false}
+                initialFrame={0}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              />
+            ) : (
+              <div className="h-4 w-4 rounded-sm bg-muted animate-pulse" />
+            )}
           </button>
         </div>
       </div>

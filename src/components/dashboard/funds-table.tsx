@@ -29,7 +29,10 @@ import {
   BarChart,
   Users,
 } from 'lucide-react'
-import { ValidationGate, VALIDATION_PRESETS } from '@/components/ui/validation-gate'
+import {
+  ValidationGate,
+  VALIDATION_PRESETS,
+} from '@/components/ui/validation-gate'
 
 type Target = {
   id: string
@@ -161,7 +164,10 @@ export default function FundsTable({ targets }: FundsTableProps) {
       <div className="h-full flex flex-col">
         <div className="flex-1 min-h-0">
           <div className="h-full rounded-sm border overflow-hidden">
-            <div className="h-full overflow-auto hide-scrollbar">
+            <div
+              className="h-full overflow-auto hide-scrollbar"
+              data-scroll-preserve="funds-table-scroll"
+            >
               <Table>
                 <TableHeader className="sticky top-0 bg-background z-10 border-b">
                   <TableRow>
@@ -363,9 +369,13 @@ export default function FundsTable({ targets }: FundsTableProps) {
                         <div className="flex justify-end">
                           {target.submission_type === 'form' && (
                             <ValidationGate
-                              requirements={VALIDATION_PRESETS.BASIC_APPLICATION}
+                              requirements={
+                                VALIDATION_PRESETS.BASIC_APPLICATION
+                              }
                               actionName="apply to this fund"
-                              onValidationPass={() => handleApplyForm(target.application_url)}
+                              onValidationPass={() =>
+                                handleApplyForm(target.application_url)
+                              }
                             >
                               <Button
                                 size="sm"
@@ -390,9 +400,13 @@ export default function FundsTable({ targets }: FundsTableProps) {
                           {target.submission_type === 'email' &&
                             target.application_email && (
                               <ValidationGate
-                                requirements={VALIDATION_PRESETS.BASIC_APPLICATION}
+                                requirements={
+                                  VALIDATION_PRESETS.BASIC_APPLICATION
+                                }
                                 actionName="send email to this fund"
-                                onValidationPass={() => handleSendEmail(target.application_email)}
+                                onValidationPass={() =>
+                                  handleSendEmail(target.application_email)
+                                }
                               >
                                 <Button
                                   size="sm"

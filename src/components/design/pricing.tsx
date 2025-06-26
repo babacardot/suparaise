@@ -1,3 +1,5 @@
+'use client'
+
 import { Check } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -66,6 +68,16 @@ const pricingTiers: PricingTier[] = [
 ]
 
 export const Pricing = () => {
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.3
+      audio.play().catch(() => {
+        // Silently handle audio play errors (autoplay policies, etc.)
+      })
+    }
+  }
+
   return (
     <section className="pt-32 pb-20">
       <div className="mx-auto max-w-5xl px-6">
@@ -124,6 +136,12 @@ export const Pricing = () => {
                 {tier.buttonText && (
                   <Button
                     asChild
+                    onClick={
+                      tier.permissionLevel === 'PRO' ||
+                      tier.permissionLevel === 'MAX'
+                        ? playClickSound
+                        : undefined
+                    }
                     className={`mt-6 w-full ${
                       tier.popular
                         ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'

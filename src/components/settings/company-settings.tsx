@@ -175,7 +175,7 @@ function CompanySettingsSkeleton() {
         <div className="space-y-6 pr-2">
           {/* Company Logo Skeleton */}
           <div className="flex items-center space-x-4">
-            <Skeleton className="h-20 w-20 rounded-full" />
+            <Skeleton className="h-20 w-20 rounded-sm" />
             <div className="space-x-2">
               <Skeleton className="h-8 w-24 inline-block" />
               <Skeleton className="h-8 w-16 inline-block" />
@@ -589,6 +589,33 @@ export default function CompanySettings() {
     }, 0)
   }
 
+  const validateUrl = (url: string, field: string): boolean => {
+    if (!url.trim()) return true // Empty URLs are allowed
+
+    // Check if URL starts with https://
+    if (!url.startsWith('https://')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: `${formatFieldName(field)} must start with https://`,
+      })
+      return false
+    }
+
+    // Basic URL validation
+    try {
+      new URL(url)
+      return true
+    } catch {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: `Please enter a valid ${formatFieldName(field)} URL`,
+      })
+      return false
+    }
+  }
+
   const handleFieldSave = async (field: string) => {
     if (!currentStartupId) {
       toast({
@@ -597,6 +624,14 @@ export default function CompanySettings() {
         description: 'No startup selected.',
       })
       return
+    }
+
+    // Validate URLs for website field
+    if (field === 'website') {
+      const fieldValue = formData[field as keyof typeof formData] as string
+      if (!validateUrl(fieldValue, field)) {
+        return // Don't save if validation fails
+      }
     }
 
     setIsLoading(true)
@@ -1599,33 +1634,81 @@ export default function CompanySettings() {
 
           {/* Incorporation Information */}
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-4">
               <Label>Is your company incorporated?</Label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="incorporated"
-                    checked={formData.isIncorporated === true}
-                    onChange={async () => {
-                      handleInputChange('isIncorporated', true)
-                      await handleFieldSave('isIncorporated')
-                    }}
-                  />
-                  <span>Yes</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="incorporated"
-                    checked={formData.isIncorporated === false}
-                    onChange={async () => {
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={async () => {
+                    if (formData.isIncorporated) {
+                      playClickSound()
                       handleInputChange('isIncorporated', false)
-                      await handleFieldSave('isIncorporated')
-                    }}
-                  />
-                  <span>No</span>
-                </label>
+                      // Save without toast or completion sound
+                      try {
+                        const updateData = { isIncorporated: false }
+                        const { data, error } = await supabase.rpc(
+                          'update_user_startup_data',
+                          {
+                            p_user_id: user.id,
+                            p_startup_id: currentStartupId,
+                            p_data: updateData,
+                          },
+                        )
+                        if (error) throw error
+                        if (data?.error) throw new Error(data.error)
+                      } catch (error) {
+                        console.error(
+                          'Error saving incorporation status:',
+                          error,
+                        )
+                      }
+                    }
+                  }}
+                  disabled={isLoading}
+                  className={cn(
+                    'flex items-center justify-center rounded-sm border-2 px-4 py-3 text-sm font-medium transition-all',
+                    !formData.isIncorporated
+                      ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-300'
+                      : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                  )}
+                >
+                  No
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!formData.isIncorporated) {
+                      playClickSound()
+                      handleInputChange('isIncorporated', true)
+                      // Save without toast or completion sound
+                      try {
+                        const updateData = { isIncorporated: true }
+                        const { data, error } = await supabase.rpc(
+                          'update_user_startup_data',
+                          {
+                            p_user_id: user.id,
+                            p_startup_id: currentStartupId,
+                            p_data: updateData,
+                          },
+                        )
+                        if (error) throw error
+                        if (data?.error) throw new Error(data.error)
+                      } catch (error) {
+                        console.error(
+                          'Error saving incorporation status:',
+                          error,
+                        )
+                      }
+                    }
+                  }}
+                  disabled={isLoading}
+                  className={cn(
+                    'flex items-center justify-center rounded-sm border-2 px-4 py-3 text-sm font-medium transition-all',
+                    formData.isIncorporated
+                      ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-400'
+                      : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                  )}
+                >
+                  Yes
+                </button>
               </div>
             </div>
 
@@ -2009,198 +2092,200 @@ export default function CompanySettings() {
 
           {/* File Uploads */}
           <div className="space-y-6">
-            {/* Pitch Deck Upload */}
-            <div className="space-y-2">
-              <Label>Deck</Label>
-              <input
-                ref={pitchDeckInputRef}
-                type="file"
-                accept=".pdf,.ppt,.pptx"
-                className="hidden"
-                onChange={(e) => {
-                  const selectedFile = e.target.files?.[0]
-                  if (selectedFile) handlePitchDeckUpload(selectedFile)
-                }}
-                disabled={pitchDeckUploading}
-              />
-              {!formData.pitchDeckUrl ? (
-                <div className="flex items-center space-x-4">
-                  <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-                    <LottieIcon
-                      animationData={animations.fileplus}
-                      size={32}
-                      loop={false}
-                      autoplay={false}
-                    />
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Pitch Deck Upload */}
+              <div className="space-y-2">
+                <Label>Deck</Label>
+                <input
+                  ref={pitchDeckInputRef}
+                  type="file"
+                  accept=".pdf,.ppt,.pptx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const selectedFile = e.target.files?.[0]
+                    if (selectedFile) handlePitchDeckUpload(selectedFile)
+                  }}
+                  disabled={pitchDeckUploading}
+                />
+                {!formData.pitchDeckUrl ? (
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                      <LottieIcon
+                        animationData={animations.fileplus}
+                        size={32}
+                        loop={false}
+                        autoplay={false}
+                      />
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          pitchDeckInputRef.current?.click()
+                        }}
+                        disabled={pitchDeckUploading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      >
+                        {pitchDeckUploading ? (
+                          <>
+                            <Spinner className="h-3 w-3 mr-2" />
+                            Uploading...
+                          </>
+                        ) : (
+                          'Upload'
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        playClickSound()
-                        pitchDeckInputRef.current?.click()
-                      }}
-                      disabled={pitchDeckUploading}
-                      className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                    >
-                      {pitchDeckUploading ? (
-                        <>
-                          <Spinner className="h-3 w-3 mr-2" />
-                          Uploading...
-                        </>
-                      ) : (
-                        'Upload'
-                      )}
-                    </Button>
+                ) : (
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-sm flex items-center justify-center">
+                      <LottieIcon
+                        animationData={animations.fileplus}
+                        size={32}
+                        loop={false}
+                        autoplay={false}
+                      />
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          pitchDeckInputRef.current?.click()
+                        }}
+                        disabled={pitchDeckUploading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      >
+                        {pitchDeckUploading ? (
+                          <>
+                            <Spinner className="h-3 w-3 mr-2" />
+                            Uploading...
+                          </>
+                        ) : (
+                          'Update'
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          handlePitchDeckRemove()
+                        }}
+                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <div className="h-20 w-20 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-sm flex items-center justify-center">
-                    <LottieIcon
-                      animationData={animations.fileplus}
-                      size={32}
-                      loop={false}
-                      autoplay={false}
-                    />
-                  </div>
-                  <div className="space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        playClickSound()
-                        pitchDeckInputRef.current?.click()
-                      }}
-                      disabled={pitchDeckUploading}
-                      className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                    >
-                      {pitchDeckUploading ? (
-                        <>
-                          <Spinner className="h-3 w-3 mr-2" />
-                          Uploading...
-                        </>
-                      ) : (
-                        'Update'
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        playClickSound()
-                        handlePitchDeckRemove()
-                      }}
-                      className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                PDF, PPT, or PPTX (max 5MB)
-              </p>
-            </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  PDF, PPT, or PPTX (max 5MB)
+                </p>
+              </div>
 
-            {/* Video Upload */}
-            <div className="space-y-2">
-              <Label>Demo</Label>
-              <input
-                ref={videoInputRef}
-                type="file"
-                accept=".mp4,.mov,.avi,.webm"
-                className="hidden"
-                onChange={(e) => {
-                  const selectedFile = e.target.files?.[0]
-                  if (selectedFile) handleVideoUpload(selectedFile)
-                }}
-                disabled={videoUploading}
-              />
-              {!formData.introVideoUrl ? (
-                <div className="flex items-center space-x-4">
-                  <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-                    <LottieIcon
-                      animationData={animations.fileplus}
-                      size={32}
-                      loop={false}
-                      autoplay={false}
-                    />
+              {/* Video Upload */}
+              <div className="space-y-2">
+                <Label>Demo</Label>
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept=".mp4,.mov,.avi,.webm"
+                  className="hidden"
+                  onChange={(e) => {
+                    const selectedFile = e.target.files?.[0]
+                    if (selectedFile) handleVideoUpload(selectedFile)
+                  }}
+                  disabled={videoUploading}
+                />
+                {!formData.introVideoUrl ? (
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                      <LottieIcon
+                        animationData={animations.fileplus}
+                        size={32}
+                        loop={false}
+                        autoplay={false}
+                      />
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          videoInputRef.current?.click()
+                        }}
+                        disabled={videoUploading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      >
+                        {videoUploading ? (
+                          <>
+                            <Spinner className="h-3 w-3 mr-2" />
+                            Uploading...
+                          </>
+                        ) : (
+                          'Upload'
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        playClickSound()
-                        videoInputRef.current?.click()
-                      }}
-                      disabled={videoUploading}
-                      className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                    >
-                      {videoUploading ? (
-                        <>
-                          <Spinner className="h-3 w-3 mr-2" />
-                          Uploading...
-                        </>
-                      ) : (
-                        'Upload'
-                      )}
-                    </Button>
+                ) : (
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-sm flex items-center justify-center">
+                      <LottieIcon
+                        animationData={animations.fileplus}
+                        size={32}
+                        loop={false}
+                        autoplay={false}
+                      />
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          videoInputRef.current?.click()
+                        }}
+                        disabled={videoUploading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      >
+                        {videoUploading ? (
+                          <>
+                            <Spinner className="h-3 w-3 mr-2" />
+                            Uploading...
+                          </>
+                        ) : (
+                          'Update'
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          handleVideoRemove()
+                        }}
+                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <div className="h-20 w-20 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-sm flex items-center justify-center">
-                    <LottieIcon
-                      animationData={animations.fileplus}
-                      size={32}
-                      loop={false}
-                      autoplay={false}
-                    />
-                  </div>
-                  <div className="space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        playClickSound()
-                        videoInputRef.current?.click()
-                      }}
-                      disabled={videoUploading}
-                      className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                    >
-                      {videoUploading ? (
-                        <>
-                          <Spinner className="h-3 w-3 mr-2" />
-                          Uploading...
-                        </>
-                      ) : (
-                        'Update'
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        playClickSound()
-                        handleVideoRemove()
-                      }}
-                      className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                MP4, MOV, AVI, or WebM (max 100MB)
-              </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  MP4, MOV, AVI, or WebM (max 100MB)
+                </p>
+              </div>
             </div>
           </div>
 

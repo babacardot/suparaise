@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
-import { Checkbox } from '@/components/ui/checkbox'
+
 import { Skeleton } from '@/components/ui/skeleton'
 import { PencilIcon, CheckIcon, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
@@ -18,7 +18,7 @@ const formatFieldName = (fieldName: string): string => {
     retryAttempts: 'Retry attempts',
     maxParallelSubmissions: 'Parallel submissions',
     enableDebugMode: 'Debug mode',
-    customInstructions: 'Custom instructions',
+    customInstructions: 'Instructions',
     preferredTone: 'Tone',
     timeoutMinutes: 'Timeout',
     enableStealth: 'Stealth',
@@ -174,26 +174,26 @@ export default function AgentSettings() {
     field: string,
     value: string | boolean | number | string[],
   ) => {
-    // Check permissions for advanced features
-    if (field === 'enableStealth' || field === 'enableDebugMode') {
+    // Check permissions for debug mode (MAX only)
+    if (field === 'enableDebugMode') {
       if (!isAdvancedFeatureAvailable()) {
         toast({
           variant: 'destructive',
           title: 'Feature locked',
           description:
-            'Stealth and debug modes are only available for MAX users. Please upgrade your plan.',
+            'Developer mode is only available for MAX users. Please upgrade your plan.',
         })
         return
       }
     }
 
-    if (field === 'preferredTone') {
-      if (!isToneFeatureAvailable()) {
+    if (field === 'preferredTone' || field === 'customInstructions') {
+      if (!isProPlusFeatureAvailable()) {
         toast({
           variant: 'destructive',
           title: 'Feature locked',
           description:
-            'Tone selection is only available for PRO and MAX users. Please upgrade your plan.',
+            'This feature is only available for PRO and MAX users. Please upgrade your plan.',
         })
         return
       }
@@ -254,35 +254,59 @@ export default function AgentSettings() {
 
   // Helper functions for permission-based features
   const getMaxParallelOptions = () => {
-    const baseOptions = [
-      { value: 1, label: '1 submission' },
-      { value: 2, label: '2 submissions' },
-      { value: 3, label: '3 submissions' },
+    const allOptions = [
+      { value: 1, label: '1 submission', tier: 'FREE' },
+      { value: 3, label: '3 submissions', tier: 'PRO' },
+      { value: 5, label: '5 submissions', tier: 'PRO' },
+      { value: 15, label: '15 submissions', tier: 'MAX' },
     ]
 
-    if (formData.permissionLevel === 'PRO') {
-      return [
-        ...baseOptions,
-        { value: 4, label: '4 submissions' },
-        { value: 5, label: '5 submissions' },
-      ]
-    } else if (formData.permissionLevel === 'MAX') {
-      return [
-        ...baseOptions,
-        { value: 4, label: '4 submissions' },
-        { value: 5, label: '5 submissions' },
-        { value: 6, label: '6 submissions' },
-        { value: 7, label: '7 submissions' },
-        { value: 8, label: '8 submissions' },
-        { value: 9, label: '9 submissions' },
-        { value: 10, label: '10 submissions' },
-      ]
-    }
-
-    return [{ value: 1, label: '1 submission' }] // FREE tier
+    return allOptions
   }
 
-  const isToneFeatureAvailable = () =>
+  const getRetryOptions = () => {
+    const allOptions = [
+      { value: 1, label: '1 attempt', tier: 'FREE' },
+      { value: 3, label: '3 attempts', tier: 'FREE' },
+      { value: 5, label: '5 attempts', tier: 'PRO' },
+      { value: 10, label: '10 attempts', tier: 'MAX' },
+    ]
+
+    return allOptions
+  }
+
+  const getTimeoutOptions = () => {
+    const allOptions = [
+      { value: 5, label: '5 minutes', tier: 'FREE' },
+      { value: 10, label: '10 minutes', tier: 'FREE' },
+      { value: 15, label: '15 minutes', tier: 'PRO' },
+      { value: 30, label: '30 minutes', tier: 'MAX' },
+    ]
+
+    return allOptions
+  }
+
+  const getSubmissionDelayOptions = () => {
+    const allOptions = [
+      { value: 0, label: 'No delay', tier: 'MAX' },
+      { value: 15, label: '15 seconds', tier: 'PRO' },
+      { value: 30, label: '30 seconds', tier: 'FREE' },
+    ]
+
+    return allOptions
+  }
+
+  const isOptionAllowed = (tier: string) => {
+    if (tier === 'FREE') return true
+    if (tier === 'PRO')
+      return (
+        formData.permissionLevel === 'PRO' || formData.permissionLevel === 'MAX'
+      )
+    if (tier === 'MAX') return formData.permissionLevel === 'MAX'
+    return false
+  }
+
+  const isProPlusFeatureAvailable = () =>
     formData.permissionLevel === 'PRO' || formData.permissionLevel === 'MAX'
   const isAdvancedFeatureAvailable = () => formData.permissionLevel === 'MAX'
 
@@ -299,6 +323,134 @@ export default function AgentSettings() {
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
+          {/* Advanced Features */}
+          <div className="space-y-4">
+            <div
+              className={cn(
+                'group relative p-4 border rounded-sm transition-all duration-200',
+                'hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20',
+                formData.enableStealth &&
+                  'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10',
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Label
+                      htmlFor="enableStealth"
+                      className="font-medium text-sm"
+                    >
+                      Stealth mode
+                    </Label>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Use advanced patches to mimic human behavior patterns, avoid
+                    bot detection, and ensure natural interaction with investor
+                    portals
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    handleInputChange('enableStealth', !formData.enableStealth)
+                    await handleFieldSave('enableStealth')
+                  }}
+                  className={cn(
+                    'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                    formData.enableStealth
+                      ? 'bg-blue-600'
+                      : 'bg-gray-200 dark:bg-gray-700',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
+                      formData.enableStealth
+                        ? 'translate-x-5'
+                        : 'translate-x-1',
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div
+              className={cn(
+                'group relative p-4 border rounded-sm transition-all duration-200',
+                !isAdvancedFeatureAvailable()
+                  ? 'bg-muted/30 border-muted'
+                  : 'hover:border-orange-200 dark:hover:border-orange-800 hover:bg-orange-50/50 dark:hover:bg-orange-950/20',
+                formData.enableDebugMode &&
+                  isAdvancedFeatureAvailable() &&
+                  'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/10',
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Label
+                      htmlFor="enableDebugMode"
+                      className={cn(
+                        'font-medium text-sm',
+                        !isAdvancedFeatureAvailable() &&
+                          'text-muted-foreground',
+                      )}
+                    >
+                      Developer mode
+                    </Label>
+                    {!isAdvancedFeatureAvailable() && (
+                      <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded">
+                        MAX
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className={cn(
+                      'text-xs leading-relaxed',
+                      !isAdvancedFeatureAvailable()
+                        ? 'text-muted-foreground/60'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    Access detailed logs, screenshots, and insights to optimize
+                    your agent performance.
+                    {!isAdvancedFeatureAvailable() && (
+                      <span className="block mt-1 text-orange-600 dark:text-orange-400">
+                        Upgrade to MAX to access this feature
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    handleInputChange(
+                      'enableDebugMode',
+                      !formData.enableDebugMode,
+                    )
+                    await handleFieldSave('enableDebugMode')
+                  }}
+                  disabled={!isAdvancedFeatureAvailable()}
+                  className={cn(
+                    'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2',
+                    formData.enableDebugMode && isAdvancedFeatureAvailable()
+                      ? 'bg-orange-600'
+                      : 'bg-gray-200 dark:bg-gray-700',
+                    !isAdvancedFeatureAvailable() &&
+                      'opacity-50 cursor-not-allowed',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
+                      formData.enableDebugMode && isAdvancedFeatureAvailable()
+                        ? 'translate-x-5'
+                        : 'translate-x-1',
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Basic Agents Settings */}
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
@@ -313,20 +465,42 @@ export default function AgentSettings() {
                     value={formData.submissionDelay}
                     onChange={async (e) => {
                       const newValue = parseInt(e.target.value) || 30
+                      const selectedOption = getSubmissionDelayOptions().find(
+                        (opt) => opt.value === newValue,
+                      )
+
+                      if (
+                        selectedOption &&
+                        !isOptionAllowed(selectedOption.tier)
+                      ) {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Feature locked',
+                          description: `This option requires ${selectedOption.tier} plan. Please upgrade to access it.`,
+                        })
+                        return
+                      }
+
                       handleInputChange('submissionDelay', newValue)
                       await handleFieldSave('submissionDelay')
                     }}
                     disabled={isLoading}
                   >
-                    <option value={10}>10 seconds</option>
-                    <option value={15}>15 seconds</option>
-                    <option value={30}>30 seconds</option>
-                    <option value={45}>45 seconds</option>
-                    <option value={60}>1 minute</option>
-                    <option value={90}>1.5 minutes</option>
-                    <option value={120}>2 minutes</option>
-                    <option value={180}>3 minutes</option>
-                    <option value={300}>5 minutes</option>
+                    {getSubmissionDelayOptions().map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={!isOptionAllowed(option.tier)}
+                        style={{
+                          color: !isOptionAllowed(option.tier)
+                            ? '#9ca3af'
+                            : 'inherit',
+                        }}
+                      >
+                        {option.label}
+                        {!isOptionAllowed(option.tier) && ` [${option.tier}]`}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
@@ -341,21 +515,42 @@ export default function AgentSettings() {
                     value={formData.retryAttempts}
                     onChange={async (e) => {
                       const newValue = parseInt(e.target.value) || 3
+                      const selectedOption = getRetryOptions().find(
+                        (opt) => opt.value === newValue,
+                      )
+
+                      if (
+                        selectedOption &&
+                        !isOptionAllowed(selectedOption.tier)
+                      ) {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Feature locked',
+                          description: `This option requires ${selectedOption.tier} plan. Please upgrade to access it.`,
+                        })
+                        return
+                      }
+
                       handleInputChange('retryAttempts', newValue)
                       await handleFieldSave('retryAttempts')
                     }}
                     disabled={isLoading}
                   >
-                    <option value={1}>1 attempt</option>
-                    <option value={2}>2 attempts</option>
-                    <option value={3}>3 attempts</option>
-                    <option value={4}>4 attempts</option>
-                    <option value={5}>5 attempts</option>
-                    <option value={6}>6 attempts</option>
-                    <option value={7}>7 attempts</option>
-                    <option value={8}>8 attempts</option>
-                    <option value={9}>9 attempts</option>
-                    <option value={10}>10 attempts</option>
+                    {getRetryOptions().map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={!isOptionAllowed(option.tier)}
+                        style={{
+                          color: !isOptionAllowed(option.tier)
+                            ? '#9ca3af'
+                            : 'inherit',
+                        }}
+                      >
+                        {option.label}
+                        {!isOptionAllowed(option.tier) && ` [${option.tier}]`}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
@@ -366,21 +561,20 @@ export default function AgentSettings() {
               <div className="space-y-2">
                 <Label htmlFor="maxParallelSubmissions">
                   Parallel submissions
-                  <span
-                    className={cn(
-                      'ml-2 text-xs px-1.5 py-0.5 rounded',
-                      formData.permissionLevel === 'FREE' &&
-                        'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300',
-                      formData.permissionLevel === 'PRO' &&
-                        'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-                      formData.permissionLevel === 'MAX' &&
-                        'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-                    )}
-                  >
-                    {formData.permissionLevel === 'FREE' && 'Max 1'}
-                    {formData.permissionLevel === 'PRO' && 'Max 5'}
-                    {formData.permissionLevel === 'MAX' && 'Max 10'}
-                  </span>
+                  {formData.permissionLevel !== 'FREE' && (
+                    <span
+                      className={cn(
+                        'ml-2 text-xs px-1.5 py-0.5 rounded',
+                        formData.permissionLevel === 'PRO' &&
+                          'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+                        formData.permissionLevel === 'MAX' &&
+                          'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+                      )}
+                    >
+                      {formData.permissionLevel === 'PRO' && 'Max 5'}
+                      {formData.permissionLevel === 'MAX' && 'Max 15'}
+                    </span>
+                  )}
                 </Label>
                 <div className="relative">
                   <select
@@ -389,14 +583,40 @@ export default function AgentSettings() {
                     value={formData.maxParallelSubmissions}
                     onChange={async (e) => {
                       const newValue = parseInt(e.target.value) || 3
+                      const selectedOption = getMaxParallelOptions().find(
+                        (opt) => opt.value === newValue,
+                      )
+
+                      if (
+                        selectedOption &&
+                        !isOptionAllowed(selectedOption.tier)
+                      ) {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Feature locked',
+                          description: `This option requires ${selectedOption.tier} plan. Please upgrade to access it.`,
+                        })
+                        return
+                      }
+
                       handleInputChange('maxParallelSubmissions', newValue)
                       await handleFieldSave('maxParallelSubmissions')
                     }}
                     disabled={isLoading}
                   >
                     {getMaxParallelOptions().map((option) => (
-                      <option key={option.value} value={option.value}>
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={!isOptionAllowed(option.tier)}
+                        style={{
+                          color: !isOptionAllowed(option.tier)
+                            ? '#9ca3af'
+                            : 'inherit',
+                        }}
+                      >
                         {option.label}
+                        {!isOptionAllowed(option.tier) && ` [${option.tier}]`}
                       </option>
                     ))}
                   </select>
@@ -413,123 +633,44 @@ export default function AgentSettings() {
                     value={formData.timeoutMinutes}
                     onChange={async (e) => {
                       const newValue = parseInt(e.target.value) || 10
+                      const selectedOption = getTimeoutOptions().find(
+                        (opt) => opt.value === newValue,
+                      )
+
+                      if (
+                        selectedOption &&
+                        !isOptionAllowed(selectedOption.tier)
+                      ) {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Feature locked',
+                          description: `This option requires ${selectedOption.tier} plan. Please upgrade to access it.`,
+                        })
+                        return
+                      }
+
                       handleInputChange('timeoutMinutes', newValue)
                       await handleFieldSave('timeoutMinutes')
                     }}
                     disabled={isLoading}
                   >
-                    <option value={5}>5 minutes</option>
-                    <option value={10}>10 minutes</option>
-                    <option value={15}>15 minutes</option>
-                    <option value={20}>20 minutes</option>
-                    <option value={30}>30 minutes</option>
-                    <option value={45}>45 minutes</option>
-                    <option value={60}>1 hour</option>
+                    {getTimeoutOptions().map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={!isOptionAllowed(option.tier)}
+                        style={{
+                          color: !isOptionAllowed(option.tier)
+                            ? '#9ca3af'
+                            : 'inherit',
+                        }}
+                      >
+                        {option.label}
+                        {!isOptionAllowed(option.tier) && ` [${option.tier}]`}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Preferences */}
-          <div className="space-y-2">
-            <div className="space-y-4">
-              <div
-                className={cn(
-                  'flex items-center space-x-3 p-3 border rounded-sm transition-colors',
-                  !isAdvancedFeatureAvailable()
-                    ? 'bg-muted/30 border-muted cursor-not-allowed'
-                    : 'hover:bg-muted/50',
-                )}
-              >
-                <Checkbox
-                  id="enableStealth"
-                  checked={formData.enableStealth}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('enableStealth', checked)
-                  }
-                  disabled={!isAdvancedFeatureAvailable()}
-                />
-                <div className="grid gap-1.5 leading-none flex-1">
-                  <Label
-                    htmlFor="enableStealth"
-                    className={cn(
-                      'font-medium',
-                      !isAdvancedFeatureAvailable() && 'text-muted-foreground',
-                    )}
-                  >
-                    Stealth mode
-                    {!isAdvancedFeatureAvailable() && (
-                      <span className="ml-2 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded">
-                        MAX only
-                      </span>
-                    )}
-                  </Label>
-                  <p
-                    className={cn(
-                      'text-sm',
-                      !isAdvancedFeatureAvailable()
-                        ? 'text-muted-foreground/60'
-                        : 'text-muted-foreground',
-                    )}
-                  >
-                    Use built-in patches to avoid bot detection
-                    {!isAdvancedFeatureAvailable() && (
-                      <span className="block text-xs mt-1 text-orange-600 dark:text-orange-400">
-                        Upgrade to MAX to access stealth features
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={cn(
-                  'flex items-center space-x-3 p-3 border rounded-sm transition-colors',
-                  !isAdvancedFeatureAvailable()
-                    ? 'bg-muted/30 border-muted cursor-not-allowed'
-                    : 'hover:bg-muted/50',
-                )}
-              >
-                <Checkbox
-                  id="enableDebugMode"
-                  checked={formData.enableDebugMode}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('enableDebugMode', checked)
-                  }
-                  disabled={!isAdvancedFeatureAvailable()}
-                />
-                <div className="grid gap-1.5 leading-none flex-1">
-                  <Label
-                    htmlFor="enableDebugMode"
-                    className={cn(
-                      'font-medium',
-                      !isAdvancedFeatureAvailable() && 'text-muted-foreground',
-                    )}
-                  >
-                    Debug mode
-                    {!isAdvancedFeatureAvailable() && (
-                      <span className="ml-2 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded">
-                        MAX only
-                      </span>
-                    )}
-                  </Label>
-                  <p
-                    className={cn(
-                      'text-sm',
-                      !isAdvancedFeatureAvailable()
-                        ? 'text-muted-foreground/60'
-                        : 'text-muted-foreground',
-                    )}
-                  >
-                    Save detailed logs and screenshots for troubleshooting
-                    {!isAdvancedFeatureAvailable() && (
-                      <span className="block text-xs mt-1 text-orange-600 dark:text-orange-400">
-                        Upgrade to MAX to access debug features
-                      </span>
-                    )}
-                  </p>
                 </div>
               </div>
             </div>
@@ -540,7 +681,7 @@ export default function AgentSettings() {
             <div className="space-y-2">
               <Label htmlFor="preferredTone">
                 Tone
-                {!isToneFeatureAvailable() && (
+                {!isProPlusFeatureAvailable() && (
                   <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
                     PRO+
                   </span>
@@ -551,18 +692,12 @@ export default function AgentSettings() {
                   id="preferredTone"
                   className={cn(
                     'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
-                    !isToneFeatureAvailable() &&
+                    !isProPlusFeatureAvailable() &&
                       'bg-muted/50 text-muted-foreground cursor-not-allowed',
                   )}
                   value={formData.preferredTone}
                   onChange={async (e) => {
-                    if (!isToneFeatureAvailable()) {
-                      toast({
-                        variant: 'destructive',
-                        title: 'Feature locked',
-                        description:
-                          'Tone selection is only available for PRO and MAX users. Please upgrade your plan.',
-                      })
+                    if (!isProPlusFeatureAvailable()) {
                       return
                     }
                     const newValue = e.target
@@ -570,7 +705,7 @@ export default function AgentSettings() {
                     handleInputChange('preferredTone', newValue)
                     await handleFieldSave('preferredTone')
                   }}
-                  disabled={isLoading || !isToneFeatureAvailable()}
+                  disabled={isLoading || !isProPlusFeatureAvailable()}
                 >
                   <option value="professional">Professional</option>
                   <option value="enthusiastic">Enthusiastic</option>
@@ -579,15 +714,17 @@ export default function AgentSettings() {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
-              {!isToneFeatureAvailable() && (
-                <p className="text-xs text-blue-600 dark:text-blue-400">
-                  Upgrade to PRO or MAX to customize agent tone
-                </p>
-              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="customInstructions">Custom instructions</Label>
+              <Label htmlFor="customInstructions">
+                Instructions
+                {!isProPlusFeatureAvailable() && (
+                  <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
+                    PRO+
+                  </span>
+                )}
+              </Label>
               <div className="relative">
                 <Textarea
                   id="customInstructions"
@@ -597,20 +734,34 @@ export default function AgentSettings() {
                   }
                   className={cn(
                     'rounded-sm pr-8 min-h-[100px]',
-                    editingField !== 'customInstructions' && 'bg-muted',
+                    (editingField !== 'customInstructions' ||
+                      !isProPlusFeatureAvailable()) &&
+                      'bg-muted',
+                    !isProPlusFeatureAvailable() &&
+                      'cursor-not-allowed text-muted-foreground',
                   )}
-                  readOnly={editingField !== 'customInstructions'}
-                  placeholder="Any specific instructions for how the agent should fill out forms or communicate. For example: 'Always mention our flagship product when describing the solution' or 'Emphasize our B2B SaaS experience'..."
+                  readOnly={
+                    editingField !== 'customInstructions' ||
+                    !isProPlusFeatureAvailable()
+                  }
+                  placeholder={
+                    isProPlusFeatureAvailable()
+                      ? "Any specific instructions for how the agent should fill out forms or communicate. For example: 'Always mention our flagship product when describing the solution' or 'Emphasize our B2B SaaS experience'..."
+                      : 'Always mention our flagship product when describing the solution. Emphasize our B2B SaaS experience...'
+                  }
                   rows={4}
+                  disabled={!isProPlusFeatureAvailable()}
                 />
-                {editingField !== 'customInstructions' ? (
+                {editingField !== 'customInstructions' &&
+                isProPlusFeatureAvailable() ? (
                   <button
                     onClick={() => handleFieldEdit('customInstructions')}
                     className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
                   >
                     <PencilIcon className="h-3 w-3" />
                   </button>
-                ) : (
+                ) : isProPlusFeatureAvailable() &&
+                  editingField === 'customInstructions' ? (
                   <button
                     onClick={() => handleFieldSave('customInstructions')}
                     className="absolute right-2 top-2 text-green-500 hover:text-green-600"
@@ -618,7 +769,7 @@ export default function AgentSettings() {
                   >
                     <CheckIcon className="h-4 w-4" />
                   </button>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

@@ -62,7 +62,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
     },
     {
       title: 'Integrations',
-      href: `#`,
+      href: `/dashboard/${startupId}/settings/integrations`,
       icon: 'integration',
     },
   ]

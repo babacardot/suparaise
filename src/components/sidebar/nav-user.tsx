@@ -34,7 +34,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { user, signOut, currentStartupId } = useUser()
+  const { user, signOut } = useUser()
   const { theme, setTheme } = useTheme()
   const router = useRouter()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
@@ -43,7 +43,7 @@ export function NavUser({
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.3
-      audio.play().catch(() => {})
+      audio.play().catch(() => { })
     }
   }
 
@@ -64,17 +64,23 @@ export function NavUser({
     // Prioritize live user from context
     if (user && user.user_metadata) {
       const { avatar_url, avatar_removed } = user.user_metadata
+
+      // If avatar was explicitly removed, use default
       if (avatar_removed) {
         return `https://avatar.vercel.sh/${encodeURIComponent(
           email.toLowerCase(),
         )}.png?size=80`
       }
-      return (
-        avatar_url ||
-        `https://avatar.vercel.sh/${encodeURIComponent(
-          email.toLowerCase(),
-        )}.png?size=80`
-      )
+
+      // Use avatar_url from OAuth providers (includes LinkedIn, Twitter, Github, Google)
+      if (avatar_url) {
+        return avatar_url
+      }
+
+      // Default fallback
+      return `https://avatar.vercel.sh/${encodeURIComponent(
+        email.toLowerCase(),
+      )}.png?size=80`
     }
 
     // Fallback to prop user if context user isn't available
@@ -137,7 +143,7 @@ export function NavUser({
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-sm"
             side={isMobile ? 'bottom' : 'right'}
             align="end"
-            sideOffset={4}
+            sideOffset={18}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -162,23 +168,40 @@ export function NavUser({
               <DropdownMenuItem
                 onClick={() => {
                   playClickSound()
-                  if (currentStartupId) {
-                    router.push(`/dashboard/${currentStartupId}/settings`)
-                  }
+                  router.push('/')
                 }}
-                onMouseEnter={() => setHoveredItem('settings')}
+                onMouseEnter={() => setHoveredItem('homepage')}
                 onMouseLeave={() => setHoveredItem(null)}
                 className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
               >
                 <LottieIcon
-                  animationData={animations.settings}
+                  animationData={animations.luggage}
                   size={16}
                   loop={false}
                   autoplay={false}
                   initialFrame={0}
-                  isHovered={hoveredItem === 'settings'}
+                  isHovered={hoveredItem === 'homepage'}
                 />
-                Settings
+                Homepage
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  playClickSound()
+                  window.open('https://www.producthunt.com/posts/suparaise', '_blank')
+                }}
+                onMouseEnter={() => setHoveredItem('support')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
+              >
+                <LottieIcon
+                  animationData={animations.star}
+                  size={16}
+                  loop={false}
+                  autoplay={false}
+                  initialFrame={0}
+                  isHovered={hoveredItem === 'support'}
+                />
+                Support us
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {

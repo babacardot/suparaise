@@ -25,7 +25,7 @@ export async function runFormFillingAgent(startup: Startup, targetUrl: string) {
         Description: ${startup.description}
 
         Founders:
-        ${startup.founders.map((f) => `- ${f.firstName} ${f.lastName}, ${f.email}, ${f.linkedin}\n  Bio: ${f.bio || 'N/A'}\n  GitHub: ${f.github_url || 'N/A'}\n  Website: ${f.personal_website_url || 'N/A'}`).join('\n')}
+        ${startup.founders.map((f) => `- ${f.firstName} ${f.lastName}, ${f.email}, ${f.linkedin}\n  Bio: ${f.bio || 'N/A'}\n  Github: ${f.github_url || 'N/A'}\n  Website: ${f.personal_website_url || 'N/A'}`).join('\n')}
 
         Here are some common questions and their answers. Use them if the form asks for them:
         ${Object.entries(startup.commonResponses)

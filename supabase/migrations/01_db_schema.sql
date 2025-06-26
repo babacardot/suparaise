@@ -80,12 +80,10 @@ CREATE TYPE revenue_model_type AS ENUM (
 CREATE TYPE subscription_status AS ENUM ('active', 'inactive', 'past_due', 'canceled', 'unpaid');
 CREATE TYPE permission_level AS ENUM ('FREE', 'PRO', 'MAX');
 CREATE TYPE agent_tone AS ENUM ('professional', 'enthusiastic', 'concise', 'detailed');
-
--- Agent settings enums
-CREATE TYPE agent_submission_delay AS ENUM ('10', '15', '30', '45', '60', '90', '120', '180', '300');
-CREATE TYPE agent_retry_attempts AS ENUM ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10');
-CREATE TYPE agent_parallel_submissions AS ENUM ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10');
-CREATE TYPE agent_timeout_minutes AS ENUM ('5', '10', '15', '20', '30', '45', '60');
+CREATE TYPE agent_submission_delay AS ENUM ('0', '15', '30');
+CREATE TYPE agent_retry_attempts AS ENUM ('1', '3', '5', '10');
+CREATE TYPE agent_parallel_submissions AS ENUM ('1', '3', '5', '15');
+CREATE TYPE agent_timeout_minutes AS ENUM ('5', '10', '15',  '30');
 
 -- --------------------------------------------------
 -- Auto-update `updated_at` column
@@ -250,6 +248,7 @@ CREATE TABLE founders (
     linkedin TEXT,
     github_url TEXT,
     personal_website_url TEXT,
+    twitter_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

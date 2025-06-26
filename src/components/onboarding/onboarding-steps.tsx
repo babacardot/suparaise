@@ -503,6 +503,7 @@ export const TeamStep: React.FC<
         linkedin: '',
         githubUrl: '',
         personalWebsiteUrl: '',
+        twitterUrl: '',
       },
     ])
   }
@@ -702,6 +703,12 @@ export const TeamStep: React.FC<
                     {fieldErrors[index].linkedin}
                   </p>
                 )}
+                {/* Show hint if LinkedIn URL was pre-populated */}
+                {founder.linkedin && index === 0 && (
+                  <p className="text-xs text-green-600 mt-1">
+                    ✓ Pre-filled from your profile
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -728,29 +735,51 @@ export const TeamStep: React.FC<
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-website`}>
-                  Personal website
-                </Label>
+                <Label htmlFor={`founder-${index}-twitter`}>X (Twitter)</Label>
                 <Input
-                  id={`founder-${index}-website`}
-                  value={founder.personalWebsiteUrl}
+                  id={`founder-${index}-twitter`}
+                  value={founder.twitterUrl}
                   onChange={(e) =>
-                    updateFounder(index, 'personalWebsiteUrl', e.target.value)
+                    updateFounder(index, 'twitterUrl', e.target.value)
                   }
-                  placeholder="https://sarahchen.com"
+                  placeholder="https://x.com/sarahchen"
                   autoComplete="url"
                   className={
-                    fieldErrors[index]?.personalWebsiteUrl
+                    fieldErrors[index]?.twitterUrl
                       ? 'border-red-500 focus:border-red-500'
                       : ''
                   }
                 />
-                {fieldErrors[index]?.personalWebsiteUrl && (
+                {fieldErrors[index]?.twitterUrl && (
                   <p className="text-sm text-red-600 mt-1">
-                    {fieldErrors[index].personalWebsiteUrl}
+                    {fieldErrors[index].twitterUrl}
                   </p>
                 )}
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`founder-${index}-website`}>
+                Personal website
+              </Label>
+              <Input
+                id={`founder-${index}-website`}
+                value={founder.personalWebsiteUrl}
+                onChange={(e) =>
+                  updateFounder(index, 'personalWebsiteUrl', e.target.value)
+                }
+                placeholder="https://sarahchen.com"
+                autoComplete="url"
+                className={
+                  fieldErrors[index]?.personalWebsiteUrl
+                    ? 'border-red-500 focus:border-red-500'
+                    : ''
+                }
+              />
+              {fieldErrors[index]?.personalWebsiteUrl && (
+                <p className="text-sm text-red-600 mt-1">
+                  {fieldErrors[index].personalWebsiteUrl}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor={`founder-${index}-bio`}>Bio</Label>
@@ -1764,6 +1793,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                     {founder.phone && <p>Phone: {founder.phone}</p>}
                     {founder.linkedin && <p>LinkedIn: {founder.linkedin}</p>}
                     {founder.githubUrl && <p>Github: {founder.githubUrl}</p>}
+                    {founder.twitterUrl && (
+                      <p>X (Twitter): {founder.twitterUrl}</p>
+                    )}
                     {founder.personalWebsiteUrl && (
                       <p>Website: {founder.personalWebsiteUrl}</p>
                     )}

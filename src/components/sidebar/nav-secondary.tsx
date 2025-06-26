@@ -44,7 +44,11 @@ export function NavSecondary({
                     }}
                     onMouseEnter={() => setHoveredItem(item.title)}
                     onMouseLeave={() => setHoveredItem(null)}
-                    className={item.isSpecial ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800' : ''}
+                    className={
+                      item.isSpecial
+                        ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 border border-green-200 dark:border-green-800'
+                        : ''
+                    }
                   >
                     <LottieIcon
                       animationData={item.animation}
@@ -53,7 +57,9 @@ export function NavSecondary({
                       autoplay={false}
                       initialFrame={0}
                       isHovered={isHovered}
-                      customColor={item.isSpecial ? [0.97, 0.6, 0.1] : undefined} // Amber color in RGB decimals
+                      customColor={
+                        item.isSpecial ? [0.133, 0.773, 0.369] : undefined
+                      } // Green-500 color in RGB decimals
                     />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -65,7 +71,11 @@ export function NavSecondary({
                     onClick={onItemClick}
                     onMouseEnter={() => setHoveredItem(item.title)}
                     onMouseLeave={() => setHoveredItem(null)}
-                    className={item.isSpecial ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800' : ''}
+                    className={
+                      item.isSpecial
+                        ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 border border-green-200 dark:border-green-800'
+                        : ''
+                    }
                   >
                     <Link href={item.url}>
                       <LottieIcon
@@ -75,7 +85,9 @@ export function NavSecondary({
                         autoplay={false}
                         initialFrame={0}
                         isHovered={isHovered}
-                        customColor={item.isSpecial ? [0.97, 0.6, 0.1] : undefined} // Amber color in RGB decimals
+                        customColor={
+                          item.isSpecial ? [0.133, 0.773, 0.369] : undefined
+                        } // Green-500 color in RGB decimals
                       />
                       <span>{item.title}</span>
                     </Link>
