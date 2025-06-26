@@ -43,7 +43,7 @@ export function NavUser({
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.3
-      audio.play().catch(() => { })
+      audio.play().catch(() => {})
     }
   }
 
@@ -187,7 +187,10 @@ export function NavUser({
               <DropdownMenuItem
                 onClick={() => {
                   playClickSound()
-                  window.open('https://www.producthunt.com/posts/suparaise', '_blank')
+                  window.open(
+                    'https://www.producthunt.com/posts/suparaise',
+                    '_blank',
+                  )
                 }}
                 onMouseEnter={() => setHoveredItem('support')}
                 onMouseLeave={() => setHoveredItem(null)}
