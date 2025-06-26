@@ -53,7 +53,7 @@ BEGIN
         p_data->>'logo_url',
         p_data->>'pitch_deck_url',
         p_data->>'intro_video_url',
-        TRUE -- Mark this startup as onboarded since it's completing the full process
+        COALESCE((p_data->>'onboarded')::BOOLEAN, TRUE) -- Allow setting onboarded status, default to TRUE
     )
     RETURNING id INTO new_startup_id;
 
@@ -81,6 +81,68 @@ BEGIN
     END IF;
 
     -- Return the new startup ID as a JSON object
+    SELECT jsonb_build_object('id', new_startup_id) INTO result;
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- NEW: Creates a minimal startup when user skips onboarding
+CREATE OR REPLACE FUNCTION create_minimal_startup_for_skip(p_user_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    new_startup_id UUID;
+    user_name TEXT;
+    user_email TEXT;
+    result JSONB;
+BEGIN
+    -- Get user info for defaults
+    SELECT 
+        COALESCE(
+            (raw_user_meta_data::jsonb)->>'full_name',
+            (raw_user_meta_data::jsonb)->>'name',
+            split_part(email, '@', 1)
+        ),
+        email
+    INTO user_name, user_email
+    FROM auth.users 
+    WHERE id = p_user_id;
+
+    -- Insert minimal startup record
+    INSERT INTO startups (
+        user_id, 
+        name, 
+        description_short,
+        employee_count,
+        founded_year,
+        onboarded  -- This remains FALSE for skipped onboarding
+    )
+    VALUES (
+        p_user_id,
+        COALESCE(user_name, 'My Startup') || '''s Company',
+        'Complete your profile to get started with fundraising automation',
+        1,
+        EXTRACT(YEAR FROM NOW())::INTEGER,
+        FALSE -- Not onboarded yet
+    )
+    RETURNING id INTO new_startup_id;
+
+    -- Create a minimal founder record
+    INSERT INTO founders (
+        startup_id, 
+        first_name, 
+        last_name, 
+        email,
+        role
+    )
+    VALUES (
+        new_startup_id,
+        COALESCE(split_part(user_name, ' ', 1), 'Founder'),
+        COALESCE(split_part(user_name, ' ', 2), ''),
+        user_email,
+        'Founder'
+    );
+
+    -- Return the new startup ID
     SELECT jsonb_build_object('id', new_startup_id) INTO result;
     RETURN result;
 END;
@@ -132,13 +194,14 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
--- Check if user needs to create their first startup or if any startup needs onboarding
+-- UPDATED: Check if user needs to create their first startup or if any startup needs onboarding
 CREATE OR REPLACE FUNCTION check_user_onboarding_status(p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
     startup_exists BOOLEAN;
     profile_name TEXT;
     has_incomplete_startups BOOLEAN;
+    can_skip_initial BOOLEAN;
 BEGIN
     -- Check if user has any active startups
     SELECT EXISTS(
@@ -150,6 +213,9 @@ BEGIN
         SELECT 1 FROM startups WHERE user_id = p_user_id AND onboarded = FALSE AND is_active = TRUE
     ) INTO has_incomplete_startups;
 
+    -- Allow skipping only if user has no startups at all (first time)
+    can_skip_initial := NOT startup_exists;
+
     -- Get profile info
     SELECT full_name INTO profile_name
     FROM profiles
@@ -157,6 +223,7 @@ BEGIN
 
     RETURN jsonb_build_object(
         'needsOnboarding', NOT startup_exists OR has_incomplete_startups,
+        'canSkipInitial', can_skip_initial,
         'profileName', COALESCE(profile_name, ''),
         'hasStartup', startup_exists,
         'hasIncompleteStartups', has_incomplete_startups
@@ -214,4 +281,7 @@ BEGIN
 
     RETURN result;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public; 
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Grant execute permissions for the new function
+GRANT EXECUTE ON FUNCTION create_minimal_startup_for_skip(UUID) TO authenticated; 

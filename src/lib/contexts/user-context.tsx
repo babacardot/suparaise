@@ -117,7 +117,7 @@ export function UserProvider({ children }: UserProviderProps) {
     setStartupsLoading(true)
     try {
       const { data: startupsData, error } = await supabase.rpc(
-        'get_user_startups_with_status',
+        'get_user_startups',
         { p_user_id: user.id },
       )
 

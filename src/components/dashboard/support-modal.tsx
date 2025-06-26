@@ -4,14 +4,14 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Button as ExpandButton } from '@/components/design/button-expand'
 import { Textarea } from '@/components/ui/textarea'
-import { ImagePlus, FileIcon, X, ArrowRight } from 'lucide-react'
+import { ImagePlus, FileIcon, X, ArrowRight, Eraser } from 'lucide-react'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const categories = [
   { value: 'account', label: 'Account issues' },
-  { value: 'billing', label: 'Billing and payments' },
+  { value: 'billing', label: 'Billing' },
   { value: 'technical', label: 'Technical support' },
   { value: 'other', label: 'Other' },
 ]
@@ -34,21 +34,19 @@ const CustomSelect = ({ value, onChange, options }: CustomSelectProps) => {
   return (
     <div ref={selectRef} className="relative">
       <div
-        className={`rounded-sm bg-background dark:bg-[#121317] text-foreground p-3 cursor-pointer border border-border hover:border-foreground/20 transition-colors duration-200 flex items-center justify-between ${
-          isOpen ? 'border-foreground/20' : ''
-        }`}
+        className={`rounded-sm bg-background dark:bg-[#121317] text-foreground p-3 cursor-pointer border border-border hover:border-foreground/20 transition-colors duration-200 flex items-center justify-between ${isOpen ? 'border-foreground/20' : ''
+          }`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="text-sm font-medium">
           {value
             ? options.find((opt: SelectOption) => opt.value === value)?.label ||
-              ''
+            ''
             : 'Select category'}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+            }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -214,6 +212,15 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
     setIsUploading(false)
   }
 
+  const handleClear = () => {
+    playClickSound()
+    setCategory('')
+    setMessage('')
+    setImage(null)
+    setUploadProgress(0)
+    setIsUploading(false)
+  }
+
   const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
@@ -243,12 +250,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
     }
   }
 
-  // Reset form when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      resetForm()
-    }
-  }, [isOpen])
+
 
   // Add click outside handler like feedback modal
   const formRef = useRef<HTMLDivElement>(null)
@@ -258,7 +260,6 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
         if (!isSubmitted) {
           playClickSound()
-          resetForm()
           onClose()
         }
       }
@@ -325,7 +326,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-sm absolute bottom-2 right-2"
+                    className="rounded-sm absolute bottom-2 right-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     onClick={() => {
                       playClickSound()
                       fileInputRef.current?.click()
@@ -347,11 +348,10 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                 <div className="border rounded-sm p-2 relative bg-background max-w-full overflow-hidden">
                   <div className="flex items-center space-x-2">
                     <div
-                      className={`rounded-sm p-1.5 flex-shrink-0 ${
-                        image.type.includes('png')
-                          ? 'bg-green-100 text-green-500'
-                          : 'bg-blue-100 text-blue-500'
-                      }`}
+                      className={`rounded-sm p-1.5 flex-shrink-0 ${image.type.includes('png')
+                        ? 'bg-green-100 text-green-500'
+                        : 'bg-blue-100 text-blue-500'
+                        }`}
                     >
                       <FileIcon className="h-4 w-4" />
                     </div>
@@ -388,22 +388,34 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <ExpandButton
-                onClick={handleSubmit}
-                disabled={!category || !message || isSubmitting}
-                className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 disabled:opacity-50 disabled:hover:bg-green-50 disabled:dark:hover:bg-green-900/30"
-                Icon={ArrowRight}
-                iconPlacement="right"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-sm h-4 w-4 border-b-2 border-current mr-2"></div>
-                    Submitting...
-                  </>
-                ) : (
-                  'Submit'
-                )}
-              </ExpandButton>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={handleClear}
+                  className="px-2 rounded-sm w-8 transition-all duration-250 ease-out hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30] active:scale-95"
+                  disabled={isSubmitting}
+                >
+                  <Eraser className="h-4 w-4" />
+                </Button>
+
+                <ExpandButton
+                  onClick={handleSubmit}
+                  disabled={!category || !message || isSubmitting}
+                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 disabled:opacity-50 disabled:hover:bg-green-50 disabled:dark:hover:bg-green-900/30"
+                  Icon={ArrowRight}
+                  iconPlacement="right"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-sm h-4 w-4 border-b-2 border-current mr-2"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit'
+                  )}
+                </ExpandButton>
+              </div>
             </div>
           </div>
         </motion.div>

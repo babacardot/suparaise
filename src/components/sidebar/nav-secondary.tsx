@@ -19,6 +19,7 @@ export function NavSecondary({
     url: string
     animation: object
     onClick?: () => void
+    isSpecial?: boolean
   }[]
   onItemClick?: () => void
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
@@ -43,6 +44,7 @@ export function NavSecondary({
                     }}
                     onMouseEnter={() => setHoveredItem(item.title)}
                     onMouseLeave={() => setHoveredItem(null)}
+                    className={item.isSpecial ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800' : ''}
                   >
                     <LottieIcon
                       animationData={item.animation}
@@ -51,6 +53,7 @@ export function NavSecondary({
                       autoplay={false}
                       initialFrame={0}
                       isHovered={isHovered}
+                      customColor={item.isSpecial ? [0.97, 0.6, 0.1] : undefined} // Amber color in RGB decimals
                     />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -62,6 +65,7 @@ export function NavSecondary({
                     onClick={onItemClick}
                     onMouseEnter={() => setHoveredItem(item.title)}
                     onMouseLeave={() => setHoveredItem(null)}
+                    className={item.isSpecial ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800' : ''}
                   >
                     <Link href={item.url}>
                       <LottieIcon
@@ -71,6 +75,7 @@ export function NavSecondary({
                         autoplay={false}
                         initialFrame={0}
                         isHovered={isHovered}
+                        customColor={item.isSpecial ? [0.97, 0.6, 0.1] : undefined} // Amber color in RGB decimals
                       />
                       <span>{item.title}</span>
                     </Link>

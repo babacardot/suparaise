@@ -274,26 +274,3 @@ BEGIN
     RETURN result;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
--- Function to get user startups with onboarding status
-CREATE OR REPLACE FUNCTION get_user_startups_with_status(p_user_id UUID)
-RETURNS JSONB AS $$
-DECLARE
-    result JSONB;
-BEGIN
-    SELECT jsonb_agg(
-        jsonb_build_object(
-            'id', s.id,
-            'name', s.name,
-            'logo_url', s.logo_url,
-            'onboarded', s.onboarded,
-            'created_at', s.created_at
-        ) ORDER BY s.created_at DESC
-    )
-    INTO result
-    FROM startups s
-    WHERE s.user_id = p_user_id;
-
-    RETURN COALESCE(result, '[]'::jsonb);
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public; 

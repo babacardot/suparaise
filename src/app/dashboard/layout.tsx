@@ -42,6 +42,8 @@ export default function DashboardLayout({
   // Add state for new startup creation dialog
   const [isCreatingNewStartup, setIsCreatingNewStartup] = useState(false)
 
+
+
   // Determine breadcrumbs based on current pathname
   const getBreadcrumbs = () => {
     if (pathname?.includes('/funds')) {
@@ -137,6 +139,8 @@ export default function DashboardLayout({
     setIsCreatingNewStartup(true)
   }
 
+
+
   if (loading || signingOut) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -161,12 +165,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-                name: user.user_metadata?.full_name || user.email || '',
-                email: user.email || '',
-                avatar: user.user_metadata?.avatar_url,
-                startupName: currentStartup?.name || undefined,
-                startupLogo: currentStartup?.logo_url || undefined,
-              }
+              name: user.user_metadata?.full_name || user.email || '',
+              email: user.email || '',
+              avatar: user.user_metadata?.avatar_url,
+              startupName: currentStartup?.name || undefined,
+              startupLogo: currentStartup?.logo_url || undefined,
+            }
             : null
         }
         startups={startups}
@@ -184,7 +188,9 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          {children}
+        </div>
       </SidebarInset>
 
       {/* First-time onboarding dialog */}

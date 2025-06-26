@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import SupportModal from '@/components/dashboard/support-modal'
 import FeedbackModal from '@/components/dashboard/feedback-modal'
 import { useUser } from '@/lib/contexts/user-context'
+import { useValidation } from '@/hooks/use-validation'
+import { VALIDATION_PRESETS } from '@/components/ui/validation-gate'
 import {
   Sidebar,
   SidebarContent,
@@ -68,6 +70,12 @@ export function AppSidebar({
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false)
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false)
 
+  // Check if user profile is complete
+  const { isValid: isProfileComplete } = useValidation({
+    requirements: VALIDATION_PRESETS.BASIC_APPLICATION,
+    autoCheck: true,
+  })
+
   // Get permission level, defaulting to FREE if not available
   const permissionLevel = subscription?.permission_level || 'FREE'
 
@@ -88,10 +96,10 @@ export function AppSidebar({
   // Create display startup object for the switcher with formatted name
   const displayStartupForSwitcher = currentStartup
     ? {
-        id: currentStartup.id,
-        name: displayText, // Use formatted display text
-        logo_url: currentStartup.logo_url,
-      }
+      id: currentStartup.id,
+      name: displayText, // Use formatted display text
+      logo_url: currentStartup.logo_url,
+    }
     : null
 
   // Debug logging
@@ -126,6 +134,14 @@ export function AppSidebar({
     setIsFeedbackModalOpen(true)
   }
 
+  const handleCompleteProfileClick = () => {
+    playClickSound()
+    // Navigate to settings page
+    if (currentStartupId) {
+      window.location.href = `/dashboard/${currentStartupId}/settings`
+    }
+  }
+
   const data = {
     user: userData,
     navMain: [
@@ -158,6 +174,14 @@ export function AppSidebar({
       },
     ],
     navSecondary: [
+      // Show Complete your onboarding if profile is incomplete
+      ...(!isProfileComplete && currentStartupId ? [{
+        title: 'Complete your onboarding',
+        url: '#',
+        animation: animations.checkmark,
+        onClick: handleCompleteProfileClick,
+        isSpecial: true,
+      }] : []),
       {
         title: 'Support',
         url: '#',
@@ -185,8 +209,8 @@ export function AppSidebar({
                 currentStartupId={currentStartupId}
                 currentStartupDisplay={displayStartupForSwitcher}
                 firstName={firstName}
-                onStartupSelect={onStartupSelect || (() => {})}
-                onCreateNew={onCreateNewStartup || (() => {})}
+                onStartupSelect={onStartupSelect || (() => { })}
+                onCreateNew={onCreateNewStartup || (() => { })}
                 isCollapsed={state === 'collapsed'}
               />
             </SidebarMenuItem>
@@ -231,11 +255,10 @@ export function AppSidebar({
         onMouseLeave={() => setIsToggleHovered(false)}
         variant="ghost"
         size="sm"
-        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-[2px] bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
-          state === 'collapsed'
-            ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
-            : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
-        }`}
+        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-[2px] bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
+          ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
+          : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
+          }`}
       >
         <LottieIcon
           animationData={animations.nineGrid}

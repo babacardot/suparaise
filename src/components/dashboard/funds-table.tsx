@@ -29,6 +29,7 @@ import {
   BarChart,
   Users,
 } from 'lucide-react'
+import { ValidationGate, VALIDATION_PRESETS } from '@/components/ui/validation-gate'
 
 type Target = {
   id: string
@@ -361,51 +362,57 @@ export default function FundsTable({ targets }: FundsTableProps) {
                       <TableCell className="text-right p-2">
                         <div className="flex justify-end">
                           {target.submission_type === 'form' && (
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleApplyForm(target.application_url)
-                              }
-                              onMouseEnter={() =>
-                                setHoveredButton(`apply-${target.id}`)
-                              }
-                              onMouseLeave={() => setHoveredButton(null)}
-                              className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-3 text-sm h-8"
+                            <ValidationGate
+                              requirements={VALIDATION_PRESETS.BASIC_APPLICATION}
+                              actionName="apply to this fund"
+                              onValidationPass={() => handleApplyForm(target.application_url)}
                             >
-                              <LottieIcon
-                                animationData={animations.takeoff}
-                                size={14}
-                                className="mr-1"
-                                isHovered={
-                                  hoveredButton === `apply-${target.id}`
-                                }
-                              />
-                              Apply
-                            </Button>
-                          )}
-                          {target.submission_type === 'email' &&
-                            target.application_email && (
                               <Button
                                 size="sm"
-                                onClick={() =>
-                                  handleSendEmail(target.application_email)
-                                }
                                 onMouseEnter={() =>
-                                  setHoveredButton(`email-${target.id}`)
+                                  setHoveredButton(`apply-${target.id}`)
                                 }
                                 onMouseLeave={() => setHoveredButton(null)}
-                                className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 rounded-sm px-3 text-sm h-8"
+                                className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-3 text-sm h-8"
                               >
                                 <LottieIcon
-                                  animationData={animations.mailopen}
+                                  animationData={animations.takeoff}
                                   size={14}
                                   className="mr-1"
                                   isHovered={
-                                    hoveredButton === `email-${target.id}`
+                                    hoveredButton === `apply-${target.id}`
                                   }
                                 />
-                                Send Email
+                                Apply
                               </Button>
+                            </ValidationGate>
+                          )}
+                          {target.submission_type === 'email' &&
+                            target.application_email && (
+                              <ValidationGate
+                                requirements={VALIDATION_PRESETS.BASIC_APPLICATION}
+                                actionName="send email to this fund"
+                                onValidationPass={() => handleSendEmail(target.application_email)}
+                              >
+                                <Button
+                                  size="sm"
+                                  onMouseEnter={() =>
+                                    setHoveredButton(`email-${target.id}`)
+                                  }
+                                  onMouseLeave={() => setHoveredButton(null)}
+                                  className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 rounded-sm px-3 text-sm h-8"
+                                >
+                                  <LottieIcon
+                                    animationData={animations.mailopen}
+                                    size={14}
+                                    className="mr-1"
+                                    isHovered={
+                                      hoveredButton === `email-${target.id}`
+                                    }
+                                  />
+                                  Send Email
+                                </Button>
+                              </ValidationGate>
                             )}
                           {target.submission_type === 'other' && (
                             <Button
