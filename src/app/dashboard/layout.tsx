@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useUser } from '@/lib/contexts/user-context'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
@@ -144,6 +144,13 @@ export default function DashboardLayout({
     setIsCreatingNewStartup(true)
   }
 
+  // Handle redirect when user is null (moved to useEffect to avoid render-time side effects)
+  useEffect(() => {
+    if (!user && !loading && !signingOut) {
+      router.push('/')
+    }
+  }, [user, loading, signingOut, router])
+
   // Only show loading spinner if we truly don't have a user and are loading for the first time
   if (loading && !user) {
     return (
@@ -161,9 +168,8 @@ export default function DashboardLayout({
     )
   }
 
-  // If user is null and not loading, redirect immediately using router
+  // If user is null and not loading, show loading while redirect happens
   if (!user && !loading && !signingOut) {
-    router.push('/')
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner className="h-5 w-5" />
@@ -177,12 +183,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-                name: user.user_metadata?.full_name || user.email || '',
-                email: user.email || '',
-                avatar: user.user_metadata?.avatar_url,
-                startupName: currentStartup?.name || undefined,
-                startupLogo: currentStartup?.logo_url || undefined,
-              }
+              name: user.user_metadata?.full_name || user.email || '',
+              email: user.email || '',
+              avatar: user.user_metadata?.avatar_url,
+              startupName: currentStartup?.name || undefined,
+              startupLogo: currentStartup?.logo_url || undefined,
+            }
             : null
         }
         startups={startups}

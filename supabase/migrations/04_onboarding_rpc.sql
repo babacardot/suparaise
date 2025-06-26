@@ -126,7 +126,7 @@ BEGIN
         description_short,
         employee_count,
         founded_year,
-        onboarded  -- This remains FALSE for skipped onboarding
+        onboarded  -- Set to TRUE when skipping - validation-gate will handle missing fields
     )
     VALUES (
         p_user_id,
@@ -134,7 +134,7 @@ BEGIN
         'Complete your profile to get started with fundraising automation',
         1,
         EXTRACT(YEAR FROM NOW())::INTEGER,
-        FALSE -- Not onboarded yet
+        TRUE -- Mark as onboarded since user explicitly skipped
     )
     RETURNING id INTO new_startup_id;
 
