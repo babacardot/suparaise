@@ -58,8 +58,14 @@ export function StartupSwitcher({
     ? startups.find((s) => s.id === currentStartupId)
     : null
 
-  // Use currentStartup for consistency, fallback to currentStartupDisplay
-  const displayStartup = currentStartup || currentStartupDisplay
+  // Use currentStartupDisplay if it has a formatted name, otherwise format currentStartup
+  const displayStartup = currentStartupDisplay || (currentStartup ? {
+    ...currentStartup,
+    name: `${firstName}+${currentStartup.name}`
+  } : null)
+
+  // Keep the original company name for avatar generation to maintain consistent colors
+  const avatarName = currentStartup?.name || displayStartup?.name
 
   // Format startup names for display in dropdown
   const formatStartupDisplayName = (startup: StartupDisplay) => {
@@ -109,7 +115,7 @@ export function StartupSwitcher({
               />
             ) : (
               <Image
-                src={generateAvatarUrl(displayStartup?.name, 32)}
+                src={generateAvatarUrl(avatarName, 32)}
                 alt={displayStartup?.name || 'Startup'}
                 className="w-full h-full object-contain"
                 width={32}

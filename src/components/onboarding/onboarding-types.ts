@@ -130,7 +130,7 @@ export const FOUNDER_ROLES = Constants.public.Enums.founder_role
 export const INDUSTRIES = Constants.public.Enums.industry_type
 export const LEGAL_STRUCTURES = Constants.public.Enums.legal_structure
 export const FUNDING_ROUNDS = Constants.public.Enums.investment_stage.filter(
-  (r) => r !== 'All stages',
+  (r) => r !== 'All',
 )
 export const INVESTMENT_INSTRUMENTS =
   Constants.public.Enums.investment_instrument

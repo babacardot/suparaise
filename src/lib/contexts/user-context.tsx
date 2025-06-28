@@ -100,7 +100,7 @@ export function UserProvider({ children }: UserProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Save scroll position for current page
+  // Save scroll position for current page (optimized with ref to prevent deps)
   const saveScrollPosition = useCallback(() => {
     if (typeof window !== 'undefined') {
       const scrollElements = document.querySelectorAll('[data-scroll-preserve]')
@@ -112,53 +112,61 @@ export function UserProvider({ children }: UserProviderProps) {
       })
 
       // Also save main window scroll
-      scrollPositions.current.set(`window-${pathname}`, window.scrollY)
+      scrollPositions.current.set(`window-${window.location.pathname}`, window.scrollY)
     }
-  }, [pathname])
+  }, [])
 
-  // Restore scroll position for current page
+  // Restore scroll position for current page (optimized with ref to prevent deps)
   const restoreScrollPosition = useCallback(() => {
     if (typeof window !== 'undefined') {
-      // Use requestAnimationFrame to ensure DOM is ready
+      // Use multiple requestAnimationFrame calls to ensure DOM is fully ready
       requestAnimationFrame(() => {
-        const scrollElements = document.querySelectorAll(
-          '[data-scroll-preserve]',
-        )
-        scrollElements.forEach((element) => {
-          const scrollKey = element.getAttribute('data-scroll-preserve')
-          if (scrollKey) {
-            const savedPosition = scrollPositions.current.get(scrollKey)
-            if (savedPosition !== undefined) {
-              element.scrollTop = savedPosition
+        requestAnimationFrame(() => {
+          const scrollElements = document.querySelectorAll('[data-scroll-preserve]')
+          scrollElements.forEach((element) => {
+            const scrollKey = element.getAttribute('data-scroll-preserve')
+            if (scrollKey) {
+              const savedPosition = scrollPositions.current.get(scrollKey)
+              if (savedPosition !== undefined) {
+                element.scrollTop = savedPosition
+              }
             }
+          })
+
+          // Restore main window scroll
+          const savedWindowPosition = scrollPositions.current.get(`window-${window.location.pathname}`)
+          if (savedWindowPosition !== undefined) {
+            window.scrollTo(0, savedWindowPosition)
           }
         })
-
-        // Restore main window scroll
-        const savedWindowPosition = scrollPositions.current.get(
-          `window-${pathname}`,
-        )
-        if (savedWindowPosition !== undefined) {
-          window.scrollTo(0, savedWindowPosition)
-        }
       })
     }
-  }, [pathname])
+  }, [])
 
-  // Save scroll position before auth state changes
+  // Save scroll position on navigation and page visibility changes
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      saveScrollPosition()
+    }
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         saveScrollPosition()
       } else if (document.visibilityState === 'visible') {
         // Small delay to ensure everything is rendered
-        setTimeout(restoreScrollPosition, 100)
+        setTimeout(restoreScrollPosition, 150)
       }
     }
 
+    // Save scroll position before page unload/navigation
+    window.addEventListener('beforeunload', handleBeforeUnload)
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
+    // Restore scroll position on mount
+    restoreScrollPosition()
+
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [saveScrollPosition, restoreScrollPosition])
@@ -474,9 +482,9 @@ export function UserProvider({ children }: UserProviderProps) {
     }
   }, [supabase, router])
 
-  // Fetch startup data when user is available and on dashboard
+  // Fetch startup data when user is available (only once, not on every navigation)
   useEffect(() => {
-    if (user && !loading && pathname.startsWith('/dashboard')) {
+    if (user && !loading && !startupsInitialized) {
       fetchStartups()
       checkOnboardingStatus()
       fetchSubscription()
@@ -484,7 +492,7 @@ export function UserProvider({ children }: UserProviderProps) {
   }, [
     user,
     loading,
-    pathname,
+    startupsInitialized,
     fetchStartups,
     checkOnboardingStatus,
     fetchSubscription,
@@ -524,11 +532,9 @@ export function UserProvider({ children }: UserProviderProps) {
     }),
     [
       user,
-      supabase,
       loading,
       signingOut,
-      signOut,
-      refreshUser,
+      supabase,
       startups,
       currentStartup,
       currentStartupId,
@@ -538,6 +544,8 @@ export function UserProvider({ children }: UserProviderProps) {
       subscription,
       subscriptionLoading,
       isSubscribed,
+      signOut,
+      refreshUser,
       fetchSubscription,
       fetchStartups,
       selectStartup,

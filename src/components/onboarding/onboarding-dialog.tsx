@@ -42,19 +42,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-        title: 'Welcome to suparaise.com',
-        subtitle:
-          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-        image: '/random/onboarding.svg',
-        statusText: 'Onboarding',
-      }
+      title: 'Welcome to suparaise.com',
+      subtitle:
+        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+      image: '/random/onboarding.svg',
+      statusText: 'Onboarding',
+    }
     : {
-        title: 'Ready to launch another venture?',
-        subtitle:
-          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-        image: '/random/test_your_app.svg',
-        statusText: 'New venture',
-      }
+      title: 'Ready to launch another venture?',
+      subtitle:
+        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+      image: '/random/test_your_app.svg',
+      statusText: 'New venture',
+    }
 
   return (
     <motion.div
@@ -109,6 +109,7 @@ export function OnboardingDialog({
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [validationAttempted, setValidationAttempted] = useState(false)
   const [showExitConfirmation, setShowExitConfirmation] = useState(false)
+  const [showSkipConfirmation, setShowSkipConfirmation] = useState(false)
 
   // File upload states
   const [logoUploadProgress, setLogoUploadProgress] = useState(0)
@@ -354,7 +355,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-                founder.email.trim().toLowerCase(),
+              founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -366,7 +367,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-              (user?.email || '').toLowerCase()
+            (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -914,6 +915,25 @@ export function OnboardingDialog({
     }
   }
 
+  // Handle skip button click - show confirmation modal
+  const handleSkipAttempt = () => {
+    playNavigationSound()
+    setShowSkipConfirmation(true)
+  }
+
+  // Confirm skip
+  const handleConfirmSkip = () => {
+    playNavigationSound()
+    setShowSkipConfirmation(false)
+    skipOnboarding()
+  }
+
+  // Cancel skip
+  const handleCancelSkip = () => {
+    playNavigationSound()
+    setShowSkipConfirmation(false)
+  }
+
   return (
     <>
       <style jsx>{`
@@ -1057,11 +1077,11 @@ export function OnboardingDialog({
                 {currentStep === 1 && isFirstStartup && (
                   <Button
                     variant="outline"
-                    onClick={skipOnboarding}
+                    onClick={handleSkipAttempt}
                     disabled={loading}
                     className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800"
                   >
-                    Skip
+                    Skip for now
                   </Button>
                 )}
                 {/* Previous button - only from step 2 onwards */}
@@ -1102,6 +1122,43 @@ export function OnboardingDialog({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Skip Confirmation Dialog */}
+      {showSkipConfirmation && (
+        <Dialog
+          open={showSkipConfirmation}
+          onOpenChange={(open) => !open && handleCancelSkip()}
+        >
+          <DialogContent
+            showCloseButton={false}
+            className="max-w-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:duration-500 data-[state=closed]:duration-300"
+          >
+            <DialogHeader>
+              <DialogTitle>Skip onboarding ?</DialogTitle>
+              <DialogDescription className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Take a quick look around the platform before setting up your profile.
+                </p>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={handleCancelSkip}>
+                Continue onboarding
+              </Button>
+              <ExpandButton
+                onClick={handleConfirmSkip}
+                disabled={loading}
+                className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800"
+                Icon={ArrowRight}
+                iconPlacement="right"
+                justify="end"
+              >
+                {loading ? <Spinner className="h-3 w-3" /> : 'Skip'}
+              </ExpandButton>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Exit Confirmation Dialog */}
       {showExitConfirmation && (

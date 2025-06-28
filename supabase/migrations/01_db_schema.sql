@@ -45,7 +45,7 @@ CREATE TYPE founder_role AS ENUM (
     'Legal Counsel',
     'Other'
 );
-CREATE TYPE investment_stage AS ENUM ('Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'All stages');
+CREATE TYPE investment_stage AS ENUM ('Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'All');
 CREATE TYPE industry_type AS ENUM (
     -- Tech
     'B2B SaaS', 'Fintech', 'Healthtech', 'AI/ML', 'Deep tech', 'Climate tech', 

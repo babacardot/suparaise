@@ -43,8 +43,8 @@ export default function DashboardLayout({
   // Add state for new startup creation dialog
   const [isCreatingNewStartup, setIsCreatingNewStartup] = useState(false)
 
-  // Determine breadcrumbs based on current pathname
-  const getBreadcrumbs = () => {
+  // Memoize breadcrumbs to prevent unnecessary re-renders
+  const breadcrumbs = React.useMemo(() => {
     if (pathname?.includes('/funds')) {
       return [
         { label: 'Dashboard', href: '/dashboard' },
@@ -96,9 +96,9 @@ export default function DashboardLayout({
         { label: 'Overview', isCurrentPage: true },
       ]
     }
-  }
+  }, [pathname, currentStartupId])
 
-  const playClickSound = () => {
+  const playClickSound = React.useCallback(() => {
     if (typeof window !== 'undefined') {
       // Optimize audio playback to not block navigation
       try {
@@ -112,37 +112,37 @@ export default function DashboardLayout({
         // Silently handle any audio creation errors
       }
     }
-  }
+  }, [])
 
-  const handleOnboardingComplete = async () => {
+  const handleOnboardingComplete = React.useCallback(async () => {
     setNeedsOnboarding(false)
     if (user) {
       await refreshStartups() // Re-fetch startups to get the new one
     }
-  }
+  }, [user, refreshStartups, setNeedsOnboarding])
 
-  const handleNewStartupComplete = async () => {
+  const handleNewStartupComplete = React.useCallback(async () => {
     setIsCreatingNewStartup(false)
     if (user) {
       await refreshStartups() // Re-fetch startups to get the new one
     }
-  }
+  }, [user, refreshStartups])
 
-  const handleNewStartupCancel = () => {
+  const handleNewStartupCancel = React.useCallback(() => {
     setIsCreatingNewStartup(false)
-  }
+  }, [])
 
-  const handleStartupSwitch = (startup: StartupDisplay) => {
+  const handleStartupSwitch = React.useCallback((startup: StartupDisplay) => {
     console.log('Switching to startup:', startup)
     playClickSound()
     selectStartup(startup.id)
-  }
+  }, [playClickSound, selectStartup])
 
-  const handleNewStartupCreation = () => {
+  const handleNewStartupCreation = React.useCallback(() => {
     console.log('Creating new startup...')
     playClickSound()
     setIsCreatingNewStartup(true)
-  }
+  }, [playClickSound])
 
   // Handle redirect when user is null (moved to useEffect to avoid render-time side effects)
   useEffect(() => {
@@ -152,7 +152,8 @@ export default function DashboardLayout({
   }, [user, loading, signingOut, router])
 
   // Only show loading spinner if we truly don't have a user and are loading for the first time
-  if (loading && !user) {
+  // Avoid showing spinner for brief loading states during navigation
+  if (loading && !user && !signingOut) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner className="h-5 w-5" />
@@ -168,10 +169,11 @@ export default function DashboardLayout({
     )
   }
 
-  // If user is null and not loading, show loading while redirect happens
+  // If no user and not in a loading state, let redirect happen
   if (!user && !loading && !signingOut) {
+    // Brief delay to allow for quick authentication checks without showing spinner
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center opacity-0">
         <Spinner className="h-5 w-5" />
       </div>
     )
@@ -202,7 +204,7 @@ export default function DashboardLayout({
             <SidebarTrigger className="-ml-1" onClick={playClickSound} />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <div className="-ml-2">
-              <TopBanner breadcrumbs={getBreadcrumbs()} />
+              <TopBanner breadcrumbs={breadcrumbs} />
             </div>
           </div>
         </header>

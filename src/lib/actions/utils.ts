@@ -7,181 +7,179 @@ export function cn(...inputs: ClassValue[]) {
 
 export function generateRandomCompanyName(): string {
   const adjectives = [
-    'Magnificent',
-    'Distinguished',
-    'Brilliant',
-    'Cosmic',
-    'Legendary',
-    'Mysterious',
-    'Spectacular',
-    'Majestic',
-    'Fantastic',
-    'Supreme',
-    'Stellar',
-    'Epic',
-    'Heroic',
-    'Phenomenal',
-    'Elite',
-    'Premium',
-    'Glorious',
-    'Illustrious',
-    'Notable',
-    'Jazzy',
-    'Fancy',
-    'Super',
-    'Ultra',
-    'Mega',
-    'Hyper',
-    'Turbo',
-    'Amazing',
-    'Fabulous',
-    'Splendid',
-    'Unstoppable',
-    'Unbeatable',
-    'Ultimate',
-    'Unmatched',
-    'Quantum',
+    'Blue',
+    'Red',
+    'Fast',
+    'Smart',
+    'Bold',
+    'Pure',
+    'Wild',
+    'Cool',
+    'Hot',
+    'Tiny',
+    'Big',
+    'New',
+    'Zen',
+    'Pro',
+    'Max',
+    'Top',
+    'Win',
+    'Key',
+    'Sky',
+    'Moon',
+    'Star',
+    'Sun',
+    'Fire',
+    'Ice',
+    'Arc',
+    'Gem',
+    'Gold',
+    'Iron',
+    'Neon',
+    'Tech',
     'Cyber',
-    'Digital',
-    'Techno',
     'Neo',
-    'Alpha',
-    'Omega',
-    'Prime',
+    'Apex',
+    'Peak',
+    'Edge',
+    'Core',
+    'Flow',
+    'Wave',
+    'Flux',
+    'Vibe',
+    'Zap',
+    'Buzz',
+    'Rush',
+    'Glow',
+    'Spark',
+    'Flash',
+    'Bolt',
+    'Dash',
     'Swift',
-    'Blazing',
-    'Lightning',
-    'Rocket',
-    'Ninja',
-    'Samurai',
-    'Phoenix',
-    'Dragon',
-    'Titan',
-    'Nexus',
-    'Vertex',
-    'Zenith',
+    'Quick',
   ]
 
   const nouns = [
-    'Ventures',
-    'Labs',
-    'Works',
-    'Systems',
-    'Solutions',
-    'Digital',
-    'Dynamics',
-    'Technologies',
-    'Innovations',
-    'Studios',
-    'Industries',
+    'Lab',
+    'Tech',
     'Corp',
-    'Enterprises',
-    'Holdings',
-    'Group',
-    'Partners',
-    'Capital',
-    'Forge',
-    'Factory',
-    'Workshop',
-    'Foundry',
-    'Arsenal',
-    'Vault',
-    'Engine',
-    'Machine',
-    'Robot',
-    'Nexus',
-    'Matrix',
-    'Grid',
-    'Cloud',
-    'Stream',
-    'Flow',
-    'Wave',
-    'Pulse',
-    'Force',
-    'Logic',
+    'Inc',
+    'Co',
+    'AI',
+    'App',
+    'Web',
+    'Net',
     'Code',
     'Data',
-    'Net',
-    'Web',
-    'Link',
+    'Cloud',
     'Hub',
+    'Link',
     'Node',
     'Core',
     'Base',
+    'Grid',
+    'Flow',
+    'Wave',
+    'Pulse',
+    'Logic',
     'Stack',
     'Suite',
-    'Unicorn',
-    'Rocket',
-    'Phoenix',
+    'Works',
+    'Labs',
+    'Forge',
+    'Vault',
+    'Engine',
+    'Force',
+    'Nexus',
+    'Matrix',
+    'Robot',
+    'Beast',
     'Dragon',
     'Titan',
-    'Beast',
+    'Phoenix',
+    'Rocket',
+    'Stream',
+    'Box',
+    'Spot',
+    'Dot',
+    'Zip',
+    'Fox',
+    'Wolf',
+    'Bear',
+    'Lion',
+    'Bird',
+    'Fish',
+    'Bee',
+    'Ant',
   ]
 
-  const prefixes = ['The', 'Meta', 'Super', 'Pro', 'Ultra', 'Mega']
+  const prefixes = ['My', 'Go', 'Up', 'In', 'On']
 
   const suffixes = [
-    'Pro',
-    'Elite',
-    'Supreme',
-    'Prime',
-    'Max',
-    'Plus',
     'X',
     'AI',
-    'Tech',
-    'Labs',
+    'Go',
+    'Up',
+    'IO',
+    'JS',
     'Co',
     'Inc',
+    'Ltd',
+    'Pro',
+    'Max',
+    'One',
+    'Two',
   ]
 
-  // Random style selection (similar to your username generator)
-  const usePrefix = Math.random() < 0.15 // 15% chance
-  const useSuffix = Math.random() < 0.2 // 20% chance
-  const useNumber = Math.random() < 0.3 // 30% chance
-
+  // Keep combinations under 11 characters
   const adjective = adjectives[Math.floor(Math.random() * adjectives.length)]
   const noun = nouns[Math.floor(Math.random() * nouns.length)]
-  const number = useNumber ? Math.floor(Math.random() * 99 + 1).toString() : ''
-
+  
   let result = ''
-
-  // Style variations (keeping your humor but for companies)
   const style = Math.random()
-
-  if (style < 0.4) {
-    // Basic style: AdjectiveNoun or AdjectiveNoun + Number
+  
+  // Calculate potential length before building
+  const baseLength = adjective.length + noun.length
+  
+  if (style < 0.5 && baseLength <= 10) {
+    // Simple: AdjectiveNoun (most common for short names)
+    result = adjective + noun
+  } else if (style < 0.7 && baseLength <= 8) {
+    // With number: AdjectiveNoun + single digit
+    const number = Math.floor(Math.random() * 9 + 1).toString()
     result = adjective + noun + number
-  } else if (style < 0.6 && usePrefix) {
-    // Prefix style: The/Meta/Super + AdjectiveNoun
+  } else if (style < 0.85) {
+    // Try with short prefix
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
-    result = prefix + adjective + noun
-  } else if (style < 0.8 && useSuffix) {
-    // Suffix style: AdjectiveNoun + Pro/Elite/Supreme
-    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
-    result = adjective + noun + suffix
+    if (prefix.length + noun.length <= 10) {
+      result = prefix + noun
+    } else {
+      result = adjective + noun // fallback
+    }
   } else {
-    // Complex style: Prefix + Adjective + Noun + Suffix + Number (but shorter)
-    const parts = [adjective, noun]
-    if (useSuffix && parts.join('').length < 12) {
-      const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
-      parts.push(suffix)
+    // Try with short suffix
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
+    if (adjective.length + suffix.length <= 10) {
+      result = adjective + suffix
+    } else if (noun.length + suffix.length <= 10) {
+      result = noun + suffix
+    } else {
+      result = adjective + noun // fallback
     }
-    if (useNumber && parts.join('').length < 15) {
-      parts.push(number)
-    }
-    result = parts.join('')
+  }
+  
+  // Final safety check - if still too long, use simple combination
+  if (result.length > 10) {
+    // Find the shortest possible combination
+    const shortAdjectives = adjectives.filter(adj => adj.length <= 4)
+    const shortNouns = nouns.filter(n => n.length <= 4)
+    
+    const shortAdj = shortAdjectives[Math.floor(Math.random() * shortAdjectives.length)] || 'New'
+    const shortNoun = shortNouns[Math.floor(Math.random() * shortNouns.length)] || 'Co'
+    
+    result = shortAdj + shortNoun
   }
 
-  // Ensure reasonable length (your style but company appropriate)
-  if (result.length > 20) {
-    // Fallback to simpler style
-    result =
-      adjective +
-      noun +
-      (Math.random() > 0.7 ? Math.floor(Math.random() * 9 + 1).toString() : '')
-  }
-
-  // Ensure first letter is capitalized for company names
+  // Ensure first letter is capitalized
   return result.charAt(0).toUpperCase() + result.slice(1)
 }

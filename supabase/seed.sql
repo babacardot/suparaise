@@ -32,7 +32,7 @@ VALUES
 ),
 (
     'Andreessen Horowitz (a16z)', 'https://a16z.com', 'https://a16z.com/submissions/', NULL, 'form',
-    ARRAY['All stages']::investment_stage[],
+    ARRAY['All']::investment_stage[],
     ARRAY['AI/ML', 'Web3', 'B2B SaaS', 'Consumer', 'Fintech', 'Healthtech']::industry_type[],
     ARRAY['Global']::region_type[],
     'comprehensive', '21+', ARRAY['pitch_deck', 'video']::required_document_type[], 'Requires a warm intro for best results, but cold submissions are accepted via the form.'
