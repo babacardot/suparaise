@@ -81,9 +81,7 @@ CREATE TYPE subscription_status AS ENUM ('active', 'inactive', 'past_due', 'canc
 CREATE TYPE permission_level AS ENUM ('FREE', 'PRO', 'MAX');
 CREATE TYPE agent_tone AS ENUM ('professional', 'enthusiastic', 'concise', 'detailed');
 CREATE TYPE agent_submission_delay AS ENUM ('0', '15', '30');
-CREATE TYPE agent_retry_attempts AS ENUM ('1', '3', '5', '10');
 CREATE TYPE agent_parallel_submissions AS ENUM ('1', '3', '5', '15');
-CREATE TYPE agent_timeout_minutes AS ENUM ('5', '10', '15',  '30');
 CREATE TYPE check_size_range AS ENUM ('1K-10K', '10K-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K-1M', '1M+');
 CREATE TYPE investment_approach AS ENUM ('hands-on', 'passive', 'advisory', 'network-focused');
 CREATE TYPE response_time AS ENUM ('1-3 days', '1 week', '2 weeks', '1 month', '2+ months');
@@ -417,9 +415,7 @@ CREATE TABLE agent_settings (
     startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
-    retry_attempts agent_retry_attempts DEFAULT '3' NOT NULL,
     max_parallel_submissions agent_parallel_submissions DEFAULT '3' NOT NULL,
-    timeout_minutes agent_timeout_minutes DEFAULT '10' NOT NULL,
     preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
     debug_mode BOOLEAN DEFAULT FALSE NOT NULL,
     stealth BOOLEAN DEFAULT TRUE NOT NULL,
@@ -751,9 +747,7 @@ CREATE TABLE agent_settings_archive (
     startup_id UUID NOT NULL,
     user_id UUID NOT NULL,
     submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
-    retry_attempts agent_retry_attempts DEFAULT '3' NOT NULL,
     max_parallel_submissions agent_parallel_submissions DEFAULT '3' NOT NULL,
-    timeout_minutes agent_timeout_minutes DEFAULT '10' NOT NULL,
     preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
     debug_mode BOOLEAN DEFAULT FALSE NOT NULL,
     stealth BOOLEAN DEFAULT TRUE NOT NULL,

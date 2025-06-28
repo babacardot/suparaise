@@ -15,12 +15,10 @@ import { useToast } from '@/lib/hooks/use-toast'
 const formatFieldName = (fieldName: string): string => {
   const fieldLabels: Record<string, string> = {
     submissionDelay: 'Submission delay',
-    retryAttempts: 'Retry attempts',
     maxParallelSubmissions: 'Parallel submissions',
     enableDebugMode: 'Debug mode',
     customInstructions: 'Instructions',
     preferredTone: 'Tone',
-    timeoutMinutes: 'Timeout',
     enableStealth: 'Stealth',
   }
   return fieldLabels[fieldName] || fieldName
@@ -111,7 +109,6 @@ export default function AgentSettings() {
 
   const [formData, setFormData] = useState({
     submissionDelay: 30, // seconds between submissions
-    retryAttempts: 3,
     maxParallelSubmissions: 3,
     enableDebugMode: false,
     customInstructions: '',
@@ -120,7 +117,6 @@ export default function AgentSettings() {
       | 'enthusiastic'
       | 'concise'
       | 'detailed',
-    timeoutMinutes: 10, // task timeout in minutes
     enableStealth: true, // avoid detection
     permissionLevel: 'FREE' as 'FREE' | 'PRO' | 'MAX', // user's subscription level
   })
@@ -259,28 +255,6 @@ export default function AgentSettings() {
       { value: 3, label: '3 submissions', tier: 'PRO' },
       { value: 5, label: '5 submissions', tier: 'PRO' },
       { value: 15, label: '15 submissions', tier: 'MAX' },
-    ]
-
-    return allOptions
-  }
-
-  const getRetryOptions = () => {
-    const allOptions = [
-      { value: 1, label: '1 attempt', tier: 'FREE' },
-      { value: 3, label: '3 attempts', tier: 'FREE' },
-      { value: 5, label: '5 attempts', tier: 'PRO' },
-      { value: 10, label: '10 attempts', tier: 'MAX' },
-    ]
-
-    return allOptions
-  }
-
-  const getTimeoutOptions = () => {
-    const allOptions = [
-      { value: 5, label: '5 minutes', tier: 'FREE' },
-      { value: 10, label: '10 minutes', tier: 'FREE' },
-      { value: 15, label: '15 minutes', tier: 'PRO' },
-      { value: 30, label: '30 minutes', tier: 'MAX' },
     ]
 
     return allOptions
@@ -507,58 +481,6 @@ export default function AgentSettings() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="retryAttempts">Retry attempts</Label>
-                <div className="relative">
-                  <select
-                    id="retryAttempts"
-                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={formData.retryAttempts}
-                    onChange={async (e) => {
-                      const newValue = parseInt(e.target.value) || 3
-                      const selectedOption = getRetryOptions().find(
-                        (opt) => opt.value === newValue,
-                      )
-
-                      if (
-                        selectedOption &&
-                        !isOptionAllowed(selectedOption.tier)
-                      ) {
-                        toast({
-                          variant: 'destructive',
-                          title: 'Feature locked',
-                          description: `This option requires ${selectedOption.tier} plan. Please upgrade to access it.`,
-                        })
-                        return
-                      }
-
-                      handleInputChange('retryAttempts', newValue)
-                      await handleFieldSave('retryAttempts')
-                    }}
-                    disabled={isLoading}
-                  >
-                    {getRetryOptions().map((option) => (
-                      <option
-                        key={option.value}
-                        value={option.value}
-                        disabled={!isOptionAllowed(option.tier)}
-                        style={{
-                          color: !isOptionAllowed(option.tier)
-                            ? '#9ca3af'
-                            : 'inherit',
-                        }}
-                      >
-                        {option.label}
-                        {!isOptionAllowed(option.tier) && ` [${option.tier}]`}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
                 <Label htmlFor="maxParallelSubmissions">
                   Parallel submissions
                 </Label>
@@ -591,56 +513,6 @@ export default function AgentSettings() {
                     disabled={isLoading}
                   >
                     {getMaxParallelOptions().map((option) => (
-                      <option
-                        key={option.value}
-                        value={option.value}
-                        disabled={!isOptionAllowed(option.tier)}
-                        style={{
-                          color: !isOptionAllowed(option.tier)
-                            ? '#9ca3af'
-                            : 'inherit',
-                        }}
-                      >
-                        {option.label}
-                        {!isOptionAllowed(option.tier) && ` [${option.tier}]`}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="timeoutMinutes">Task timeout</Label>
-                <div className="relative">
-                  <select
-                    id="timeoutMinutes"
-                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={formData.timeoutMinutes}
-                    onChange={async (e) => {
-                      const newValue = parseInt(e.target.value) || 10
-                      const selectedOption = getTimeoutOptions().find(
-                        (opt) => opt.value === newValue,
-                      )
-
-                      if (
-                        selectedOption &&
-                        !isOptionAllowed(selectedOption.tier)
-                      ) {
-                        toast({
-                          variant: 'destructive',
-                          title: 'Feature locked',
-                          description: `This option requires ${selectedOption.tier} plan. Please upgrade to access it.`,
-                        })
-                        return
-                      }
-
-                      handleInputChange('timeoutMinutes', newValue)
-                      await handleFieldSave('timeoutMinutes')
-                    }}
-                    disabled={isLoading}
-                  >
-                    {getTimeoutOptions().map((option) => (
                       <option
                         key={option.value}
                         value={option.value}

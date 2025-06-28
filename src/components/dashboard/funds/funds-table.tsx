@@ -2,6 +2,8 @@
 
 import React from 'react'
 import Image from 'next/image'
+import { useUser } from '@/lib/contexts/user-context'
+import { useToast } from '@/lib/hooks/use-toast'
 import {
   Table,
   TableBody,
@@ -48,6 +50,7 @@ interface FundsTableProps {
   targets: Target[]
   filters: FundsFiltersType
   onFiltersChange: (filters: FundsFiltersType) => void
+  startupId: string
 }
 
 interface ColumnVisibility {
@@ -66,8 +69,14 @@ const FundsTable = React.memo(function FundsTable({
   targets,
   filters,
   onFiltersChange,
+  startupId,
 }: FundsTableProps) {
+  const { user } = useUser()
+  const { toast } = useToast()
   const [hoveredButton, setHoveredButton] = React.useState<string | null>(null)
+  const [submittingTargets, setSubmittingTargets] = React.useState<Set<string>>(
+    new Set(),
+  )
 
   // Initialize sort config from localStorage if available
   const [sortConfig, setSortConfig] = React.useState<{
@@ -473,9 +482,79 @@ const FundsTable = React.memo(function FundsTable({
     return str.charAt(0).toUpperCase() + str.slice(1)
   }, [])
 
-  const handleApplyForm = React.useCallback((applicationUrl: string) => {
-    window.open(applicationUrl, '_blank')
-  }, [])
+  const handleApplyForm = React.useCallback(
+    async (targetId: string, targetName: string) => {
+      if (!user?.id) {
+        toast({
+          title: 'Error',
+          description: 'You must be logged in to submit applications',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (submittingTargets.has(targetId)) {
+        return // Already submitting
+      }
+
+      setSubmittingTargets((prev) => new Set(Array.from(prev).concat(targetId)))
+
+      try {
+        toast({
+          title: 'Starting application',
+          description: `Submitting application to ${targetName}...`,
+        })
+
+        const response = await fetch('/api/agent/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startupId,
+            targetId,
+            userId: user.id,
+          }),
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to submit application')
+        }
+
+        if (result.success) {
+          toast({
+            title: 'Application submitted!',
+            description: `Successfully submitted application to ${result.targetName}`,
+          })
+        } else {
+          toast({
+            title: 'Application failed',
+            description: result.error || 'Failed to submit application',
+            variant: 'destructive',
+          })
+        }
+      } catch (error) {
+        console.error('Application submission error:', error)
+        toast({
+          title: 'Error',
+          description:
+            error instanceof Error
+              ? error.message
+              : 'Failed to submit application',
+          variant: 'destructive',
+        })
+      } finally {
+        setSubmittingTargets((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(targetId)
+          return newSet
+        })
+      }
+    },
+    [user?.id, startupId, submittingTargets, toast],
+  )
 
   const handleSendEmail = React.useCallback((email: string | undefined) => {
     if (!email) return
@@ -873,26 +952,34 @@ const FundsTable = React.memo(function FundsTable({
                                   VALIDATION_PRESETS.BASIC_APPLICATION
                                 }
                                 onValidationPass={() =>
-                                  handleApplyForm(target.application_url)
+                                  handleApplyForm(target.id, target.name)
                                 }
                               >
                                 <Button
                                   size="sm"
+                                  disabled={submittingTargets.has(target.id)}
                                   onMouseEnter={() =>
                                     setHoveredButton(`apply-${target.id}`)
                                   }
                                   onMouseLeave={() => setHoveredButton(null)}
-                                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-3 text-sm h-8"
+                                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-3 text-sm h-8 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <LottieIcon
-                                    animationData={animations.takeoff}
+                                    animationData={
+                                      submittingTargets.has(target.id)
+                                        ? animations.autorenew
+                                        : animations.takeoff
+                                    }
                                     size={14}
                                     className="mr-1"
                                     isHovered={
-                                      hoveredButton === `apply-${target.id}`
+                                      hoveredButton === `apply-${target.id}` &&
+                                      !submittingTargets.has(target.id)
                                     }
                                   />
-                                  Apply
+                                  {submittingTargets.has(target.id)
+                                    ? 'Submitting...'
+                                    : 'Apply'}
                                 </Button>
                               </ValidationGate>
                             )}

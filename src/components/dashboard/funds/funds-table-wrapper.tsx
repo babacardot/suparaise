@@ -24,12 +24,14 @@ type Target = {
 
 interface FundsTableWrapperProps {
   targets: Target[]
+  startupId: string
 }
 
 const FILTERS_STORAGE_KEY = 'funds-table-filters'
 
 const FundsTableWrapper = React.memo(function FundsTableWrapper({
   targets,
+  startupId,
 }: FundsTableWrapperProps) {
   // Initialize filters from localStorage if available
   const [filters, setFilters] = React.useState<FundsFilters>(() => {
@@ -88,6 +90,7 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
         targets={targets}
         filters={filters}
         onFiltersChange={handleFiltersChange}
+        startupId={startupId}
       />
     </div>
   )

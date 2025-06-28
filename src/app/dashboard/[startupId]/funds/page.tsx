@@ -66,7 +66,12 @@ async function getTargets(): Promise<Target[]> {
   return (data as Target[]) || []
 }
 
-export default async function FundsPage() {
+export default async function FundsPage({
+  params,
+}: {
+  params: Promise<{ startupId: string }>
+}) {
+  const { startupId } = await params
   const targets = await getTargets()
 
   return (
@@ -76,7 +81,7 @@ export default async function FundsPage() {
           <h1 className="text-3xl font-bold tracking-tight mt-1.5">Funds</h1>
         </div>
         <div className="flex-1 overflow-hidden hide-scrollbar">
-          <FundsTableWrapper targets={targets} />
+          <FundsTableWrapper targets={targets} startupId={startupId} />
         </div>
       </div>
     </SecureFundsWrapper>

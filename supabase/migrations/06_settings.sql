@@ -574,9 +574,7 @@ BEGIN
     -- Get the agent settings for this user/startup combination
     SELECT jsonb_build_object(
         'submissionDelay', ags.submission_delay::text::integer,
-        'retryAttempts', ags.retry_attempts::text::integer,
         'maxParallelSubmissions', ags.max_parallel_submissions::text::integer,
-        'timeoutMinutes', ags.timeout_minutes::text::integer,
         'preferredTone', CASE 
             WHEN user_permission IN ('PRO', 'MAX') THEN ags.preferred_tone
             ELSE 'professional'
@@ -601,14 +599,12 @@ BEGIN
     IF result IS NULL THEN
         result := jsonb_build_object(
             'submissionDelay', 30,
-            'retryAttempts', 3,
             'maxParallelSubmissions', CASE 
                 WHEN user_permission = 'FREE' THEN 1
                 WHEN user_permission = 'PRO' THEN 3
                 WHEN user_permission = 'MAX' THEN 5
                 ELSE 3
             END,
-            'timeoutMinutes', 10,
             'preferredTone', CASE 
                 WHEN user_permission IN ('PRO', 'MAX') THEN 'professional'
                 ELSE 'professional'
@@ -710,9 +706,7 @@ BEGIN
         UPDATE agent_settings
         SET 
             submission_delay = COALESCE((p_data->>'submissionDelay')::agent_submission_delay, submission_delay),
-            retry_attempts = COALESCE((p_data->>'retryAttempts')::agent_retry_attempts, retry_attempts),
             max_parallel_submissions = COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, max_parallel_submissions),
-            timeout_minutes = COALESCE((p_data->>'timeoutMinutes')::agent_timeout_minutes, timeout_minutes),
             preferred_tone = CASE 
                 WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
                 THEN (p_data->>'preferredTone')::agent_tone
@@ -734,15 +728,13 @@ BEGIN
     ELSE
         -- Insert new settings
         INSERT INTO agent_settings (
-            startup_id, user_id, submission_delay, retry_attempts, 
-            max_parallel_submissions, timeout_minutes, preferred_tone,
+            startup_id, user_id, submission_delay, 
+            max_parallel_submissions, preferred_tone,
             debug_mode, stealth, custom_instructions
         ) VALUES (
             p_startup_id, p_user_id,
             COALESCE((p_data->>'submissionDelay')::agent_submission_delay, '30'),
-            COALESCE((p_data->>'retryAttempts')::agent_retry_attempts, '3'),
             COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, LEAST('3', max_parallel_allowed::text)::agent_parallel_submissions),
-            COALESCE((p_data->>'timeoutMinutes')::agent_timeout_minutes, '10'),
             CASE 
                 WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
                 THEN (p_data->>'preferredTone')::agent_tone
@@ -801,13 +793,13 @@ BEGIN
     
     -- Archive agent settings
     INSERT INTO agent_settings_archive (
-        id, startup_id, user_id, submission_delay, retry_attempts, max_parallel_submissions,
-        timeout_minutes, preferred_tone, debug_mode, stealth, custom_instructions,
+        id, startup_id, user_id, submission_delay, max_parallel_submissions,
+        preferred_tone, debug_mode, stealth, custom_instructions,
         created_at, updated_at, original_id, original_startup_id, original_user_id
     )
     SELECT 
-        gen_random_uuid(), startup_id, user_id, submission_delay, retry_attempts, max_parallel_submissions,
-        timeout_minutes, preferred_tone, debug_mode, stealth, custom_instructions,
+        gen_random_uuid(), startup_id, user_id, submission_delay, max_parallel_submissions,
+        preferred_tone, debug_mode, stealth, custom_instructions,
         created_at, updated_at, id, startup_id, user_id
     FROM agent_settings 
     WHERE user_id = p_user_id;

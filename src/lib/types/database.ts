@@ -215,11 +215,9 @@ export type Database = {
           id: string
           max_parallel_submissions: Database['public']['Enums']['agent_parallel_submissions']
           preferred_tone: Database['public']['Enums']['agent_tone']
-          retry_attempts: Database['public']['Enums']['agent_retry_attempts']
           startup_id: string
           stealth: boolean
           submission_delay: Database['public']['Enums']['agent_submission_delay']
-          timeout_minutes: Database['public']['Enums']['agent_timeout_minutes']
           updated_at: string | null
           user_id: string
         }
@@ -230,11 +228,9 @@ export type Database = {
           id?: string
           max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
           preferred_tone?: Database['public']['Enums']['agent_tone']
-          retry_attempts?: Database['public']['Enums']['agent_retry_attempts']
           startup_id: string
           stealth?: boolean
           submission_delay?: Database['public']['Enums']['agent_submission_delay']
-          timeout_minutes?: Database['public']['Enums']['agent_timeout_minutes']
           updated_at?: string | null
           user_id: string
         }
@@ -245,11 +241,9 @@ export type Database = {
           id?: string
           max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
           preferred_tone?: Database['public']['Enums']['agent_tone']
-          retry_attempts?: Database['public']['Enums']['agent_retry_attempts']
           startup_id?: string
           stealth?: boolean
           submission_delay?: Database['public']['Enums']['agent_submission_delay']
-          timeout_minutes?: Database['public']['Enums']['agent_timeout_minutes']
           updated_at?: string | null
           user_id?: string
         }
@@ -276,11 +270,9 @@ export type Database = {
           original_startup_id: string
           original_user_id: string
           preferred_tone: Database['public']['Enums']['agent_tone']
-          retry_attempts: Database['public']['Enums']['agent_retry_attempts']
           startup_id: string
           stealth: boolean
           submission_delay: Database['public']['Enums']['agent_submission_delay']
-          timeout_minutes: Database['public']['Enums']['agent_timeout_minutes']
           updated_at: string | null
           user_id: string
         }
@@ -296,11 +288,9 @@ export type Database = {
           original_startup_id: string
           original_user_id: string
           preferred_tone?: Database['public']['Enums']['agent_tone']
-          retry_attempts?: Database['public']['Enums']['agent_retry_attempts']
           startup_id: string
           stealth?: boolean
           submission_delay?: Database['public']['Enums']['agent_submission_delay']
-          timeout_minutes?: Database['public']['Enums']['agent_timeout_minutes']
           updated_at?: string | null
           user_id: string
         }
@@ -316,11 +306,9 @@ export type Database = {
           original_startup_id?: string
           original_user_id?: string
           preferred_tone?: Database['public']['Enums']['agent_tone']
-          retry_attempts?: Database['public']['Enums']['agent_retry_attempts']
           startup_id?: string
           stealth?: boolean
           submission_delay?: Database['public']['Enums']['agent_submission_delay']
-          timeout_minutes?: Database['public']['Enums']['agent_timeout_minutes']
           updated_at?: string | null
           user_id?: string
         }
@@ -1573,9 +1561,7 @@ export type Database = {
     Enums: {
       acceptance_rate: '<1%' | '1-5%' | '6-10%' | '11-20%' | '20%+'
       agent_parallel_submissions: '1' | '3' | '5' | '15'
-      agent_retry_attempts: '1' | '3' | '5' | '10'
       agent_submission_delay: '0' | '15' | '30'
-      agent_timeout_minutes: '5' | '10' | '15' | '30'
       agent_tone: 'professional' | 'enthusiastic' | 'concise' | 'detailed'
       batch_size: '1-10' | '11-20' | '21-50' | '51-100' | '100+'
       check_size_range:
@@ -1860,9 +1846,7 @@ export const Constants = {
     Enums: {
       acceptance_rate: ['<1%', '1-5%', '6-10%', '11-20%', '20%+'],
       agent_parallel_submissions: ['1', '3', '5', '15'],
-      agent_retry_attempts: ['1', '3', '5', '10'],
       agent_submission_delay: ['0', '15', '30'],
-      agent_timeout_minutes: ['5', '10', '15', '30'],
       agent_tone: ['professional', 'enthusiastic', 'concise', 'detailed'],
       batch_size: ['1-10', '11-20', '21-50', '51-100', '100+'],
       check_size_range: [
