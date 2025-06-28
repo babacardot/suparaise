@@ -575,6 +575,7 @@ BEGIN
     SELECT jsonb_build_object(
         'submissionDelay', ags.submission_delay::text::integer,
         'maxParallelSubmissions', ags.max_parallel_submissions::text::integer,
+        'maxQueueSize', ags.max_queue_size,
         'preferredTone', CASE 
             WHEN user_permission IN ('PRO', 'MAX') THEN ags.preferred_tone
             ELSE 'professional'
@@ -583,10 +584,7 @@ BEGIN
             WHEN user_permission = 'MAX' THEN ags.debug_mode
             ELSE false
         END,
-        'enableStealth', CASE 
-            WHEN user_permission = 'MAX' THEN ags.stealth
-            ELSE true
-        END,
+        'enableStealth', ags.stealth,
         'customInstructions', ags.custom_instructions,
         'permissionLevel', user_permission
     )
@@ -601,9 +599,15 @@ BEGIN
             'submissionDelay', 30,
             'maxParallelSubmissions', CASE 
                 WHEN user_permission = 'FREE' THEN 1
-                WHEN user_permission = 'PRO' THEN 3
-                WHEN user_permission = 'MAX' THEN 5
-                ELSE 3
+                WHEN user_permission = 'PRO' THEN 5
+                WHEN user_permission = 'MAX' THEN 10
+                ELSE 1
+            END,
+            'maxQueueSize', CASE 
+                WHEN user_permission = 'FREE' THEN 0
+                WHEN user_permission = 'PRO' THEN 25
+                WHEN user_permission = 'MAX' THEN 50
+                ELSE 0
             END,
             'preferredTone', CASE 
                 WHEN user_permission IN ('PRO', 'MAX') THEN 'professional'
@@ -613,10 +617,7 @@ BEGIN
                 WHEN user_permission = 'MAX' THEN false
                 ELSE false
             END,
-            'enableStealth', CASE 
-                WHEN user_permission = 'MAX' THEN true
-                ELSE true
-            END,
+            'enableStealth', true,
             'customInstructions', '',
             'permissionLevel', user_permission
         );
@@ -663,12 +664,12 @@ BEGIN
     FROM profiles
     WHERE id = p_user_id AND is_active = TRUE;
 
-    -- Set max parallel submissions based on permission level
+    -- Set max parallel submissions and queue size based on permission level
     max_parallel_allowed := CASE 
         WHEN user_permission = 'FREE' THEN 1
         WHEN user_permission = 'PRO' THEN 5
         WHEN user_permission = 'MAX' THEN 10
-        ELSE 3
+        ELSE 1
     END;
 
     -- Validate max parallel submissions doesn't exceed permission limit
@@ -680,6 +681,27 @@ BEGIN
         );
     END IF;
 
+    -- Validate max queue size based on permission level
+    IF p_data ? 'maxQueueSize' THEN
+        DECLARE
+            max_queue_allowed INTEGER;
+        BEGIN
+            max_queue_allowed := CASE 
+                WHEN user_permission = 'FREE' THEN 0
+                WHEN user_permission = 'PRO' THEN 25
+                WHEN user_permission = 'MAX' THEN 50
+                ELSE 0
+            END;
+            
+            IF (p_data->>'maxQueueSize')::INTEGER > max_queue_allowed THEN
+                RETURN jsonb_build_object(
+                    'error', 
+                    format('Maximum queue size exceeded. Your plan allows up to %s queued applications.', max_queue_allowed)
+                );
+            END IF;
+        END;
+    END IF;
+
     -- Validate premium features based on permission level
     IF p_data ? 'preferredTone' AND user_permission NOT IN ('PRO', 'MAX') THEN
         RETURN jsonb_build_object(
@@ -688,10 +710,10 @@ BEGIN
         );
     END IF;
 
-    IF (p_data ? 'enableDebugMode' OR p_data ? 'enableStealth') AND user_permission != 'MAX' THEN
+    IF p_data ? 'enableDebugMode' AND user_permission != 'MAX' THEN
         RETURN jsonb_build_object(
             'error', 
-            'Debug mode and stealth settings are only available for MAX users. Please upgrade your plan.'
+            'Debug mode is only available for MAX users. Please upgrade your plan.'
         );
     END IF;
 
@@ -707,6 +729,7 @@ BEGIN
         SET 
             submission_delay = COALESCE((p_data->>'submissionDelay')::agent_submission_delay, submission_delay),
             max_parallel_submissions = COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, max_parallel_submissions),
+            max_queue_size = COALESCE((p_data->>'maxQueueSize')::INTEGER, max_queue_size),
             preferred_tone = CASE 
                 WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
                 THEN (p_data->>'preferredTone')::agent_tone
@@ -717,11 +740,7 @@ BEGIN
                 THEN (p_data->>'enableDebugMode')::BOOLEAN
                 ELSE debug_mode
             END,
-            stealth = CASE 
-                WHEN user_permission = 'MAX' AND p_data ? 'enableStealth' 
-                THEN (p_data->>'enableStealth')::BOOLEAN
-                ELSE stealth
-            END,
+            stealth = COALESCE((p_data->>'enableStealth')::BOOLEAN, stealth),
             custom_instructions = COALESCE(p_data->>'customInstructions', custom_instructions),
             updated_at = NOW()
         WHERE startup_id = p_startup_id AND user_id = p_user_id;
@@ -729,12 +748,18 @@ BEGIN
         -- Insert new settings
         INSERT INTO agent_settings (
             startup_id, user_id, submission_delay, 
-            max_parallel_submissions, preferred_tone,
+            max_parallel_submissions, max_queue_size, preferred_tone,
             debug_mode, stealth, custom_instructions
         ) VALUES (
             p_startup_id, p_user_id,
             COALESCE((p_data->>'submissionDelay')::agent_submission_delay, '30'),
-            COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, LEAST('3', max_parallel_allowed::text)::agent_parallel_submissions),
+            COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, LEAST('1', max_parallel_allowed::text)::agent_parallel_submissions),
+            COALESCE((p_data->>'maxQueueSize')::INTEGER, CASE 
+                WHEN user_permission = 'FREE' THEN 0
+                WHEN user_permission = 'PRO' THEN 25
+                WHEN user_permission = 'MAX' THEN 50
+                ELSE 0
+            END),
             CASE 
                 WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
                 THEN (p_data->>'preferredTone')::agent_tone
@@ -745,11 +770,7 @@ BEGIN
                 THEN (p_data->>'enableDebugMode')::BOOLEAN
                 ELSE false
             END,
-            CASE 
-                WHEN user_permission = 'MAX' AND p_data ? 'enableStealth' 
-                THEN (p_data->>'enableStealth')::BOOLEAN
-                ELSE true
-            END,
+            COALESCE((p_data->>'enableStealth')::BOOLEAN, true),
             COALESCE(p_data->>'customInstructions', '')
         );
     END IF;
@@ -1079,4 +1100,260 @@ GRANT EXECUTE ON FUNCTION update_user_agent_settings(UUID, UUID, JSONB) TO authe
 GRANT EXECUTE ON FUNCTION soft_delete_user_account(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION reactivate_user_account(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION can_email_be_used_for_signup(TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_archived_user_data(UUID) TO authenticated; 
+GRANT EXECUTE ON FUNCTION get_archived_user_data(UUID) TO authenticated;
+
+-- =================================================================
+-- QUEUE MANAGEMENT RPC FUNCTIONS
+-- =================================================================
+
+-- Function to get current queue status for a startup
+CREATE OR REPLACE FUNCTION get_queue_status(p_user_id UUID, p_startup_id UUID DEFAULT NULL)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+    target_startup_id UUID;
+    current_in_progress INTEGER;
+    current_queued INTEGER;
+    agent_settings_data JSONB;
+    max_parallel INTEGER;
+    max_queue INTEGER;
+BEGIN
+    -- If no startup_id provided, get the user's first startup
+    IF p_startup_id IS NULL THEN
+        SELECT id INTO target_startup_id
+        FROM startups 
+        WHERE user_id = p_user_id AND is_active = TRUE
+        ORDER BY created_at DESC 
+        LIMIT 1;
+    ELSE
+        target_startup_id := p_startup_id;
+    END IF;
+
+    -- Get agent settings to know limits
+    SELECT get_user_agent_settings(p_user_id, target_startup_id) INTO agent_settings_data;
+    max_parallel := (agent_settings_data->>'maxParallelSubmissions')::INTEGER;
+    max_queue := (agent_settings_data->>'maxQueueSize')::INTEGER;
+
+    -- Count current in-progress submissions
+    SELECT COUNT(*) INTO current_in_progress
+    FROM submissions
+    WHERE startup_id = target_startup_id 
+      AND status = 'in_progress';
+
+    -- Count current queued submissions
+    SELECT COUNT(*) INTO current_queued
+    FROM submissions
+    WHERE startup_id = target_startup_id 
+      AND status = 'pending'
+      AND queue_position IS NOT NULL;
+
+    -- Build result
+    result := jsonb_build_object(
+        'maxParallel', max_parallel,
+        'maxQueue', max_queue,
+        'currentInProgress', current_in_progress,
+        'currentQueued', current_queued,
+        'availableSlots', GREATEST(0, max_parallel - current_in_progress),
+        'availableQueueSlots', GREATEST(0, max_queue - current_queued),
+        'canSubmitMore', (current_in_progress < max_parallel) OR (current_queued < max_queue)
+    );
+
+    RETURN result;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in get_queue_status for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to add a submission to the queue
+CREATE OR REPLACE FUNCTION queue_submission(
+    p_user_id UUID,
+    p_startup_id UUID,
+    p_target_id UUID
+)
+RETURNS JSONB AS $$
+DECLARE
+    queue_status JSONB;
+    current_in_progress INTEGER;
+    current_queued INTEGER;
+    max_parallel INTEGER;
+    max_queue INTEGER;
+    next_queue_position INTEGER;
+    submission_id UUID;
+    existing_submission UUID;
+BEGIN
+    -- Check if submission already exists
+    SELECT id INTO existing_submission
+    FROM submissions
+    WHERE startup_id = p_startup_id AND target_id = p_target_id;
+
+    IF existing_submission IS NOT NULL THEN
+        RETURN jsonb_build_object('error', 'Submission already exists for this target');
+    END IF;
+
+    -- Get current queue status
+    SELECT get_queue_status(p_user_id, p_startup_id) INTO queue_status;
+    
+    IF queue_status ? 'error' THEN
+        RETURN queue_status;
+    END IF;
+
+    current_in_progress := (queue_status->>'currentInProgress')::INTEGER;
+    current_queued := (queue_status->>'currentQueued')::INTEGER;
+    max_parallel := (queue_status->>'maxParallel')::INTEGER;
+    max_queue := (queue_status->>'maxQueue')::INTEGER;
+
+    -- Check if we can submit (either immediately or queue)
+    IF current_in_progress >= max_parallel AND current_queued >= max_queue THEN
+        RETURN jsonb_build_object('error', 'Queue is full. Cannot add more submissions.');
+    END IF;
+
+    -- If we have available parallel slots, submit immediately
+    IF current_in_progress < max_parallel THEN
+        -- Create submission for immediate processing
+        INSERT INTO submissions (startup_id, target_id, status, submission_date, started_at)
+        VALUES (p_startup_id, p_target_id, 'pending', NOW(), NOW())
+        RETURNING id INTO submission_id;
+
+        RETURN jsonb_build_object(
+            'success', true,
+            'submissionId', submission_id,
+            'status', 'immediate',
+            'message', 'Submission created for immediate processing'
+        );
+    ELSE
+        -- Add to queue
+        -- Get next queue position
+        SELECT COALESCE(MAX(queue_position), 0) + 1 INTO next_queue_position
+        FROM submissions
+        WHERE startup_id = p_startup_id 
+          AND status = 'pending'
+          AND queue_position IS NOT NULL;
+
+        -- Create queued submission
+        INSERT INTO submissions (startup_id, target_id, status, queue_position, queued_at, submission_date)
+        VALUES (p_startup_id, p_target_id, 'pending', next_queue_position, NOW(), NOW())
+        RETURNING id INTO submission_id;
+
+        RETURN jsonb_build_object(
+            'success', true,
+            'submissionId', submission_id,
+            'status', 'queued',
+            'queuePosition', next_queue_position,
+            'message', format('Submission added to queue at position %s', next_queue_position)
+        );
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in queue_submission for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to process the next item in queue (moves from queued to processing)
+CREATE OR REPLACE FUNCTION process_next_queued_submission(p_startup_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    next_submission UUID;
+    queue_pos INTEGER;
+BEGIN
+    -- Find the next queued submission (lowest queue_position)
+    SELECT id, queue_position INTO next_submission, queue_pos
+    FROM submissions
+    WHERE startup_id = p_startup_id 
+      AND status = 'pending'
+      AND queue_position IS NOT NULL
+    ORDER BY queue_position ASC
+    LIMIT 1;
+
+    IF next_submission IS NULL THEN
+        RETURN jsonb_build_object(
+            'success', true,
+            'message', 'No queued submissions to process'
+        );
+    END IF;
+
+    -- Move submission from queued to processing
+    UPDATE submissions
+    SET 
+        status = 'pending',
+        queue_position = NULL,
+        queued_at = NULL,
+        started_at = NOW()
+    WHERE id = next_submission;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'submissionId', next_submission,
+        'previousQueuePosition', queue_pos,
+        'message', 'Submission moved from queue to processing'
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in process_next_queued_submission for startup %: %', p_startup_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to get all submissions with queue info for a startup
+CREATE OR REPLACE FUNCTION get_submissions_with_queue(p_user_id UUID, p_startup_id UUID DEFAULT NULL)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+    target_startup_id UUID;
+BEGIN
+    -- If no startup_id provided, get the user's first startup
+    IF p_startup_id IS NULL THEN
+        SELECT id INTO target_startup_id
+        FROM startups 
+        WHERE user_id = p_user_id AND is_active = TRUE
+        ORDER BY created_at DESC 
+        LIMIT 1;
+    ELSE
+        target_startup_id := p_startup_id;
+    END IF;
+
+    -- Get all submissions with queue information
+    SELECT jsonb_agg(
+        jsonb_build_object(
+            'id', s.id,
+            'targetId', s.target_id,
+            'targetName', t.name,
+            'status', s.status,
+            'queuePosition', s.queue_position,
+            'queuedAt', s.queued_at,
+            'startedAt', s.started_at,
+            'submissionDate', s.submission_date,
+            'agentNotes', s.agent_notes,
+            'createdAt', s.created_at
+        ) ORDER BY 
+            CASE 
+                WHEN s.status = 'in_progress' THEN 1
+                WHEN s.status = 'pending' AND s.queue_position IS NULL THEN 2
+                WHEN s.status = 'pending' AND s.queue_position IS NOT NULL THEN 3 + s.queue_position
+                ELSE 999
+            END
+    )
+    INTO result
+    FROM submissions s
+    JOIN targets t ON s.target_id = t.id
+    WHERE s.startup_id = target_startup_id;
+
+    RETURN COALESCE(result, '[]'::jsonb);
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in get_submissions_with_queue for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Grant execute permissions for queue management functions
+GRANT EXECUTE ON FUNCTION get_queue_status(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION queue_submission(UUID, UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION process_next_queued_submission(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_submissions_with_queue(UUID, UUID) TO authenticated; 

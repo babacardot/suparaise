@@ -214,6 +214,7 @@ export type Database = {
           debug_mode: boolean
           id: string
           max_parallel_submissions: Database['public']['Enums']['agent_parallel_submissions']
+          max_queue_size: number
           preferred_tone: Database['public']['Enums']['agent_tone']
           startup_id: string
           stealth: boolean
@@ -227,6 +228,7 @@ export type Database = {
           debug_mode?: boolean
           id?: string
           max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
+          max_queue_size?: number
           preferred_tone?: Database['public']['Enums']['agent_tone']
           startup_id: string
           stealth?: boolean
@@ -240,6 +242,7 @@ export type Database = {
           debug_mode?: boolean
           id?: string
           max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
+          max_queue_size?: number
           preferred_tone?: Database['public']['Enums']['agent_tone']
           startup_id?: string
           stealth?: boolean
@@ -1154,6 +1157,9 @@ export type Database = {
           agent_notes: string | null
           created_at: string | null
           id: string
+          queue_position: number | null
+          queued_at: string | null
+          started_at: string | null
           startup_id: string
           status: Database['public']['Enums']['submission_status'] | null
           submission_date: string | null
@@ -1163,6 +1169,9 @@ export type Database = {
           agent_notes?: string | null
           created_at?: string | null
           id?: string
+          queue_position?: number | null
+          queued_at?: string | null
+          started_at?: string | null
           startup_id: string
           status?: Database['public']['Enums']['submission_status'] | null
           submission_date?: string | null
@@ -1172,6 +1181,9 @@ export type Database = {
           agent_notes?: string | null
           created_at?: string | null
           id?: string
+          queue_position?: number | null
+          queued_at?: string | null
+          started_at?: string | null
           startup_id?: string
           status?: Database['public']['Enums']['submission_status'] | null
           submission_date?: string | null
@@ -1446,6 +1458,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      get_queue_status: {
+        Args: { p_user_id: string; p_startup_id?: string }
+        Returns: Json
+      }
       get_startup_by_id: {
         Args: { p_startup_id: string; p_user_id: string }
         Returns: Json
@@ -1455,6 +1471,10 @@ export type Database = {
         Returns: Json
       }
       get_startup_founders: {
+        Args: { p_user_id: string; p_startup_id?: string }
+        Returns: Json
+      }
+      get_submissions_with_queue: {
         Args: { p_user_id: string; p_startup_id?: string }
         Returns: Json
       }
@@ -1496,6 +1516,14 @@ export type Database = {
       }
       increment_submission_count: {
         Args: { p_user_id: string }
+        Returns: Json
+      }
+      process_next_queued_submission: {
+        Args: { p_startup_id: string }
+        Returns: Json
+      }
+      queue_submission: {
+        Args: { p_user_id: string; p_startup_id: string; p_target_id: string }
         Returns: Json
       }
       reactivate_user_account: {
@@ -1560,7 +1588,7 @@ export type Database = {
     }
     Enums: {
       acceptance_rate: '<1%' | '1-5%' | '6-10%' | '11-20%' | '20%+'
-      agent_parallel_submissions: '1' | '3' | '5' | '15'
+      agent_parallel_submissions: '1' | '5' | '10'
       agent_submission_delay: '0' | '15' | '30'
       agent_tone: 'professional' | 'enthusiastic' | 'concise' | 'detailed'
       batch_size: '1-10' | '11-20' | '21-50' | '51-100' | '100+'
@@ -1845,7 +1873,7 @@ export const Constants = {
   public: {
     Enums: {
       acceptance_rate: ['<1%', '1-5%', '6-10%', '11-20%', '20%+'],
-      agent_parallel_submissions: ['1', '3', '5', '15'],
+      agent_parallel_submissions: ['1', '5', '10'],
       agent_submission_delay: ['0', '15', '30'],
       agent_tone: ['professional', 'enthusiastic', 'concise', 'detailed'],
       batch_size: ['1-10', '11-20', '21-50', '51-100', '100+'],

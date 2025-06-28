@@ -81,7 +81,7 @@ CREATE TYPE subscription_status AS ENUM ('active', 'inactive', 'past_due', 'canc
 CREATE TYPE permission_level AS ENUM ('FREE', 'PRO', 'MAX');
 CREATE TYPE agent_tone AS ENUM ('professional', 'enthusiastic', 'concise', 'detailed');
 CREATE TYPE agent_submission_delay AS ENUM ('0', '15', '30');
-CREATE TYPE agent_parallel_submissions AS ENUM ('1', '3', '5', '15');
+CREATE TYPE agent_parallel_submissions AS ENUM ('1', '5', '10');
 CREATE TYPE check_size_range AS ENUM ('1K-10K', '10K-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K-1M', '1M+');
 CREATE TYPE investment_approach AS ENUM ('hands-on', 'passive', 'advisory', 'network-focused');
 CREATE TYPE response_time AS ENUM ('1-3 days', '1 week', '2 weeks', '1 month', '2+ months');
@@ -372,6 +372,9 @@ CREATE TABLE submissions (
     submission_date TIMESTAMPTZ DEFAULT NOW(),
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
+    queue_position INTEGER, -- Position in queue (NULL if not queued)
+    queued_at TIMESTAMPTZ, -- When it was added to queue
+    started_at TIMESTAMPTZ, -- When processing actually started
     UNIQUE(startup_id, target_id),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -415,14 +418,16 @@ CREATE TABLE agent_settings (
     startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
-    max_parallel_submissions agent_parallel_submissions DEFAULT '3' NOT NULL,
+    max_parallel_submissions agent_parallel_submissions DEFAULT '1' NOT NULL,
+    max_queue_size INTEGER DEFAULT 0 NOT NULL,
     preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
     debug_mode BOOLEAN DEFAULT FALSE NOT NULL,
     stealth BOOLEAN DEFAULT TRUE NOT NULL,
     custom_instructions TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(startup_id)
+    UNIQUE(startup_id),
+    CONSTRAINT chk_max_queue_size CHECK (max_queue_size >= 0)
 );
 
 CREATE TRIGGER set_agent_settings_timestamp
@@ -450,6 +455,9 @@ CREATE INDEX IF NOT EXISTS idx_common_responses_startup_id ON common_responses(s
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_id ON submissions(startup_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_target_id ON submissions(target_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
+CREATE INDEX IF NOT EXISTS idx_submissions_queue_position ON submissions(queue_position) WHERE queue_position IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_submissions_queued_at ON submissions(queued_at) WHERE queued_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_submissions_startup_status_queue ON submissions(startup_id, status, queue_position);
 
 -- Composite index for the unique constraint queries
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_target ON submissions(startup_id, target_id);
@@ -747,7 +755,7 @@ CREATE TABLE agent_settings_archive (
     startup_id UUID NOT NULL,
     user_id UUID NOT NULL,
     submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
-    max_parallel_submissions agent_parallel_submissions DEFAULT '3' NOT NULL,
+    max_parallel_submissions agent_parallel_submissions DEFAULT '1' NOT NULL,
     preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
     debug_mode BOOLEAN DEFAULT FALSE NOT NULL,
     stealth BOOLEAN DEFAULT TRUE NOT NULL,

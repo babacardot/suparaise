@@ -109,7 +109,7 @@ export default function AgentSettings() {
 
   const [formData, setFormData] = useState({
     submissionDelay: 30, // seconds between submissions
-    maxParallelSubmissions: 3,
+    maxParallelSubmissions: 1,
     enableDebugMode: false,
     customInstructions: '',
     preferredTone: 'professional' as
@@ -252,9 +252,8 @@ export default function AgentSettings() {
   const getMaxParallelOptions = () => {
     const allOptions = [
       { value: 1, label: '1 submission', tier: 'FREE' },
-      { value: 3, label: '3 submissions', tier: 'PRO' },
       { value: 5, label: '5 submissions', tier: 'PRO' },
-      { value: 15, label: '15 submissions', tier: 'MAX' },
+      { value: 10, label: '10 submissions', tier: 'MAX' },
     ]
 
     return allOptions
@@ -314,13 +313,13 @@ export default function AgentSettings() {
                       htmlFor="enableStealth"
                       className="font-medium text-sm"
                     >
-                      Stealth mode
+                      Stealth
                     </Label>
                   </div>
                   <p className="text-xs leading-relaxed text-muted-foreground">
                     Use advanced patches to mimic human behavior patterns, avoid
                     bot detection, and ensure natural interaction with investor
-                    portals
+                    portals.
                   </p>
                 </div>
                 <button
@@ -369,7 +368,7 @@ export default function AgentSettings() {
                           'text-muted-foreground',
                       )}
                     >
-                      Developer mode
+                      Dev mode
                     </Label>
                     {!isAdvancedFeatureAvailable() && (
                       <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded">

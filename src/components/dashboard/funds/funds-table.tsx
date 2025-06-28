@@ -77,6 +77,15 @@ const FundsTable = React.memo(function FundsTable({
   const [submittingTargets, setSubmittingTargets] = React.useState<Set<string>>(
     new Set(),
   )
+  const [queueStatus, setQueueStatus] = React.useState<{
+    maxParallel: number
+    maxQueue: number
+    currentInProgress: number
+    currentQueued: number
+    availableSlots: number
+    availableQueueSlots: number
+    canSubmitMore: boolean
+  } | null>(null)
 
   // Initialize sort config from localStorage if available
   const [sortConfig, setSortConfig] = React.useState<{
@@ -282,6 +291,39 @@ const FundsTable = React.memo(function FundsTable({
 
   // Filter targets based on active filters (keeping for backward compatibility)
   const filteredTargets = filteredAndSortedTargets
+
+  // Fetch queue status
+  React.useEffect(() => {
+    if (!user?.id || !startupId) return
+
+    const fetchQueueStatus = async () => {
+      try {
+        const response = await fetch('/api/queue/status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            startupId,
+          }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setQueueStatus(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch queue status:', error)
+      }
+    }
+
+    fetchQueueStatus()
+    // Refresh queue status every 30 seconds
+    const interval = setInterval(fetchQueueStatus, 30000)
+
+    return () => clearInterval(interval)
+  }, [user?.id, startupId])
 
   const clearFilters = React.useCallback(() => {
     onFiltersChange({
@@ -500,9 +542,20 @@ const FundsTable = React.memo(function FundsTable({
       setSubmittingTargets((prev) => new Set(Array.from(prev).concat(targetId)))
 
       try {
+        // Check queue status first
+        if (!queueStatus?.canSubmitMore) {
+          toast({
+            title: 'Queue Full',
+            description:
+              'Cannot submit more applications. Queue is at capacity.',
+            variant: 'destructive',
+          })
+          return
+        }
+
         toast({
-          title: 'Starting application',
-          description: `Submitting application to ${targetName}...`,
+          title: 'Adding to queue',
+          description: `Adding application to ${targetName} to processing queue...`,
         })
 
         const response = await fetch('/api/agent/submit', {
@@ -524,10 +577,43 @@ const FundsTable = React.memo(function FundsTable({
         }
 
         if (result.success) {
-          toast({
-            title: 'Application submitted!',
-            description: `Successfully submitted application to ${result.targetName}`,
-          })
+          if (result.status === 'queued') {
+            toast({
+              title: 'Added to Queue!',
+              description: `Application to ${result.targetName} added to queue at position ${result.queuePosition}`,
+            })
+          } else {
+            toast({
+              title: 'Processing Started!',
+              description: `Application to ${result.targetName} is now being processed`,
+            })
+          }
+
+          // Refresh queue status
+          setTimeout(() => {
+            const fetchQueueStatus = async () => {
+              try {
+                const response = await fetch('/api/queue/status', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    userId: user.id,
+                    startupId,
+                  }),
+                })
+
+                if (response.ok) {
+                  const data = await response.json()
+                  setQueueStatus(data)
+                }
+              } catch (error) {
+                console.error('Failed to refresh queue status:', error)
+              }
+            }
+            fetchQueueStatus()
+          }, 1000)
         } else {
           toast({
             title: 'Application failed',
@@ -553,7 +639,7 @@ const FundsTable = React.memo(function FundsTable({
         })
       }
     },
-    [user?.id, startupId, submittingTargets, toast],
+    [user?.id, startupId, submittingTargets, toast, queueStatus],
   )
 
   const handleSendEmail = React.useCallback((email: string | undefined) => {
@@ -602,6 +688,50 @@ const FundsTable = React.memo(function FundsTable({
             backgroundSize: '100px 100px',
           }}
         />
+
+        {/* Queue Status Display */}
+        {queueStatus && (
+          <div className="mb-4 p-4 bg-slate-50 dark:bg-slate-900/30 rounded-md border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <div className="text-sm font-medium">Parallel Slots:</div>
+                  <div className="flex gap-1">
+                    {Array.from({ length: queueStatus.maxParallel }, (_, i) => (
+                      <div
+                        key={i}
+                        className={`w-6 h-6 rounded-sm border-2 flex items-center justify-center text-xs font-bold ${
+                          i < queueStatus.currentInProgress
+                            ? 'bg-blue-500 border-blue-600 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500'
+                        }`}
+                      >
+                        {i < queueStatus.currentInProgress ? '●' : i + 1}
+                      </div>
+                    ))}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {queueStatus.currentInProgress}/{queueStatus.maxParallel}{' '}
+                    running
+                  </span>
+                </div>
+                {queueStatus.maxQueue > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-medium">Queue:</div>
+                    <span className="text-sm text-muted-foreground">
+                      {queueStatus.currentQueued}/{queueStatus.maxQueue} queued
+                    </span>
+                  </div>
+                )}
+              </div>
+              {!queueStatus.canSubmitMore && (
+                <div className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                  Queue Full
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Filters Component */}
         <FundsFilters
@@ -957,29 +1087,63 @@ const FundsTable = React.memo(function FundsTable({
                               >
                                 <Button
                                   size="sm"
-                                  disabled={submittingTargets.has(target.id)}
+                                  disabled={
+                                    submittingTargets.has(target.id) ||
+                                    (queueStatus
+                                      ? !queueStatus.canSubmitMore
+                                      : false)
+                                  }
                                   onMouseEnter={() =>
                                     setHoveredButton(`apply-${target.id}`)
                                   }
                                   onMouseLeave={() => setHoveredButton(null)}
-                                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-3 text-sm h-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className={`rounded-sm px-3 text-sm h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    queueStatus && !queueStatus.canSubmitMore
+                                      ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                      : queueStatus &&
+                                          queueStatus.availableSlots === 0
+                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                  }`}
+                                  title={
+                                    queueStatus && !queueStatus.canSubmitMore
+                                      ? 'Queue is full. Cannot add more applications.'
+                                      : queueStatus &&
+                                          queueStatus.availableSlots === 0
+                                        ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
+                                        : queueStatus
+                                          ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
+                                          : 'Submit application'
+                                  }
                                 >
                                   <LottieIcon
                                     animationData={
                                       submittingTargets.has(target.id)
                                         ? animations.autorenew
-                                        : animations.takeoff
+                                        : queueStatus &&
+                                            !queueStatus.canSubmitMore
+                                          ? animations.cross
+                                          : queueStatus &&
+                                              queueStatus.availableSlots === 0
+                                            ? animations.hourglass
+                                            : animations.takeoff
                                     }
                                     size={14}
                                     className="mr-1"
                                     isHovered={
                                       hoveredButton === `apply-${target.id}` &&
-                                      !submittingTargets.has(target.id)
+                                      !submittingTargets.has(target.id) &&
+                                      queueStatus?.canSubmitMore !== false
                                     }
                                   />
                                   {submittingTargets.has(target.id)
                                     ? 'Submitting...'
-                                    : 'Apply'}
+                                    : queueStatus && !queueStatus.canSubmitMore
+                                      ? 'Queue Full'
+                                      : queueStatus &&
+                                          queueStatus.availableSlots === 0
+                                        ? 'Add to Queue'
+                                        : 'Apply Now'}
                                 </Button>
                               </ValidationGate>
                             )}
