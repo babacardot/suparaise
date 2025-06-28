@@ -838,7 +838,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-firstName` &&
-                          'bg-muted',
+                        'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-firstName`}
                       placeholder="Enter first name"
@@ -877,7 +877,7 @@ export default function ProfileSettings() {
                       }
                       className={cn(
                         'rounded-sm pr-8',
-                        editingField !== `${founder.id}-lastName` && 'bg-muted',
+                        editingField !== `${founder.id}-lastName` && 'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-lastName`}
                       placeholder="Enter last name"
@@ -915,7 +915,7 @@ export default function ProfileSettings() {
                       }
                       className={cn(
                         'rounded-sm pr-8',
-                        editingField !== `${founder.id}-email` && 'bg-muted',
+                        editingField !== `${founder.id}-email` && 'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-email`}
                       placeholder="Enter email"
@@ -987,7 +987,7 @@ export default function ProfileSettings() {
                         id="user-id"
                         value={user.id}
                         readOnly
-                        className="rounded-l-sm rounded-r-none bg-muted"
+                        className="rounded-l-sm rounded-r-none dark:bg-muted"
                       />
                       <Button
                         variant="outline"
@@ -1020,7 +1020,7 @@ export default function ProfileSettings() {
                       id={`${founder.id}-founder-id`}
                       value={founder.id}
                       readOnly
-                      className="rounded-sm bg-muted"
+                      className="rounded-sm dark:bg-muted"
                     />
                   </div>
                 )}
@@ -1037,7 +1037,7 @@ export default function ProfileSettings() {
                     }
                     className={cn(
                       'rounded-sm pr-8 min-h-[80px]',
-                      editingField !== `${founder.id}-bio` && 'bg-muted',
+                      editingField !== `${founder.id}-bio` && 'dark:bg-muted',
                     )}
                     readOnly={editingField !== `${founder.id}-bio`}
                     placeholder="Tell us about this founder..."
@@ -1092,7 +1092,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-linkedin` &&
-                            'bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-linkedin`}
                         placeholder="https://linkedin.com/in/profile"
@@ -1136,7 +1136,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-githubUrl` &&
-                            'bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-githubUrl`}
                         placeholder="https://github.com/username"
@@ -1182,7 +1182,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-personalWebsiteUrl` &&
-                            'bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={
                           editingField !== `${founder.id}-personalWebsiteUrl`
@@ -1228,7 +1228,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-twitterUrl` &&
-                            'bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-twitterUrl`}
                         placeholder="https://x.com/username"
@@ -1431,14 +1431,7 @@ export default function ProfileSettings() {
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    onClick={handleAddFounder}
-                    disabled={isLoading}
-                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
-                  >
-                    Add
-                  </Button>
+                <div className="flex justify-between pt-4">
                   <Button
                     variant="outline"
                     className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800"
@@ -1446,6 +1439,13 @@ export default function ProfileSettings() {
                     disabled={isLoading}
                   >
                     Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAddFounder}
+                    disabled={isLoading}
+                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                  >
+                    Add
                   </Button>
                 </div>
               </div>

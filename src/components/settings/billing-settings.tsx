@@ -16,6 +16,7 @@ import { Loader2, Check, Crown } from 'lucide-react'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 import { SUBSCRIPTION_PLANS, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
+import { cn } from '@/lib/actions/utils'
 
 // Sound utility functions
 const playSound = (soundFile: string) => {
@@ -200,10 +201,15 @@ export default function BillingSettings() {
             <div className="flex items-center gap-3 mb-3">
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-semibold -mt-1">Current plan</h3>
-                {isSubscribed && (
-                  <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
+                {isSubscribed && subscription?.permission_level && (
+                  <Badge className={cn(
+                    "border",
+                    subscription.permission_level === 'MAX'
+                      ? "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                      : "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                  )}>
                     <Crown className="h-3 w-3 mr-1" />
-                    Pro
+                    {subscription.permission_level}
                   </Badge>
                 )}
               </div>
@@ -342,9 +348,9 @@ export default function BillingSettings() {
               </CardHeader>
               <CardContent>
                 <Button variant="outline" disabled>
-                  Manage Billing
+                  Manage billing
                   <Badge variant="secondary" className="ml-2 text-xs">
-                    Coming Soon
+                    Coming soon
                   </Badge>
                 </Button>
               </CardContent>

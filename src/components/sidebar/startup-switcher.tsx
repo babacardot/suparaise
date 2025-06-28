@@ -59,10 +59,14 @@ export function StartupSwitcher({
     : null
 
   // Use currentStartupDisplay if it has a formatted name, otherwise format currentStartup
-  const displayStartup = currentStartupDisplay || (currentStartup ? {
-    ...currentStartup,
-    name: `${firstName}+${currentStartup.name}`
-  } : null)
+  const displayStartup =
+    currentStartupDisplay ||
+    (currentStartup
+      ? {
+          ...currentStartup,
+          name: `${firstName}+${currentStartup.name}`,
+        }
+      : null)
 
   // Keep the original company name for avatar generation to maintain consistent colors
   const avatarName = currentStartup?.name || displayStartup?.name

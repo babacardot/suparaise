@@ -9,6 +9,162 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accelerator_submissions: {
+        Row: {
+          accelerator_id: string
+          agent_notes: string | null
+          created_at: string | null
+          id: string
+          startup_id: string
+          status: Database["public"]["Enums"]["submission_status"] | null
+          submission_date: string | null
+        }
+        Insert: {
+          accelerator_id: string
+          agent_notes?: string | null
+          created_at?: string | null
+          id?: string
+          startup_id: string
+          status?: Database["public"]["Enums"]["submission_status"] | null
+          submission_date?: string | null
+        }
+        Update: {
+          accelerator_id?: string
+          agent_notes?: string | null
+          created_at?: string | null
+          id?: string
+          startup_id?: string
+          status?: Database["public"]["Enums"]["submission_status"] | null
+          submission_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accelerator_submissions_accelerator_id_fkey"
+            columns: ["accelerator_id"]
+            isOneToOne: false
+            referencedRelation: "accelerators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accelerator_submissions_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accelerators: {
+        Row: {
+          acceptance_rate: Database["public"]["Enums"]["acceptance_rate"] | null
+          application_email: string | null
+          application_url: string | null
+          batch_size: Database["public"]["Enums"]["batch_size"] | null
+          batches_per_year: number | null
+          created_at: string | null
+          equity_taken: Database["public"]["Enums"]["equity_range"] | null
+          form_complexity: Database["public"]["Enums"]["form_complexity"] | null
+          funding_provided: Database["public"]["Enums"]["funding_range"] | null
+          id: string
+          industry_focus: Database["public"]["Enums"]["industry_type"][] | null
+          is_active: boolean | null
+          is_remote_friendly: boolean | null
+          location: string | null
+          name: string
+          next_application_deadline: string | null
+          notes: string | null
+          program_duration:
+            | Database["public"]["Enums"]["program_duration"]
+            | null
+          program_fee: number | null
+          program_type: Database["public"]["Enums"]["program_type"] | null
+          region_focus: Database["public"]["Enums"]["region_type"][] | null
+          required_documents:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
+          stage_focus: Database["public"]["Enums"]["investment_stage"][] | null
+          submission_type: Database["public"]["Enums"]["submission_type"] | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          acceptance_rate?:
+            | Database["public"]["Enums"]["acceptance_rate"]
+            | null
+          application_email?: string | null
+          application_url?: string | null
+          batch_size?: Database["public"]["Enums"]["batch_size"] | null
+          batches_per_year?: number | null
+          created_at?: string | null
+          equity_taken?: Database["public"]["Enums"]["equity_range"] | null
+          form_complexity?:
+            | Database["public"]["Enums"]["form_complexity"]
+            | null
+          funding_provided?: Database["public"]["Enums"]["funding_range"] | null
+          id?: string
+          industry_focus?: Database["public"]["Enums"]["industry_type"][] | null
+          is_active?: boolean | null
+          is_remote_friendly?: boolean | null
+          location?: string | null
+          name: string
+          next_application_deadline?: string | null
+          notes?: string | null
+          program_duration?:
+            | Database["public"]["Enums"]["program_duration"]
+            | null
+          program_fee?: number | null
+          program_type?: Database["public"]["Enums"]["program_type"] | null
+          region_focus?: Database["public"]["Enums"]["region_type"][] | null
+          required_documents?:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
+          stage_focus?: Database["public"]["Enums"]["investment_stage"][] | null
+          submission_type?:
+            | Database["public"]["Enums"]["submission_type"]
+            | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          acceptance_rate?:
+            | Database["public"]["Enums"]["acceptance_rate"]
+            | null
+          application_email?: string | null
+          application_url?: string | null
+          batch_size?: Database["public"]["Enums"]["batch_size"] | null
+          batches_per_year?: number | null
+          created_at?: string | null
+          equity_taken?: Database["public"]["Enums"]["equity_range"] | null
+          form_complexity?:
+            | Database["public"]["Enums"]["form_complexity"]
+            | null
+          funding_provided?: Database["public"]["Enums"]["funding_range"] | null
+          id?: string
+          industry_focus?: Database["public"]["Enums"]["industry_type"][] | null
+          is_active?: boolean | null
+          is_remote_friendly?: boolean | null
+          location?: string | null
+          name?: string
+          next_application_deadline?: string | null
+          notes?: string | null
+          program_duration?:
+            | Database["public"]["Enums"]["program_duration"]
+            | null
+          program_fee?: number | null
+          program_type?: Database["public"]["Enums"]["program_type"] | null
+          region_focus?: Database["public"]["Enums"]["region_type"][] | null
+          required_documents?:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
+          stage_focus?: Database["public"]["Enums"]["investment_stage"][] | null
+          submission_type?:
+            | Database["public"]["Enums"]["submission_type"]
+            | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       agent_settings: {
         Row: {
           created_at: string | null
@@ -64,6 +220,161 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      angel_submissions: {
+        Row: {
+          agent_notes: string | null
+          angel_id: string
+          created_at: string | null
+          id: string
+          startup_id: string
+          status: Database["public"]["Enums"]["submission_status"] | null
+          submission_date: string | null
+        }
+        Insert: {
+          agent_notes?: string | null
+          angel_id: string
+          created_at?: string | null
+          id?: string
+          startup_id: string
+          status?: Database["public"]["Enums"]["submission_status"] | null
+          submission_date?: string | null
+        }
+        Update: {
+          agent_notes?: string | null
+          angel_id?: string
+          created_at?: string | null
+          id?: string
+          startup_id?: string
+          status?: Database["public"]["Enums"]["submission_status"] | null
+          submission_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "angel_submissions_angel_id_fkey"
+            columns: ["angel_id"]
+            isOneToOne: false
+            referencedRelation: "angels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "angel_submissions_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      angels: {
+        Row: {
+          application_email: string | null
+          application_url: string | null
+          bio: string | null
+          check_size: Database["public"]["Enums"]["check_size_range"] | null
+          created_at: string | null
+          domain_expertise: string[] | null
+          email: string | null
+          first_name: string
+          form_complexity: Database["public"]["Enums"]["form_complexity"] | null
+          id: string
+          industry_focus: Database["public"]["Enums"]["industry_type"][] | null
+          investment_approach:
+            | Database["public"]["Enums"]["investment_approach"]
+            | null
+          is_active: boolean | null
+          last_name: string
+          linkedin: string | null
+          location: string | null
+          notable_investments: string[] | null
+          notes: string | null
+          personal_website: string | null
+          previous_exits: string[] | null
+          region_focus: Database["public"]["Enums"]["region_type"][] | null
+          required_documents:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
+          response_time: Database["public"]["Enums"]["response_time"] | null
+          stage_focus: Database["public"]["Enums"]["investment_stage"][] | null
+          submission_type: Database["public"]["Enums"]["submission_type"] | null
+          twitter: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          application_email?: string | null
+          application_url?: string | null
+          bio?: string | null
+          check_size?: Database["public"]["Enums"]["check_size_range"] | null
+          created_at?: string | null
+          domain_expertise?: string[] | null
+          email?: string | null
+          first_name: string
+          form_complexity?:
+            | Database["public"]["Enums"]["form_complexity"]
+            | null
+          id?: string
+          industry_focus?: Database["public"]["Enums"]["industry_type"][] | null
+          investment_approach?:
+            | Database["public"]["Enums"]["investment_approach"]
+            | null
+          is_active?: boolean | null
+          last_name: string
+          linkedin?: string | null
+          location?: string | null
+          notable_investments?: string[] | null
+          notes?: string | null
+          personal_website?: string | null
+          previous_exits?: string[] | null
+          region_focus?: Database["public"]["Enums"]["region_type"][] | null
+          required_documents?:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
+          response_time?: Database["public"]["Enums"]["response_time"] | null
+          stage_focus?: Database["public"]["Enums"]["investment_stage"][] | null
+          submission_type?:
+            | Database["public"]["Enums"]["submission_type"]
+            | null
+          twitter?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          application_email?: string | null
+          application_url?: string | null
+          bio?: string | null
+          check_size?: Database["public"]["Enums"]["check_size_range"] | null
+          created_at?: string | null
+          domain_expertise?: string[] | null
+          email?: string | null
+          first_name?: string
+          form_complexity?:
+            | Database["public"]["Enums"]["form_complexity"]
+            | null
+          id?: string
+          industry_focus?: Database["public"]["Enums"]["industry_type"][] | null
+          investment_approach?:
+            | Database["public"]["Enums"]["investment_approach"]
+            | null
+          is_active?: boolean | null
+          last_name?: string
+          linkedin?: string | null
+          location?: string | null
+          notable_investments?: string[] | null
+          notes?: string | null
+          personal_website?: string | null
+          previous_exits?: string[] | null
+          region_focus?: Database["public"]["Enums"]["region_type"][] | null
+          required_documents?:
+            | Database["public"]["Enums"]["required_document_type"][]
+            | null
+          response_time?: Database["public"]["Enums"]["response_time"] | null
+          stage_focus?: Database["public"]["Enums"]["investment_stage"][] | null
+          submission_type?:
+            | Database["public"]["Enums"]["submission_type"]
+            | null
+          twitter?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       common_responses: {
         Row: {
@@ -751,11 +1062,23 @@ export type Database = {
       }
     }
     Enums: {
+      acceptance_rate: "<1%" | "1-5%" | "6-10%" | "11-20%" | "20%+"
       agent_parallel_submissions: "1" | "3" | "5" | "15"
       agent_retry_attempts: "1" | "3" | "5" | "10"
       agent_submission_delay: "0" | "15" | "30"
       agent_timeout_minutes: "5" | "10" | "15" | "30"
       agent_tone: "professional" | "enthusiastic" | "concise" | "detailed"
+      batch_size: "1-10" | "11-20" | "21-50" | "51-100" | "100+"
+      check_size_range:
+        | "1K-10K"
+        | "10K-25K"
+        | "25K-50K"
+        | "50K-100K"
+        | "100K-250K"
+        | "250K-500K"
+        | "500K-1M"
+        | "1M+"
+      equity_range: "0%" | "1-3%" | "4-6%" | "7-10%" | "10%+" | "variable"
       form_complexity: "simple" | "standard" | "comprehensive"
       founder_role:
         | "Founder"
@@ -771,6 +1094,13 @@ export type Database = {
         | "Advisor"
         | "Legal Counsel"
         | "Other"
+      funding_range:
+        | "0-25K"
+        | "25K-50K"
+        | "50K-100K"
+        | "100K-250K"
+        | "250K-500K"
+        | "500K+"
       industry_type:
         | "B2B SaaS"
         | "Fintech"
@@ -817,6 +1147,11 @@ export type Database = {
         | "Transportation"
         | "Utilities"
         | "Other"
+      investment_approach:
+        | "hands-on"
+        | "passive"
+        | "advisory"
+        | "network-focused"
       investment_instrument:
         | "Equity"
         | "Debt"
@@ -842,6 +1177,13 @@ export type Database = {
         | "Non-profit"
         | "Other"
       permission_level: "FREE" | "PRO" | "MAX"
+      program_duration:
+        | "3 months"
+        | "6 months"
+        | "12 months"
+        | "ongoing"
+        | "variable"
+      program_type: "in-person" | "remote" | "hybrid"
       question_count_range: "1-5" | "6-10" | "11-20" | "21+"
       region_type:
         | "Global"
@@ -868,6 +1210,7 @@ export type Database = {
         | "business_plan"
         | "traction_data"
         | "legal_documents"
+      response_time: "1-3 days" | "1 week" | "2 weeks" | "1 month" | "2+ months"
       revenue_model_type:
         | "Subscription"
         | "One-time purchase"
@@ -1006,11 +1349,24 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      acceptance_rate: ["<1%", "1-5%", "6-10%", "11-20%", "20%+"],
       agent_parallel_submissions: ["1", "3", "5", "15"],
       agent_retry_attempts: ["1", "3", "5", "10"],
       agent_submission_delay: ["0", "15", "30"],
       agent_timeout_minutes: ["5", "10", "15", "30"],
       agent_tone: ["professional", "enthusiastic", "concise", "detailed"],
+      batch_size: ["1-10", "11-20", "21-50", "51-100", "100+"],
+      check_size_range: [
+        "1K-10K",
+        "10K-25K",
+        "25K-50K",
+        "50K-100K",
+        "100K-250K",
+        "250K-500K",
+        "500K-1M",
+        "1M+",
+      ],
+      equity_range: ["0%", "1-3%", "4-6%", "7-10%", "10%+", "variable"],
       form_complexity: ["simple", "standard", "comprehensive"],
       founder_role: [
         "Founder",
@@ -1026,6 +1382,14 @@ export const Constants = {
         "Advisor",
         "Legal Counsel",
         "Other",
+      ],
+      funding_range: [
+        "0-25K",
+        "25K-50K",
+        "50K-100K",
+        "100K-250K",
+        "250K-500K",
+        "500K+",
       ],
       industry_type: [
         "B2B SaaS",
@@ -1074,6 +1438,12 @@ export const Constants = {
         "Utilities",
         "Other",
       ],
+      investment_approach: [
+        "hands-on",
+        "passive",
+        "advisory",
+        "network-focused",
+      ],
       investment_instrument: [
         "Equity",
         "Debt",
@@ -1102,6 +1472,14 @@ export const Constants = {
         "Other",
       ],
       permission_level: ["FREE", "PRO", "MAX"],
+      program_duration: [
+        "3 months",
+        "6 months",
+        "12 months",
+        "ongoing",
+        "variable",
+      ],
+      program_type: ["in-person", "remote", "hybrid"],
       question_count_range: ["1-5", "6-10", "11-20", "21+"],
       region_type: [
         "Global",
@@ -1130,6 +1508,7 @@ export const Constants = {
         "traction_data",
         "legal_documents",
       ],
+      response_time: ["1-3 days", "1 week", "2 weeks", "1 month", "2+ months"],
       revenue_model_type: [
         "Subscription",
         "One-time purchase",

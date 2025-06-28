@@ -33,7 +33,7 @@ export async function generateMetadata({
   }
 }
 
-export default function BillingPage() {
+export default function IntegrationsPage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <SettingsLayout>

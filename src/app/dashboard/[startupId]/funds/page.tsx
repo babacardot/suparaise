@@ -1,6 +1,7 @@
 import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import FundsTableWrapper from '@/components/dashboard/funds/funds-table-wrapper'
+import SecureFundsWrapper from '@/components/dashboard/funds/secure-funds-wrapper'
 import type { Metadata } from 'next'
 
 export async function generateMetadata({
@@ -69,13 +70,15 @@ export default async function FundsPage() {
   const targets = await getTargets()
 
   return (
-    <div className="h-full flex flex-col overflow-hidden hide-scrollbar">
-      <div className="flex-shrink-0 pb-4">
-        <h1 className="text-3xl font-bold tracking-tight mt-1.5">Funds</h1>
+    <SecureFundsWrapper>
+      <div className="h-full flex flex-col overflow-hidden hide-scrollbar">
+        <div className="flex-shrink-0 pb-4">
+          <h1 className="text-3xl font-bold tracking-tight mt-1.5">Funds</h1>
+        </div>
+        <div className="flex-1 overflow-hidden hide-scrollbar">
+          <FundsTableWrapper targets={targets} />
+        </div>
       </div>
-      <div className="flex-1 overflow-hidden hide-scrollbar">
-        <FundsTableWrapper targets={targets} />
-      </div>
-    </div>
+    </SecureFundsWrapper>
   )
 }

@@ -15,6 +15,7 @@ interface EnhanceRequest {
     | 'traction'
     | 'market'
     | 'customers'
+    | 'instructions'
   enhancementType?: 'grammar' | 'full'
   context?: {
     companyName?: string
@@ -138,6 +139,19 @@ Enhance this key customers description:
 - Show customer diversity and validation
 - Include specific use cases or outcomes
 - Be impressive yet credible
+
+${context?.companyName ? `Company: ${context.companyName}` : ''}
+
+Text to enhance: "${text}"`,
+
+    instructions: `${baseInstruction}
+
+Enhance these AI agent instructions:
+- Make them clear and actionable
+- Ensure professional tone and specificity
+- Include practical guidance for form filling
+- Make instructions comprehensive yet concise
+- Focus on representing the company effectively
 
 ${context?.companyName ? `Company: ${context.companyName}` : ''}
 

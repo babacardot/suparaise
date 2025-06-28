@@ -561,20 +561,6 @@ export default function AgentSettings() {
               <div className="space-y-2">
                 <Label htmlFor="maxParallelSubmissions">
                   Parallel submissions
-                  {formData.permissionLevel !== 'FREE' && (
-                    <span
-                      className={cn(
-                        'ml-2 text-xs px-1.5 py-0.5 rounded',
-                        formData.permissionLevel === 'PRO' &&
-                        'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-                        formData.permissionLevel === 'MAX' &&
-                        'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-                      )}
-                    >
-                      {formData.permissionLevel === 'PRO' && 'Max 5'}
-                      {formData.permissionLevel === 'MAX' && 'Max 15'}
-                    </span>
-                  )}
                 </Label>
                 <div className="relative">
                   <select
@@ -736,7 +722,7 @@ export default function AgentSettings() {
                     'rounded-sm pr-8 min-h-[100px]',
                     (editingField !== 'customInstructions' ||
                       !isProPlusFeatureAvailable()) &&
-                    'bg-muted',
+                    'dark:bg-muted',
                     !isProPlusFeatureAvailable() &&
                     'cursor-not-allowed text-muted-foreground',
                   )}
@@ -751,6 +737,14 @@ export default function AgentSettings() {
                   }
                   rows={4}
                   disabled={!isProPlusFeatureAvailable()}
+                  enableAI={editingField === 'customInstructions' && isProPlusFeatureAvailable()}
+                  aiFieldType="instructions"
+                  aiContext={{
+                    companyName: user?.user_metadata?.companyName || '',
+                  }}
+                  onAIEnhance={(enhancedText) =>
+                    handleInputChange('customInstructions', enhancedText)
+                  }
                 />
                 {editingField !== 'customInstructions' &&
                   isProPlusFeatureAvailable() ? (

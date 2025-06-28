@@ -11,7 +11,7 @@ import {
 import Link from 'next/link'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
-import { useValidation } from '@/hooks/use-validation'
+import { useValidation } from '@/lib/hooks/use-validation'
 import { useUser } from '@/lib/contexts/user-context'
 
 // Define required field categories

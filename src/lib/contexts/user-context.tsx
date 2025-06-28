@@ -112,7 +112,10 @@ export function UserProvider({ children }: UserProviderProps) {
       })
 
       // Also save main window scroll
-      scrollPositions.current.set(`window-${window.location.pathname}`, window.scrollY)
+      scrollPositions.current.set(
+        `window-${window.location.pathname}`,
+        window.scrollY,
+      )
     }
   }, [])
 
@@ -122,7 +125,9 @@ export function UserProvider({ children }: UserProviderProps) {
       // Use multiple requestAnimationFrame calls to ensure DOM is fully ready
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const scrollElements = document.querySelectorAll('[data-scroll-preserve]')
+          const scrollElements = document.querySelectorAll(
+            '[data-scroll-preserve]',
+          )
           scrollElements.forEach((element) => {
             const scrollKey = element.getAttribute('data-scroll-preserve')
             if (scrollKey) {
@@ -134,7 +139,9 @@ export function UserProvider({ children }: UserProviderProps) {
           })
 
           // Restore main window scroll
-          const savedWindowPosition = scrollPositions.current.get(`window-${window.location.pathname}`)
+          const savedWindowPosition = scrollPositions.current.get(
+            `window-${window.location.pathname}`,
+          )
           if (savedWindowPosition !== undefined) {
             window.scrollTo(0, savedWindowPosition)
           }

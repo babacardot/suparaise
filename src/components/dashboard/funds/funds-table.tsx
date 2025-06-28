@@ -62,7 +62,11 @@ interface ColumnVisibility {
 const SORT_STORAGE_KEY = 'funds-table-sort'
 const COLUMN_VISIBILITY_STORAGE_KEY = 'funds-table-columns'
 
-const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersChange }: FundsTableProps) {
+const FundsTable = React.memo(function FundsTable({
+  targets,
+  filters,
+  onFiltersChange,
+}: FundsTableProps) {
   const [hoveredButton, setHoveredButton] = React.useState<string | null>(null)
 
   // Initialize sort config from localStorage if available
@@ -84,79 +88,103 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
   })
 
   // Initialize column visibility from localStorage, with complexity hidden by default
-  const [columnVisibility, setColumnVisibility] = React.useState<ColumnVisibility>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedVisibility = localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY)
-        if (savedVisibility) {
-          return JSON.parse(savedVisibility)
-        }
-      } catch (error) {
-        console.warn('Failed to load saved column visibility:', error)
-      }
-    }
-    return {
-      region: true,
-      focus: true,
-      industry: true,
-      requirements: true,
-      type: true,
-      complexity: false, // Hidden by default
-    }
-  })
-
-  // Update column visibility and save to localStorage
-  const updateColumnVisibility = React.useCallback((column: keyof ColumnVisibility, visible: boolean) => {
-    setColumnVisibility(prev => {
-      const newVisibility = { ...prev, [column]: visible }
-
-      // Save to localStorage
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<ColumnVisibility>(() => {
       if (typeof window !== 'undefined') {
         try {
-          localStorage.setItem(COLUMN_VISIBILITY_STORAGE_KEY, JSON.stringify(newVisibility))
+          const savedVisibility = localStorage.getItem(
+            COLUMN_VISIBILITY_STORAGE_KEY,
+          )
+          if (savedVisibility) {
+            return JSON.parse(savedVisibility)
+          }
         } catch (error) {
-          console.warn('Failed to save column visibility:', error)
+          console.warn('Failed to load saved column visibility:', error)
         }
       }
-
-      return newVisibility
+      return {
+        region: true,
+        focus: true,
+        industry: true,
+        requirements: true,
+        type: true,
+        complexity: false, // Hidden by default
+      }
     })
-  }, [])
+
+  // Update column visibility and save to localStorage
+  const updateColumnVisibility = React.useCallback(
+    (column: keyof ColumnVisibility, visible: boolean) => {
+      setColumnVisibility((prev) => {
+        const newVisibility = { ...prev, [column]: visible }
+
+        // Save to localStorage
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(
+              COLUMN_VISIBILITY_STORAGE_KEY,
+              JSON.stringify(newVisibility),
+            )
+          } catch (error) {
+            console.warn('Failed to save column visibility:', error)
+          }
+        }
+
+        return newVisibility
+      })
+    },
+    [],
+  )
 
   // Filter and sort targets based on active filters and sort configuration
   const filteredAndSortedTargets = React.useMemo(() => {
     const result = targets.filter((target) => {
       // Filter by submission type
-      if (filters.submissionTypes.length > 0 && !filters.submissionTypes.includes(target.submission_type)) {
+      if (
+        filters.submissionTypes.length > 0 &&
+        !filters.submissionTypes.includes(target.submission_type)
+      ) {
         return false
       }
 
       // Filter by stage focus
       if (filters.stageFocus.length > 0) {
-        const hasMatchingStage = target.stage_focus?.some(stage => filters.stageFocus.includes(stage))
+        const hasMatchingStage = target.stage_focus?.some((stage) =>
+          filters.stageFocus.includes(stage),
+        )
         if (!hasMatchingStage) return false
       }
 
       // Filter by industry focus
       if (filters.industryFocus.length > 0) {
-        const hasMatchingIndustry = target.industry_focus?.some(industry => filters.industryFocus.includes(industry))
+        const hasMatchingIndustry = target.industry_focus?.some((industry) =>
+          filters.industryFocus.includes(industry),
+        )
         if (!hasMatchingIndustry) return false
       }
 
       // Filter by region focus
       if (filters.regionFocus.length > 0) {
-        const hasMatchingRegion = target.region_focus?.some(region => filters.regionFocus.includes(region))
+        const hasMatchingRegion = target.region_focus?.some((region) =>
+          filters.regionFocus.includes(region),
+        )
         if (!hasMatchingRegion) return false
       }
 
       // Filter by form complexity
-      if (filters.formComplexity.length > 0 && target.form_complexity && !filters.formComplexity.includes(target.form_complexity)) {
+      if (
+        filters.formComplexity.length > 0 &&
+        target.form_complexity &&
+        !filters.formComplexity.includes(target.form_complexity)
+      ) {
         return false
       }
 
       // Filter by required documents
       if (filters.requiredDocuments && filters.requiredDocuments.length > 0) {
-        const hasMatchingDocument = target.required_documents?.some(doc => filters.requiredDocuments.includes(doc))
+        const hasMatchingDocument = target.required_documents?.some((doc) =>
+          filters.requiredDocuments.includes(doc),
+        )
         if (!hasMatchingDocument) return false
       }
 
@@ -188,8 +216,14 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
             break
           case 'complexity':
             const complexityOrder = { simple: 1, standard: 2, comprehensive: 3 }
-            aValue = complexityOrder[a.form_complexity as keyof typeof complexityOrder] || 0
-            bValue = complexityOrder[b.form_complexity as keyof typeof complexityOrder] || 0
+            aValue =
+              complexityOrder[
+              a.form_complexity as keyof typeof complexityOrder
+              ] || 0
+            bValue =
+              complexityOrder[
+              b.form_complexity as keyof typeof complexityOrder
+              ] || 0
             break
           case 'requirements':
             aValue = a.required_documents?.length || 0
@@ -217,10 +251,12 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
   }, [targets, filters, sortConfig])
 
   const handleSort = React.useCallback((key: string) => {
-    setSortConfig(prevConfig => {
+    setSortConfig((prevConfig) => {
       const config = {
         key,
-        direction: (prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc') as 'asc' | 'desc'
+        direction: (prevConfig.key === key && prevConfig.direction === 'asc'
+          ? 'desc'
+          : 'asc') as 'asc' | 'desc',
       }
 
       // Persist sort config to localStorage
@@ -234,8 +270,6 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
       return config
     })
   }, [])
-
-
 
   // Filter targets based on active filters (keeping for backward compatibility)
   const filteredTargets = filteredAndSortedTargets
@@ -287,11 +321,20 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
       return 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
     }
     // Europe - Purple
-    if (['Europe', 'Western Europe', 'Eastern Europe', 'Continental Europe'].includes(region)) {
+    if (
+      [
+        'Europe',
+        'Western Europe',
+        'Eastern Europe',
+        'Continental Europe',
+      ].includes(region)
+    ) {
       return 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
     }
     // Asia - Orange
-    if (['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)) {
+    if (
+      ['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)
+    ) {
       return 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800'
     }
     // Latin America - Pink
@@ -320,11 +363,20 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
       return [0.133, 0.773, 0.369] as [number, number, number] // green-600
     }
     // Europe - Purple
-    if (['Europe', 'Western Europe', 'Eastern Europe', 'Continental Europe'].includes(region)) {
+    if (
+      [
+        'Europe',
+        'Western Europe',
+        'Eastern Europe',
+        'Continental Europe',
+      ].includes(region)
+    ) {
       return [0.583, 0.278, 0.824] as [number, number, number] // purple-600
     }
     // Asia - Orange
-    if (['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)) {
+    if (
+      ['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)
+    ) {
       return [0.918, 0.435, 0.071] as [number, number, number] // orange-600
     }
     // Latin America - Pink
@@ -345,13 +397,22 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
 
   const getStageColor = React.useCallback((stage: string) => {
     switch (stage) {
-      case 'Pre-seed': return "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
-      case 'Seed': return "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
-      case 'Series A': return "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-      case 'Series B': return "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
-      case 'Series C': return "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
-      case 'Growth': return "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-      default: return "bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800"
+      case 'All':
+        return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
+      case 'Pre-seed':
+        return 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+      case 'Seed':
+        return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
+      case 'Series A':
+        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+      case 'Series B':
+        return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
+      case 'Series C':
+        return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+      case 'Growth':
+        return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+      default:
+        return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
     }
   }, [])
 
@@ -437,7 +498,32 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
 
   return (
     <TooltipProvider>
-      <div className="h-full flex flex-col">
+      <div
+        className="h-full flex flex-col"
+        style={{
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          WebkitTapHighlightColor: 'transparent'
+        }}
+        onCopy={(e: React.ClipboardEvent) => e.preventDefault()}
+        onCut={(e: React.ClipboardEvent) => e.preventDefault()}
+        onPaste={(e: React.ClipboardEvent) => e.preventDefault()}
+        onDragStart={(e: React.DragEvent) => e.preventDefault()}
+        onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
+      >
+        {/* Security Watermark */}
+        <div
+          className="fixed inset-0 pointer-events-none z-50 opacity-5"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='Arial' font-size='8' fill='%23000' transform='rotate(-45 50 50)'%3ECONFIDENTIAL%3C/text%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '100px 100px'
+          }}
+        />
+
         {/* Filters Component */}
         <FundsFilters
           filters={filters}
@@ -509,16 +595,6 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                           </button>
                         </TableHead>
                       )}
-                      {columnVisibility.requirements && (
-                        <TableHead className="w-[110px]">
-                          <button
-                            onClick={() => handleSort('requirements')}
-                            className="flex items-center hover:text-foreground transition-colors font-medium"
-                          >
-                            Requirements
-                          </button>
-                        </TableHead>
-                      )}
                       {columnVisibility.type && (
                         <TableHead className="w-[70px]">
                           <button
@@ -526,6 +602,16 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Type
+                          </button>
+                        </TableHead>
+                      )}
+                      {columnVisibility.requirements && (
+                        <TableHead className="w-[110px]">
+                          <button
+                            onClick={() => handleSort('requirements')}
+                            className="flex items-center hover:text-foreground transition-colors font-medium"
+                          >
+                            Requirements
                           </button>
                         </TableHead>
                       )}
@@ -558,7 +644,9 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                                   {target.name}
                                 </a>
                               ) : (
-                                <span className="font-medium">{target.name}</span>
+                                <span className="font-medium">
+                                  {target.name}
+                                </span>
                               )}
                             </div>
                             {target.notes && (
@@ -571,38 +659,46 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                         {columnVisibility.region && (
                           <TableCell className="p-2">
                             <div className="flex flex-wrap gap-1">
-                              {target.region_focus?.slice(0, 2).map((region) => (
-                                <Badge
-                                  key={region}
-                                  className={`rounded-sm ${getRegionColor(region)} text-xs`}
-                                >
-                                  <LottieIcon
-                                    animationData={animations.globe}
-                                    size={12}
-                                    className="mr-1"
-                                    customColor={getRegionIconColor(region)}
-                                  />
-                                  {region}
-                                </Badge>
-                              ))}
-                              {target.region_focus && target.region_focus.length > 2 && (
-                                <Tooltip>
-                                  <TooltipTrigger>
-                                    <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
-                                      +{target.region_focus.length - 2}
-                                    </Badge>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="bg-background text-foreground border border-border rounded-sm shadow-md px-3 py-2 before:hidden after:hidden [&>svg]:hidden [&>*[role='presentation']]:hidden">
-                                    <div className="space-y-1">
-                                      {target.region_focus.slice(2).map((region) => (
-                                        <div key={region} className="text-xs">
-                                          {region}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
+                              {target.region_focus
+                                ?.slice(0, 2)
+                                .map((region) => (
+                                  <Badge
+                                    key={region}
+                                    className={`rounded-sm ${getRegionColor(region)} text-xs`}
+                                  >
+                                    <LottieIcon
+                                      animationData={animations.globe}
+                                      size={12}
+                                      className="mr-1"
+                                      customColor={getRegionIconColor(region)}
+                                    />
+                                    {region}
+                                  </Badge>
+                                ))}
+                              {target.region_focus &&
+                                target.region_focus.length > 2 && (
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs cursor-help">
+                                        +{target.region_focus.length - 2}
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-background text-foreground border border-border rounded-sm shadow-md px-3 py-2 before:hidden after:hidden [&>svg]:hidden [&>*[role='presentation']]:hidden">
+                                      <div className="space-y-1">
+                                        {target.region_focus
+                                          .slice(2)
+                                          .map((region) => (
+                                            <div
+                                              key={region}
+                                              className="text-xs"
+                                            >
+                                              {region}
+                                            </div>
+                                          ))}
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
                             </div>
                           </TableCell>
                         )}
@@ -630,7 +726,10 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                                         {target.stage_focus
                                           .slice(2)
                                           .map((stage) => (
-                                            <div key={stage} className="text-xs">
+                                            <div
+                                              key={stage}
+                                              className="text-xs"
+                                            >
                                               {stage}
                                             </div>
                                           ))}
@@ -667,7 +766,10 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                                         {target.industry_focus
                                           .slice(2)
                                           .map((industry) => (
-                                            <div key={industry} className="text-xs">
+                                            <div
+                                              key={industry}
+                                              className="text-xs"
+                                            >
                                               {industry}
                                             </div>
                                           ))}
@@ -676,6 +778,15 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                                   </Tooltip>
                                 )}
                             </div>
+                          </TableCell>
+                        )}
+                        {columnVisibility.type && (
+                          <TableCell className="p-2">
+                            <Badge
+                              className={`rounded-sm text-xs ${getSubmissionTypeColor(target.submission_type)}`}
+                            >
+                              {capitalizeFirst(target.submission_type)}
+                            </Badge>
                           </TableCell>
                         )}
                         {columnVisibility.requirements && (
@@ -721,9 +832,13 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                                                 className="text-xs flex items-center gap-1"
                                               >
                                                 <LottieIcon
-                                                  animationData={docBadge.animation}
+                                                  animationData={
+                                                    docBadge.animation
+                                                  }
                                                   size={12}
-                                                  customColor={docBadge.customColor}
+                                                  customColor={
+                                                    docBadge.customColor
+                                                  }
                                                 />
                                                 {docBadge.label}
                                               </div>
@@ -734,15 +849,6 @@ const FundsTable = React.memo(function FundsTable({ targets, filters, onFiltersC
                                   </Tooltip>
                                 )}
                             </div>
-                          </TableCell>
-                        )}
-                        {columnVisibility.type && (
-                          <TableCell className="p-2">
-                            <Badge
-                              className={`rounded-sm text-xs ${getSubmissionTypeColor(target.submission_type)}`}
-                            >
-                              {capitalizeFirst(target.submission_type)}
-                            </Badge>
                           </TableCell>
                         )}
                         {columnVisibility.complexity && (

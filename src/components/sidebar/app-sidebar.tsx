@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import SupportModal from '@/components/dashboard/support-modal'
 import FeedbackModal from '@/components/dashboard/feedback-modal'
 import { useUser } from '@/lib/contexts/user-context'
-import { useValidation } from '@/hooks/use-validation'
+import { useValidation } from '@/lib/hooks/use-validation'
 import { VALIDATION_PRESETS } from '@/components/ui/validation-gate'
 import {
   Sidebar,

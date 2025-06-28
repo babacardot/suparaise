@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Card,
@@ -12,8 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
-import { CheckIcon, Settings } from 'lucide-react'
+
+import { Settings } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -56,49 +57,66 @@ const integrations: Integration[] = [
     id: 'gmail',
     name: 'Gmail',
     description:
-      'Connect your Gmail account for automated email outreach to VCs',
+      'Connect your Gmail for automated email outreach to angels and funds.',
     icon: (
       <Image
         src="/integrations/gmail.webp"
         alt="Gmail"
-        className="h-6 w-6"
-        width={24}
-        height={24}
+        className="h-full w-full object-cover"
+        width={48}
+        height={48}
       />
     ),
-    status: 'available',
+    status: 'coming_soon',
   },
   {
     id: 'slack',
     name: 'Slack',
     description:
-      'Get real-time notifications about funding opportunities and responses',
+      'Get real-time notifications about funding opportunities and responses.',
     icon: (
       <Image
         src="/integrations/slack.webp"
         alt="Slack"
-        className="h-6 w-6"
-        width={24}
-        height={24}
+        className="h-full w-full object-cover"
+        width={48}
+        height={48}
       />
     ),
-    status: 'available',
+    status: 'coming_soon',
   },
   {
     id: 'linkedin',
     name: 'LinkedIn',
     description:
-      'Sync your LinkedIn profile and find VC contacts automatically',
+      'Link your LinkedIn to reach out to angels without leaving Suparaise.',
     icon: (
       <Image
         src="/integrations/linkedin.webp"
         alt="LinkedIn"
-        className="h-6 w-6"
-        width={24}
-        height={24}
+        className="h-full w-full object-cover"
+        width={48}
+        height={48}
       />
     ),
-    status: 'available',
+    status: 'coming_soon',
+    isPremium: true,
+  },
+  {
+    id: 'drive',
+    name: 'Drive',
+    description:
+      'Sync your Google Drive for document sharing.',
+    icon: (
+      <Image
+        src="/integrations/drive.webp"
+        alt="Google Drive"
+        className="h-full w-full object-cover"
+        width={48}
+        height={48}
+      />
+    ),
+    status: 'coming_soon',
     isPremium: true,
   },
 ]
@@ -118,7 +136,7 @@ function IntegrationSettingsSkeleton() {
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="grid gap-4 md:grid-cols-2 pr-2">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-3 flex-1">
@@ -150,21 +168,21 @@ export default function IntegrationSettings() {
     string | null
   >(null)
 
-  // Get permission level and check PRO access
+  // Get permission level and check MAX access
   const permissionLevel = subscription?.permission_level || 'FREE'
-  const hasProAccess = permissionLevel === 'PRO' || permissionLevel === 'MAX'
+  const hasMaxAccess = permissionLevel === 'MAX'
 
-  // Redirect if user doesn't have PRO access
+  // Redirect if user doesn't have MAX access
   useEffect(() => {
-    if (!hasProAccess) {
+    if (!hasMaxAccess) {
       toast({
         variant: 'destructive',
         title: 'Access denied',
         description:
-          'Integrations are only available for PRO and MAX users. Upgrade your plan.',
+          'Integrations are only available for MAX users. Upgrade your plan.',
       })
     }
-  }, [hasProAccess, toast])
+  }, [hasMaxAccess, toast])
 
   useEffect(() => {
     // Simulate loading user's connected integrations
@@ -179,7 +197,7 @@ export default function IntegrationSettings() {
     return <div>Loading...</div>
   }
 
-  if (!hasProAccess) {
+  if (!hasMaxAccess) {
     return (
       <div className="h-full flex flex-col overflow-hidden">
         <div className="flex-shrink-0 pb-4">
@@ -199,16 +217,16 @@ export default function IntegrationSettings() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-sm h-6 w-6">
+                      <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-sm h-10 w-10">
                         <LottieIcon
                           animationData={animations.star}
                           size={24}
-                          customColor={[0.2, 0.4, 0.9]}
+                          customColor={[1.0, 0.75, 0.0]}
                         />
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-foreground">
-                          PRO+
+                          MAX
                         </h3>
                         <p className="text-sm text-muted-foreground">
                           Upgrade to unlock
@@ -216,7 +234,7 @@ export default function IntegrationSettings() {
                       </div>
                     </div>
                     <p className="text-muted-foreground max-w-md mb-6">
-                      Integrations are only available for PRO and MAX users.
+                      Integrations are only available for MAX users.
                       Upgrade your plan to connect external services and
                       automate your fundraising process on additional channels.
                     </p>
@@ -227,27 +245,33 @@ export default function IntegrationSettings() {
                         Currently available:
                       </span>
                       <div className="flex items-center gap-2">
-                        <Image
-                          src="/integrations/gmail.webp"
-                          alt="Gmail"
-                          className="h-5 w-5 opacity-60 rounded-sm"
-                          width={20}
-                          height={20}
-                        />
-                        <Image
-                          src="/integrations/slack.webp"
-                          alt="Slack"
-                          className="h-5 w-5 opacity-60 rounded-sm"
-                          width={20}
-                          height={20}
-                        />
-                        <Image
-                          src="/integrations/linkedin.webp"
-                          alt="LinkedIn"
-                          className="h-5 w-5 opacity-60 rounded-sm"
-                          width={20}
-                          height={20}
-                        />
+                        <div className="h-5 w-5 rounded-sm overflow-hidden">
+                          <Image
+                            src="/integrations/gmail.webp"
+                            alt="Gmail"
+                            className="h-full w-full opacity-60 object-cover"
+                            width={20}
+                            height={20}
+                          />
+                        </div>
+                        <div className="h-5 w-5 rounded-sm overflow-hidden">
+                          <Image
+                            src="/integrations/slack.webp"
+                            alt="Slack"
+                            className="h-full w-full opacity-60 object-cover"
+                            width={20}
+                            height={20}
+                          />
+                        </div>
+                        <div className="h-5 w-5 rounded-sm overflow-hidden">
+                          <Image
+                            src="/integrations/linkedin.webp"
+                            alt="LinkedIn"
+                            className="h-full w-full opacity-60 object-cover"
+                            width={20}
+                            height={20}
+                          />
+                        </div>
                         <span className="text-xs text-muted-foreground">
                           + more coming soon.
                         </span>
@@ -290,13 +314,23 @@ export default function IntegrationSettings() {
     const integration = integrations.find((i) => i.id === integrationId)
     if (!integration) return
 
+    // Check if integration is coming soon
+    if (integration.status === 'coming_soon') {
+      playClickSound()
+      toast({
+        title: 'Coming soon',
+        description: `${integration.name} integration is not yet available. We're working on it!`,
+      })
+      return
+    }
+
     // Check if this is a premium feature and user doesn't have access
-    if (integration.isPremium && !hasProAccess) {
+    if (integration.isPremium && !hasMaxAccess) {
       playClickSound()
       toast({
         variant: 'destructive',
         title: 'Premium feature',
-        description: `${integration.name} integration is only available for PRO and MAX users. Please upgrade your plan.`,
+        description: `${integration.name} integration is only available for MAX users. Please upgrade your plan.`,
       })
       return
     }
@@ -341,18 +375,9 @@ export default function IntegrationSettings() {
   const getStatusBadge = (status: Integration['status']) => {
     switch (status) {
       case 'connected':
-        return (
-          <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
-            <CheckIcon className="h-3 w-3 mr-1" />
-            Connected
-          </Badge>
-        )
+        return null // Remove connected badge as green background is enough
       case 'available':
-        return (
-          <Badge className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-            Available
-          </Badge>
-        )
+        return null // Remove available badge as requested
       case 'coming_soon':
         return (
           <Badge className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800">
@@ -378,7 +403,8 @@ export default function IntegrationSettings() {
           {integrations.map((integration) => {
             const isConnected = connectedIntegrations.has(integration.id)
             const isConnecting = connectingIntegration === integration.id
-            const requiresUpgrade = integration.isPremium && !hasProAccess
+            const requiresUpgrade = integration.isPremium && !hasMaxAccess
+            const isComingSoon = integration.status === 'coming_soon'
 
             return (
               <Card
@@ -386,47 +412,53 @@ export default function IntegrationSettings() {
                 className={cn(
                   'transition-all duration-200',
                   isConnected &&
-                    'bg-green-50/50 dark:bg-green-950/30 border-green-200 dark:border-green-800',
+                  'bg-green-50/50 dark:bg-green-950/30 border-green-200 dark:border-green-800',
                   requiresUpgrade && 'opacity-75',
                 )}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-center space-x-3">
                       <div
                         className={cn(
-                          'p-2 rounded-sm',
+                          'p-0 rounded-sm w-12 h-12 overflow-hidden flex items-center justify-center',
                           isConnected
-                            ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
-                            : 'bg-muted text-muted-foreground',
+                            ? 'bg-green-100 dark:bg-green-900/50'
+                            : 'bg-muted',
                         )}
                       >
                         {integration.icon}
                       </div>
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="text-base">
-                            {integration.name}
-                          </CardTitle>
-                          {integration.isPremium && (
-                            <Badge className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                              PRO
-                            </Badge>
-                          )}
-                        </div>
+                        <CardTitle className="text-base">
+                          {integration.name}
+                        </CardTitle>
                         {getStatusBadge(
                           isConnected ? 'connected' : integration.status,
                         )}
                       </div>
                     </div>
 
-                    <Switch
-                      checked={isConnected}
-                      onCheckedChange={() =>
+                    <button
+                      onClick={() =>
                         handleIntegrationToggle(integration.id, isConnected)
                       }
-                      disabled={isConnecting}
-                    />
+                      disabled={isConnecting || isComingSoon}
+                      className={cn(
+                        'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
+                        isConnected && !isComingSoon
+                          ? 'bg-green-600'
+                          : 'bg-gray-200 dark:bg-gray-700',
+                        (isConnecting || isComingSoon) && 'opacity-50 cursor-not-allowed',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
+                          isConnected && !isComingSoon ? 'translate-x-5' : 'translate-x-1',
+                        )}
+                      />
+                    </button>
                   </div>
                 </CardHeader>
 

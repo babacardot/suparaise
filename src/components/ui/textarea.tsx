@@ -15,6 +15,7 @@ const MIN_CHAR_REQUIREMENTS = {
     market: 40,
     customers: 40,
     competitors: 40,
+    instructions: 40,
   },
   // Full enhancement requirements (higher thresholds)
   full: {
@@ -26,20 +27,22 @@ const MIN_CHAR_REQUIREMENTS = {
     market: 80,
     customers: 80,
     competitors: 80,
+    instructions: 80,
   },
 } as const
 
 interface TextareaProps extends React.ComponentProps<'textarea'> {
   enableAI?: boolean
   aiFieldType?:
-    | 'bio'
-    | 'description-short'
-    | 'description-medium'
-    | 'description-long'
-    | 'traction'
-    | 'market'
-    | 'customers'
-    | 'competitors'
+  | 'bio'
+  | 'description-short'
+  | 'description-medium'
+  | 'description-long'
+  | 'traction'
+  | 'market'
+  | 'customers'
+  | 'competitors'
+  | 'instructions'
   aiContext?: {
     companyName?: string
     industry?: string

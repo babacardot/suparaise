@@ -314,9 +314,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -1095,8 +1094,8 @@ export default function CompanySettings() {
                   formData.logoUrl ||
                   `https://avatar.vercel.sh/${encodeURIComponent(
                     formData.name.toLowerCase() ||
-                      currentStartupId ||
-                      'suparaise',
+                    currentStartupId ||
+                    'suparaise',
                   )}.png?size=80`
                 }
                 alt="Company logo"
@@ -1164,7 +1163,7 @@ export default function CompanySettings() {
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     className={cn(
                       'rounded-sm pr-8',
-                      editingField !== 'name' && 'bg-muted',
+                      editingField !== 'name' && 'dark:bg-muted',
                     )}
                     readOnly={editingField !== 'name'}
                     placeholder="Enter your company name"
@@ -1199,7 +1198,7 @@ export default function CompanySettings() {
                     }
                     className={cn(
                       'rounded-sm pr-8',
-                      editingField !== 'website' && 'bg-muted',
+                      editingField !== 'website' && 'dark:bg-muted',
                     )}
                     readOnly={editingField !== 'website'}
                     placeholder="https://yourcompany.com"
@@ -1240,7 +1239,7 @@ export default function CompanySettings() {
                     }
                     className={cn(
                       'rounded-sm pr-8',
-                      editingField !== 'foundedYear' && 'bg-muted',
+                      editingField !== 'foundedYear' && 'dark:bg-muted',
                     )}
                     readOnly={editingField !== 'foundedYear'}
                     min="1900"
@@ -1304,7 +1303,7 @@ export default function CompanySettings() {
                     }
                     className={cn(
                       'rounded-sm pr-8',
-                      editingField !== 'location' && 'bg-muted',
+                      editingField !== 'location' && 'dark:bg-muted',
                     )}
                     readOnly={editingField !== 'location'}
                     placeholder="e.g., San Francisco, CA"
@@ -1369,7 +1368,7 @@ export default function CompanySettings() {
                   }
                   className={cn(
                     'rounded-sm pr-8 min-h-[60px]',
-                    editingField !== 'descriptionShort' && 'bg-muted',
+                    editingField !== 'descriptionShort' && 'dark:bg-muted',
                   )}
                   readOnly={editingField !== 'descriptionShort'}
                   placeholder="Brief description of what your company does"
@@ -1414,7 +1413,7 @@ export default function CompanySettings() {
                   }
                   className={cn(
                     'rounded-sm pr-8 min-h-[80px]',
-                    editingField !== 'descriptionMedium' && 'bg-muted',
+                    editingField !== 'descriptionMedium' && 'dark:bg-muted',
                   )}
                   readOnly={editingField !== 'descriptionMedium'}
                   placeholder="Describe what your company does, the problem you solve, and your solution..."
@@ -1459,7 +1458,7 @@ export default function CompanySettings() {
                   }
                   className={cn(
                     'rounded-sm pr-8 min-h-[120px]',
-                    editingField !== 'descriptionLong' && 'bg-muted',
+                    editingField !== 'descriptionLong' && 'dark:bg-muted',
                   )}
                   readOnly={editingField !== 'descriptionLong'}
                   placeholder="Detailed description of your company, market opportunity, solution, and business model..."
@@ -1753,7 +1752,7 @@ export default function CompanySettings() {
                       }
                       className={cn(
                         'rounded-sm pr-8',
-                        editingField !== 'incorporationCity' && 'bg-muted',
+                        editingField !== 'incorporationCity' && 'dark:bg-muted',
                       )}
                       readOnly={editingField !== 'incorporationCity'}
                       placeholder="Paris"
@@ -1953,7 +1952,7 @@ export default function CompanySettings() {
                   }
                   className={cn(
                     'rounded-sm pr-8 min-h-[80px]',
-                    editingField !== 'tractionSummary' && 'bg-muted',
+                    editingField !== 'tractionSummary' && 'dark:bg-muted',
                   )}
                   readOnly={editingField !== 'tractionSummary'}
                   placeholder="Key metrics, growth numbers, user adoption, partnerships, etc."
@@ -1998,7 +1997,7 @@ export default function CompanySettings() {
                   }
                   className={cn(
                     'rounded-sm pr-8 min-h-[80px]',
-                    editingField !== 'marketSummary' && 'bg-muted',
+                    editingField !== 'marketSummary' && 'dark:bg-muted',
                   )}
                   readOnly={editingField !== 'marketSummary'}
                   placeholder="Market size, target customers, competitive landscape, etc."
@@ -2043,7 +2042,7 @@ export default function CompanySettings() {
                   }
                   className={cn(
                     'rounded-sm pr-8 min-h-[80px]',
-                    editingField !== 'keyCustomers' && 'bg-muted',
+                    editingField !== 'keyCustomers' && 'dark:bg-muted',
                   )}
                   readOnly={editingField !== 'keyCustomers'}
                   placeholder="Notable customers, enterprise clients, early adopters..."
@@ -2109,7 +2108,7 @@ export default function CompanySettings() {
                 />
                 {!formData.pitchDeckUrl ? (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                    <div className="h-20 w-20 dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
                       <LottieIcon
                         animationData={animations.fileplus}
                         size={32}
@@ -2206,7 +2205,7 @@ export default function CompanySettings() {
                 />
                 {!formData.introVideoUrl ? (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                    <div className="h-20 w-20 dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
                       <LottieIcon
                         animationData={animations.fileplus}
                         size={32}
@@ -2347,7 +2346,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

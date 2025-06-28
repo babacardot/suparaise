@@ -107,7 +107,7 @@ export default function PhoneNumberInput({
         <div
           className={cn(
             'flex w-full rounded-sm border border-input bg-transparent shadow-xs transition-colors',
-            !isEditing && 'bg-muted',
+            !isEditing && 'dark:bg-muted',
           )}
         >
           <RPNInput.default

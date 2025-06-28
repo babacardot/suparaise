@@ -59,34 +59,34 @@ function NavItem({
     [item.icon],
   )
 
-  // Check if this item requires PRO permission
-  const requiresProPermission = item.title === 'Integrations'
-  const hasProAccess = permissionLevel === 'PRO' || permissionLevel === 'MAX'
-  const isLockedForFreeUser = requiresProPermission && !hasProAccess
+  // Check if this item requires MAX permission
+  const requiresMaxPermission = item.title === 'Integrations'
+  const hasMaxAccess = permissionLevel === 'MAX'
+  const isLockedForUser = requiresMaxPermission && !hasMaxAccess
 
   // Optimize click handler with useCallback
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      if (isLockedForFreeUser) {
+      if (isLockedForUser) {
         e.preventDefault()
         toast({
           variant: 'destructive',
           title: 'Feature locked',
-          description: `${item.title} is only available for PRO and MAX users. Please upgrade your plan.`,
+          description: `${item.title} is only available for MAX users. Please upgrade your plan.`,
         })
         return
       }
       // Play sound asynchronously to not block navigation
       playClickSound()
     },
-    [isLockedForFreeUser, item.title, toast],
+    [isLockedForUser, item.title, toast],
   )
 
   // Optimize hover handlers with useCallback
   const handleMouseEnter = useCallback(() => setIsHovered(true), [])
   const handleMouseLeave = useCallback(() => setIsHovered(false), [])
 
-  if (isLockedForFreeUser) {
+  if (isLockedForUser) {
     return (
       <div
         onClick={handleClick}
@@ -123,12 +123,12 @@ function NavItem({
             <span className="font-medium text-sm">{item.title}</span>
           </div>
           <div className="flex items-center gap-2">
-            {requiresProPermission && (
+            {requiresMaxPermission && (
               <Badge
                 variant="secondary"
-                className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
               >
-                PRO+
+                MAX
               </Badge>
             )}
           </div>

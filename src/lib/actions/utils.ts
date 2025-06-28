@@ -134,13 +134,13 @@ export function generateRandomCompanyName(): string {
   // Keep combinations under 11 characters
   const adjective = adjectives[Math.floor(Math.random() * adjectives.length)]
   const noun = nouns[Math.floor(Math.random() * nouns.length)]
-  
+
   let result = ''
   const style = Math.random()
-  
+
   // Calculate potential length before building
   const baseLength = adjective.length + noun.length
-  
+
   if (style < 0.5 && baseLength <= 10) {
     // Simple: AdjectiveNoun (most common for short names)
     result = adjective + noun
@@ -167,16 +167,19 @@ export function generateRandomCompanyName(): string {
       result = adjective + noun // fallback
     }
   }
-  
+
   // Final safety check - if still too long, use simple combination
   if (result.length > 10) {
     // Find the shortest possible combination
-    const shortAdjectives = adjectives.filter(adj => adj.length <= 4)
-    const shortNouns = nouns.filter(n => n.length <= 4)
-    
-    const shortAdj = shortAdjectives[Math.floor(Math.random() * shortAdjectives.length)] || 'New'
-    const shortNoun = shortNouns[Math.floor(Math.random() * shortNouns.length)] || 'Co'
-    
+    const shortAdjectives = adjectives.filter((adj) => adj.length <= 4)
+    const shortNouns = nouns.filter((n) => n.length <= 4)
+
+    const shortAdj =
+      shortAdjectives[Math.floor(Math.random() * shortAdjectives.length)] ||
+      'New'
+    const shortNoun =
+      shortNouns[Math.floor(Math.random() * shortNouns.length)] || 'Co'
+
     result = shortAdj + shortNoun
   }
 

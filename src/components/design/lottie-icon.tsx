@@ -27,9 +27,15 @@ const LottieIconComponent = ({
   const [internalHovered, setInternalHovered] = useState(false)
   const [animData, setAnimData] = useState<LottieAnimationData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lottieRef = useRef<any>(null)
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
+
+  // Handle mounting to prevent hydration mismatches
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Use external hover state if provided, otherwise use internal state
   const isHovered =
@@ -131,14 +137,17 @@ const LottieIconComponent = ({
     )
   }
 
-  // Apply theme-based filter if no custom color is provided
-  const shouldApplyThemeFilter = !customColor
-  const isDark = theme === 'dark'
-  const filterStyle = shouldApplyThemeFilter
-    ? isDark
-      ? { filter: 'invert(1) brightness(1.2)' }
-      : { filter: 'brightness(0.8)' }
-    : {}
+  // Apply theme-based filter if no custom color is provided and component is mounted
+  const shouldApplyThemeFilter = !customColor && mounted
+  const isDark = resolvedTheme === 'dark'
+
+  // Only apply filters if mounted and theme is resolved
+  const filterStyle =
+    shouldApplyThemeFilter && resolvedTheme
+      ? isDark
+        ? { filter: 'invert(1) brightness(1.2)' }
+        : { filter: 'brightness(0.8)' }
+      : {}
 
   return (
     <div

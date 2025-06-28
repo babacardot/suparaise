@@ -84,6 +84,15 @@ CREATE TYPE agent_submission_delay AS ENUM ('0', '15', '30');
 CREATE TYPE agent_retry_attempts AS ENUM ('1', '3', '5', '10');
 CREATE TYPE agent_parallel_submissions AS ENUM ('1', '3', '5', '15');
 CREATE TYPE agent_timeout_minutes AS ENUM ('5', '10', '15',  '30');
+CREATE TYPE check_size_range AS ENUM ('1K-10K', '10K-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K-1M', '1M+');
+CREATE TYPE investment_approach AS ENUM ('hands-on', 'passive', 'advisory', 'network-focused');
+CREATE TYPE response_time AS ENUM ('1-3 days', '1 week', '2 weeks', '1 month', '2+ months');
+CREATE TYPE program_duration AS ENUM ('3 months','6 months', '12 months', 'ongoing', 'variable');
+CREATE TYPE program_type AS ENUM ('in-person', 'remote', 'hybrid');
+CREATE TYPE equity_range AS ENUM ('0%', '1-3%', '4-6%', '7-10%', '10%+', 'variable');
+CREATE TYPE funding_range AS ENUM ('0-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K+');
+CREATE TYPE batch_size AS ENUM ('1-10', '11-20', '21-50', '51-100', '100+');
+CREATE TYPE acceptance_rate AS ENUM ('<1%', '1-5%', '6-10%', '11-20%', '20%+');
 
 -- --------------------------------------------------
 -- Auto-update `updated_at` column
@@ -141,6 +150,83 @@ CREATE TABLE targets (
 
 CREATE TRIGGER set_targets_timestamp
 BEFORE UPDATE ON targets
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- --------------------------------------------------
+-- Table: angels
+-- Stores all the angel investors we can apply to.
+-- --------------------------------------------------
+CREATE TABLE angels (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT,
+    linkedin TEXT,
+    twitter TEXT,
+    personal_website TEXT,
+    location TEXT,
+    bio TEXT,
+    check_size check_size_range,
+    stage_focus investment_stage[],
+    industry_focus industry_type[],
+    region_focus region_type[],
+    investment_approach investment_approach,
+    previous_exits TEXT[], -- Companies they've invested in that had exits
+    domain_expertise TEXT[], -- Areas of expertise they can help with
+    response_time response_time,
+    submission_type submission_type DEFAULT 'email',
+    application_url TEXT,
+    application_email TEXT,
+    form_complexity form_complexity,
+    required_documents required_document_type[],
+    notable_investments TEXT[], -- Notable companies in their portfolio
+    is_active BOOLEAN DEFAULT TRUE,
+    notes TEXT, -- For special instructions or additional info
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TRIGGER set_angels_timestamp
+BEFORE UPDATE ON angels
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- --------------------------------------------------
+-- Table: accelerators
+-- Stores all the accelerators/incubators we can apply to.
+-- --------------------------------------------------
+CREATE TABLE accelerators (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    website TEXT,
+    application_url TEXT,
+    application_email TEXT,
+    submission_type submission_type DEFAULT 'form',
+    program_type program_type,
+    program_duration program_duration,
+    location TEXT,
+    is_remote_friendly BOOLEAN DEFAULT FALSE,
+    batch_size batch_size,
+    batches_per_year INTEGER,
+    next_application_deadline DATE,
+    stage_focus investment_stage[],
+    industry_focus industry_type[],
+    region_focus region_type[],
+    equity_taken equity_range,
+    funding_provided funding_range,
+    acceptance_rate acceptance_rate,
+    form_complexity form_complexity,
+    required_documents required_document_type[],
+    program_fee NUMERIC(10, 2), -- Some charge program fees
+    is_active BOOLEAN DEFAULT TRUE,
+    notes TEXT, -- For special instructions
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TRIGGER set_accelerators_timestamp
+BEFORE UPDATE ON accelerators
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
@@ -293,6 +379,36 @@ CREATE TABLE submissions (
 );
 
 -- --------------------------------------------------
+-- Table: angel_submissions
+-- Tracks the status of each application submission to angels by the agent.
+-- --------------------------------------------------
+CREATE TABLE angel_submissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
+    angel_id UUID REFERENCES angels(id) ON DELETE CASCADE NOT NULL,
+    submission_date TIMESTAMPTZ DEFAULT NOW(),
+    status submission_status DEFAULT 'pending',
+    agent_notes TEXT, -- To store the agent's final report
+    UNIQUE(startup_id, angel_id),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- --------------------------------------------------
+-- Table: accelerator_submissions
+-- Tracks the status of each application submission to accelerators by the agent.
+-- --------------------------------------------------
+CREATE TABLE accelerator_submissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
+    accelerator_id UUID REFERENCES accelerators(id) ON DELETE CASCADE NOT NULL,
+    submission_date TIMESTAMPTZ DEFAULT NOW(),
+    status submission_status DEFAULT 'pending',
+    agent_notes TEXT, -- To store the agent's final report
+    UNIQUE(startup_id, accelerator_id),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- --------------------------------------------------
 -- Table: agent_settings
 -- Stores agent configuration settings per startup.
 -- --------------------------------------------------
@@ -341,6 +457,18 @@ CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
 
 -- Composite index for the unique constraint queries
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_target ON submissions(startup_id, target_id);
+
+-- Indexes for angel_submissions queries
+CREATE INDEX IF NOT EXISTS idx_angel_submissions_startup_id ON angel_submissions(startup_id);
+CREATE INDEX IF NOT EXISTS idx_angel_submissions_angel_id ON angel_submissions(angel_id);
+CREATE INDEX IF NOT EXISTS idx_angel_submissions_status ON angel_submissions(status);
+CREATE INDEX IF NOT EXISTS idx_angel_submissions_startup_angel ON angel_submissions(startup_id, angel_id);
+
+-- Indexes for accelerator_submissions queries
+CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_startup_id ON accelerator_submissions(startup_id);
+CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_accelerator_id ON accelerator_submissions(accelerator_id);
+CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_status ON accelerator_submissions(status);
+CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_startup_accelerator ON accelerator_submissions(startup_id, accelerator_id);
 CREATE INDEX IF NOT EXISTS idx_common_responses_startup_question ON common_responses(startup_id, question);
 
 -- Index for email lookups in founders (if used)
@@ -362,13 +490,44 @@ CREATE INDEX IF NOT EXISTS idx_agent_settings_startup_user ON agent_settings(sta
 CREATE INDEX IF NOT EXISTS idx_profiles_permission_level ON profiles(permission_level);
 CREATE INDEX IF NOT EXISTS idx_profiles_is_subscribed ON profiles(is_subscribed);
 
+-- Performance indexes for angels table
+CREATE INDEX IF NOT EXISTS idx_angels_stage_focus ON angels USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_angels_industry_focus ON angels USING GIN(industry_focus) WHERE industry_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_angels_region_focus ON angels USING GIN(region_focus) WHERE region_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_angels_investment_approach ON angels(investment_approach) WHERE investment_approach IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_angels_check_size ON angels(check_size) WHERE check_size IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_angels_response_time ON angels(response_time) WHERE response_time IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_angels_is_active ON angels(is_active);
+
+-- Performance indexes for accelerators table
+CREATE INDEX IF NOT EXISTS idx_accelerators_stage_focus ON accelerators USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_industry_focus ON accelerators USING GIN(industry_focus) WHERE industry_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_region_focus ON accelerators USING GIN(region_focus) WHERE region_focus IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_program_type ON accelerators(program_type) WHERE program_type IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_program_duration ON accelerators(program_duration) WHERE program_duration IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_batch_size ON accelerators(batch_size) WHERE batch_size IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_equity_taken ON accelerators(equity_taken) WHERE equity_taken IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_funding_provided ON accelerators(funding_provided) WHERE funding_provided IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_acceptance_rate ON accelerators(acceptance_rate) WHERE acceptance_rate IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_is_remote_friendly ON accelerators(is_remote_friendly);
+CREATE INDEX IF NOT EXISTS idx_accelerators_is_active ON accelerators(is_active);
+CREATE INDEX IF NOT EXISTS idx_accelerators_next_application_deadline ON accelerators(next_application_deadline) WHERE next_application_deadline IS NOT NULL;
+
 -- --------------------------------------------------
 -- Row Level Security (RLS) Policies
 -- --------------------------------------------------
 
--- Targets are public
+-- Targets are restricted - only authenticated users can view
 ALTER TABLE targets ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public read access to targets" ON targets FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated users to read targets" ON targets FOR SELECT USING (auth.role() = 'authenticated');
+
+-- Angels are restricted - only authenticated users can view
+ALTER TABLE angels ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated users to read angels" ON angels FOR SELECT USING (auth.role() = 'authenticated' AND is_active = TRUE);
+
+-- Accelerators are restricted - only authenticated users can view
+ALTER TABLE accelerators ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated users to read accelerators" ON accelerators FOR SELECT USING (auth.role() = 'authenticated' AND is_active = TRUE);
 
 -- Users can only see their own profile (optimized with select auth.uid())
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -397,6 +556,16 @@ ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage submissions for their own startup" ON submissions FOR ALL
 USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
 
+-- Users can only manage angel submissions for their own startup (optimized with select auth.uid())
+ALTER TABLE angel_submissions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow users to manage angel submissions for their own startup" ON angel_submissions FOR ALL
+USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
+
+-- Users can only manage accelerator submissions for their own startup (optimized with select auth.uid())
+ALTER TABLE accelerator_submissions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow users to manage accelerator submissions for their own startup" ON accelerator_submissions FOR ALL
+USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
+
 -- Row Level Security for agent_settings
 ALTER TABLE agent_settings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage agent settings for their own startup" ON agent_settings FOR ALL
@@ -411,5 +580,9 @@ ANALYZE startups;
 ANALYZE founders;
 ANALYZE common_responses;
 ANALYZE submissions;
-ANALYZE targets; 
+ANALYZE angel_submissions;
+ANALYZE accelerator_submissions;
+ANALYZE targets;
+ANALYZE angels;
+ANALYZE accelerators;
 ANALYZE agent_settings;

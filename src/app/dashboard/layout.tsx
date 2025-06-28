@@ -132,11 +132,14 @@ export default function DashboardLayout({
     setIsCreatingNewStartup(false)
   }, [])
 
-  const handleStartupSwitch = React.useCallback((startup: StartupDisplay) => {
-    console.log('Switching to startup:', startup)
-    playClickSound()
-    selectStartup(startup.id)
-  }, [playClickSound, selectStartup])
+  const handleStartupSwitch = React.useCallback(
+    (startup: StartupDisplay) => {
+      console.log('Switching to startup:', startup)
+      playClickSound()
+      selectStartup(startup.id)
+    },
+    [playClickSound, selectStartup],
+  )
 
   const handleNewStartupCreation = React.useCallback(() => {
     console.log('Creating new startup...')
@@ -185,12 +188,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-              name: user.user_metadata?.full_name || user.email || '',
-              email: user.email || '',
-              avatar: user.user_metadata?.avatar_url,
-              startupName: currentStartup?.name || undefined,
-              startupLogo: currentStartup?.logo_url || undefined,
-            }
+                name: user.user_metadata?.full_name || user.email || '',
+                email: user.email || '',
+                avatar: user.user_metadata?.avatar_url,
+                startupName: currentStartup?.name || undefined,
+                startupLogo: currentStartup?.logo_url || undefined,
+              }
             : null
         }
         startups={startups}
