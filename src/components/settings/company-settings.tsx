@@ -840,9 +840,8 @@ export default function CompanySettings() {
 
       playCompletionSound()
       toast({
-        title: 'Account Deactivated',
-        description:
-          'Your account has been deactivated. All data has been preserved.',
+        title: 'Account deleted',
+        description: 'Your account has been deleted successfully.',
       })
 
       // Sign out the user
@@ -852,7 +851,7 @@ export default function CompanySettings() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to deactivate account. Please try again.',
+        description: 'Failed to delete account. Please try again.',
       })
     }
   }
@@ -2368,9 +2367,9 @@ export default function CompanySettings() {
                     Delete account
                   </h2>
                   <p className="text-sm text-red-600/80 dark:text-red-400/80">
-                    Permanently delete your account and all associated data.
-                    This action cannot be undone. Any active subscriptions will
-                    be cancelled.
+                    Delete your account and all associated data. This action
+                    cannot be undone. Any active subscriptions will be
+                    cancelled.
                   </p>
                   <Dialog>
                     <DialogTrigger asChild>
@@ -2385,9 +2384,8 @@ export default function CompanySettings() {
                       <DialogHeader>
                         <DialogTitle>Are you sure ?</DialogTitle>
                         <DialogDescription>
-                          This action will permanently delete your account. All
-                          your startup data will be preserved for a short period
-                          before being deleted.
+                          This action will delete your account and all your
+                          startup data. This cannot be undone.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-2 pt-0">
@@ -2440,9 +2438,8 @@ export default function CompanySettings() {
                   Delete account
                 </h2>
                 <p className="text-sm text-red-600/80 dark:text-red-400/80">
-                  Permanently delete your account and all associated data. This
-                  action cannot be undone. Any active subscriptions will be
-                  cancelled.
+                  Delete your account and all associated data. This action
+                  cannot be undone. Any active subscriptions will be cancelled.
                 </p>
                 <Dialog>
                   <DialogTrigger asChild>
@@ -2457,15 +2454,14 @@ export default function CompanySettings() {
                     <DialogHeader>
                       <DialogTitle>Are you sure ?</DialogTitle>
                       <DialogDescription>
-                        This action will permanently delete your account. All
-                        your startup data will be preserved for a short period
-                        before being deleted.
+                        This action will delete your account and all your
+                        startup data. This cannot be undone.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-2 pt-0">
                       <Label htmlFor="confirm" className="text-sm font-medium">
                         Please type{' '}
-                        <span className="font-semibold pt-1 text-red-500">
+                        <span className="font-semibold text-red-500">
                           DELETE
                         </span>{' '}
                         to confirm

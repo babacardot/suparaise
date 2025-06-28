@@ -782,28 +782,162 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 -- ACCOUNT MANAGEMENT RPC FUNCTIONS
 -- =================================================================
 
--- Function to soft delete a user account (keeps all data but deactivates account)
+-- Function to archive and delete a user account (preserves data but clears constraints)
 CREATE OR REPLACE FUNCTION soft_delete_user_account(p_user_id UUID)
 RETURNS JSONB AS $$
+DECLARE
+    archive_count INTEGER := 0;
+    startup_ids UUID[];
 BEGIN
     -- Check if user exists and is active
     IF NOT EXISTS(SELECT 1 FROM profiles WHERE id = p_user_id AND is_active = TRUE) THEN
-        RETURN jsonb_build_object('error', 'User not found or already deactivated');
+        RETURN jsonb_build_object('error', 'User not found or already deleted');
     END IF;
 
-    -- Soft delete the user profile
-    UPDATE profiles
-    SET 
-        is_active = FALSE,
-        deleted_at = NOW(),
-        updated_at = NOW()
+    -- Get all startup IDs for this user
+    SELECT ARRAY(SELECT id FROM startups WHERE user_id = p_user_id AND is_active = TRUE) INTO startup_ids;
+
+    -- STEP 1: Archive all data before deletion
+    
+    -- Archive agent settings
+    INSERT INTO agent_settings_archive (
+        id, startup_id, user_id, submission_delay, retry_attempts, max_parallel_submissions,
+        timeout_minutes, preferred_tone, debug_mode, stealth, custom_instructions,
+        created_at, updated_at, original_id, original_startup_id, original_user_id
+    )
+    SELECT 
+        gen_random_uuid(), startup_id, user_id, submission_delay, retry_attempts, max_parallel_submissions,
+        timeout_minutes, preferred_tone, debug_mode, stealth, custom_instructions,
+        created_at, updated_at, id, startup_id, user_id
+    FROM agent_settings 
+    WHERE user_id = p_user_id;
+
+    GET DIAGNOSTICS archive_count = ROW_COUNT;
+    
+    -- Archive common responses
+    INSERT INTO common_responses_archive (
+        id, startup_id, question, answer, created_at, updated_at,
+        original_id, original_startup_id
+    )
+    SELECT 
+        gen_random_uuid(), startup_id, question, answer, created_at, updated_at,
+        id, startup_id
+    FROM common_responses 
+    WHERE startup_id = ANY(startup_ids);
+
+    -- Archive submissions
+    INSERT INTO submissions_archive (
+        id, startup_id, target_id, submission_date, status, agent_notes, created_at,
+        original_id, original_startup_id
+    )
+    SELECT 
+        gen_random_uuid(), startup_id, target_id, submission_date, status, agent_notes, created_at,
+        id, startup_id
+    FROM submissions 
+    WHERE startup_id = ANY(startup_ids);
+
+    -- Archive angel submissions
+    INSERT INTO angel_submissions_archive (
+        id, startup_id, angel_id, submission_date, status, agent_notes, created_at,
+        original_id, original_startup_id
+    )
+    SELECT 
+        gen_random_uuid(), startup_id, angel_id, submission_date, status, agent_notes, created_at,
+        id, startup_id
+    FROM angel_submissions 
+    WHERE startup_id = ANY(startup_ids);
+
+    -- Archive accelerator submissions
+    INSERT INTO accelerator_submissions_archive (
+        id, startup_id, accelerator_id, submission_date, status, agent_notes, created_at,
+        original_id, original_startup_id
+    )
+    SELECT 
+        gen_random_uuid(), startup_id, accelerator_id, submission_date, status, agent_notes, created_at,
+        id, startup_id
+    FROM accelerator_submissions 
+    WHERE startup_id = ANY(startup_ids);
+
+    -- Archive founders
+    INSERT INTO founders_archive (
+        id, startup_id, first_name, last_name, role, bio, email, phone,
+        linkedin, github_url, personal_website_url, twitter_url,
+        created_at, updated_at, original_id, original_startup_id
+    )
+    SELECT 
+        gen_random_uuid(), startup_id, first_name, last_name, role, bio, email, phone,
+        linkedin, github_url, personal_website_url, twitter_url,
+        created_at, updated_at, id, startup_id
+    FROM founders 
+    WHERE startup_id = ANY(startup_ids);
+
+    -- Archive startups
+    INSERT INTO startups_archive (
+        id, user_id, name, website, industry, location, is_incorporated,
+        incorporation_city, incorporation_country, operating_countries,
+        legal_structure, investment_instrument, funding_round, funding_amount_sought,
+        pre_money_valuation, description_short, description_medium, description_long,
+        traction_summary, market_summary, mrr, arr, employee_count, founded_year,
+        revenue_model, current_runway, key_customers, competitors, onboarded,
+        is_active, deleted_at, logo_url, pitch_deck_url, intro_video_url,
+        created_at, updated_at, original_id, original_user_id
+    )
+    SELECT 
+        gen_random_uuid(), user_id, name, website, industry, location, is_incorporated,
+        incorporation_city, incorporation_country, operating_countries,
+        legal_structure, investment_instrument, funding_round, funding_amount_sought,
+        pre_money_valuation, description_short, description_medium, description_long,
+        traction_summary, market_summary, mrr, arr, employee_count, founded_year,
+        revenue_model, current_runway, key_customers, competitors, onboarded,
+        is_active, deleted_at, logo_url, pitch_deck_url, intro_video_url,
+        created_at, updated_at, id, user_id
+    FROM startups 
+    WHERE user_id = p_user_id AND is_active = TRUE;
+
+    -- Archive profile
+    INSERT INTO profiles_archive (
+        id, full_name, email, is_subscribed, is_active, deleted_at,
+        stripe_customer_id, stripe_subscription_id, subscription_status,
+        subscription_current_period_end, permission_level, monthly_submissions_used,
+        monthly_submissions_limit, created_at, updated_at, original_id
+    )
+    SELECT 
+        gen_random_uuid(), full_name, email, is_subscribed, is_active, deleted_at,
+        stripe_customer_id, stripe_subscription_id, subscription_status,
+        subscription_current_period_end, permission_level, monthly_submissions_used,
+        monthly_submissions_limit, created_at, updated_at, id
+    FROM profiles 
     WHERE id = p_user_id;
 
-    -- Return success
+    -- STEP 2: Hard delete all live data (in proper order for foreign key constraints)
+    
+    -- Delete submissions first
+    DELETE FROM submissions WHERE startup_id = ANY(startup_ids);
+    DELETE FROM angel_submissions WHERE startup_id = ANY(startup_ids);
+    DELETE FROM accelerator_submissions WHERE startup_id = ANY(startup_ids);
+    
+    -- Delete agent settings
+    DELETE FROM agent_settings WHERE user_id = p_user_id;
+    
+    -- Delete common responses
+    DELETE FROM common_responses WHERE startup_id = ANY(startup_ids);
+    
+    -- Delete founders
+    DELETE FROM founders WHERE startup_id = ANY(startup_ids);
+    
+    -- Delete startups
+    DELETE FROM startups WHERE user_id = p_user_id;
+    
+    -- Delete profile
+    DELETE FROM profiles WHERE id = p_user_id;
+
+    -- Return success with archive info
     RETURN jsonb_build_object(
         'success', true,
         'userId', p_user_id,
-        'message', 'Account has been deactivated successfully. All data has been preserved.'
+        'message', 'Account deleted and data archived successfully.',
+        'archivedStartups', array_length(startup_ids, 1),
+        'archiveTimestamp', NOW()
     );
 
 EXCEPTION
@@ -893,6 +1027,51 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
+-- Function to retrieve archived user data (for compliance/recovery)
+CREATE OR REPLACE FUNCTION get_archived_user_data(p_original_user_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    -- Get archived data
+    SELECT jsonb_build_object(
+        'profile', (
+            SELECT jsonb_build_object(
+                'id', original_id,
+                'full_name', full_name,
+                'email', email,
+                'archived_at', archived_at,
+                'archived_reason', archived_reason
+            )
+            FROM profiles_archive 
+            WHERE original_id = p_original_user_id
+            LIMIT 1
+        ),
+        'startups', (
+            SELECT jsonb_agg(
+                jsonb_build_object(
+                    'id', original_id,
+                    'name', name,
+                    'website', website,
+                    'industry', industry,
+                    'archived_at', archived_at
+                )
+            )
+            FROM startups_archive 
+            WHERE original_user_id = p_original_user_id
+        ),
+        'founders_count', (
+            SELECT COUNT(*)
+            FROM founders_archive fa
+            JOIN startups_archive sa ON fa.original_startup_id = sa.original_id
+            WHERE sa.original_user_id = p_original_user_id
+        )
+    ) INTO result;
+
+    RETURN COALESCE(result, '{}'::jsonb);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- Grant execute permissions for all settings functions
 GRANT EXECUTE ON FUNCTION get_user_founder_profile(UUID, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION update_user_founder_profile(UUID, UUID, JSONB) TO authenticated;
@@ -907,4 +1086,5 @@ GRANT EXECUTE ON FUNCTION get_user_agent_settings(UUID, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION update_user_agent_settings(UUID, UUID, JSONB) TO authenticated;
 GRANT EXECUTE ON FUNCTION soft_delete_user_account(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION reactivate_user_account(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION can_email_be_used_for_signup(TEXT) TO authenticated; 
+GRANT EXECUTE ON FUNCTION can_email_be_used_for_signup(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_archived_user_data(UUID) TO authenticated; 

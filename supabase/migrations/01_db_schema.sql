@@ -519,15 +519,15 @@ CREATE INDEX IF NOT EXISTS idx_accelerators_next_application_deadline ON acceler
 
 -- Targets are restricted - only authenticated users can view
 ALTER TABLE targets ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow authenticated users to read targets" ON targets FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated users to read targets" ON targets FOR SELECT USING ((select auth.role()) = 'authenticated');
 
 -- Angels are restricted - only authenticated users can view
 ALTER TABLE angels ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow authenticated users to read angels" ON angels FOR SELECT USING (auth.role() = 'authenticated' AND is_active = TRUE);
+CREATE POLICY "Allow authenticated users to read angels" ON angels FOR SELECT USING ((select auth.role()) = 'authenticated' AND is_active = TRUE);
 
 -- Accelerators are restricted - only authenticated users can view
 ALTER TABLE accelerators ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow authenticated users to read accelerators" ON accelerators FOR SELECT USING (auth.role() = 'authenticated' AND is_active = TRUE);
+CREATE POLICY "Allow authenticated users to read accelerators" ON accelerators FOR SELECT USING ((select auth.role()) = 'authenticated' AND is_active = TRUE);
 
 -- Users can only see their own profile (optimized with select auth.uid())
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -586,3 +586,262 @@ ANALYZE targets;
 ANALYZE angels;
 ANALYZE accelerators;
 ANALYZE agent_settings;
+
+-- =================================================================
+-- ARCHIVE TABLES FOR DELETED DATA
+-- =================================================================
+
+-- Archive table for deleted profiles
+CREATE TABLE profiles_archive (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    full_name TEXT,
+    email TEXT,
+    is_subscribed BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    deleted_at TIMESTAMPTZ,
+    stripe_customer_id TEXT,
+    stripe_subscription_id TEXT,
+    subscription_status subscription_status,
+    subscription_current_period_end TIMESTAMPTZ,
+    permission_level permission_level DEFAULT 'FREE' NOT NULL,
+    monthly_submissions_used INTEGER DEFAULT 0 NOT NULL,
+    monthly_submissions_limit INTEGER DEFAULT 3 NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Archive-specific fields
+    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
+    original_id UUID NOT NULL -- Store the original profile ID
+);
+
+-- Archive table for deleted startups
+CREATE TABLE startups_archive (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    name TEXT NOT NULL,
+    website TEXT,
+    industry industry_type,
+    location TEXT,
+    is_incorporated BOOLEAN DEFAULT TRUE,
+    incorporation_city TEXT,
+    incorporation_country TEXT,
+    operating_countries TEXT[],
+    legal_structure legal_structure,
+    investment_instrument investment_instrument,
+    funding_round investment_stage,
+    funding_amount_sought NUMERIC(15, 2),
+    pre_money_valuation NUMERIC(15, 2),
+    description_short TEXT,
+    description_medium TEXT,
+    description_long TEXT,
+    traction_summary TEXT,
+    market_summary TEXT,
+    mrr NUMERIC(12, 2) DEFAULT 0,
+    arr NUMERIC(12, 2) DEFAULT 0,
+    employee_count INTEGER,
+    founded_year INTEGER,
+    revenue_model revenue_model_type,
+    current_runway INTEGER,
+    key_customers TEXT,
+    competitors TEXT,
+    onboarded BOOLEAN DEFAULT FALSE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    deleted_at TIMESTAMPTZ,
+    logo_url TEXT,
+    pitch_deck_url TEXT,
+    intro_video_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Archive-specific fields
+    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
+    original_id UUID NOT NULL,
+    original_user_id UUID NOT NULL
+);
+
+-- Archive table for deleted founders
+CREATE TABLE founders_archive (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    role founder_role,
+    bio TEXT,
+    email TEXT,
+    phone TEXT,
+    linkedin TEXT,
+    github_url TEXT,
+    personal_website_url TEXT,
+    twitter_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Archive-specific fields
+    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
+    original_id UUID NOT NULL,
+    original_startup_id UUID NOT NULL
+);
+
+-- Archive table for deleted submissions
+CREATE TABLE submissions_archive (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID NOT NULL,
+    target_id UUID NOT NULL,
+    submission_date TIMESTAMPTZ DEFAULT NOW(),
+    status submission_status DEFAULT 'pending',
+    agent_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Archive-specific fields
+    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
+    original_id UUID NOT NULL,
+    original_startup_id UUID NOT NULL
+);
+
+-- Archive table for deleted angel submissions
+CREATE TABLE angel_submissions_archive (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID NOT NULL,
+    angel_id UUID NOT NULL,
+    submission_date TIMESTAMPTZ DEFAULT NOW(),
+    status submission_status DEFAULT 'pending',
+    agent_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Archive-specific fields
+    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
+    original_id UUID NOT NULL,
+    original_startup_id UUID NOT NULL
+);
+
+-- Archive table for deleted accelerator submissions
+CREATE TABLE accelerator_submissions_archive (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID NOT NULL,
+    accelerator_id UUID NOT NULL,
+    submission_date TIMESTAMPTZ DEFAULT NOW(),
+    status submission_status DEFAULT 'pending',
+    agent_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Archive-specific fields
+    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
+    original_id UUID NOT NULL,
+    original_startup_id UUID NOT NULL
+);
+
+-- Archive table for deleted common responses
+CREATE TABLE common_responses_archive (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID NOT NULL,
+    question TEXT NOT NULL,
+    answer TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Archive-specific fields
+    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
+    original_id UUID NOT NULL,
+    original_startup_id UUID NOT NULL
+);
+
+-- Archive table for deleted agent settings
+CREATE TABLE agent_settings_archive (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
+    retry_attempts agent_retry_attempts DEFAULT '3' NOT NULL,
+    max_parallel_submissions agent_parallel_submissions DEFAULT '3' NOT NULL,
+    timeout_minutes agent_timeout_minutes DEFAULT '10' NOT NULL,
+    preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
+    debug_mode BOOLEAN DEFAULT FALSE NOT NULL,
+    stealth BOOLEAN DEFAULT TRUE NOT NULL,
+    custom_instructions TEXT DEFAULT '',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Archive-specific fields
+    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
+    original_id UUID NOT NULL,
+    original_startup_id UUID NOT NULL,
+    original_user_id UUID NOT NULL
+);
+
+-- Create indexes on archive tables for efficient querying
+CREATE INDEX IF NOT EXISTS idx_profiles_archive_original_id ON profiles_archive(original_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_archive_email ON profiles_archive(email);
+CREATE INDEX IF NOT EXISTS idx_profiles_archive_archived_at ON profiles_archive(archived_at);
+
+CREATE INDEX IF NOT EXISTS idx_startups_archive_original_id ON startups_archive(original_id);
+CREATE INDEX IF NOT EXISTS idx_startups_archive_original_user_id ON startups_archive(original_user_id);
+CREATE INDEX IF NOT EXISTS idx_startups_archive_archived_at ON startups_archive(archived_at);
+
+CREATE INDEX IF NOT EXISTS idx_founders_archive_original_id ON founders_archive(original_id);
+CREATE INDEX IF NOT EXISTS idx_founders_archive_original_startup_id ON founders_archive(original_startup_id);
+CREATE INDEX IF NOT EXISTS idx_founders_archive_email ON founders_archive(email);
+
+CREATE INDEX IF NOT EXISTS idx_submissions_archive_original_id ON submissions_archive(original_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_archive_original_startup_id ON submissions_archive(original_startup_id);
+
+CREATE INDEX IF NOT EXISTS idx_angel_submissions_archive_original_id ON angel_submissions_archive(original_id);
+CREATE INDEX IF NOT EXISTS idx_angel_submissions_archive_original_startup_id ON angel_submissions_archive(original_startup_id);
+
+CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_archive_original_id ON accelerator_submissions_archive(original_id);
+CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_archive_original_startup_id ON accelerator_submissions_archive(original_startup_id);
+
+CREATE INDEX IF NOT EXISTS idx_common_responses_archive_original_id ON common_responses_archive(original_id);
+CREATE INDEX IF NOT EXISTS idx_common_responses_archive_original_startup_id ON common_responses_archive(original_startup_id);
+
+CREATE INDEX IF NOT EXISTS idx_agent_settings_archive_original_id ON agent_settings_archive(original_id);
+CREATE INDEX IF NOT EXISTS idx_agent_settings_archive_original_user_id ON agent_settings_archive(original_user_id);
+
+-- =================================================================
+-- RLS POLICIES FOR ARCHIVE TABLES
+-- =================================================================
+
+-- Enable RLS on all archive tables
+ALTER TABLE profiles_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE startups_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE founders_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE submissions_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE angel_submissions_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE accelerator_submissions_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE common_responses_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE agent_settings_archive ENABLE ROW LEVEL SECURITY;
+
+-- Archive data should NOT be accessible by regular users since these are deleted accounts
+-- Only accessible through controlled functions with service role
+
+-- Profiles Archive - No direct access
+CREATE POLICY "Archive data not accessible to users" ON profiles_archive FOR ALL TO authenticated USING (FALSE);
+CREATE POLICY "Service role can access archive data" ON profiles_archive FOR ALL TO service_role USING (TRUE);
+
+-- Startups Archive - No direct access  
+CREATE POLICY "Archive data not accessible to users" ON startups_archive FOR ALL TO authenticated USING (FALSE);
+CREATE POLICY "Service role can access archive data" ON startups_archive FOR ALL TO service_role USING (TRUE);
+
+-- Founders Archive - No direct access
+CREATE POLICY "Archive data not accessible to users" ON founders_archive FOR ALL TO authenticated USING (FALSE);
+CREATE POLICY "Service role can access archive data" ON founders_archive FOR ALL TO service_role USING (TRUE);
+
+-- Submissions Archive - No direct access
+CREATE POLICY "Archive data not accessible to users" ON submissions_archive FOR ALL TO authenticated USING (FALSE);
+CREATE POLICY "Service role can access archive data" ON submissions_archive FOR ALL TO service_role USING (TRUE);
+
+-- Angel Submissions Archive - No direct access
+CREATE POLICY "Archive data not accessible to users" ON angel_submissions_archive FOR ALL TO authenticated USING (FALSE);
+CREATE POLICY "Service role can access archive data" ON angel_submissions_archive FOR ALL TO service_role USING (TRUE);
+
+-- Accelerator Submissions Archive - No direct access
+CREATE POLICY "Archive data not accessible to users" ON accelerator_submissions_archive FOR ALL TO authenticated USING (FALSE);
+CREATE POLICY "Service role can access archive data" ON accelerator_submissions_archive FOR ALL TO service_role USING (TRUE);
+
+-- Common Responses Archive - No direct access
+CREATE POLICY "Archive data not accessible to users" ON common_responses_archive FOR ALL TO authenticated USING (FALSE);
+CREATE POLICY "Service role can access archive data" ON common_responses_archive FOR ALL TO service_role USING (TRUE);
+
+-- Agent Settings Archive - No direct access
+CREATE POLICY "Archive data not accessible to users" ON agent_settings_archive FOR ALL TO authenticated USING (FALSE);
+CREATE POLICY "Service role can access archive data" ON agent_settings_archive FOR ALL TO service_role USING (TRUE);
+

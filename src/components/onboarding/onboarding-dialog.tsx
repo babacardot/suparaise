@@ -49,7 +49,7 @@ const WelcomeStep = ({
         statusText: 'Onboarding',
       }
     : {
-        title: 'Ready to launch another venture?',
+        title: 'Ready to launch another venture ?',
         subtitle:
           "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
         image: '/random/test_your_app.svg',
@@ -1135,11 +1135,9 @@ export function OnboardingDialog({
           >
             <DialogHeader>
               <DialogTitle>Skip onboarding ?</DialogTitle>
-              <DialogDescription className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Take a quick look around the platform before setting up your
-                  profile.
-                </p>
+              <DialogDescription>
+                Take a quick look around the platform before setting up your
+                profile.
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end gap-3 pt-4">

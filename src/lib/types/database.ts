@@ -54,6 +54,48 @@ export type Database = {
           },
         ]
       }
+      accelerator_submissions_archive: {
+        Row: {
+          accelerator_id: string
+          agent_notes: string | null
+          archived_at: string
+          archived_reason: string
+          created_at: string | null
+          id: string
+          original_id: string
+          original_startup_id: string
+          startup_id: string
+          status: Database['public']['Enums']['submission_status'] | null
+          submission_date: string | null
+        }
+        Insert: {
+          accelerator_id: string
+          agent_notes?: string | null
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          id?: string
+          original_id: string
+          original_startup_id: string
+          startup_id: string
+          status?: Database['public']['Enums']['submission_status'] | null
+          submission_date?: string | null
+        }
+        Update: {
+          accelerator_id?: string
+          agent_notes?: string | null
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          id?: string
+          original_id?: string
+          original_startup_id?: string
+          startup_id?: string
+          status?: Database['public']['Enums']['submission_status'] | null
+          submission_date?: string | null
+        }
+        Relationships: []
+      }
       accelerators: {
         Row: {
           acceptance_rate: Database['public']['Enums']['acceptance_rate'] | null
@@ -221,6 +263,69 @@ export type Database = {
           },
         ]
       }
+      agent_settings_archive: {
+        Row: {
+          archived_at: string
+          archived_reason: string
+          created_at: string | null
+          custom_instructions: string | null
+          debug_mode: boolean
+          id: string
+          max_parallel_submissions: Database['public']['Enums']['agent_parallel_submissions']
+          original_id: string
+          original_startup_id: string
+          original_user_id: string
+          preferred_tone: Database['public']['Enums']['agent_tone']
+          retry_attempts: Database['public']['Enums']['agent_retry_attempts']
+          startup_id: string
+          stealth: boolean
+          submission_delay: Database['public']['Enums']['agent_submission_delay']
+          timeout_minutes: Database['public']['Enums']['agent_timeout_minutes']
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          custom_instructions?: string | null
+          debug_mode?: boolean
+          id?: string
+          max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
+          original_id: string
+          original_startup_id: string
+          original_user_id: string
+          preferred_tone?: Database['public']['Enums']['agent_tone']
+          retry_attempts?: Database['public']['Enums']['agent_retry_attempts']
+          startup_id: string
+          stealth?: boolean
+          submission_delay?: Database['public']['Enums']['agent_submission_delay']
+          timeout_minutes?: Database['public']['Enums']['agent_timeout_minutes']
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          custom_instructions?: string | null
+          debug_mode?: boolean
+          id?: string
+          max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
+          original_id?: string
+          original_startup_id?: string
+          original_user_id?: string
+          preferred_tone?: Database['public']['Enums']['agent_tone']
+          retry_attempts?: Database['public']['Enums']['agent_retry_attempts']
+          startup_id?: string
+          stealth?: boolean
+          submission_delay?: Database['public']['Enums']['agent_submission_delay']
+          timeout_minutes?: Database['public']['Enums']['agent_timeout_minutes']
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       angel_submissions: {
         Row: {
           agent_notes: string | null
@@ -265,6 +370,48 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
+      }
+      angel_submissions_archive: {
+        Row: {
+          agent_notes: string | null
+          angel_id: string
+          archived_at: string
+          archived_reason: string
+          created_at: string | null
+          id: string
+          original_id: string
+          original_startup_id: string
+          startup_id: string
+          status: Database['public']['Enums']['submission_status'] | null
+          submission_date: string | null
+        }
+        Insert: {
+          agent_notes?: string | null
+          angel_id: string
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          id?: string
+          original_id: string
+          original_startup_id: string
+          startup_id: string
+          status?: Database['public']['Enums']['submission_status'] | null
+          submission_date?: string | null
+        }
+        Update: {
+          agent_notes?: string | null
+          angel_id?: string
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          id?: string
+          original_id?: string
+          original_startup_id?: string
+          startup_id?: string
+          status?: Database['public']['Enums']['submission_status'] | null
+          submission_date?: string | null
+        }
+        Relationships: []
       }
       angels: {
         Row: {
@@ -411,6 +558,45 @@ export type Database = {
           },
         ]
       }
+      common_responses_archive: {
+        Row: {
+          answer: string | null
+          archived_at: string
+          archived_reason: string
+          created_at: string | null
+          id: string
+          original_id: string
+          original_startup_id: string
+          question: string
+          startup_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer?: string | null
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          id?: string
+          original_id: string
+          original_startup_id: string
+          question: string
+          startup_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string | null
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          id?: string
+          original_id?: string
+          original_startup_id?: string
+          question?: string
+          startup_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
@@ -505,6 +691,69 @@ export type Database = {
           },
         ]
       }
+      founders_archive: {
+        Row: {
+          archived_at: string
+          archived_reason: string
+          bio: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string
+          github_url: string | null
+          id: string
+          last_name: string
+          linkedin: string | null
+          original_id: string
+          original_startup_id: string
+          personal_website_url: string | null
+          phone: string | null
+          role: Database['public']['Enums']['founder_role'] | null
+          startup_id: string
+          twitter_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          archived_at?: string
+          archived_reason?: string
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name: string
+          github_url?: string | null
+          id?: string
+          last_name: string
+          linkedin?: string | null
+          original_id: string
+          original_startup_id: string
+          personal_website_url?: string | null
+          phone?: string | null
+          role?: Database['public']['Enums']['founder_role'] | null
+          startup_id: string
+          twitter_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          archived_at?: string
+          archived_reason?: string
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string
+          github_url?: string | null
+          id?: string
+          last_name?: string
+          linkedin?: string | null
+          original_id?: string
+          original_startup_id?: string
+          personal_website_url?: string | null
+          phone?: string | null
+          role?: Database['public']['Enums']['founder_role'] | null
+          startup_id?: string
+          twitter_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -554,6 +803,75 @@ export type Database = {
           is_subscribed?: boolean | null
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
+          permission_level?: Database['public']['Enums']['permission_level']
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_current_period_end?: string | null
+          subscription_status?:
+            | Database['public']['Enums']['subscription_status']
+            | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles_archive: {
+        Row: {
+          archived_at: string
+          archived_reason: string
+          created_at: string | null
+          deleted_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          is_active: boolean | null
+          is_subscribed: boolean | null
+          monthly_submissions_limit: number
+          monthly_submissions_used: number
+          original_id: string
+          permission_level: Database['public']['Enums']['permission_level']
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_current_period_end: string | null
+          subscription_status:
+            | Database['public']['Enums']['subscription_status']
+            | null
+          updated_at: string | null
+        }
+        Insert: {
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_subscribed?: boolean | null
+          monthly_submissions_limit?: number
+          monthly_submissions_used?: number
+          original_id: string
+          permission_level?: Database['public']['Enums']['permission_level']
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_current_period_end?: string | null
+          subscription_status?:
+            | Database['public']['Enums']['subscription_status']
+            | null
+          updated_at?: string | null
+        }
+        Update: {
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_subscribed?: boolean | null
+          monthly_submissions_limit?: number
+          monthly_submissions_used?: number
+          original_id?: string
           permission_level?: Database['public']['Enums']['permission_level']
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -698,6 +1016,151 @@ export type Database = {
         }
         Relationships: []
       }
+      startups_archive: {
+        Row: {
+          archived_at: string
+          archived_reason: string
+          arr: number | null
+          competitors: string | null
+          created_at: string | null
+          current_runway: number | null
+          deleted_at: string | null
+          description_long: string | null
+          description_medium: string | null
+          description_short: string | null
+          employee_count: number | null
+          founded_year: number | null
+          funding_amount_sought: number | null
+          funding_round: Database['public']['Enums']['investment_stage'] | null
+          id: string
+          incorporation_city: string | null
+          incorporation_country: string | null
+          industry: Database['public']['Enums']['industry_type'] | null
+          intro_video_url: string | null
+          investment_instrument:
+            | Database['public']['Enums']['investment_instrument']
+            | null
+          is_active: boolean
+          is_incorporated: boolean | null
+          key_customers: string | null
+          legal_structure: Database['public']['Enums']['legal_structure'] | null
+          location: string | null
+          logo_url: string | null
+          market_summary: string | null
+          mrr: number | null
+          name: string
+          onboarded: boolean
+          operating_countries: string[] | null
+          original_id: string
+          original_user_id: string
+          pitch_deck_url: string | null
+          pre_money_valuation: number | null
+          revenue_model:
+            | Database['public']['Enums']['revenue_model_type']
+            | null
+          traction_summary: string | null
+          updated_at: string | null
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          archived_at?: string
+          archived_reason?: string
+          arr?: number | null
+          competitors?: string | null
+          created_at?: string | null
+          current_runway?: number | null
+          deleted_at?: string | null
+          description_long?: string | null
+          description_medium?: string | null
+          description_short?: string | null
+          employee_count?: number | null
+          founded_year?: number | null
+          funding_amount_sought?: number | null
+          funding_round?: Database['public']['Enums']['investment_stage'] | null
+          id?: string
+          incorporation_city?: string | null
+          incorporation_country?: string | null
+          industry?: Database['public']['Enums']['industry_type'] | null
+          intro_video_url?: string | null
+          investment_instrument?:
+            | Database['public']['Enums']['investment_instrument']
+            | null
+          is_active?: boolean
+          is_incorporated?: boolean | null
+          key_customers?: string | null
+          legal_structure?:
+            | Database['public']['Enums']['legal_structure']
+            | null
+          location?: string | null
+          logo_url?: string | null
+          market_summary?: string | null
+          mrr?: number | null
+          name: string
+          onboarded?: boolean
+          operating_countries?: string[] | null
+          original_id: string
+          original_user_id: string
+          pitch_deck_url?: string | null
+          pre_money_valuation?: number | null
+          revenue_model?:
+            | Database['public']['Enums']['revenue_model_type']
+            | null
+          traction_summary?: string | null
+          updated_at?: string | null
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          archived_at?: string
+          archived_reason?: string
+          arr?: number | null
+          competitors?: string | null
+          created_at?: string | null
+          current_runway?: number | null
+          deleted_at?: string | null
+          description_long?: string | null
+          description_medium?: string | null
+          description_short?: string | null
+          employee_count?: number | null
+          founded_year?: number | null
+          funding_amount_sought?: number | null
+          funding_round?: Database['public']['Enums']['investment_stage'] | null
+          id?: string
+          incorporation_city?: string | null
+          incorporation_country?: string | null
+          industry?: Database['public']['Enums']['industry_type'] | null
+          intro_video_url?: string | null
+          investment_instrument?:
+            | Database['public']['Enums']['investment_instrument']
+            | null
+          is_active?: boolean
+          is_incorporated?: boolean | null
+          key_customers?: string | null
+          legal_structure?:
+            | Database['public']['Enums']['legal_structure']
+            | null
+          location?: string | null
+          logo_url?: string | null
+          market_summary?: string | null
+          mrr?: number | null
+          name?: string
+          onboarded?: boolean
+          operating_countries?: string[] | null
+          original_id?: string
+          original_user_id?: string
+          pitch_deck_url?: string | null
+          pre_money_valuation?: number | null
+          revenue_model?:
+            | Database['public']['Enums']['revenue_model_type']
+            | null
+          traction_summary?: string | null
+          updated_at?: string | null
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       submissions: {
         Row: {
           agent_notes: string | null
@@ -742,6 +1205,48 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
+      }
+      submissions_archive: {
+        Row: {
+          agent_notes: string | null
+          archived_at: string
+          archived_reason: string
+          created_at: string | null
+          id: string
+          original_id: string
+          original_startup_id: string
+          startup_id: string
+          status: Database['public']['Enums']['submission_status'] | null
+          submission_date: string | null
+          target_id: string
+        }
+        Insert: {
+          agent_notes?: string | null
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          id?: string
+          original_id: string
+          original_startup_id: string
+          startup_id: string
+          status?: Database['public']['Enums']['submission_status'] | null
+          submission_date?: string | null
+          target_id: string
+        }
+        Update: {
+          agent_notes?: string | null
+          archived_at?: string
+          archived_reason?: string
+          created_at?: string | null
+          id?: string
+          original_id?: string
+          original_startup_id?: string
+          startup_id?: string
+          status?: Database['public']['Enums']['submission_status'] | null
+          submission_date?: string | null
+          target_id?: string
+        }
+        Relationships: []
       }
       support_requests: {
         Row: {
@@ -934,6 +1439,10 @@ export type Database = {
       }
       get_all_targets: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_archived_user_data: {
+        Args: { p_original_user_id: string }
         Returns: Json
       }
       get_or_create_stripe_customer: {

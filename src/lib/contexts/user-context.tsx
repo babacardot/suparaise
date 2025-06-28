@@ -243,10 +243,11 @@ export function UserProvider({ children }: UserProviderProps) {
         .single()
 
       if (error) {
-        // If the columns don't exist yet, set default values
+        // If profile doesn't exist or columns don't exist yet, set default values
         if (
-          error.message?.includes('column') &&
-          error.message?.includes('does not exist')
+          error.code === 'PGRST116' || // No rows returned
+          (error.message?.includes('column') &&
+            error.message?.includes('does not exist'))
         ) {
           setSubscription({
             is_subscribed: false,
@@ -257,6 +258,14 @@ export function UserProvider({ children }: UserProviderProps) {
           })
         } else {
           console.error('Error fetching subscription:', error)
+          // Still set default values even on error
+          setSubscription({
+            is_subscribed: false,
+            subscription_status: null,
+            subscription_current_period_end: null,
+            stripe_customer_id: null,
+            permission_level: 'FREE',
+          })
         }
       } else {
         setSubscription(data as unknown as SubscriptionData)
