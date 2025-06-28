@@ -4,6 +4,7 @@ import Testimonials from '@/components/design/testimonials'
 import Pricing from '@/components/design/pricing'
 import { FaqSection } from '@/components/design/faq'
 import { Footer } from '@/components/design/footer'
+import { BackgroundText } from '@/components/design/background-text'
 import type { Metadata } from 'next'
 // import { LandingCustomers } from '@/components/design/landing-customers'
 
@@ -21,6 +22,7 @@ export default function LandingPage() {
       <Pricing />
       <FaqSection />
       <Footer />
+      <BackgroundText />
     </>
   )
 }

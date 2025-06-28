@@ -38,6 +38,14 @@ export const Footer = () => {
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
             <Link
+              href="/about"
+              prefetch={true}
+              onClick={playClickSound}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              About
+            </Link>
+            <Link
               href="/privacy"
               prefetch={true}
               onClick={playClickSound}

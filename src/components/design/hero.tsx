@@ -2,7 +2,10 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ChevronRight } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { useUser } from '@/lib/contexts/user-context'
 import { Button } from '@/components/ui/button'
 import { Button as ExpandButton } from '@/components/design/button-expand'
 import { AnimatedGroup } from '@/components/ui/animated-group'
@@ -28,6 +31,9 @@ const transitionVariants = {
 }
 
 export function HeroSection() {
+  const { theme } = useTheme()
+  const { user } = useUser()
+
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
@@ -38,11 +44,14 @@ export function HeroSection() {
     }
   }
 
+  // Determine portal image source based on theme
+  const portalImageSrc = theme === 'light' ? '/banner.png' : '/banner.png'
+
   return (
     <>
       <main className="overflow-hidden">
         <section>
-          <div className="relative pt-24 pb-20">
+          <div className="relative pt-24">
             <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]"></div>
             <div className="mx-auto max-w-5xl px-6">
               <div className="sm:mx-auto lg:mr-auto">
@@ -68,19 +77,21 @@ export function HeroSection() {
                     focus on building your business.
                   </p>
                   <div className="mt-12 flex items-center gap-2">
-                    <ExpandButton
-                      key={1}
-                      asChild
-                      size="lg"
-                      onClick={playClickSound}
-                      className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
-                      Icon={ChevronRight}
-                      iconPlacement="right"
-                    >
-                      <Link href="/signup" prefetch={true}>
-                        <span className="text-nowrap">Get started</span>
-                      </Link>
-                    </ExpandButton>
+                    {!user && (
+                      <ExpandButton
+                        key={1}
+                        asChild
+                        size="lg"
+                        onClick={playClickSound}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
+                        Icon={ChevronRight}
+                        iconPlacement="right"
+                      >
+                        <Link href="/signup" prefetch={true}>
+                          <span className="text-nowrap">Get started</span>
+                        </Link>
+                      </ExpandButton>
+                    )}
                     <Button
                       key={2}
                       asChild
@@ -89,14 +100,47 @@ export function HeroSection() {
                       onClick={playClickSound}
                       className="rounded-sm px-5 text-base h-[42px] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     >
-                      <Link href="/login" prefetch={true}>
-                        <span className="text-nowrap">Login</span>
+                      <Link href="/about" prefetch={true}>
+                        <span className="text-nowrap">Learn more</span>
                       </Link>
                     </Button>
                   </div>
                 </AnimatedGroup>
               </div>
             </div>
+
+            {/* Portal Image Section */}
+            <AnimatedGroup
+              variants={{
+                container: {
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.05,
+                      delayChildren: 1.0,
+                    },
+                  },
+                },
+                ...transitionVariants,
+              }}
+            >
+              <div className="hidden md:block relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
+                <div
+                  aria-hidden
+                  className="bg-gradient-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
+                />
+                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-5xl overflow-hidden rounded-sm border p-4 shadow-lg shadow-zinc-950/15 ring-1">
+                  <Image
+                    className="aspect-[15/8] relative rounded-sm"
+                    src={portalImageSrc}
+                    alt="Suparaise Portal Interface"
+                    width={2700}
+                    height={1440}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                  />
+                </div>
+              </div>
+            </AnimatedGroup>
           </div>
         </section>
       </main>

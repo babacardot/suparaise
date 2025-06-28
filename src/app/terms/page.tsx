@@ -155,12 +155,7 @@ export default function TermsPage() {
             {/* Footer info */}
             <div className="mt-20 pt-8 border-t border-border text-end">
               <p className="text-sm text-muted-foreground">
-                {' '}
-                {new Date().toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                June 15, 2024
               </p>
             </div>
           </div>

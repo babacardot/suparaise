@@ -92,7 +92,7 @@ interface FaqSectionProps extends React.HTMLAttributes<HTMLElement> {
 const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
   ({ className, contactInfo, ...props }, ref) => {
     return (
-      <section ref={ref} className={cn('pt-20 pb-32', className)} {...props}>
+      <section ref={ref} id="faq" className={cn('pt-20 pb-32', className)} {...props}>
         <div className="mx-auto max-w-5xl px-6">
           <div className="flex flex-col items-center gap-6 text-center">
             <div className="flex justify-center">
