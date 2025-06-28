@@ -14,9 +14,12 @@ export function useSecurity() {
     const preventKeyCombinations = (e: KeyboardEvent) => {
       // Prevent Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+S, Ctrl+P, F12, Ctrl+Shift+I, Ctrl+U
       if (
-        (e.ctrlKey && ['a', 'c', 'v', 'x', 's', 'p', 'u'].includes(e.key.toLowerCase())) ||
+        (e.ctrlKey &&
+          ['a', 'c', 'v', 'x', 's', 'p', 'u'].includes(e.key.toLowerCase())) ||
         e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase())) ||
+        (e.ctrlKey &&
+          e.shiftKey &&
+          ['i', 'j', 'c'].includes(e.key.toLowerCase())) ||
         (e.ctrlKey && e.shiftKey && e.key === 'K') // Ctrl+Shift+K (Console)
       ) {
         e.preventDefault()
@@ -44,7 +47,7 @@ export function useSecurity() {
 
     // Disable image saving
     const images = document.querySelectorAll('img')
-    images.forEach(img => {
+    images.forEach((img) => {
       img.setAttribute('draggable', 'false')
       img.style.pointerEvents = 'none'
     })
@@ -58,4 +61,4 @@ export function useSecurity() {
   }, [])
 
   return { isSecured }
-} 
+}

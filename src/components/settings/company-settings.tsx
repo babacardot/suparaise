@@ -314,8 +314,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -1094,8 +1095,8 @@ export default function CompanySettings() {
                   formData.logoUrl ||
                   `https://avatar.vercel.sh/${encodeURIComponent(
                     formData.name.toLowerCase() ||
-                    currentStartupId ||
-                    'suparaise',
+                      currentStartupId ||
+                      'suparaise',
                   )}.png?size=80`
                 }
                 alt="Company logo"
@@ -2346,7 +2347,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                            (formData.name || 'CONFIRM')
+                              (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

@@ -358,7 +358,7 @@ export default function FundsFilters({
         WebkitUserSelect: 'none',
         MozUserSelect: 'none',
         msUserSelect: 'none',
-        WebkitTouchCallout: 'none'
+        WebkitTouchCallout: 'none',
       }}
       onCopy={(e: React.ClipboardEvent) => e.preventDefault()}
       onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
@@ -675,7 +675,7 @@ export default function FundsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {filters.requiredDocuments &&
-                      filters.requiredDocuments.length > 0 ? (
+                    filters.requiredDocuments.length > 0 ? (
                       filters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = REQUIRED_DOCUMENTS.find(
                           (d) => d.value === doc,
@@ -707,7 +707,7 @@ export default function FundsFilters({
                       )}
                   </div>
                   {filters.requiredDocuments &&
-                    filters.requiredDocuments.length > 0 ? (
+                  filters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
@@ -849,10 +849,11 @@ export default function FundsFilters({
                     }}
                     className={`
                                             flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
-                                            ${visible
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                      }
+                                            ${
+                                              visible
+                                                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                                            }
                                         `}
                   >
                     <span className="text-sm font-medium capitalize">

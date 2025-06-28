@@ -105,8 +105,7 @@ const integrations: Integration[] = [
   {
     id: 'drive',
     name: 'Drive',
-    description:
-      'Sync your Google Drive for document sharing.',
+    description: 'Sync your Google Drive for document sharing.',
     icon: (
       <Image
         src="/integrations/drive.webp"
@@ -234,9 +233,9 @@ export default function IntegrationSettings() {
                       </div>
                     </div>
                     <p className="text-muted-foreground max-w-md mb-6">
-                      Integrations are only available for MAX users.
-                      Upgrade your plan to connect external services and
-                      automate your fundraising process on additional channels.
+                      Integrations are only available for MAX users. Upgrade
+                      your plan to connect external services and automate your
+                      fundraising process on additional channels.
                     </p>
 
                     {/* Preview of integrations */}
@@ -412,7 +411,7 @@ export default function IntegrationSettings() {
                 className={cn(
                   'transition-all duration-200',
                   isConnected &&
-                  'bg-green-50/50 dark:bg-green-950/30 border-green-200 dark:border-green-800',
+                    'bg-green-50/50 dark:bg-green-950/30 border-green-200 dark:border-green-800',
                   requiresUpgrade && 'opacity-75',
                 )}
               >
@@ -449,13 +448,16 @@ export default function IntegrationSettings() {
                         isConnected && !isComingSoon
                           ? 'bg-green-600'
                           : 'bg-gray-200 dark:bg-gray-700',
-                        (isConnecting || isComingSoon) && 'opacity-50 cursor-not-allowed',
+                        (isConnecting || isComingSoon) &&
+                          'opacity-50 cursor-not-allowed',
                       )}
                     >
                       <span
                         className={cn(
                           'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
-                          isConnected && !isComingSoon ? 'translate-x-5' : 'translate-x-1',
+                          isConnected && !isComingSoon
+                            ? 'translate-x-5'
+                            : 'translate-x-1',
                         )}
                       />
                     </button>

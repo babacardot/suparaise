@@ -218,11 +218,11 @@ const FundsTable = React.memo(function FundsTable({
             const complexityOrder = { simple: 1, standard: 2, comprehensive: 3 }
             aValue =
               complexityOrder[
-              a.form_complexity as keyof typeof complexityOrder
+                a.form_complexity as keyof typeof complexityOrder
               ] || 0
             bValue =
               complexityOrder[
-              b.form_complexity as keyof typeof complexityOrder
+                b.form_complexity as keyof typeof complexityOrder
               ] || 0
             break
           case 'requirements':
@@ -506,7 +506,7 @@ const FundsTable = React.memo(function FundsTable({
           MozUserSelect: 'none',
           msUserSelect: 'none',
           WebkitTouchCallout: 'none',
-          WebkitTapHighlightColor: 'transparent'
+          WebkitTapHighlightColor: 'transparent',
         }}
         onCopy={(e: React.ClipboardEvent) => e.preventDefault()}
         onCut={(e: React.ClipboardEvent) => e.preventDefault()}
@@ -520,7 +520,7 @@ const FundsTable = React.memo(function FundsTable({
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='Arial' font-size='8' fill='%23000' transform='rotate(-45 50 50)'%3ECONFIDENTIAL%3C/text%3E%3C/svg%3E")`,
             backgroundRepeat: 'repeat',
-            backgroundSize: '100px 100px'
+            backgroundSize: '100px 100px',
           }}
         />
 

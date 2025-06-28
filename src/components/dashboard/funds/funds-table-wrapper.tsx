@@ -81,7 +81,7 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
         userSelect: 'none',
         WebkitUserSelect: 'none',
         MozUserSelect: 'none',
-        msUserSelect: 'none'
+        msUserSelect: 'none',
       }}
     >
       <FundsTable

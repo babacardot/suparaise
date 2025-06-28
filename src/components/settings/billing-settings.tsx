@@ -202,12 +202,14 @@ export default function BillingSettings() {
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-semibold -mt-1">Current plan</h3>
                 {isSubscribed && subscription?.permission_level && (
-                  <Badge className={cn(
-                    "border",
-                    subscription.permission_level === 'MAX'
-                      ? "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
-                      : "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
-                  )}>
+                  <Badge
+                    className={cn(
+                      'border',
+                      subscription.permission_level === 'MAX'
+                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                        : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                    )}
+                  >
                     <Crown className="h-3 w-3 mr-1" />
                     {subscription.permission_level}
                   </Badge>
