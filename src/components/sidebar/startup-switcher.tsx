@@ -116,6 +116,7 @@ export function StartupSwitcher({
                 className="w-full h-full object-contain"
                 width={32}
                 height={32}
+                unoptimized
               />
             ) : (
               <Image
@@ -161,6 +162,7 @@ export function StartupSwitcher({
                             className="w-full h-full object-contain"
                             width={20}
                             height={20}
+                            unoptimized
                           />
                         ) : (
                           <Image

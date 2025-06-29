@@ -301,6 +301,9 @@ export default function FundsFilters({
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
   }
 
+  // Store scroll positions for each filter type
+  const scrollPositions = React.useRef<Record<string, number>>({})
+
   const FilterSection = ({
     filterKey,
     options,
@@ -309,50 +312,85 @@ export default function FundsFilters({
     filterKey: keyof FundsFilters
     options: Array<{ value: string; label: string; animation?: object }>
     hasIcon?: boolean
-  }) => (
-    <div className="p-2">
-      <div
-        className="space-y-1 max-h-48 overflow-y-auto [&::-webkit-scrollbar]:hidden"
-        style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}
-      >
-        {options.map((option) => {
-          const isSelected = filters[filterKey]?.includes(option.value) || false
-          const colors = getOptionColors(filterKey, option.value)
+  }) => {
+    const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
-          return (
-            <div
-              key={option.value}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                updateFilter(filterKey, option.value, !isSelected)
-              }}
-              className={`
-                                flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
-                                ${isSelected ? colors : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'}
-                            `}
-            >
-              {hasIcon && option.animation && (
-                <LottieIcon
-                  animationData={option.animation}
-                  size={14}
-                  className="mr-2"
-                />
-              )}
-              <span className="text-sm font-medium">{option.label}</span>
-            </div>
-          )
-        })}
+    // Restore scroll position after render
+    React.useLayoutEffect(() => {
+      if (scrollContainerRef.current && scrollPositions.current[filterKey]) {
+        scrollContainerRef.current.scrollTop =
+          scrollPositions.current[filterKey]
+      }
+    })
+
+    const handleScroll = () => {
+      if (scrollContainerRef.current) {
+        scrollPositions.current[filterKey] =
+          scrollContainerRef.current.scrollTop
+      }
+    }
+
+    const handleOptionClick = (
+      optionValue: string,
+      isSelected: boolean,
+      e: React.MouseEvent,
+    ) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      // Store current scroll position before state update
+      if (scrollContainerRef.current) {
+        scrollPositions.current[filterKey] =
+          scrollContainerRef.current.scrollTop
+      }
+
+      updateFilter(filterKey, optionValue, !isSelected)
+    }
+
+    return (
+      <div className="p-2">
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="space-y-1 max-h-48 overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          {options.map((option) => {
+            const isSelected =
+              filters[filterKey]?.includes(option.value) || false
+            const colors = getOptionColors(filterKey, option.value)
+
+            return (
+              <div
+                key={option.value}
+                onClick={(e) => handleOptionClick(option.value, isSelected, e)}
+                className={`
+                                  flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
+                                  ${isSelected ? colors : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'}
+                              `}
+              >
+                {hasIcon && option.animation && (
+                  <LottieIcon
+                    animationData={option.animation}
+                    size={14}
+                    className="mr-2"
+                  />
+                )}
+                <span className="text-sm font-medium">{option.label}</span>
+              </div>
+            )
+          })}
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div
-      className="w-[calc(100%+2rem)] -ml-4 sm:ml-0 sm:w-full p-4"
+      className="w-[calc(100%+2rem)] -ml-4 sm:ml-0 sm:w-full px-4 pt-2 pb-4"
       style={{
         userSelect: 'none',
         WebkitUserSelect: 'none',

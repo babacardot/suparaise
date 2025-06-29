@@ -314,9 +314,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -555,10 +554,10 @@ export default function CompanySettings() {
     }
 
     fetchStartupData()
-  }, [user, currentStartupId, supabase, toast])
+  }, [user, currentStartupId, supabase, toast, startups])
 
   if (!user) {
-    return <div>Loading...</div>
+    return <div></div>
   }
 
   if (dataLoading) {
@@ -750,10 +749,7 @@ export default function CompanySettings() {
 
       void data // Used for error checking above
 
-      // Update local state
-      setFormData((prev) => ({ ...prev, logoUrl: publicUrl }))
-
-      // Refresh startups data so startup-switcher reflects the new logo
+      // Refresh startups data so all components (incl. this one via useEffect) reflect the new logo
       try {
         await refreshStartups()
       } catch (refreshError) {
@@ -795,9 +791,6 @@ export default function CompanySettings() {
         throw new Error(data.error)
       }
 
-      // Update local state first
-      setFormData((prev) => ({ ...prev, logoUrl: null }))
-
       // Clean up the logo file from storage
       try {
         const { data: files, error: listError } = await supabase.storage
@@ -813,7 +806,7 @@ export default function CompanySettings() {
         // Don't show error to user since the main update succeeded
       }
 
-      // Refresh startups data so startup-switcher reflects the logo removal
+      // Refresh startups data so all components (incl. this one via useEffect) reflect the logo removal
       try {
         await refreshStartups()
       } catch (refreshError) {
@@ -872,6 +865,20 @@ export default function CompanySettings() {
     }
   }
 
+  // Helper function to get logo URL, similar to getAvatarUrl in nav-user.tsx
+  const getLogoUrl = () => {
+    // Use logoUrl if available
+    if (formData.logoUrl) {
+      return formData.logoUrl
+    }
+
+    // Default fallback
+    return `https://avatar.vercel.sh/${encodeURIComponent(
+      formData.name?.toLowerCase() || currentStartupId || 'suparaise',
+    )}.png?size=80`
+  }
+
+  const logoUrl = getLogoUrl()
   const companyInitial = formData.name?.charAt(0)?.toUpperCase() || 'C'
 
   const handleAccountDelete = async () => {
@@ -947,7 +954,7 @@ export default function CompanySettings() {
       const fileName = `${user.id}/pitch-deck-${Date.now()}-${file.name}`
 
       const { error: uploadError } = await supabase.storage
-        .from('pitch-decks')
+        .from('decks')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true,
@@ -957,7 +964,7 @@ export default function CompanySettings() {
 
       const {
         data: { publicUrl },
-      } = supabase.storage.from('pitch-decks').getPublicUrl(fileName)
+      } = supabase.storage.from('decks').getPublicUrl(fileName)
 
       const { data, error } = await supabase.rpc('update_user_startup_data', {
         p_user_id: user.id,
@@ -1139,18 +1146,11 @@ export default function CompanySettings() {
           {/* Company Logo */}
           <div className="flex items-center space-x-4">
             <Avatar
-              key={formData.logoUrl || 'no-logo'}
+              key={logoUrl}
               className="h-20 w-20 rounded-sm"
             >
               <AvatarImage
-                src={
-                  formData.logoUrl ||
-                  `https://avatar.vercel.sh/${encodeURIComponent(
-                    formData.name.toLowerCase() ||
-                      currentStartupId ||
-                      'suparaise',
-                  )}.png?size=80`
-                }
+                src={logoUrl}
                 alt="Company logo"
               />
               <AvatarFallback className="rounded-sm text-lg">
@@ -1182,10 +1182,9 @@ export default function CompanySettings() {
                 {logoUploading ? (
                   <>
                     <Spinner className="h-3 w-3 mr-2" />
-                    Uploading...
                   </>
                 ) : (
-                  <>{formData.logoUrl ? 'Update' : 'Update'}</>
+                  <>{formData.logoUrl ? 'Update' : 'Upload'}</>
                 )}
               </Button>
               {formData.logoUrl && (
@@ -2192,7 +2191,6 @@ export default function CompanySettings() {
                         {pitchDeckUploading ? (
                           <>
                             <Spinner className="h-3 w-3 mr-2" />
-                            Uploading...
                           </>
                         ) : (
                           'Upload'
@@ -2225,7 +2223,6 @@ export default function CompanySettings() {
                         {pitchDeckUploading ? (
                           <>
                             <Spinner className="h-3 w-3 mr-2" />
-                            Uploading...
                           </>
                         ) : (
                           'Update'
@@ -2289,7 +2286,6 @@ export default function CompanySettings() {
                         {videoUploading ? (
                           <>
                             <Spinner className="h-3 w-3 mr-2" />
-                            Uploading...
                           </>
                         ) : (
                           'Upload'
@@ -2322,7 +2318,6 @@ export default function CompanySettings() {
                         {videoUploading ? (
                           <>
                             <Spinner className="h-3 w-3 mr-2" />
-                            Uploading...
                           </>
                         ) : (
                           'Update'
@@ -2407,7 +2402,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

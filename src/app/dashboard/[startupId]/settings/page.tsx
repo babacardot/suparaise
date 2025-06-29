@@ -2,7 +2,7 @@ import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 import SettingsLayout from '@/components/settings/settings-layout'
-import ProfileSettings from '@/components/settings/profile-settings'
+import ProfileSettings from '@/components/settings/founder-settings'
 
 export async function generateMetadata({
   params,

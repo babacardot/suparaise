@@ -276,9 +276,18 @@ BEGIN
         current_runway = COALESCE((p_data->>'currentRunway')::INTEGER, current_runway),
         key_customers = COALESCE(p_data->>'keyCustomers', key_customers),
         competitors = COALESCE(p_data->>'competitors', competitors),
-        logo_url = COALESCE(p_data->>'logoUrl', logo_url),
-        pitch_deck_url = COALESCE(p_data->>'pitchDeckUrl', pitch_deck_url),
-        intro_video_url = COALESCE(p_data->>'introVideoUrl', intro_video_url),
+        logo_url = CASE 
+            WHEN p_data ? 'logoUrl' THEN p_data->>'logoUrl'
+            ELSE logo_url 
+        END,
+        pitch_deck_url = CASE 
+            WHEN p_data ? 'pitchDeckUrl' THEN p_data->>'pitchDeckUrl'
+            ELSE pitch_deck_url 
+        END,
+        intro_video_url = CASE 
+            WHEN p_data ? 'introVideoUrl' THEN p_data->>'introVideoUrl'
+            ELSE intro_video_url 
+        END,
         updated_at = NOW()
     WHERE id = p_startup_id AND user_id = p_user_id;
 
@@ -853,17 +862,6 @@ BEGIN
     WHERE user_id = p_user_id;
 
     GET DIAGNOSTICS archive_count = ROW_COUNT;
-    
-    -- Archive common responses
-    INSERT INTO common_responses_archive (
-        id, startup_id, question, answer, created_at, updated_at,
-        original_id, original_startup_id
-    )
-    SELECT 
-        gen_random_uuid(), startup_id, question, answer, created_at, updated_at,
-        id, startup_id
-    FROM common_responses 
-    WHERE startup_id = ANY(startup_ids);
 
     -- Archive submissions
     INSERT INTO submissions_archive (
@@ -958,9 +956,6 @@ BEGIN
     
     -- Delete agent settings
     DELETE FROM agent_settings WHERE user_id = p_user_id;
-    
-    -- Delete common responses
-    DELETE FROM common_responses WHERE startup_id = ANY(startup_ids);
     
     -- Delete founders
     DELETE FROM founders WHERE startup_id = ANY(startup_ids);

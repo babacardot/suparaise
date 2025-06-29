@@ -302,7 +302,6 @@ const FileUploadComponent: React.FC<
               {uploadStatus === 'uploading' ? (
                 <>
                   <Spinner className="h-3 w-3 mr-2" />
-                  Uploading...
                 </>
               ) : (
                 'Upload'
@@ -380,7 +379,6 @@ const FileUploadComponent: React.FC<
                 {uploadStatus === 'uploading' ? (
                   <>
                     <Spinner className="h-3 w-3 mr-2" />
-                    Uploading...
                   </>
                 ) : (
                   'Update'

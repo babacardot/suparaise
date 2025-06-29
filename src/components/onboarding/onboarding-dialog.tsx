@@ -675,7 +675,7 @@ export function OnboardingDialog({
       if (startup.pitchDeckFile) {
         pitchDeckUrl = await uploadFile(
           startup.pitchDeckFile,
-          'pitch_decks',
+          'decks',
           `${userId}/pitch-deck-${Date.now()}`,
         )
       }
@@ -683,7 +683,7 @@ export function OnboardingDialog({
       if (startup.introVideoFile) {
         introVideoUrl = await uploadFile(
           startup.introVideoFile,
-          'intro_videos',
+          'videos',
           `${userId}/intro-video-${Date.now()}`,
         )
       }

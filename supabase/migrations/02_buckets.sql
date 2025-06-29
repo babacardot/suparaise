@@ -7,14 +7,14 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('logos', 'logos', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Create the 'pitch_decks' bucket for pitch decks
+-- 2. Create the 'decks' bucket for pitch decks
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('pitch_decks', 'pitch_decks', true)
+VALUES ('decks', 'decks', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 3. Create the 'intro_videos' bucket for intro videos
+-- 3. Create the 'videos' bucket for intro videos
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('intro_videos', 'intro_videos', true)
+VALUES ('videos', 'videos', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- 4. Create the 'support_request_images' bucket for support request attachments
@@ -50,39 +50,39 @@ USING (bucket_id = 'logos' AND auth.role() = 'authenticated');
 
 
 -- Pitch Decks: Same policies as logos
-CREATE POLICY "Allow public read on pitch_decks"
+CREATE POLICY "Allow public read on decks"
 ON storage.objects FOR SELECT
-USING (bucket_id = 'pitch_decks');
+USING (bucket_id = 'decks');
 
-CREATE POLICY "Allow authenticated users to manage their pitch_decks"
+CREATE POLICY "Allow authenticated users to manage their deck"
 ON storage.objects FOR INSERT
-WITH CHECK (bucket_id = 'pitch_decks' AND auth.role() = 'authenticated');
+WITH CHECK (bucket_id = 'decks' AND auth.role() = 'authenticated');
 
-CREATE POLICY "Allow authenticated users to update their own pitch_decks"
+CREATE POLICY "Allow authenticated users to update their own deck"
 ON storage.objects FOR UPDATE
-USING (bucket_id = 'pitch_decks' AND auth.role() = 'authenticated');
+USING (bucket_id = 'decks' AND auth.role() = 'authenticated');
 
-CREATE POLICY "Allow authenticated users to delete their own pitch_decks"
+CREATE POLICY "Allow authenticated users to delete their own deck"
 ON storage.objects FOR DELETE
-USING (bucket_id = 'pitch_decks' AND auth.role() = 'authenticated');
+USING (bucket_id = 'decks' AND auth.role() = 'authenticated');
 
 
--- Intro Videos: Same policies as logos
-CREATE POLICY "Allow public read on intro_videos"
+-- Videos: Same policies as logos
+CREATE POLICY "Allow public read on videos"
 ON storage.objects FOR SELECT
-USING (bucket_id = 'intro_videos');
+USING (bucket_id = 'videos');
 
-CREATE POLICY "Allow authenticated users to manage their intro_videos"
+CREATE POLICY "Allow authenticated users to manage their videos"
 ON storage.objects FOR INSERT
-WITH CHECK (bucket_id = 'intro_videos' AND auth.role() = 'authenticated');
+WITH CHECK (bucket_id = 'videos' AND auth.role() = 'authenticated');
 
-CREATE POLICY "Allow authenticated users to update their own intro_videos"
+CREATE POLICY "Allow authenticated users to update their own videos"
 ON storage.objects FOR UPDATE
-USING (bucket_id = 'intro_videos' AND auth.role() = 'authenticated');
+USING (bucket_id = 'videos' AND auth.role() = 'authenticated');
 
-CREATE POLICY "Allow authenticated users to delete their own intro_videos"
+CREATE POLICY "Allow authenticated users to delete their own videos"
 ON storage.objects FOR DELETE
-USING (bucket_id = 'intro_videos' AND auth.role() = 'authenticated');
+USING (bucket_id = 'videos' AND auth.role() = 'authenticated');
 
 
 -- Support Request Images: Users can only access their own images

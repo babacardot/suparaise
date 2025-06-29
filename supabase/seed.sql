@@ -5,7 +5,6 @@ TRUNCATE TABLE
     profiles, 
     startups, 
     founders, 
-    common_responses, 
     targets, 
     submissions 
 RESTART IDENTITY CASCADE;

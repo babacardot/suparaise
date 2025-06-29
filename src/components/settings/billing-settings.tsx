@@ -191,7 +191,7 @@ export default function BillingSettings() {
   }
 
   if (!user) {
-    return <div>Loading...</div>
+    return <div></div>
   }
 
   if (subscriptionLoading) {

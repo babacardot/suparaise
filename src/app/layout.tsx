@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://suparaise.com'),
   title: {
-    default: 'Suparaise | AI-Powered Fundraising Automation',
-    template: '%s | Suparaise',
+    default: 'Suparaise',
+    template: 'Suparaise | %s',
   },
   description:
     'Automate your startup fundraising with AI agents that fill out VCs and funds applications, handle investor outreach, and streamline your fundraising process.',

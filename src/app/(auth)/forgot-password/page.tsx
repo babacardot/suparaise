@@ -1,7 +1,7 @@
 import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
 import { Suspense } from 'react'
 import Spinner from '@/components/ui/spinner'
-import { TopBanner } from '@/components/design/top-banner'
+import { TopBanner } from '@/components/design/ph-banner'
 
 export default function ForgotPasswordPage() {
   return (

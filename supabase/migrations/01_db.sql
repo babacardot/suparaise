@@ -343,25 +343,6 @@ FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- --------------------------------------------------
--- Table: common_responses
--- Stores pre-written answers to common application questions.
--- --------------------------------------------------
-CREATE TABLE common_responses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
-    question TEXT NOT NULL,
-    answer TEXT,
-    UNIQUE(startup_id, question),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TRIGGER set_common_responses_timestamp
-BEFORE UPDATE ON common_responses
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
-
--- --------------------------------------------------
 -- Table: submissions
 -- Tracks the status of each application submission by the agent.
 -- --------------------------------------------------
@@ -448,9 +429,6 @@ CREATE INDEX IF NOT EXISTS idx_startups_onboarded ON startups(onboarded);
 -- Index for founders.startup_id (for founder lookups)
 CREATE INDEX IF NOT EXISTS idx_founders_startup_id ON founders(startup_id);
 
--- Index for common_responses.startup_id (for response lookups)
-CREATE INDEX IF NOT EXISTS idx_common_responses_startup_id ON common_responses(startup_id);
-
 -- Index for submissions queries
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_id ON submissions(startup_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_target_id ON submissions(target_id);
@@ -473,7 +451,6 @@ CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_startup_id ON accelerator
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_accelerator_id ON accelerator_submissions(accelerator_id);
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_status ON accelerator_submissions(status);
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_startup_accelerator ON accelerator_submissions(startup_id, accelerator_id);
-CREATE INDEX IF NOT EXISTS idx_common_responses_startup_question ON common_responses(startup_id, question);
 
 -- Index for email lookups in founders (if used)
 CREATE INDEX IF NOT EXISTS idx_founders_email ON founders(email) WHERE email IS NOT NULL;
@@ -550,11 +527,6 @@ ALTER TABLE founders ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage founders of their own startup" ON founders FOR ALL
 USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
 
--- Users can only manage common responses for their own startup (optimized with select auth.uid())
-ALTER TABLE common_responses ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow users to manage responses for their own startup" ON common_responses FOR ALL
-USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
-
 -- Users can only manage submissions for their own startup (optimized with select auth.uid())
 ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage submissions for their own startup" ON submissions FOR ALL
@@ -567,7 +539,7 @@ USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id
 
 -- Users can only manage accelerator submissions for their own startup (optimized with select auth.uid())
 ALTER TABLE accelerator_submissions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow users to manage accelerator submissions for their own startup" ON accelerator_submissions FOR ALL
+CREATE POLICY "Allow users to manage accel submissions for their own startup" ON accelerator_submissions FOR ALL
 USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
 
 -- Row Level Security for agent_settings
@@ -582,7 +554,6 @@ USING ((select auth.uid()) = user_id AND (SELECT is_active FROM profiles WHERE i
 ANALYZE profiles;
 ANALYZE startups;
 ANALYZE founders;
-ANALYZE common_responses;
 ANALYZE submissions;
 ANALYZE angel_submissions;
 ANALYZE accelerator_submissions;
@@ -734,21 +705,6 @@ CREATE TABLE accelerator_submissions_archive (
     original_startup_id UUID NOT NULL
 );
 
--- Archive table for deleted common responses
-CREATE TABLE common_responses_archive (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    startup_id UUID NOT NULL,
-    question TEXT NOT NULL,
-    answer TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    -- Archive-specific fields
-    archived_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    archived_reason TEXT DEFAULT 'user_deletion' NOT NULL,
-    original_id UUID NOT NULL,
-    original_startup_id UUID NOT NULL
-);
-
 -- Archive table for deleted agent settings
 CREATE TABLE agent_settings_archive (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -792,9 +748,6 @@ CREATE INDEX IF NOT EXISTS idx_angel_submissions_archive_original_startup_id ON 
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_archive_original_id ON accelerator_submissions_archive(original_id);
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_archive_original_startup_id ON accelerator_submissions_archive(original_startup_id);
 
-CREATE INDEX IF NOT EXISTS idx_common_responses_archive_original_id ON common_responses_archive(original_id);
-CREATE INDEX IF NOT EXISTS idx_common_responses_archive_original_startup_id ON common_responses_archive(original_startup_id);
-
 CREATE INDEX IF NOT EXISTS idx_agent_settings_archive_original_id ON agent_settings_archive(original_id);
 CREATE INDEX IF NOT EXISTS idx_agent_settings_archive_original_user_id ON agent_settings_archive(original_user_id);
 
@@ -809,7 +762,6 @@ ALTER TABLE founders_archive ENABLE ROW LEVEL SECURITY;
 ALTER TABLE submissions_archive ENABLE ROW LEVEL SECURITY;
 ALTER TABLE angel_submissions_archive ENABLE ROW LEVEL SECURITY;
 ALTER TABLE accelerator_submissions_archive ENABLE ROW LEVEL SECURITY;
-ALTER TABLE common_responses_archive ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agent_settings_archive ENABLE ROW LEVEL SECURITY;
 
 -- Archive data should NOT be accessible by regular users since these are deleted accounts
@@ -838,10 +790,6 @@ CREATE POLICY "Service role can access archive data" ON angel_submissions_archiv
 -- Accelerator Submissions Archive - No direct access
 CREATE POLICY "Archive data not accessible to users" ON accelerator_submissions_archive FOR ALL TO authenticated USING (FALSE);
 CREATE POLICY "Service role can access archive data" ON accelerator_submissions_archive FOR ALL TO service_role USING (TRUE);
-
--- Common Responses Archive - No direct access
-CREATE POLICY "Archive data not accessible to users" ON common_responses_archive FOR ALL TO authenticated USING (FALSE);
-CREATE POLICY "Service role can access archive data" ON common_responses_archive FOR ALL TO service_role USING (TRUE);
 
 -- Agent Settings Archive - No direct access
 CREATE POLICY "Archive data not accessible to users" ON agent_settings_archive FOR ALL TO authenticated USING (FALSE);

@@ -5,7 +5,7 @@ import { useUser } from '@/lib/contexts/user-context'
 import { useRouter } from 'next/navigation'
 import { useEffect, Suspense } from 'react'
 import Spinner from '@/components/ui/spinner'
-import { TopBanner } from '@/components/design/top-banner'
+import { TopBanner } from '@/components/design/ph-banner'
 
 function LoginPageContent() {
   const router = useRouter()

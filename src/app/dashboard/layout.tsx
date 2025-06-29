@@ -87,7 +87,7 @@ export default function DashboardLayout({
             label: 'Settings',
             href: `/dashboard/${currentStartupId}/settings`,
           },
-          { label: 'Profile', isCurrentPage: true },
+          { label: 'Founder', isCurrentPage: true },
         ]
       }
     } else {

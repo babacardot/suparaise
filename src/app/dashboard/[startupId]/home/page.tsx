@@ -36,7 +36,7 @@ export default async function HomePage() {
     <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight mt-1.5">
-          Welcome back
+          Welcome
         </h1>
       </div>
     </div>

@@ -258,7 +258,7 @@ export default function ProfileSettings() {
   }, [user, currentStartupId, supabase, toast])
 
   if (!user) {
-    return <div>Loading...</div>
+    return <div></div>
   }
 
   if (dataLoading) {

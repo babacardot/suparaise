@@ -79,17 +79,6 @@ export default function SecureFundsWrapper({
       onDragStart={(e: React.DragEvent) => e.preventDefault()}
       onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
     >
-      {/* Simple watermark overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none z-40 opacity-[0.02]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='Arial, sans-serif' font-size='14' fill='%23000' transform='rotate(-25 100 100)' opacity='0.8'%3ESuparaise Confidential%3C/text%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '200px 200px',
-          mixBlendMode: 'overlay',
-        }}
-      />
-
       {children}
     </div>
   )

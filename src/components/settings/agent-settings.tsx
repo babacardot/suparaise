@@ -159,7 +159,7 @@ export default function AgentSettings() {
   }, [user, currentStartupId, supabase, toast])
 
   if (!user) {
-    return <div>Loading...</div>
+    return <div></div>
   }
 
   if (dataLoading) {
@@ -398,7 +398,7 @@ export default function AgentSettings() {
                           'text-muted-foreground',
                       )}
                     >
-                      Dev mode
+                      Developer mode
                     </Label>
                     {!isAdvancedFeatureAvailable() && (
                       <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded">

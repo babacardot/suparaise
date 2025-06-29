@@ -679,16 +679,6 @@ const FundsTable = React.memo(function FundsTable({
         onDragStart={(e: React.DragEvent) => e.preventDefault()}
         onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
       >
-        {/* Security Watermark */}
-        <div
-          className="fixed inset-0 pointer-events-none z-50 opacity-5"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='Arial' font-size='8' fill='%23000' transform='rotate(-45 50 50)'%3ECONFIDENTIAL%3C/text%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-            backgroundSize: '100px 100px',
-          }}
-        />
-
         {/* Filters Component */}
         <FundsFilters
           filters={filters}
@@ -804,7 +794,7 @@ const FundsTable = React.memo(function FundsTable({
                                   href={target.website}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
+                                  className="font-medium text-foreground hover:text-foreground hover:underline"
                                 >
                                   {target.name}
                                 </a>
@@ -1098,7 +1088,7 @@ const FundsTable = React.memo(function FundsTable({
                                       ? 'Queue Full'
                                       : queueStatus &&
                                           queueStatus.availableSlots === 0
-                                        ? 'Add to Queue'
+                                        ? 'Queue'
                                         : 'Apply'}
                                 </Button>
                               </ValidationGate>

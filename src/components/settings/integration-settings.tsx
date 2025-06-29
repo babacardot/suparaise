@@ -193,7 +193,7 @@ export default function IntegrationSettings() {
   }, [user])
 
   if (!user) {
-    return <div>Loading...</div>
+    return <div></div>
   }
 
   if (!hasMaxAccess) {

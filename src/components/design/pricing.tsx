@@ -24,7 +24,7 @@ const pricingTiers: PricingTier[] = [
     description: 'Get started with agentic fundraising',
     features: [
       '3 fund applications per month',
-      'Access to 100 pre-screened funds',
+      'Access to 150 pre-screened funds',
       'Claude 4 sonnet',
       'Application tracking',
     ],
@@ -43,7 +43,6 @@ const pricingTiers: PricingTier[] = [
       '3 parallel submissions',
       'Smart queuing system',
       'Agent customization',
-      'Standard support',
     ],
     buttonText: 'Start free trial',
     href: '/signup',
@@ -56,11 +55,11 @@ const pricingTiers: PricingTier[] = [
     priceSuffix: '/mo',
     description: 'For startups that need meetings now',
     features: [
-      '120 runs per month',
+      '125 runs per month',
       'Access to 2,000+ global funds',
       '5 parallel submissions',
       'Advanced application tracking',
-      'Integrations',
+      'Developer mode',
       'Priority support',
     ],
     buttonText: 'Get started',
@@ -153,16 +152,17 @@ export const Pricing = () => {
                     asChild
                     onClick={
                       tier.permissionLevel === 'PRO' ||
-                        tier.permissionLevel === 'MAX'
+                      tier.permissionLevel === 'MAX'
                         ? playClickSound
                         : undefined
                     }
-                    className={`mt-6 w-full ${tier.popular
-                      ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                      : tier.permissionLevel === 'MAX'
-                        ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800'
-                        : ''
-                      }`}
+                    className={`mt-6 w-full ${
+                      tier.popular
+                        ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                        : tier.permissionLevel === 'MAX'
+                          ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800'
+                          : ''
+                    }`}
                     variant="outline"
                   >
                     <Link href={tier.href}>{tier.buttonText}</Link>
@@ -173,7 +173,7 @@ export const Pricing = () => {
           </div>
 
           <div className="flex justify-center mt-0 -mb-6">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-sm bg-muted/50 border">
               <div className="w-3 h-3 rounded-full bg-green-500 -mt-0.25"></div>
               <span className="text-sm font-medium">
                 $0.60 / per application

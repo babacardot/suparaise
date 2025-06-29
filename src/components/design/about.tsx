@@ -41,7 +41,8 @@ const features = [
     description:
       'The most advanced AI fill out applications exactly as you would, with precision that matches your voice.',
     color: 'green',
-    bgClass: 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800',
+    bgClass:
+      'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800',
     customColor: [0.133, 0.773, 0.369] as [number, number, number], // Green-500
   },
   {
@@ -50,7 +51,8 @@ const features = [
     description:
       'Our agents can fill out 25+ applications simultaneously in the time it takes you to complete just one.',
     color: 'blue',
-    bgClass: 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800',
+    bgClass:
+      'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800',
     customColor: [0.239, 0.596, 0.965] as [number, number, number], // Blue-500
   },
   {
@@ -59,7 +61,8 @@ const features = [
     description:
       'Access 2,000+ funds, angels, and accelerators from Silicon Valley to Singapore and throughout EMEA.',
     color: 'amber',
-    bgClass: 'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800',
+    bgClass:
+      'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800',
     customColor: [0.965, 0.647, 0.125] as [number, number, number], // Amber-500
   },
 ]
@@ -136,7 +139,9 @@ export const About3 = () => {
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 >
-                  <div className={`inline-flex items-center justify-center p-3 rounded-sm ${feature.bgClass}`}>
+                  <div
+                    className={`inline-flex items-center justify-center p-3 rounded-sm ${feature.bgClass}`}
+                  >
                     <LottieIcon
                       animationData={feature.animation}
                       size={24}
