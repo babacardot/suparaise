@@ -28,18 +28,18 @@ jobs:
             echo "❌ SUPABASE_SERVICE_ROLE_KEY is NOT available"
             exit 1
           fi
-      
+
       - name: Reset subscription limits
         run: |
           echo "🔄 Starting subscription limits reset..."
-          
+
           # Call the Edge Function (matching pattern of other workflows)
           RESPONSE=$(curl -s -X POST "https://swhlekigmfdbwulrncot.supabase.co/functions/v1/reset-subscription-limits" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json")
-          
+
           echo "📊 Reset Response: $RESPONSE"
-          
+
           # Check if the response indicates success
           if echo "$RESPONSE" | grep -q '"success":true'; then
             echo "✅ Subscription limits reset completed successfully"
@@ -64,11 +64,9 @@ jobs:
             echo "Response: $RESPONSE"
             exit 1
           fi
-      
 
-      
       - name: Notify on failure
         if: failure()
         run: |
           echo "🚨 Subscription reset job failed! Check the logs above for details."
-          # In a real setup, you might want to send notifications to Slack, email, etc. 
+          # In a real setup, you might want to send notifications to Slack, email, etc.

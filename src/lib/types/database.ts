@@ -1374,7 +1374,19 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      subscription_usage_summary: {
+        Row: {
+          avg_submissions_limit: number | null
+          avg_submissions_used: number | null
+          permission_level:
+            | Database['public']['Enums']['permission_level']
+            | null
+          subscribed_users: number | null
+          user_count: number | null
+          users_at_limit: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_startup_founder: {
@@ -1387,6 +1399,14 @@ export type Database = {
       }
       cancel_subscription: {
         Args: { p_stripe_customer_id: string }
+        Returns: Json
+      }
+      check_and_reset_free_users: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      check_and_reset_paid_users: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       check_submission_limit: {
@@ -1510,9 +1530,25 @@ export type Database = {
         Args: { p_user_id: string; p_founder_id: string }
         Returns: Json
       }
-      reset_monthly_submissions: {
+      run_automatic_subscription_resets: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      send_agent_completion_admin_email: {
+        Args: { p_submission_id: string }
+        Returns: undefined
+      }
+      send_agent_completion_customer_email: {
+        Args: { p_submission_id: string }
+        Returns: undefined
+      }
+      send_subscription_upgrade_email: {
+        Args: { user_email: string; user_name: string; plan_name: string }
+        Returns: undefined
+      }
+      send_suparaise_welcome_email: {
+        Args: { user_email: string; user_name: string }
+        Returns: undefined
       }
       soft_delete_startup: {
         Args: { p_user_id: string; p_startup_id: string }
