@@ -237,42 +237,36 @@ const Logo = ({ className }: { className?: string }) => {
     setMounted(true)
   }, [])
 
-  // Avoid hydration mismatch by not rendering theme-dependent content until mounted
-  if (!mounted) {
-    return (
-      <div className={cn('flex items-center space-x-2', className)}>
-        <Image
-          src="/lb.webp" // Neutral logo for SSR
-          alt="Suparaise logo"
-          className="h-8 w-auto"
-          width={32}
-          height={32}
-          priority
-          style={{ width: 'auto', height: '32px' }}
-        />
-        <span className="text-xl font-semibold text-foreground">Suparaise</span>
-      </div>
-    )
-  }
-
-  // Determine which logo to use based on resolved theme
-  const logoSrc = resolvedTheme === 'dark' ? '/tw.webp' : '/tb.webp'
+  // Determine which logos to use based on resolved theme, defaulting to light theme for SSR
+  const iconSrc =
+    mounted && resolvedTheme === 'dark' ? '/green.webp' : '/green.webp'
+  const textLogoSrc =
+    mounted && resolvedTheme === 'dark' ? '/sw.webp' : '/sb.webp'
 
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
+    <div className={cn('flex items-center space-x-1 -mr-4', className)}>
+      {/* Theme-sensitive Icon */}
       <Image
-        key={logoSrc} // Force re-render when logo changes
-        src={logoSrc}
-        alt="Suparaise logo"
-        className="h-8 w-auto transition-opacity duration-200"
-        width={32}
-        height={32}
+        key={`icon-${iconSrc}`} // Force re-render when icon changes
+        src={iconSrc}
+        alt="Suparaise icon"
+        className="h-10 w-auto" // Increased size
+        width={52} // Increased size
+        height={52} // Increased size
         priority
-        style={{ width: 'auto', height: '32px' }}
+        style={{ width: 'auto', height: '52px' }}
       />
-      <span className="text-xl font-semibold text-foreground transition-colors duration-200">
-        Suparaise
-      </span>
+      {/* Theme-sensitive Text Logo */}
+      <Image
+        key={`text-${textLogoSrc}`} // Force re-render when text logo changes
+        src={textLogoSrc}
+        alt="Suparaise text logo"
+        width={120}
+        height={30}
+        priority
+        className="h-auto"
+        style={{ width: '120px' }} // Maintain aspect ratio
+      />
     </div>
   )
 }

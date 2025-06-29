@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
 interface BackgroundTextProps {
   onClick?: () => void
@@ -9,14 +10,22 @@ interface BackgroundTextProps {
 
 export function BackgroundText({ onClick }: BackgroundTextProps) {
   const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-  // Use resolvedTheme for more reliable theme detection, fallback to light theme
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const imageSrc = resolvedTheme === 'dark' ? '/tw.webp' : '/tb.webp'
+
+  if (!mounted) {
+    // Render a placeholder or null on the server and initial client render
+    return null
+  }
 
   return (
     <div className="w-full overflow-hidden relative h-32 sm:h-40 md:h-48 lg:h-56 -mt-8 -mb-52 ml-28 lg:ml-[365px] pointer-events-none">
       <Image
-        key={resolvedTheme} // Force re-render when theme changes
         src={imageSrc}
         className="absolute inset-0 w-full h-full object-contain opacity-[0.04] select-none scale-110 sm:scale-125 md:scale-140 lg:scale-150"
         alt="Background image"
