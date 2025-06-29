@@ -620,15 +620,14 @@ BEGIN
         <li><strong>Access to 1,200 global funds</strong></li>
         <li><strong>3 parallel submissions</strong></li>
         <li><strong>Smart queuing system</strong></li>
-        <li><strong>Agent customization</strong></li>
-        <li><strong>Standard support</strong></li>';
+        <li><strong>Agent customization</strong></li>';
   ELSIF plan_name = 'MAX' THEN
     plan_benefits := '
-        <li><strong>120 runs per month</strong></li>
+        <li><strong>125 runs per month</strong></li>
         <li><strong>Access to 2,000+ global funds</strong></li>
         <li><strong>5 parallel submissions</strong></li>
         <li><strong>Advanced application tracking</strong></li>
-        <li><strong>Integrations</strong></li>
+        <li><strong>Developer mode</strong></li>
         <li><strong>Priority support</strong></li>';
   ELSE
     plan_benefits := '<li><strong>Enhanced features</strong> for better fundraising success</li>';

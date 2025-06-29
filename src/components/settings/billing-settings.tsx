@@ -142,11 +142,11 @@ export default function BillingSettings() {
       'Standard support',
     ],
     max_monthly: [
-      '120 runs per month',
+      '125 runs per month',
       'Access to 2,000+ global funds',
       '5 parallel submissions',
       'Advanced application tracking',
-      'Integrations',
+      'Developer mode',
       'Priority support',
     ],
   }

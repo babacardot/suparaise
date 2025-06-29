@@ -14,7 +14,7 @@ const transitionVariants = {
   item: {
     hidden: {
       opacity: 0,
-      filter: 'blur(12px)',
+      filter: 'blur(4px)',
       y: 12,
     },
     visible: {
@@ -61,7 +61,7 @@ export function HeroSection() {
       <main className="overflow-hidden">
         <section>
           <div className="relative pt-24">
-            <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]"></div>
+            <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(100%_100%_at_50%_100%,transparent_0%,var(--background)_60%)]"></div>
             <div className="mx-auto max-w-5xl px-6">
               <div className="sm:mx-auto lg:mr-auto">
                 <AnimatedGroup
@@ -140,7 +140,7 @@ export function HeroSection() {
                 <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-5xl overflow-hidden rounded-3xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
                   {isMounted && (
                     <Image
-                      className="aspect-[15/8] relative rounded-3xl"
+                      className="aspect-[15/8] relative rounded-sm"
                       src={portalImageSrc}
                       alt="Portal interface"
                       width={2700}

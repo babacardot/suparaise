@@ -36,7 +36,7 @@ export const Footer = () => {
     <footer className="border-t bg-background rounded-sm">
       <div className="mx-auto max-w-5xl px-6 py-6">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-4 sm:items-center">
             <Link
               href="/about"
               prefetch={true}
@@ -45,6 +45,7 @@ export const Footer = () => {
             >
               About
             </Link>
+            <span className="hidden sm:inline text-muted-foreground">|</span>
             <Link
               href="/privacy"
               prefetch={true}
