@@ -11,7 +11,7 @@ const MOVEMENT_DAMPING = 1400
 const BASE_GLOBE_CONFIG: COBEOptions = {
   width: 800,
   height: 800,
-  onRender: () => {},
+  onRender: () => { },
   devicePixelRatio: 2,
   phi: 0,
   theta: 0.3,
@@ -43,8 +43,8 @@ const getGlobeConfig = (theme?: string): COBEOptions => {
     ...BASE_GLOBE_CONFIG,
     dark: isDark ? 2 : 0,
     baseColor: isDark ? [0.3, 0.3, 0.3] : [1, 1, 1],
-    glowColor: isDark ? [0.91, 0.2, 0.34] : [0.91, 0.2, 0.34],
-    markerColor: [0.91, 0.2, 0.34],
+    glowColor: isDark ? [0.91, 0.2, 0.34] : [1, 1, 1],
+    markerColor: isDark ? [0.91, 0.2, 0.34] : [251 / 255, 100 / 255, 21 / 255],
     mapBrightness: isDark ? 6 : 1.2,
     diffuse: isDark ? 0.9 : 0.4,
   }

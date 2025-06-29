@@ -28,10 +28,10 @@ const transitionVariants = {
 }
 
 const achievements = [
-  { label: 'Applications automated', value: '2500+' },
+  { label: 'Applications automated', value: '25000+' },
   { label: 'Founders served', value: '1000+' },
-  { label: 'Success rate', value: '99%' },
-  { label: 'Meetings booked', value: '500+' },
+  { label: 'Success rate', value: '99.9%' },
+  { label: 'Meetings booked', value: '400+' },
 ]
 
 const features = [
@@ -40,18 +40,27 @@ const features = [
     title: 'Accuracy',
     description:
       'The most advanced AI fill out applications exactly as you would, with precision that matches your voice.',
+    color: 'green',
+    bgClass: 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800',
+    customColor: [0.133, 0.773, 0.369] as [number, number, number], // Green-500
   },
   {
     animation: animations.speed,
     title: 'Scale',
     description:
       'Our agents can fill out 25+ applications simultaneously in the time it takes you to complete just one.',
+    color: 'blue',
+    bgClass: 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800',
+    customColor: [0.239, 0.596, 0.965] as [number, number, number], // Blue-500
   },
   {
     animation: animations.globe,
-    title: 'Global',
+    title: 'Reach',
     description:
       'Access 2,000+ funds, angels, and accelerators from Silicon Valley to Singapore and throughout EMEA.',
+    color: 'amber',
+    bgClass: 'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800',
+    customColor: [0.965, 0.647, 0.125] as [number, number, number], // Amber-500
   },
 ]
 
@@ -127,13 +136,13 @@ export const About3 = () => {
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 >
-                  <div className="inline-flex items-center justify-center p-3 rounded-sm bg-primary/10">
+                  <div className={`inline-flex items-center justify-center p-3 rounded-sm ${feature.bgClass}`}>
                     <LottieIcon
                       animationData={feature.animation}
                       size={24}
                       loop={true}
                       autoplay={hoveredIndex === index}
-                      className="text-primary"
+                      customColor={feature.customColor}
                     />
                   </div>
                   <h3 className="font-semibold text-lg">{feature.title}</h3>
@@ -159,16 +168,52 @@ export const About3 = () => {
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-                {achievements.map((stat, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="text-4xl lg:text-5xl font-bold text-primary">
-                      {stat.value}
+                {achievements.map((stat, index) => {
+                  // Split number from symbol for better styling
+                  const formatStatValue = (value: string) => {
+                    if (value.includes('+')) {
+                      const number = value.replace('+', '')
+                      return (
+                        <>
+                          <span className="text-4xl lg:text-5xl font-bold text-primary">
+                            {number}
+                          </span>
+                          <span className="text-2xl lg:text-3xl font-bold text-primary/80 ml-1">
+                            +
+                          </span>
+                        </>
+                      )
+                    } else if (value.includes('%')) {
+                      const number = value.replace('%', '')
+                      return (
+                        <>
+                          <span className="text-4xl lg:text-5xl font-bold text-primary">
+                            {number}
+                          </span>
+                          <span className="text-2xl lg:text-3xl font-bold text-primary/80 ml-1">
+                            %
+                          </span>
+                        </>
+                      )
+                    }
+                    return (
+                      <span className="text-4xl lg:text-5xl font-bold text-primary">
+                        {value}
+                      </span>
+                    )
+                  }
+
+                  return (
+                    <div key={index} className="space-y-2">
+                      <div className="flex items-baseline justify-center">
+                        {formatStatValue(stat.value)}
+                      </div>
+                      <div className="text-muted-foreground font-medium text-sm">
+                        {stat.label}
+                      </div>
                     </div>
-                    <div className="text-muted-foreground font-medium text-sm">
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>
