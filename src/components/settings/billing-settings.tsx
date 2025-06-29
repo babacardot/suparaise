@@ -131,6 +131,26 @@ export default function BillingSettings() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
+  // Plan features for display
+  const planFeatures = {
+    pro_monthly: [
+      '50 runs per month',
+      'Access to 1,200 global funds',
+      '3 parallel submissions',
+      'Smart queuing system',
+      'Agent customization',
+      'Standard support',
+    ],
+    max_monthly: [
+      '120 runs per month',
+      'Access to 2,000+ global funds',
+      '5 parallel submissions',
+      'Advanced application tracking',
+      'Integrations',
+      'Priority support',
+    ],
+  }
+
   const handleSubscribe = async (
     plan: 'pro_monthly' | 'pro_yearly' | 'max_monthly' | 'max_yearly',
   ) => {
@@ -229,7 +249,7 @@ export default function BillingSettings() {
                   You&apos;re on the free plan.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Upgrade to Pro for 100 runs per month, access to 1200+ global
+                  Upgrade to Pro for 50 runs per month, access to 1,200 global
                   funds, and advanced features.
                 </p>
               </div>
@@ -264,8 +284,8 @@ export default function BillingSettings() {
                 </CardHeader>
                 <CardContent className="flex flex-col h-full">
                   <ul className="space-y-2 mb-6 flex-1">
-                    {SUBSCRIPTION_PLANS.pro_monthly.features.map(
-                      (feature, index) => (
+                    {planFeatures.pro_monthly.map(
+                      (feature: string, index: number) => (
                         <li
                           key={index}
                           className="flex items-center gap-2 text-sm"
@@ -310,8 +330,8 @@ export default function BillingSettings() {
                 </CardHeader>
                 <CardContent className="flex flex-col h-full">
                   <ul className="space-y-2 mb-6 flex-1">
-                    {SUBSCRIPTION_PLANS.max_monthly.features.map(
-                      (feature, index) => (
+                    {planFeatures.max_monthly.map(
+                      (feature: string, index: number) => (
                         <li
                           key={index}
                           className="flex items-center gap-2 text-sm"

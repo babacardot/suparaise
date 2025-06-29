@@ -13,7 +13,7 @@ interface PricingTier {
   buttonText: string
   href: string
   popular?: boolean
-  permissionLevel: 'FREE' | 'PRO' | 'MAX'
+  permissionLevel: 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'
 }
 
 const pricingTiers: PricingTier[] = [
@@ -24,8 +24,9 @@ const pricingTiers: PricingTier[] = [
     description: 'Get started with agentic fundraising',
     features: [
       '3 fund applications per month',
-      'Access to 100+ funds',
-      'Claude 3.7 sonnet',
+      'Access to 100 pre-screened funds',
+      'Claude 4 sonnet',
+      'Application tracking',
     ],
     buttonText: '',
     href: '/signup',
@@ -33,14 +34,15 @@ const pricingTiers: PricingTier[] = [
   },
   {
     name: 'Pro',
-    price: 25,
+    price: 30,
     priceSuffix: '/mo',
-    description: 'For startups actively fundraising',
+    description: 'For startups actively seeking their first funding round',
     features: [
-      '100 runs per month',
-      'Access to 1200+ global funds',
-      'Claude 4 sonnet',
-      '5 parallel submissions',
+      '50 runs per month',
+      'Access to 1,200 global funds',
+      '3 parallel submissions',
+      'Smart queuing system',
+      'Agent customization',
       'Standard support',
     ],
     buttonText: 'Start free trial',
@@ -50,20 +52,34 @@ const pricingTiers: PricingTier[] = [
   },
   {
     name: 'Max',
-    price: 120,
+    price: 100,
     priceSuffix: '/mo',
     description: 'For startups that need meetings now',
     features: [
-      '500 runs per month',
-      'Access to 2000+ global funds',
-      'Claude 4 sonnet',
-      '15 parallel submissions',
-      'Enhanced agent customization',
+      '120 runs per month',
+      'Access to 2,000+ global funds',
+      '5 parallel submissions',
+      'Advanced application tracking',
+      'Integrations',
       'Priority support',
     ],
     buttonText: 'Get started',
     href: '/signup',
     permissionLevel: 'MAX',
+  },
+  {
+    name: 'Enterprise',
+    price: 'Custom',
+    priceSuffix: '',
+    description: 'Volume discounts available',
+    features: [
+      '500+ fund applications per month',
+      'Up to 25 parallel submissions',
+      'Premium support',
+    ],
+    buttonText: 'Contact sales',
+    href: 'mailto:hello@suparaise.com',
+    permissionLevel: 'ENTERPRISE',
   },
 ]
 
@@ -89,12 +105,11 @@ export const Pricing = () => {
             Simple, transparent pricing
           </h2>
           <p className="text-center mt-5 opacity-75">
-            Choose the plan that fits your fundraising needs. All plans include
-            a free trial.
+            Choose the plan that fits your needs.
           </p>
 
           <div className="grid gap-8 lg:grid-cols-3 mt-12 w-full max-w-6xl">
-            {pricingTiers.map((tier, idx) => (
+            {pricingTiers.slice(0, 3).map((tier, idx) => (
               <div
                 key={idx}
                 className={`relative flex flex-col rounded-sm border p-6 ${tier.popular ? 'ring-2 ring-green-200 dark:ring-green-800' : ''}`}
@@ -127,7 +142,7 @@ export const Pricing = () => {
                 <ul className="flex flex-col gap-3 mt-6 flex-1">
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
-                      <Check className="size-4 shrink-0 mt-0.5 text-primary" />
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
                       {feature}
                     </li>
                   ))}
@@ -157,9 +172,64 @@ export const Pricing = () => {
             ))}
           </div>
 
+          {/* Enterprise Plan - Full Width */}
+          <div className="w-full max-w-6xl mt-6">
+            {pricingTiers.slice(3).map((tier, idx) => (
+              <div
+                key={idx + 3}
+                className="relative flex flex-col rounded-sm border p-8"
+              >
+                <div className="text-left mb-8">
+                  <h3 className="text-2xl font-semibold">{tier.name}</h3>
+                  <div className="flex items-baseline mt-4">
+                    <span className="text-5xl font-semibold">{tier.price}</span>
+                    <span className="text-muted-foreground ml-1">
+                      {tier.priceSuffix}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {tier.description}
+                  </p>
+                </div>
+
+                <div className="flex-1 mb-8">
+                  <ul className="grid grid-cols-1 gap-4">
+                    {tier.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="flex justify-start">
+                  {tier.buttonText && (
+                    <Button
+                      asChild
+                      className="w-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800"
+                      variant="outline"
+                    >
+                      <Link href={tier.href}>{tier.buttonText}</Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-center mt-2">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border">
+              <div className="w-2 h-2 rounded-full bg-green-500 -mt-0.5"></div>
+              <span className="text-sm font-medium">
+                $0.60 / per application
+              </span>
+            </div>
+          </div>
+
           <p className="text-sm text-muted-foreground mt-4">
-            All plans include SSL encryption, GDPR compliance, and can be
-            cancelled anytime.
+            All plans include SSL encryption, automated Captcha solving, stealth
+            mode, GDPR compliance, and can be cancelled anytime.
           </p>
         </div>
       </div>

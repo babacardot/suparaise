@@ -19,7 +19,6 @@ export interface OnboardingStatusResponse {
   hasStartup: boolean
 }
 
-// The Founder object is custom-built by the 'get_startup_data_by_user_id'
 // function. We define its shape here, using the underlying table column
 // types from 'database.ts' for accuracy and maintainability.
 export type Founder = {
@@ -32,8 +31,6 @@ export type Founder = {
   personal_website_url: Tables<'founders'>['personal_website_url']
 }
 
-// The Startup object is the primary Data Transfer Object (DTO) returned by the
-// 'get_startup_data_by_user_id' RPC call. It combines data from multiple tables.
 // We define its shape here so that TypeScript understands the object we get
 // back from Supabase, preventing runtime errors.
 export type Startup = {

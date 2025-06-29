@@ -438,7 +438,8 @@ const CompetitorInput: React.FC<{
 }
 
 export default function CompanySettings() {
-  const { user, supabase, currentStartupId, startups } = useUser()
+  const { user, supabase, currentStartupId, startups, refreshStartups } =
+    useUser()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [editingField, setEditingField] = useState<string | null>(null)
@@ -650,6 +651,16 @@ export default function CompanySettings() {
         throw new Error(data.error)
       }
 
+      // If updating company name, refresh startups data so startup-switcher reflects the change
+      if (field === 'name') {
+        try {
+          await refreshStartups()
+        } catch (refreshError) {
+          console.error('Error refreshing startups:', refreshError)
+          // Don't show error to user since the main update succeeded
+        }
+      }
+
       setEditingField(null)
       playCompletionSound()
       toast({
@@ -742,6 +753,14 @@ export default function CompanySettings() {
       // Update local state
       setFormData((prev) => ({ ...prev, logoUrl: publicUrl }))
 
+      // Refresh startups data so startup-switcher reflects the new logo
+      try {
+        await refreshStartups()
+      } catch (refreshError) {
+        console.error('Error refreshing startups:', refreshError)
+        // Don't show error to user since the main update succeeded
+      }
+
       playCompletionSound()
       toast({
         title: 'Logo updated',
@@ -762,8 +781,9 @@ export default function CompanySettings() {
   const handleLogoRemove = async () => {
     if (!currentStartupId) return
 
+    setLogoUploading(true)
     try {
-      const { error } = await supabase.rpc('update_user_startup_data', {
+      const { data, error } = await supabase.rpc('update_user_startup_data', {
         p_user_id: user.id,
         p_startup_id: currentStartupId,
         p_data: { logoUrl: null },
@@ -771,7 +791,35 @@ export default function CompanySettings() {
 
       if (error) throw error
 
+      if (data?.error) {
+        throw new Error(data.error)
+      }
+
+      // Update local state first
       setFormData((prev) => ({ ...prev, logoUrl: null }))
+
+      // Clean up the logo file from storage
+      try {
+        const { data: files, error: listError } = await supabase.storage
+          .from('logos')
+          .list(user.id)
+
+        if (!listError && files && files.length > 0) {
+          const filePaths = files.map((file) => `${user.id}/${file.name}`)
+          await supabase.storage.from('logos').remove(filePaths)
+        }
+      } catch (storageError) {
+        console.error('Could not clean up logo files:', storageError)
+        // Don't show error to user since the main update succeeded
+      }
+
+      // Refresh startups data so startup-switcher reflects the logo removal
+      try {
+        await refreshStartups()
+      } catch (refreshError) {
+        console.error('Error refreshing startups:', refreshError)
+        // Don't show error to user since the main update succeeded
+      }
 
       playCompletionSound()
       toast({
@@ -785,6 +833,8 @@ export default function CompanySettings() {
         title: 'Error',
         description: 'Failed to remove logo. Please try again.',
       })
+    } finally {
+      setLogoUploading(false)
     }
   }
 
@@ -1088,7 +1138,10 @@ export default function CompanySettings() {
         <div className="space-y-6 pr-2">
           {/* Company Logo */}
           <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20 rounded-sm">
+            <Avatar
+              key={formData.logoUrl || 'no-logo'}
+              className="h-20 w-20 rounded-sm"
+            >
               <AvatarImage
                 src={
                   formData.logoUrl ||
@@ -1143,9 +1196,17 @@ export default function CompanySettings() {
                     playClickSound()
                     handleLogoRemove()
                   }}
+                  disabled={logoUploading}
                   className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
                 >
-                  Remove
+                  {logoUploading ? (
+                    <>
+                      <Spinner className="h-3 w-3 mr-2" />
+                      Removing...
+                    </>
+                  ) : (
+                    'Remove'
+                  )}
                 </Button>
               )}
             </div>

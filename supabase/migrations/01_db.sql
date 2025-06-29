@@ -81,7 +81,7 @@ CREATE TYPE subscription_status AS ENUM ('active', 'inactive', 'past_due', 'canc
 CREATE TYPE permission_level AS ENUM ('FREE', 'PRO', 'MAX');
 CREATE TYPE agent_tone AS ENUM ('professional', 'enthusiastic', 'concise', 'detailed');
 CREATE TYPE agent_submission_delay AS ENUM ('0', '15', '30');
-CREATE TYPE agent_parallel_submissions AS ENUM ('1', '5', '10');
+CREATE TYPE agent_parallel_submissions AS ENUM ('1', '3', '5', '15', '25', '35');
 CREATE TYPE check_size_range AS ENUM ('1K-10K', '10K-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K-1M', '1M+');
 CREATE TYPE investment_approach AS ENUM ('hands-on', 'passive', 'advisory', 'network-focused');
 CREATE TYPE response_time AS ENUM ('1-3 days', '1 week', '2 weeks', '1 month', '2+ months');

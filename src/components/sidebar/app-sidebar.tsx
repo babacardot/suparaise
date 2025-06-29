@@ -81,7 +81,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const router = useRouter()
   const { state, toggleSidebar } = useSidebar()
-  const { subscription } = useUser()
+  const { subscription, user: contextUser } = useUser()
   const [isToggleHovered, setIsToggleHovered] = React.useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false)
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false)
@@ -96,7 +96,12 @@ export function AppSidebar({
   const permissionLevel = subscription?.permission_level || 'FREE'
 
   // Create display text: FirstName+StartupName
-  const firstName = user?.name?.split(' ')[0] || 'User'
+  // Use live user data from context for the most up-to-date firstName
+  const firstName =
+    contextUser?.user_metadata?.name?.split(' ')[0] ||
+    contextUser?.user_metadata?.firstName ||
+    user?.name?.split(' ')[0] ||
+    'User'
 
   // Find current startup from the startups array
   const currentStartup = React.useMemo(() => {
@@ -112,15 +117,17 @@ export function AppSidebar({
   // Create display startup object for the switcher with formatted name
   const displayStartupForSwitcher = currentStartup
     ? {
-      id: currentStartup.id,
-      name: displayText, // Use formatted display text
-      logo_url: currentStartup.logo_url,
-    }
+        id: currentStartup.id,
+        name: displayText, // Use formatted display text
+        logo_url: currentStartup.logo_url,
+      }
     : null
 
   // Debug logging
   console.log('AppSidebar Debug:', {
-    userName: user?.name,
+    propUserName: user?.name,
+    contextUserName: contextUser?.user_metadata?.name,
+    firstName,
     currentStartupId,
     currentStartup,
     displayText,
@@ -128,9 +135,9 @@ export function AppSidebar({
   })
 
   const userData = {
-    name: user?.name || 'User',
-    email: user?.email || 'user@example.com',
-    avatar: user?.avatar || '',
+    name: contextUser?.user_metadata?.name || user?.name || 'User',
+    email: contextUser?.email || user?.email || 'user@example.com',
+    avatar: contextUser?.user_metadata?.avatar_url || user?.avatar || '',
   }
 
   // Generate navigation URLs based on current startup
@@ -193,14 +200,14 @@ export function AppSidebar({
       // Show Complete your onboarding if profile is incomplete
       ...(!isProfileComplete && currentStartupId
         ? [
-          {
-            title: 'Complete your onboarding',
-            url: '#',
-            animation: animations.checkmark,
-            onClick: handleCompleteProfileClick,
-            isSpecial: true,
-          },
-        ]
+            {
+              title: 'Complete your onboarding',
+              url: '#',
+              animation: animations.checkmark,
+              onClick: handleCompleteProfileClick,
+              isSpecial: true,
+            },
+          ]
         : []),
       {
         title: 'Support',
@@ -236,8 +243,8 @@ export function AppSidebar({
                 currentStartupId={currentStartupId}
                 currentStartupDisplay={displayStartupForSwitcher}
                 firstName={firstName}
-                onStartupSelect={onStartupSelect || (() => { })}
-                onCreateNew={onCreateNewStartup || (() => { })}
+                onStartupSelect={onStartupSelect || (() => {})}
+                onCreateNew={onCreateNewStartup || (() => {})}
                 isCollapsed={state === 'collapsed'}
               />
             </SidebarMenuItem>
@@ -282,10 +289,11 @@ export function AppSidebar({
         onMouseLeave={() => setIsToggleHovered(false)}
         variant="ghost"
         size="sm"
-        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-sm bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
+        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-sm bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
+          state === 'collapsed'
             ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
             : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
-          }`}
+        }`}
       >
         <LottieIcon
           animationData={animations.nineGrid}

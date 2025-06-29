@@ -45,7 +45,8 @@ export function HeroSection() {
   }
 
   // Determine portal image source based on theme
-  const portalImageSrc = theme === 'light' ? '/banner.png' : '/banner.png'
+  const portalImageSrc =
+    theme === 'light' ? '/random/portal_w.webp' : '/random/portal_b.webp'
 
   return (
     <>

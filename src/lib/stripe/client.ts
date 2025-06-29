@@ -48,70 +48,33 @@ export const SUBSCRIPTION_PLANS = {
     price: 0,
     interval: 'month' as const,
     tier: 'starter' as const,
-    features: [
-      '3 funds applications per month',
-      'Access to 100+ funds',
-      'Claude 3.7 sonnet',
-    ],
   },
   pro_monthly: {
     name: 'Pro',
-    description: 'For startups actively fundraising',
-    price: 25,
+    description: 'For startups actively seeking their first funding round',
+    price: 30,
     interval: 'month' as const,
     tier: 'pro' as const,
-    features: [
-      '100 runs per month',
-      'Access to 1200+ global funds',
-      'Claude 4 sonnet',
-      '5 parallel submissions',
-      'Standard support',
-    ],
   },
   pro_yearly: {
     name: 'Pro Yearly',
-    description: 'For startups actively fundraising',
-    price: 300, // 25 * 12
+    description: 'For startups actively seeking their first funding round',
+    price: 305, // 30 * 12 - 15%
     interval: 'year' as const,
     tier: 'pro' as const,
-    features: [
-      '100 runs per month',
-      'Access to 1200+ global funds',
-      'Claude 4 sonnet',
-      '5 parallel submissions',
-      'Standard support',
-      '2 months free',
-    ],
   },
   max_monthly: {
     name: 'Max',
     description: 'For startups that need meetings now',
-    price: 120,
+    price: 100,
     interval: 'month' as const,
     tier: 'max' as const,
-    features: [
-      '500 runs per month',
-      'Access to 2000+ global funds',
-      'Claude 4 sonnet',
-      '15 parallel submissions',
-      'Enhanced agent customization',
-      'Priority support',
-    ],
   },
   max_yearly: {
     name: 'Max Yearly',
     description: 'For startups that need meetings now',
-    price: 1440, // 120 * 12
+    price: 1020, // 100 * 12 - 15%
     interval: 'year' as const,
     tier: 'max' as const,
-    features: [
-      '500 runs per month',
-      'Access to 2000+ global funds',
-      'Claude 4 sonnet',
-      '15 parallel submissions',
-      'Enhanced agent customization',
-      'Priority support',
-      '2 months free',
-    ],
   },
 }

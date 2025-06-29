@@ -250,13 +250,37 @@ export default function AgentSettings() {
 
   // Helper functions for permission-based features
   const getMaxParallelOptions = () => {
-    const allOptions = [
+    const standardOptions = [
       { value: 1, label: '1 submission', tier: 'FREE' },
-      { value: 5, label: '5 submissions', tier: 'PRO' },
-      { value: 10, label: '10 submissions', tier: 'MAX' },
+      { value: 3, label: '3 submissions', tier: 'PRO' },
+      { value: 5, label: '5 submissions', tier: 'MAX' },
     ]
 
-    return allOptions
+    // Enterprise options that can be set from database
+    const enterpriseOptions = [
+      { value: 15, label: '15 submissions', tier: 'ENTERPRISE' },
+      { value: 25, label: '25 submissions', tier: 'ENTERPRISE' },
+      { value: 35, label: '35 submissions', tier: 'ENTERPRISE' },
+    ]
+
+    // Always include standard options
+    const availableOptions = [...standardOptions]
+
+    // If current value is an enterprise option, include it in the dropdown
+    const currentValue = formData.maxParallelSubmissions
+    const enterpriseOption = enterpriseOptions.find(
+      (opt) => opt.value === currentValue,
+    )
+    if (
+      enterpriseOption &&
+      !availableOptions.find((opt) => opt.value === currentValue)
+    ) {
+      availableOptions.push(enterpriseOption)
+      // Sort by value to maintain logical order
+      availableOptions.sort((a, b) => a.value - b.value)
+    }
+
+    return availableOptions
   }
 
   const getSubmissionDelayOptions = () => {
@@ -276,6 +300,12 @@ export default function AgentSettings() {
         formData.permissionLevel === 'PRO' || formData.permissionLevel === 'MAX'
       )
     if (tier === 'MAX') return formData.permissionLevel === 'MAX'
+    if (tier === 'ENTERPRISE') {
+      // Enterprise options are only allowed if the current value is already set to that value
+      // This allows users with enterprise settings from the database to see their current option
+      const currentValue = formData.maxParallelSubmissions
+      return currentValue >= 15 // Enterprise starts at 15 parallel submissions
+    }
     return false
   }
 

@@ -1,18 +1,17 @@
 'use client'
 
-import { useTheme } from "next-themes";
-import Image from "next/image";
+import { useTheme } from 'next-themes'
+import Image from 'next/image'
 
 interface BackgroundTextProps {
-  onClick?: () => void;
+  onClick?: () => void
 }
 
 export function BackgroundText({ onClick }: BackgroundTextProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
   // Determine image source based on theme
-  const imageSrc =
-    theme === "light" ? "/tb.webp" : "/tw.webp";
+  const imageSrc = theme === 'light' ? '/tb.webp' : '/tw.webp'
 
   return (
     <div className="w-full overflow-hidden relative h-32 sm:h-40 md:h-48 lg:h-56 -mt-8 -mb-52 ml-28 lg:ml-[365px] pointer-events-none">
@@ -32,5 +31,5 @@ export function BackgroundText({ onClick }: BackgroundTextProps) {
         />
       )}
     </div>
-  );
+  )
 }

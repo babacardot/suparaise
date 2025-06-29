@@ -599,14 +599,14 @@ BEGIN
             'submissionDelay', 30,
             'maxParallelSubmissions', CASE 
                 WHEN user_permission = 'FREE' THEN 1
-                WHEN user_permission = 'PRO' THEN 5
-                WHEN user_permission = 'MAX' THEN 10
+                WHEN user_permission = 'PRO' THEN 3
+                WHEN user_permission = 'MAX' THEN 5
                 ELSE 1
             END,
             'maxQueueSize', CASE 
                 WHEN user_permission = 'FREE' THEN 0
-                WHEN user_permission = 'PRO' THEN 25
-                WHEN user_permission = 'MAX' THEN 50
+                WHEN user_permission = 'PRO' THEN 10
+                WHEN user_permission = 'MAX' THEN 25
                 ELSE 0
             END,
             'preferredTone', CASE 
@@ -667,18 +667,38 @@ BEGIN
     -- Set max parallel submissions and queue size based on permission level
     max_parallel_allowed := CASE 
         WHEN user_permission = 'FREE' THEN 1
-        WHEN user_permission = 'PRO' THEN 5
-        WHEN user_permission = 'MAX' THEN 10
+        WHEN user_permission = 'PRO' THEN 3
+        WHEN user_permission = 'MAX' THEN 35 -- Allow enterprise-level for MAX users
         ELSE 1
     END;
 
     -- Validate max parallel submissions doesn't exceed permission limit
-    IF p_data ? 'maxParallelSubmissions' AND 
-       (p_data->>'maxParallelSubmissions')::INTEGER > max_parallel_allowed THEN
-        RETURN jsonb_build_object(
-            'error', 
-            format('Maximum parallel submissions exceeded. Your plan allows up to %s.', max_parallel_allowed)
-        );
+    -- For MAX users, allow enterprise values (15, 25, 35) but validate they're valid enum values
+    IF p_data ? 'maxParallelSubmissions' THEN
+        DECLARE
+            requested_parallel INTEGER;
+            valid_enterprise_values INTEGER[] := ARRAY[1, 3, 5, 15, 25, 35];
+        BEGIN
+            requested_parallel := (p_data->>'maxParallelSubmissions')::INTEGER;
+            
+            -- For non-MAX users, enforce strict limits
+            IF user_permission != 'MAX' AND requested_parallel > max_parallel_allowed THEN
+                RETURN jsonb_build_object(
+                    'error', 
+                    format('Maximum parallel submissions exceeded. Your plan allows up to %s.', max_parallel_allowed)
+                );
+            END IF;
+            
+            -- For MAX users, ensure the value is in our allowed list
+            IF user_permission = 'MAX' AND requested_parallel > 5 THEN
+                IF NOT (requested_parallel = ANY(valid_enterprise_values)) THEN
+                    RETURN jsonb_build_object(
+                        'error', 
+                        'Invalid parallel submissions value. Enterprise values must be 15, 25, or 35.'
+                    );
+                END IF;
+            END IF;
+        END;
     END IF;
 
     -- Validate max queue size based on permission level
@@ -688,8 +708,8 @@ BEGIN
         BEGIN
             max_queue_allowed := CASE 
                 WHEN user_permission = 'FREE' THEN 0
-                WHEN user_permission = 'PRO' THEN 25
-                WHEN user_permission = 'MAX' THEN 50
+                WHEN user_permission = 'PRO' THEN 10
+                WHEN user_permission = 'MAX' THEN 25
                 ELSE 0
             END;
             
@@ -753,11 +773,18 @@ BEGIN
         ) VALUES (
             p_startup_id, p_user_id,
             COALESCE((p_data->>'submissionDelay')::agent_submission_delay, '30'),
-            COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, LEAST('1', max_parallel_allowed::text)::agent_parallel_submissions),
+            COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, 
+                CASE 
+                    WHEN user_permission = 'FREE' THEN '1'
+                    WHEN user_permission = 'PRO' THEN '3'
+                    WHEN user_permission = 'MAX' THEN '5'
+                    ELSE '1'
+                END
+            ),
             COALESCE((p_data->>'maxQueueSize')::INTEGER, CASE 
                 WHEN user_permission = 'FREE' THEN 0
-                WHEN user_permission = 'PRO' THEN 25
-                WHEN user_permission = 'MAX' THEN 50
+                WHEN user_permission = 'PRO' THEN 10
+                WHEN user_permission = 'MAX' THEN 25
                 ELSE 0
             END),
             CASE 

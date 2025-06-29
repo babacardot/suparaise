@@ -79,10 +79,10 @@ BEGIN
         CASE 
             WHEN LOWER(p_plan_name) LIKE '%pro%' THEN
                 v_permission_level := 'PRO';
-                v_monthly_limit := 100;
+                v_monthly_limit := 50;
             WHEN LOWER(p_plan_name) LIKE '%max%' THEN
                 v_permission_level := 'MAX';
-                v_monthly_limit := 500;
+                v_monthly_limit := 120;
             ELSE
                 v_permission_level := 'FREE';
                 v_monthly_limit := 3;
@@ -91,7 +91,7 @@ BEGIN
         -- Default based on subscription status
         IF v_calculated_is_subscribed THEN
             v_permission_level := 'PRO'; -- Default paid tier
-            v_monthly_limit := 100;
+            v_monthly_limit := 50;
         ELSE
             v_permission_level := 'FREE';
             v_monthly_limit := 3;
@@ -357,31 +357,6 @@ BEGIN
 END;
 $$;
 
--- Function to reset monthly submission counts (to be called monthly)
-CREATE OR REPLACE FUNCTION reset_monthly_submissions()
-RETURNS JSON
-LANGUAGE plpgsql
-SECURITY DEFINER SET search_path = public
-AS $$
-DECLARE
-    v_affected_rows INTEGER;
-BEGIN
-    -- Reset all monthly submission counts
-    UPDATE profiles 
-    SET 
-        monthly_submissions_used = 0,
-        updated_at = NOW()
-    WHERE is_active = TRUE;
-    
-    GET DIAGNOSTICS v_affected_rows = ROW_COUNT;
-    
-    RETURN json_build_object(
-        'success', true,
-        'affected_rows', v_affected_rows
-    );
-END;
-$$;
-
 -- Grant execute permissions
 GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT, TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, TEXT, TIMESTAMPTZ, BOOLEAN, TEXT) TO authenticated;
@@ -391,7 +366,6 @@ GRANT EXECUTE ON FUNCTION handle_payment_failure(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_subscription_data(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION check_submission_limit(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION increment_submission_count(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION reset_monthly_submissions() TO authenticated;
 
 -- Also grant to service role for webhook operations
 GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT, TEXT, TEXT) TO service_role;
@@ -402,4 +376,3 @@ GRANT EXECUTE ON FUNCTION handle_payment_failure(TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION get_subscription_data(UUID) TO service_role;
 GRANT EXECUTE ON FUNCTION check_submission_limit(UUID) TO service_role;
 GRANT EXECUTE ON FUNCTION increment_submission_count(UUID) TO service_role;
-GRANT EXECUTE ON FUNCTION reset_monthly_submissions() TO service_role; 

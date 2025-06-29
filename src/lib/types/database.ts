@@ -1410,10 +1410,6 @@ export type Database = {
         Args: { p_user_id: string; p_company_name: string }
         Returns: Json
       }
-      create_startup: {
-        Args: { p_startup_data: Json }
-        Returns: Json
-      }
       create_startup_and_founders: {
         Args: { p_data: Json }
         Returns: Json
@@ -1428,14 +1424,6 @@ export type Database = {
           p_image_url?: string
         }
         Returns: string
-      }
-      filter_targets: {
-        Args: {
-          p_stages?: string[]
-          p_industries?: string[]
-          p_regions?: string[]
-        }
-        Returns: Json
       }
       get_all_targets: {
         Args: Record<PropertyKey, never>
@@ -1454,20 +1442,12 @@ export type Database = {
         }
         Returns: Json
       }
-      get_profile_by_id: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
       get_queue_status: {
         Args: { p_user_id: string; p_startup_id?: string }
         Returns: Json
       }
       get_startup_by_id: {
         Args: { p_startup_id: string; p_user_id: string }
-        Returns: Json
-      }
-      get_startup_data_by_user_id: {
-        Args: { p_user_id: string }
         Returns: Json
       }
       get_startup_founders: {
@@ -1480,10 +1460,6 @@ export type Database = {
       }
       get_subscription_data: {
         Args: { p_user_id: string }
-        Returns: Json
-      }
-      get_target_by_id: {
-        Args: { p_target_id: string }
         Returns: Json
       }
       get_user_agent_settings: {
@@ -1538,10 +1514,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
-      search_targets: {
-        Args: { p_query: string }
-        Returns: Json
-      }
       soft_delete_startup: {
         Args: { p_user_id: string; p_startup_id: string }
         Returns: Json
@@ -1552,14 +1524,6 @@ export type Database = {
       }
       update_founder_profile: {
         Args: { p_user_id: string; p_founder_id: string; p_data: Json }
-        Returns: Json
-      }
-      update_profile: {
-        Args: { p_user_id: string; p_full_name?: string }
-        Returns: Json
-      }
-      update_startup: {
-        Args: { p_startup_id: string; p_updates: Json }
         Returns: Json
       }
       update_subscription_status: {
@@ -1588,7 +1552,7 @@ export type Database = {
     }
     Enums: {
       acceptance_rate: '<1%' | '1-5%' | '6-10%' | '11-20%' | '20%+'
-      agent_parallel_submissions: '1' | '5' | '10'
+      agent_parallel_submissions: '1' | '3' | '5' | '15' | '25' | '35'
       agent_submission_delay: '0' | '15' | '30'
       agent_tone: 'professional' | 'enthusiastic' | 'concise' | 'detailed'
       batch_size: '1-10' | '11-20' | '21-50' | '51-100' | '100+'
@@ -1873,7 +1837,7 @@ export const Constants = {
   public: {
     Enums: {
       acceptance_rate: ['<1%', '1-5%', '6-10%', '11-20%', '20%+'],
-      agent_parallel_submissions: ['1', '5', '10'],
+      agent_parallel_submissions: ['1', '3', '5', '15', '25', '35'],
       agent_submission_delay: ['0', '15', '30'],
       agent_tone: ['professional', 'enthusiastic', 'concise', 'detailed'],
       batch_size: ['1-10', '11-20', '21-50', '51-100', '100+'],

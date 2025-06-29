@@ -186,9 +186,7 @@ export default function PrivacyPage() {
 
             {/* Footer info */}
             <div className="mt-20 pt-8 border-t border-border text-end">
-              <p className="text-sm text-muted-foreground">
-                June 15, 2024
-              </p>
+              <p className="text-sm text-muted-foreground">June 15, 2024</p>
             </div>
           </div>
         </div>

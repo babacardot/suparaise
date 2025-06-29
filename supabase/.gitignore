@@ -4,3 +4,4 @@
 functions/
 .temp/
 .env.*
+/migrations/00_setup.sql

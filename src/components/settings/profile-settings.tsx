@@ -180,7 +180,7 @@ function ProfileSettingsSkeleton() {
 }
 
 export default function ProfileSettings() {
-  const { user, supabase, currentStartupId } = useUser()
+  const { user, supabase, currentStartupId, refreshUser } = useUser()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [editingField, setEditingField] = useState<string | null>(null)
@@ -362,6 +362,35 @@ export default function ProfileSettings() {
         throw new Error(data.error)
       }
 
+      // If this is the main founder (first in list) and we're updating name fields,
+      // also update the user metadata so nav-user and startup-switcher reflect the changes
+      const isMainFounder = founders.findIndex((f) => f.id === founderId) === 0
+      if (isMainFounder && (field === 'firstName' || field === 'lastName')) {
+        try {
+          const updatedFounder = founders.find((f) => f.id === founderId)
+          if (updatedFounder) {
+            const fullName =
+              `${updatedFounder.firstName} ${updatedFounder.lastName}`.trim()
+
+            // Update user metadata with the new name
+            await supabase.auth.updateUser({
+              data: {
+                ...user.user_metadata,
+                name: fullName,
+                firstName: updatedFounder.firstName,
+                lastName: updatedFounder.lastName,
+              },
+            })
+
+            // Refresh user context to get updated data
+            await refreshUser()
+          }
+        } catch (metadataError) {
+          console.error('Error updating user metadata:', metadataError)
+          // Don't show error to user since the main update succeeded
+        }
+      }
+
       setEditingField(null)
       playCompletionSound()
       toast({
@@ -431,6 +460,9 @@ export default function ProfileSettings() {
 
       if (updateError) throw updateError
 
+      // Refresh user context to immediately reflect the avatar change
+      await refreshUser()
+
       playCompletionSound()
       toast({
         title: 'Avatar updated',
@@ -459,6 +491,9 @@ export default function ProfileSettings() {
       })
 
       if (updateError) throw updateError
+
+      // Refresh user context to immediately reflect the avatar removal
+      await refreshUser()
 
       playCompletionSound()
       toast({
