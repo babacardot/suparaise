@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { priceId, plan } = await req.json()
+    const { priceId, plan, startupId } = await req.json()
 
     // Get the authenticated user
     const supabase = await createClient()
@@ -124,13 +124,21 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${req.nextUrl.origin}/dashboard?success=true&plan=${plan}`,
-      cancel_url: `${req.nextUrl.origin}/dashboard?canceled=true`,
+      success_url: startupId 
+        ? `${req.nextUrl.origin}/dashboard/${startupId}/settings/billing?success=true&plan=${plan}`
+        : `${req.nextUrl.origin}/dashboard?success=true&plan=${plan}`,
+      cancel_url: startupId
+        ? `${req.nextUrl.origin}/dashboard/${startupId}/settings/billing?canceled=true`
+        : `${req.nextUrl.origin}/dashboard?canceled=true`,
       subscription_data: {
         metadata: {
           userId: user.id,
           plan: plan,
         },
+      },
+      metadata: {
+        userId: user.id,
+        plan: plan,
       },
     })
 

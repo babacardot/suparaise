@@ -144,7 +144,7 @@ export function AppSidebar({
   const getNavUrl = (path: string) => {
     return currentStartupId
       ? `/dashboard/${currentStartupId}/${path}`
-      : `/dashboard/${path}`
+      : '#' // Prevent navigation when no startup is selected
   }
 
   const handleSupportClick = () => {
@@ -225,7 +225,7 @@ export function AppSidebar({
         title: 'Settings',
         url: currentStartupId
           ? `/dashboard/${currentStartupId}/settings`
-          : '/dashboard/settings',
+          : '#', // Prevent navigation when no startup is selected
         animation: animations.settings,
       },
     ],
@@ -290,8 +290,8 @@ export function AppSidebar({
         variant="ghost"
         size="sm"
         className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-sm bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
-            ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
-            : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
+          ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
+          : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
           }`}
       >
         <LottieIcon

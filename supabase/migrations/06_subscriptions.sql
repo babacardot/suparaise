@@ -52,7 +52,7 @@ $$;
 CREATE OR REPLACE FUNCTION update_subscription_status(
     p_stripe_customer_id TEXT,
     p_subscription_id TEXT,
-    p_status TEXT,
+    p_status subscription_status,
     p_current_period_end TIMESTAMPTZ DEFAULT NULL,
     p_is_subscribed BOOLEAN DEFAULT NULL,
     p_plan_name TEXT DEFAULT NULL

@@ -17,6 +17,8 @@ import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 import { SUBSCRIPTION_PLANS, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
 import { cn } from '@/lib/actions/utils'
+import { useParams, useSearchParams } from 'next/navigation'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 // Sound utility functions
 const playSound = (soundFile: string) => {
@@ -130,6 +132,39 @@ export default function BillingSettings() {
   const { user, subscription, subscriptionLoading, isSubscribed } = useUser()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [isPortalLoading, setIsPortalLoading] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [successPlan, setSuccessPlan] = useState<string>('')
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const startupId = params.startupId as string
+
+  // Check for success parameter from Stripe redirect
+  React.useEffect(() => {
+    const success = searchParams.get('success')
+    const canceled = searchParams.get('canceled')
+    const plan = searchParams.get('plan')
+
+    if (success === 'true' && plan) {
+      setShowSuccessModal(true)
+      setSuccessPlan(plan)
+      playSound('/sounds/completion.mp3')
+    } else if (canceled === 'true') {
+      toast({
+        title: 'Payment canceled',
+        description: 'No charges were made. You can try again anytime.',
+      })
+    }
+
+    // Clean up URL parameters
+    if (success || canceled) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('success')
+      url.searchParams.delete('canceled')
+      url.searchParams.delete('plan')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [searchParams, toast])
 
   // Plan features for display
   const planFeatures = {
@@ -167,6 +202,7 @@ export default function BillingSettings() {
         body: JSON.stringify({
           priceId,
           plan,
+          startupId,
         }),
       })
 
@@ -187,6 +223,43 @@ export default function BillingSettings() {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleManageBilling = async () => {
+    playClickSound()
+    setIsPortalLoading(true)
+    try {
+      // Build return URL based on current context
+      const currentUrl = window.location.origin + window.location.pathname
+
+      const response = await fetch('/api/stripe/customer-portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          returnUrl: currentUrl,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create portal session')
+      }
+
+      // Redirect to Stripe Customer Portal
+      window.location.href = data.url
+    } catch (error) {
+      console.error('Portal error:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to open billing portal. Please try again.',
+      })
+    } finally {
+      setIsPortalLoading(false)
     }
   }
 
@@ -369,17 +442,62 @@ export default function BillingSettings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" disabled>
+                <Button
+                  variant="outline"
+                  onClick={handleManageBilling}
+                  disabled={isPortalLoading}
+                >
+                  {isPortalLoading && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
                   Manage billing
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    Coming soon
-                  </Badge>
                 </Button>
               </CardContent>
             </Card>
           )}
         </div>
       </div>
+
+      {/* Success Modal */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              Welcome to {successPlan.includes('max') ? 'Max' : 'Pro'}! 🎉
+            </DialogTitle>
+            <DialogDescription className="text-left">
+              Your subscription has been activated successfully. You now have access to:
+              <ul className="list-disc list-inside mt-3 space-y-1 text-sm">
+                {successPlan.includes('max') ? (
+                  <>
+                    <li>125 runs per month</li>
+                    <li>Access to 2,000+ global funds</li>
+                    <li>5 parallel submissions</li>
+                    <li>Advanced application tracking</li>
+                    <li>Developer mode</li>
+                    <li>Priority support</li>
+                  </>
+                ) : (
+                  <>
+                    <li>50 runs per month</li>
+                    <li>Access to 1,200+ global funds</li>
+                    <li>3 parallel submissions</li>
+                    <li>Smart queuing system</li>
+                    <li>Agent customization</li>
+                    <li>Standard support</li>
+                  </>
+                )}
+              </ul>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end">
+            <Button onClick={() => setShowSuccessModal(false)}>
+              Get Started
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
