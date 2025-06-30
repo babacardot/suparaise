@@ -45,7 +45,10 @@ export function SignupForm({
   }
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div
+      className={cn('flex flex-col gap-6 select-none', className)}
+      {...props}
+    >
       <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
         <CardContent className="p-0">
           <form onSubmit={handleSignup} className="p-6 md:p-8">
@@ -230,6 +233,7 @@ export function SignupForm({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isSubmitting}
+                  className="select-auto"
                 />
               </div>
               <div className="grid gap-2">
@@ -244,6 +248,7 @@ export function SignupForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isSubmitting}
+                  className="select-auto"
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}

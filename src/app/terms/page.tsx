@@ -17,7 +17,7 @@ export default function TermsPage() {
           {/* Background decoration */}
           <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_10%,transparent_0%,var(--background)_75%)]"></div>
 
-          <div className="mx-auto max-w-4xl px-6 py-16">
+          <div className="mx-auto max-w-4xl px-6 py-16 select-none">
             {/* Header Section */}
             <div className="text-start mb-16">
               <h1 className="text-5xl font-bold tracking-tight mb-6">

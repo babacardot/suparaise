@@ -164,6 +164,24 @@
   }
 }
 
+/* Custom selection color for inputs and textareas */
+::selection {
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+}
+
+input::selection,
+textarea::selection {
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+}
+
+input::-moz-selection,
+textarea::-moz-selection {
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+}
+
 /* Hide scrollbars completely while maintaining scroll functionality */
 .hide-scrollbar {
   -ms-overflow-style: none; /* Internet Explorer 10+ */

@@ -204,7 +204,7 @@ export default function BillingSettings() {
     : null
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold -mt-2 mb-2">Billing</h2>
         <p className="text-muted-foreground">

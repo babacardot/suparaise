@@ -54,7 +54,7 @@ export function NavMain({
   }, [items, router])
 
   return (
-    <SidebarGroup>
+    <SidebarGroup className="select-none">
       <SidebarMenu>
         {items.map((item) => {
           const isActive = pathname === item.url

@@ -58,7 +58,7 @@ export function HeroSection() {
 
   return (
     <>
-      <main className="overflow-hidden">
+      <main className="overflow-hidden select-none">
         <section>
           <div className="relative pt-24">
             <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(100%_100%_at_50%_100%,transparent_0%,var(--background)_60%)]"></div>

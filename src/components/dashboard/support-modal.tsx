@@ -277,7 +277,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center select-none">
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -321,7 +321,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                     onChange={(e) => setMessage(e.target.value)}
                     onDrop={handleDrop}
                     onDragOver={(e) => e.preventDefault()}
-                    className="min-h-[150px] max-h-[300px] text-sm placeholder:text-sm pr-8 bg-white dark:bg-[#121317] text-gray-900 dark:text-gray-100 resize-y rounded-sm w-full"
+                    className="min-h-[150px] max-h-[300px] text-sm placeholder:text-sm pr-8 bg-white dark:bg-[#121317] text-gray-900 dark:text-gray-100 resize-y rounded-sm w-full select-auto"
                   />
                   <Button
                     variant="ghost"

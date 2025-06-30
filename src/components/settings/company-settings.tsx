@@ -314,9 +314,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -1131,7 +1130,7 @@ export default function CompanySettings() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold -mt-2 mb-2">Company</h2>
         <p className="text-muted-foreground">
@@ -1196,7 +1195,6 @@ export default function CompanySettings() {
                   {logoUploading ? (
                     <>
                       <Spinner className="h-3 w-3 mr-2" />
-                      Removing...
                     </>
                   ) : (
                     'Remove'
@@ -2397,7 +2395,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

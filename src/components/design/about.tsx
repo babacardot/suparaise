@@ -67,12 +67,12 @@ const features = [
   },
 ]
 
-export const About3 = () => {
+export const About = () => {
   const { theme } = useTheme()
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null)
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden select-none">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_10%,transparent_0%,var(--background)_75%)]"></div>
 

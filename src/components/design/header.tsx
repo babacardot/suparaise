@@ -57,7 +57,7 @@ export const Header = () => {
   }, [scrollYProgress])
 
   return (
-    <header>
+    <header className="select-none">
       <nav
         className={cn(
           'fixed z-20 w-full border-b transition-colors duration-150',
@@ -65,7 +65,7 @@ export const Header = () => {
         )}
       >
         <div className="mx-auto max-w-5xl px-6 transition-all duration-300">
-          <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
+          <div className="relative flex flex-wrap items-center justify-between gap-6 py-2 lg:gap-0 lg:py-2">
             <div className="flex w-full items-center justify-between gap-12 lg:w-auto">
               <Link
                 href="/"
@@ -130,40 +130,38 @@ export const Header = () => {
                       <div className="flex flex-col gap-8 text-left">
                         {user
                           ? // Show navigation + dashboard link for authenticated users
-                            [
-                              ...menuItems,
-                              { name: 'Dashboard', href: '/dashboard' },
-                            ].map((item, index) => (
-                              <SheetClose asChild key={index}>
-                                <Link
-                                  href={item.href}
-                                  className={`text-3xl font-semibold transition-colors duration-200 ${
-                                    item.name === 'Dashboard'
+                          [
+                            ...menuItems,
+                            { name: 'Dashboard', href: '/dashboard' },
+                          ].map((item, index) => (
+                            <SheetClose asChild key={index}>
+                              <Link
+                                href={item.href}
+                                className={`text-3xl font-semibold transition-colors duration-200 ${item.name === 'Dashboard'
+                                    ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
+                                    : 'text-foreground hover:text-muted-foreground'
+                                  }`}
+                              >
+                                {item.name}
+                              </Link>
+                            </SheetClose>
+                          ))
+                          : // Show navigation + auth links for non-authenticated users
+                          [...menuItems, ...authItems].map((item, index) => (
+                            <SheetClose asChild key={index}>
+                              <Link
+                                href={item.href}
+                                className={`text-3xl font-semibold transition-colors duration-200 ${item.name === 'Login'
+                                    ? 'text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200'
+                                    : item.isGreen
                                       ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
                                       : 'text-foreground hover:text-muted-foreground'
                                   }`}
-                                >
-                                  {item.name}
-                                </Link>
-                              </SheetClose>
-                            ))
-                          : // Show navigation + auth links for non-authenticated users
-                            [...menuItems, ...authItems].map((item, index) => (
-                              <SheetClose asChild key={index}>
-                                <Link
-                                  href={item.href}
-                                  className={`text-3xl font-semibold transition-colors duration-200 ${
-                                    item.name === 'Login'
-                                      ? 'text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200'
-                                      : item.isGreen
-                                        ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
-                                        : 'text-foreground hover:text-muted-foreground'
-                                  }`}
-                                >
-                                  {item.name}
-                                </Link>
-                              </SheetClose>
-                            ))}
+                              >
+                                {item.name}
+                              </Link>
+                            </SheetClose>
+                          ))}
                       </div>
 
                       {/* Quote */}

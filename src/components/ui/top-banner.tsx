@@ -26,7 +26,7 @@ export function TopBanner({ breadcrumbs }: TopBannerProps) {
 
   return (
     <Breadcrumb>
-      <BreadcrumbList className="flex items-center gap-0.5 mt-4">
+      <BreadcrumbList className="flex items-center gap-0.5 mt-4 select-none">
         {items.map((item, index) => (
           <div key={index} className="flex items-center">
             {index > 0 && (

@@ -314,7 +314,7 @@ export default function AgentSettings() {
   const isAdvancedFeatureAvailable = () => formData.permissionLevel === 'MAX'
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold -mt-2 mb-2">Agents</h2>
         <p className="text-muted-foreground">
@@ -620,7 +620,7 @@ export default function AgentSettings() {
                     handleInputChange('customInstructions', e.target.value)
                   }
                   className={cn(
-                    'rounded-sm pr-8 min-h-[100px]',
+                    'rounded-sm pr-8 min-h-[100px] select-auto',
                     (editingField !== 'customInstructions' ||
                       !isProPlusFeatureAvailable()) &&
                       'dark:bg-muted',

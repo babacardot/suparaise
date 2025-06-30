@@ -69,51 +69,51 @@ export const TestimonialsColumn = (props: {
 const testimonials = [
   {
     text: "Suparaise saved me 40+ hours of manual form filling. I applied to 50 VCs in a single afternoon instead of weeks. The AI perfectly captured our startup's essence and did the job as if it was me.",
-    image: 'https://picsum.photos/seed/sarah/200/200',
-    name: 'Sarah Chen',
-    role: 'CEO, TechFlow',
+    image: '/testimonials/1.webp',
+    name: 'Rohan Gupta',
+    role: 'CEO, Pineapple Payments',
   },
   {
-    text: 'Finally, a tool that understands the fundraising struggle. Suparaise automated all our pre-seed applications while I focused on building our product.',
-    image: 'https://picsum.photos/seed/marcus/200/200',
-    name: 'Marcus Rodriguez',
-    role: 'Co-founder, DataVault',
+    text: 'Finally, a tool that helps with fundraising. Suparaise automated all our pre-seed applications while I focused on building our product.',
+    image: '/testimonials/2.webp',
+    name: 'Emily Carter',
+    role: 'Co-founder, HealthGenix',
   },
   {
-    text: "The AI agent filled out complex VC forms with remarkable accuracy. It even customized our pitch for each firm's investment thesis. Game-changer!",
-    image: 'https://picsum.photos/seed/priya/200/200',
-    name: 'Priya Patel',
-    role: 'Founder, GreenTech Solutions',
+    text: "The agents filled out complex VC forms with remarkable accuracy. It even customized our pitch for each firm's investment thesis. Game-changer!",
+    image: '/testimonials/3.webp',
+    name: 'Jonathan Meyer',
+    role: 'Founder, Edupro',
   },
   {
-    text: 'We received 8 meetings in 2 weeks after starting to use Suparaise. The automated outreach feature connected us with VCs we never would have discovered manually.',
-    image: 'https://picsum.photos/seed/james/200/200',
-    name: 'James Wilson',
-    role: 'CEO, FinanceAI',
+    text: 'We received 4 meeting requests in two weeks after starting to use Suparaise. The automated outreach feature connected us with VCs we honestly would have never discovered manually.',
+    image: '/testimonials/4.webp',
+    name: 'Michael Chen',
+    role: 'CEO, Nexus Labs',
   },
   {
-    text: 'I was sceptical about the accuracy of the agent but then I started receiving meeting requests from VCs and emails. It actually did the job.',
-    image: 'https://picsum.photos/seed/emily/200/200',
-    name: 'Emily Zhang',
-    role: 'Founder, HealthTech Pro',
+    text: 'I was skeptical about the accuracy of the agents at the beginning, but then I started receiving submission summaries by email and meeting requests from VCs. It actually did the job.',
+    image: '/testimonials/5.webp',
+    name: 'Vikram Singh',
+    role: 'Founder, Greensprout',
   },
   {
-    text: 'Every founder knows that fundraising is a numbers game and that it is boring. Suparaise streamlined the whole outreach process. Highly recommend!',
-    image: 'https://picsum.photos/seed/david/200/200',
-    name: 'David Kim',
-    role: 'CEO, CloudScale',
+    text: 'Every founder knows that fundraising is a numbers game and that it is incredibly boring. Suparaise streamlined the whole outreach process. Highly recommend!',
+    image: '/testimonials/6.webp',
+    name: 'Kenji Tanaka',
+    role: 'CEO, Synth.ai',
   },
   {
-    text: 'The agents are customizable and understood perfectly our business and tailored each application accordingly based on the information I provided. Game changer!',
-    image: 'https://picsum.photos/seed/rachel/200/200',
-    name: 'Rachel Thompson',
-    role: 'Founder, SalesFlow',
+    text: 'The agents are customizable, understood our business perfectly, and tailored each application accordingly based on the information I provided. Game changer!',
+    image: '/testimonials/7.webp',
+    name: 'Arjun Sharma',
+    role: 'Founder, SaaSify',
   },
   {
-    text: 'Suparaise has a very complete list of all the VCs, accelerators and angels in the world so it made easy for us to apply to all of them in record time. No manual work was required at all.',
-    image: 'https://picsum.photos/seed/alex/200/200',
-    name: 'Alex Martinez',
-    role: 'CEO, NextGen Robotics',
+    text: 'Suparaise has a very complete list of all the VCs, accelerators, and angels in the world, so it made it easy for us to apply to all of them in record time. No manual work was required.',
+    image: '/testimonials/8.webp',
+    name: 'Khaled Al-Fahim',
+    role: 'CEO, Namaa',
   },
 ]
 
@@ -123,7 +123,7 @@ const thirdColumn = testimonials.slice(6, 9)
 
 const Testimonials = () => {
   return (
-    <section className="bg-background my-20 relative">
+    <section className="bg-background my-20 relative select-none">
       <div className="mx-auto max-w-5xl px-6 z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

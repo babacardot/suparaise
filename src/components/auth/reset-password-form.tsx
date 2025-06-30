@@ -146,7 +146,7 @@ export function ResetPasswordForm({
   return (
     <div
       className={cn(
-        'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center',
+        'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center select-none',
         className,
       )}
       {...props}
@@ -172,6 +172,7 @@ export function ResetPasswordForm({
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isSubmitting}
                   minLength={6}
+                  className="select-auto"
                 />
               </div>
 
@@ -185,6 +186,7 @@ export function ResetPasswordForm({
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={isSubmitting}
                   minLength={6}
+                  className="select-auto"
                 />
               </div>
 

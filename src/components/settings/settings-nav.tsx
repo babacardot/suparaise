@@ -120,7 +120,9 @@ function NavItem({
                 />
               )}
             </span>
-            <span className="font-medium text-sm">{item.title}</span>
+            <span className="font-medium text-sm select-none">
+              {item.title}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             {requiresMaxPermission && (
@@ -170,7 +172,7 @@ function NavItem({
               />
             )}
           </span>
-          <span className="font-medium text-sm">{item.title}</span>
+          <span className="font-medium text-sm select-none">{item.title}</span>
         </div>
         <div className="flex items-center gap-2">
           {item.title === 'Integrations' && (

@@ -110,7 +110,7 @@ export function NavUser({
   const initials = getInitials(name, email)
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="select-none">
       <SidebarMenuItem>
         <DropdownMenu
           onOpenChange={(open) => {

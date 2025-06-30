@@ -85,7 +85,7 @@ export function ForgotPasswordForm({
   return (
     <div
       className={cn(
-        'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center',
+        'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center select-none',
         className,
       )}
       {...props}
@@ -111,6 +111,7 @@ export function ForgotPasswordForm({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isSubmitting}
+                  className="select-auto"
                 />
               </div>
 

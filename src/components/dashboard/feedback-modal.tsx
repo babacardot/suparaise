@@ -149,7 +149,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center select-none">
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -171,7 +171,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               placeholder="Tell us what you think about this page."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="min-h-[100px] mb-4 text-sm placeholder:text-sm bg-white dark:bg-[#121317] text-gray-900 dark:text-gray-100 rounded-sm resize-y"
+              className="min-h-[100px] mb-4 text-sm placeholder:text-sm bg-white dark:bg-[#121317] text-gray-900 dark:text-gray-100 rounded-sm resize-y select-auto"
             />
 
             <div className="flex items-center justify-between">

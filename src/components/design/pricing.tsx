@@ -93,7 +93,7 @@ export const Pricing = () => {
   }
 
   return (
-    <section id="pricing" className="pt-32 pb-20">
+    <section id="pricing" className="pt-32 pb-20 select-none">
       <div className="mx-auto max-w-5xl px-6">
         <div className="flex flex-col items-center gap-6 text-center">
           <div className="flex justify-center">
@@ -172,7 +172,7 @@ export const Pricing = () => {
           </div>
 
           <div className="flex justify-center mt-0 -mb-6">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-sm bg-muted/50 border">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-sm bg-transparent dark:bg-muted/50 border">
               <div className="w-3 h-3 rounded-full bg-green-500 -mt-0.25"></div>
               <span className="text-sm font-medium">
                 $0.60 / per application

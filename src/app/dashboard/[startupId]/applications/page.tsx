@@ -33,7 +33,7 @@ export async function generateMetadata({
 
 export default async function ApplicationsPage() {
   return (
-    <div className="space-y-6 hide-scrollbar">
+    <div className="space-y-6 hide-scrollbar select-none">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight mt-1.5">
           Applications

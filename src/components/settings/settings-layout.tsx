@@ -69,7 +69,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-shrink-0 space-y-2 pb-4 mt-1.5">
+      <div className="flex-shrink-0 space-y-2 pb-4 mt-1.5 select-none">
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
           Manage your profile, company information, and configuration.

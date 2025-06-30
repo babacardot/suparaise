@@ -44,7 +44,7 @@ export function VerifyForm({
   return (
     <div
       className={cn(
-        'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center',
+        'flex flex-col gap-6 min-h-[calc(100vh-200px)] justify-center select-none',
         className,
       )}
       {...props}
@@ -85,7 +85,6 @@ export function VerifyForm({
                   {isResending ? (
                     <>
                       <Spinner className="h-3 w-3 mr-2" />
-                      Resending...
                     </>
                   ) : resent ? (
                     'Email resent'
