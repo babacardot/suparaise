@@ -72,6 +72,15 @@ export async function POST(req: NextRequest) {
       const status = subscription.status
       // @ts-expect-error - Stripe types might be inconsistent
       const currentPeriodEnd = new Date(subscription.current_period_end * 1000)
+      const planName = subscription.metadata.plan // Extract plan from metadata
+
+      console.log('Webhook event received:', {
+        type: event.type,
+        customerId,
+        subscriptionId,
+        status,
+        planName,
+      })
 
       // Update user subscription status using RPC function
       const { data: result, error } = await supabase.rpc(
@@ -82,6 +91,7 @@ export async function POST(req: NextRequest) {
           p_status: status,
           p_current_period_end: currentPeriodEnd.toISOString(),
           p_is_subscribed: status === 'active',
+          p_plan_name: planName, // Pass plan name to the RPC function
         },
       )
 

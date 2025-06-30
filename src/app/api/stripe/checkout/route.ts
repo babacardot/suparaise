@@ -126,9 +126,11 @@ export async function POST(req: NextRequest) {
       ],
       success_url: `${req.nextUrl.origin}/dashboard?success=true&plan=${plan}`,
       cancel_url: `${req.nextUrl.origin}/dashboard?canceled=true`,
-      metadata: {
-        userId: user.id,
-        plan: plan,
+      subscription_data: {
+        metadata: {
+          userId: user.id,
+          plan: plan,
+        },
       },
     })
 
