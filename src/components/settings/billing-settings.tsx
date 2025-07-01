@@ -21,8 +21,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { Button as ExpandButton } from '@/components/design/button-expand'
-import { ArrowRight } from 'lucide-react'
+
 import Spinner from '../ui/spinner'
 
 // Sound utility functions
@@ -466,27 +465,27 @@ export default function BillingSettings() {
 
       {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-md">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col items-center justify-center space-y-6 text-center"
+            className="flex flex-col items-center justify-center space-y-4 text-center"
           >
-            <div className="relative w-48 h-48">
+            <div className="relative w-32 h-32">
               <Image
-                src="/random/going_live.svg"
+                src={successPlan.includes('max') ? "/random/max.svg" : "/random/going_live.svg"}
                 alt="Subscription activated"
                 fill
                 className="object-contain"
                 priority
               />
             </div>
-            <div className="space-y-3">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 Welcome to {successPlan.includes('max') ? 'Max' : 'Pro'}!
               </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md">
+              <p className="text-base text-gray-600 dark:text-gray-400 max-w-sm">
                 Your subscription is now active. Here are the new features you have
                 unlocked:
               </p>
@@ -515,14 +514,14 @@ export default function BillingSettings() {
               </ul>
             </div>
 
-            <ExpandButton
+            <Button
               onClick={() => setShowSuccessModal(false)}
-              className="w-full bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
-              Icon={ArrowRight}
-              iconPlacement="right"
+              size="lg"
+              className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+              variant="outline"
             >
               Continue
-            </ExpandButton>
+            </Button>
           </motion.div>
         </DialogContent>
       </Dialog>
