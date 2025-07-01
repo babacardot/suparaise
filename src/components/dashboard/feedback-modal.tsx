@@ -137,7 +137,6 @@ export default function FeedbackModal({ isOpen, onClose, children }: FeedbackMod
       onOpenChange={(open) => {
         if (!open) {
           onClose()
-          resetForm()
         }
       }}
     >

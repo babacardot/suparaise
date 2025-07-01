@@ -261,7 +261,6 @@ export default function SupportModal({ isOpen, onClose, children }: SupportModal
       onOpenChange={(open) => {
         if (!open) {
           onClose()
-          resetForm()
         }
       }}
     >
