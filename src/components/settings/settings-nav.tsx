@@ -17,7 +17,7 @@ const playSound = (soundFile: string) => {
   setTimeout(() => {
     try {
       const audio = new Audio(soundFile)
-      audio.volume = 0.3
+      audio.volume = 0.4
       audio.play().catch(() => {
         // Silently handle audio play errors
       })

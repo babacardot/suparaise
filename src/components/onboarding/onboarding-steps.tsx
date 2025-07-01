@@ -52,7 +52,7 @@ import { animations } from '@/lib/utils/lottie-animations'
 const playSound = (soundFile: string) => {
   try {
     const audio = new Audio(soundFile)
-    audio.volume = 0.3
+    audio.volume = 0.4
     audio.play().catch((error) => {
       console.log('Could not play sound:', error)
     })
@@ -940,8 +940,8 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             <select
               id="industry"
               className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-input'
+                ? 'border-red-500 focus:border-red-500'
+                : 'border-input'
                 }`}
               value={startup.industry || ''}
               onChange={(e) =>
@@ -1222,8 +1222,8 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             <select
               id="revenue-model"
               className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.revenueModel
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-input'
+                ? 'border-red-500 focus:border-red-500'
+                : 'border-input'
                 }`}
               value={startup.revenueModel || ''}
               onChange={(e) =>

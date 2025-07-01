@@ -76,7 +76,7 @@ const COUNTRIES = RPNInput.getCountries()
 const playSound = (soundFile: string) => {
   try {
     const audio = new Audio(soundFile)
-    audio.volume = 0.3
+    audio.volume = 0.4
     audio.play().catch((error) => {
       console.log('Could not play sound:', error)
     })

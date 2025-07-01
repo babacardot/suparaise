@@ -42,7 +42,7 @@ export const Header = () => {
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
-      audio.volume = 0.3
+      audio.volume = 0.4
       audio.play().catch(() => {
         // Silently handle audio play errors (autoplay policies, etc.)
       })
@@ -138,8 +138,8 @@ export const Header = () => {
                               <Link
                                 href={item.href}
                                 className={`text-3xl font-semibold transition-colors duration-200 ${item.name === 'Dashboard'
-                                    ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
-                                    : 'text-foreground hover:text-muted-foreground'
+                                  ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
+                                  : 'text-foreground hover:text-muted-foreground'
                                   }`}
                               >
                                 {item.name}
@@ -152,10 +152,10 @@ export const Header = () => {
                               <Link
                                 href={item.href}
                                 className={`text-3xl font-semibold transition-colors duration-200 ${item.name === 'Login'
-                                    ? 'text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200'
-                                    : item.isGreen
-                                      ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
-                                      : 'text-foreground hover:text-muted-foreground'
+                                  ? 'text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200'
+                                  : item.isGreen
+                                    ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
+                                    : 'text-foreground hover:text-muted-foreground'
                                   }`}
                               >
                                 {item.name}

@@ -20,7 +20,7 @@ export const Footer = () => {
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
-      audio.volume = 0.3
+      audio.volume = 0.4
       audio.play().catch(() => {
         // Silently handle audio play errors (autoplay policies, etc.)
       })

@@ -103,7 +103,7 @@ export default function DashboardLayout({
       // Optimize audio playback to not block navigation
       try {
         const audio = new Audio('/sounds/light.mp3')
-        audio.volume = 0.3
+        audio.volume = 0.4
         // Use a promise that won't block navigation
         audio.play().catch(() => {
           // Silently handle audio play errors (autoplay policies, etc.)
@@ -188,12 +188,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-                name: user.user_metadata?.full_name || user.email || '',
-                email: user.email || '',
-                avatar: user.user_metadata?.avatar_url,
-                startupName: currentStartup?.name || undefined,
-                startupLogo: currentStartup?.logo_url || undefined,
-              }
+              name: user.user_metadata?.full_name || user.email || '',
+              email: user.email || '',
+              avatar: user.user_metadata?.avatar_url,
+              startupName: currentStartup?.name || undefined,
+              startupLogo: currentStartup?.logo_url || undefined,
+            }
             : null
         }
         startups={startups}
