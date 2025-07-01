@@ -1,7 +1,7 @@
 {
-  "name": "Suparaise | AI-Powered Fundraising Automation",
+  "name": "Suparaise",
   "short_name": "Suparaise",
-  "description": "Automate your startup fundraising with AI agents that fill out funds applications and handle investor outreach",
+  "description": "Agents that apply to funds for you, on autopilot",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -9,7 +9,7 @@ import type { Metadata } from 'next'
 // import { LandingCustomers } from '@/components/design/landing-customers'
 
 export const metadata: Metadata = {
-  title: 'Suparaise | AI-Powered Fundraising Automation',
+  title: 'Suparaise',
   description: 'Automate your startup fundraising with agents.',
 }
 

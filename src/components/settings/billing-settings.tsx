@@ -19,6 +19,7 @@ import { SUBSCRIPTION_PLANS, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
 import { cn } from '@/lib/actions/utils'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import Spinner from '../ui/spinner'
 
 // Sound utility functions
 const playSound = (soundFile: string) => {
@@ -174,7 +175,6 @@ export default function BillingSettings() {
       '3 parallel submissions',
       'Smart queuing system',
       'Agent customization',
-      'Standard support',
     ],
     max_monthly: [
       '125 runs per month',
@@ -433,26 +433,29 @@ export default function BillingSettings() {
 
           {/* Subscription Management */}
           {isSubscribed && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Manage Subscription</CardTitle>
-                <CardDescription>
-                  Update payment method, view invoices, or cancel your
-                  subscription.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  variant="outline"
-                  onClick={handleManageBilling}
-                  disabled={isPortalLoading}
-                >
-                  {isPortalLoading && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  Manage billing
-                </Button>
-              </CardContent>
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold leading-none tracking-tight">
+                    Manage subscription
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1.5">
+                    Update your payment details, view invoices, or cancel subscription.
+                  </p>
+                </div>
+                <div>
+                  <Button
+                    onClick={handleManageBilling}
+                    disabled={isPortalLoading}
+                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 translate-y-1 text-sm"
+                  >
+                    {isPortalLoading && (
+                      <Spinner className="h-5 w-5 -translate-x-2" />
+                    )}
+                    Update
+                  </Button>
+                </div>
+              </div>
             </Card>
           )}
         </div>
@@ -485,7 +488,6 @@ export default function BillingSettings() {
                     <li>3 parallel submissions</li>
                     <li>Smart queuing system</li>
                     <li>Agent customization</li>
-                    <li>Standard support</li>
                   </>
                 )}
               </ul>

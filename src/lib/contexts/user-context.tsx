@@ -193,7 +193,8 @@ export function UserProvider({ children }: UserProviderProps) {
 
   // Derive subscription status
   const isSubscribed = useMemo(() => {
-    return subscription?.is_subscribed || false
+    if (!subscription) return false
+    return subscription.subscription_status === 'active'
   }, [subscription])
 
   // Fetch user's startups
