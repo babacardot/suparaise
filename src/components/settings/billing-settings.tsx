@@ -18,7 +18,11 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { SUBSCRIPTION_PLANS, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
 import { cn } from '@/lib/actions/utils'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import { Button as ExpandButton } from '@/components/design/button-expand'
+import { ArrowRight } from 'lucide-react'
 import Spinner from '../ui/spinner'
 
 // Sound utility functions
@@ -463,15 +467,34 @@ export default function BillingSettings() {
 
       {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              Welcome to {successPlan.includes('max') ? 'Max' : 'Pro'}! 🎉
-            </DialogTitle>
-            <DialogDescription className="text-left">
-              Your subscription has been activated successfully. You now have access to:
-              <ul className="list-disc list-inside mt-3 space-y-1 text-sm">
+        <DialogContent className="max-w-lg">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center justify-center space-y-6 text-center"
+          >
+            <div className="relative w-48 h-48">
+              <Image
+                src="/random/going_live.svg"
+                alt="Subscription activated"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Welcome to {successPlan.includes('max') ? 'Max' : 'Pro'}!
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md">
+                Your subscription is now active. Here are the new features you have
+                unlocked:
+              </p>
+            </div>
+
+            <div className="w-full rounded-sm border bg-zinc-50 dark:bg-zinc-900/30 p-4 text-left">
+              <ul className="list-disc list-inside space-y-2 text-sm">
                 {successPlan.includes('max') ? (
                   <>
                     <li>125 runs per month</li>
@@ -491,13 +514,17 @@ export default function BillingSettings() {
                   </>
                 )}
               </ul>
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end">
-            <Button onClick={() => setShowSuccessModal(false)}>
-              Get Started
-            </Button>
-          </div>
+            </div>
+
+            <ExpandButton
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
+              Icon={ArrowRight}
+              iconPlacement="right"
+            >
+              Continue
+            </ExpandButton>
+          </motion.div>
         </DialogContent>
       </Dialog>
     </div>
