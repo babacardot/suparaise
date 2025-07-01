@@ -34,9 +34,14 @@ export function TopBanner({ breadcrumbs }: TopBannerProps) {
             )}
             <BreadcrumbItem className="hidden md:block">
               {item.isCurrentPage ? (
-                <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                <BreadcrumbPage className="text-sidebar-foreground/90 hover:text-sidebar-accent-foreground/80 hover:bg-sidebar-accent/30 px-2 py-1.5 rounded-sm transition-colors duration-200">
+                  {item.label}
+                </BreadcrumbPage>
               ) : (
-                <BreadcrumbLink href={item.href || '#'}>
+                <BreadcrumbLink
+                  href={item.href || '#'}
+                  className="text-sidebar-foreground/70 hover:text-sidebar-accent-foreground/80 hover:bg-sidebar-accent/20 px-2 py-1.5 rounded-sm transition-colors duration-200"
+                >
                   {item.label}
                 </BreadcrumbLink>
               )}

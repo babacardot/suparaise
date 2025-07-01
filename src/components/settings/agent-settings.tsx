@@ -31,11 +31,11 @@ function AgentSettingsSkeleton() {
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold -mt-2 mb-2">Agents</h2>
         <p className="text-muted-foreground">
-          Customize how your AI agents represent you to investors.
+          Customize how agents represent you to investors.
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
@@ -122,9 +122,10 @@ export default function AgentSettings() {
   })
 
   // Fetch agent settings when component mounts or startup changes
+  // Optimized to only depend on essential values that actually change
   useEffect(() => {
     const fetchAgentSettings = async () => {
-      if (!user || !currentStartupId) return
+      if (!user?.id || !currentStartupId) return
 
       setDataLoading(true)
       try {
@@ -156,7 +157,9 @@ export default function AgentSettings() {
     }
 
     fetchAgentSettings()
-  }, [user, currentStartupId, supabase, toast])
+    // Only depend on values that actually matter for the fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, currentStartupId]) // Intentionally omitting supabase and toast - they are stable references
 
   if (!user) {
     return <div></div>
@@ -318,11 +321,11 @@ export default function AgentSettings() {
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold -mt-2 mb-2">Agents</h2>
         <p className="text-muted-foreground">
-          Customize how your AI agents represent you to investors.
+          Customize how agents represent you to investors.
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
@@ -333,7 +336,7 @@ export default function AgentSettings() {
                 'group relative p-4 border rounded-sm transition-all duration-200',
                 'hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20',
                 formData.enableStealth &&
-                  'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10',
+                'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10',
               )}
             >
               <div className="flex items-center justify-between">
@@ -383,8 +386,8 @@ export default function AgentSettings() {
                   ? 'bg-muted/30 border-muted'
                   : 'hover:border-orange-200 dark:hover:border-orange-800 hover:bg-orange-50/50 dark:hover:bg-orange-950/20',
                 formData.enableDebugMode &&
-                  isAdvancedFeatureAvailable() &&
-                  'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/10',
+                isAdvancedFeatureAvailable() &&
+                'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/10',
               )}
             >
               <div className="flex items-center justify-between">
@@ -395,7 +398,7 @@ export default function AgentSettings() {
                       className={cn(
                         'font-medium text-sm',
                         !isAdvancedFeatureAvailable() &&
-                          'text-muted-foreground',
+                        'text-muted-foreground',
                       )}
                     >
                       Developer mode
@@ -438,7 +441,7 @@ export default function AgentSettings() {
                       ? 'bg-orange-600'
                       : 'bg-gray-200 dark:bg-gray-700',
                     !isAdvancedFeatureAvailable() &&
-                      'opacity-50 cursor-not-allowed',
+                    'opacity-50 cursor-not-allowed',
                   )}
                 >
                   <span
@@ -580,7 +583,7 @@ export default function AgentSettings() {
                   className={cn(
                     'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                     !isProPlusFeatureAvailable() &&
-                      'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                    'bg-muted/50 text-muted-foreground cursor-not-allowed',
                   )}
                   value={formData.preferredTone}
                   onChange={async (e) => {
@@ -623,9 +626,9 @@ export default function AgentSettings() {
                     'rounded-sm pr-8 min-h-[100px] select-auto',
                     (editingField !== 'customInstructions' ||
                       !isProPlusFeatureAvailable()) &&
-                      'dark:bg-muted',
+                    'dark:bg-muted',
                     !isProPlusFeatureAvailable() &&
-                      'cursor-not-allowed text-muted-foreground',
+                    'cursor-not-allowed text-muted-foreground',
                   )}
                   readOnly={
                     editingField !== 'customInstructions' ||
@@ -651,7 +654,7 @@ export default function AgentSettings() {
                   }
                 />
                 {editingField !== 'customInstructions' &&
-                isProPlusFeatureAvailable() ? (
+                  isProPlusFeatureAvailable() ? (
                   <button
                     onClick={() => handleFieldEdit('customInstructions')}
                     className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"

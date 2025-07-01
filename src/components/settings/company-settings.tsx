@@ -169,7 +169,7 @@ function CompanySettingsSkeleton() {
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
@@ -488,9 +488,10 @@ export default function CompanySettings() {
   const videoInputRef = useRef<HTMLInputElement>(null)
 
   // Fetch startup data when component mounts or startup changes
+  // Optimized to only depend on essential values that actually change
   useEffect(() => {
     const fetchStartupData = async () => {
-      if (!user || !currentStartupId) return
+      if (!user?.id || !currentStartupId) return
 
       setDataLoading(true)
       try {
@@ -554,7 +555,9 @@ export default function CompanySettings() {
     }
 
     fetchStartupData()
-  }, [user, currentStartupId, supabase, toast, startups])
+    // Only depend on values that actually matter for the fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, currentStartupId]) // Intentionally omitting supabase and toast - they are stable references
 
   if (!user) {
     return <div></div>
@@ -1139,7 +1142,7 @@ export default function CompanySettings() {
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">

@@ -131,7 +131,7 @@ function IntegrationSettingsSkeleton() {
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="grid gap-4 md:grid-cols-2 pr-2">
@@ -207,7 +207,7 @@ export default function IntegrationSettings() {
           </p>
         </div>
 
-        <Separator className="flex-shrink-0" />
+        <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
         <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
           <div className="pr-2">
@@ -395,7 +395,7 @@ export default function IntegrationSettings() {
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="grid gap-4 md:grid-cols-2 pr-2">

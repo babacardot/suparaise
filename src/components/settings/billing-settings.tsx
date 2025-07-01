@@ -52,7 +52,7 @@ function BillingSettingsSkeleton() {
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
@@ -288,7 +288,7 @@ export default function BillingSettings() {
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">

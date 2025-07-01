@@ -99,7 +99,7 @@ function ProfileSettingsSkeleton() {
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold -mt-2 mb-2">Founder</h2>
         <p className="text-muted-foreground">
-          Manage your profile and account preferences.
+          Manage your details and contact information.
         </p>
       </div>
 
@@ -205,12 +205,11 @@ export default function ProfileSettings() {
     twitterUrl: '',
   })
 
-  // Note: Scroll position preservation removed to prevent re-rendering issues
-
   // Fetch all founders when component mounts or startup changes
+  // Optimized to only depend on essential values that actually change
   useEffect(() => {
     const fetchFoundersData = async () => {
-      if (!user || !currentStartupId) return
+      if (!user?.id || !currentStartupId) return
 
       setDataLoading(true)
       try {
@@ -255,7 +254,9 @@ export default function ProfileSettings() {
     }
 
     fetchFoundersData()
-  }, [user, currentStartupId, supabase, toast])
+    // Only depend on values that actually matter for the fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, currentStartupId]) // Intentionally omitting supabase, toast, and user.user_metadata properties - they are stable references or fallback values only
 
   if (!user) {
     return <div></div>
@@ -719,12 +720,12 @@ export default function ProfileSettings() {
         </h2>
         <p className="text-muted-foreground">
           {founders.length > 1
-            ? 'Manage founders profiles and account preferences.'
-            : 'Manage your profile and account preferences.'}
+            ? 'Manage founder details and contact information.'
+            : 'Manage your details and contact information.'}
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[98.7%]" />
 
       <div
         className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar"

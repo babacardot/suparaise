@@ -72,11 +72,11 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       <div className="flex-shrink-0 space-y-2 pb-4 mt-1.5 select-none">
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
-          Manage your profile, company information, and configuration.
+          Fine-tune your profile and preferences for better results.
         </p>
       </div>
 
-      <Separator className="flex-shrink-0" />
+      <Separator className="flex-shrink-0 max-w-[75.8%]" />
 
       <div className="flex-1 flex gap-6 pt-6 min-h-0 overflow-hidden">
         {/* Sidebar */}
