@@ -10,8 +10,6 @@ import { NavSecondary } from '@/components/sidebar/nav-secondary'
 import { NavUser } from '@/components/sidebar/nav-user'
 import { StartupSwitcher } from '@/components/sidebar/startup-switcher'
 import { Button } from '@/components/ui/button'
-import SupportModal from '@/components/dashboard/support-modal'
-import FeedbackModal from '@/components/dashboard/feedback-modal'
 import { useUser } from '@/lib/contexts/user-context'
 import { useValidation } from '@/lib/hooks/use-validation'
 import { VALIDATION_PRESETS } from '@/components/ui/validation-gate'
@@ -83,8 +81,8 @@ export function AppSidebar({
   const { state, toggleSidebar } = useSidebar()
   const { subscription, user: contextUser } = useUser()
   const [isToggleHovered, setIsToggleHovered] = React.useState(false)
-  const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false)
-  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false)
+
+
 
   // Check if user profile is complete
   const { isValid: isProfileComplete } = useValidation({
@@ -147,15 +145,9 @@ export function AppSidebar({
       : '#' // Prevent navigation when no startup is selected
   }
 
-  const handleSupportClick = () => {
-    playClickSound()
-    setIsSupportModalOpen(true)
-  }
 
-  const handleFeedbackClick = () => {
-    playClickSound()
-    setIsFeedbackModalOpen(true)
-  }
+
+
 
   const handleCompleteProfileClick = () => {
     playClickSound()
@@ -213,13 +205,11 @@ export function AppSidebar({
         title: 'Support',
         url: '#',
         animation: animations.help,
-        onClick: handleSupportClick,
       },
       {
         title: 'Feedback',
         url: '#',
         animation: animations.chat,
-        onClick: handleFeedbackClick,
       },
       {
         title: 'Settings',
@@ -267,17 +257,9 @@ export function AppSidebar({
         </SidebarFooter>
       </Sidebar>
 
-      {/* Support Modal */}
-      <SupportModal
-        isOpen={isSupportModalOpen}
-        onClose={() => setIsSupportModalOpen(false)}
-      />
 
-      {/* Feedback Modal */}
-      <FeedbackModal
-        isOpen={isFeedbackModalOpen}
-        onClose={() => setIsFeedbackModalOpen(false)}
-      />
+
+
 
       {/* Collapse/Expand Button - Always visible, fixed to viewport center */}
       <Button

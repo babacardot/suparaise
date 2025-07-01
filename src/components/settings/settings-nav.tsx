@@ -70,7 +70,7 @@ function NavItem({
       if (isLockedForUser) {
         e.preventDefault()
         toast({
-          variant: 'destructive',
+          variant: 'info',
           title: 'Feature locked',
           description: `${item.title} is only available for MAX users. Please upgrade your plan.`,
         })
@@ -97,7 +97,7 @@ function NavItem({
           isActive
             ? 'bg-[#E9EAEF] dark:bg-[#2A2B30] text-accent-foreground'
             : 'hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30] hover:text-primary',
-          'justify-start w-full text-left whitespace-nowrap rounded-sm transition-all duration-200 mb-1 h-10',
+          'justify-start w-full text-left whitespace-nowrap rounded-sm transition-all duration-200 mb-1 h-8',
           'cursor-not-allowed opacity-70',
         )}
       >
@@ -150,7 +150,7 @@ function NavItem({
         isActive
           ? 'bg-[#E9EAEF] dark:bg-[#2A2B30] text-accent-foreground'
           : 'hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30] hover:text-primary',
-        'justify-start w-full text-left whitespace-nowrap rounded-sm transition-all duration-200 mb-1 h-10',
+        'justify-start w-full text-left whitespace-nowrap rounded-sm transition-all duration-200 mb-1 h-8',
       )}
     >
       <div className="flex items-center gap-3 justify-between w-full">

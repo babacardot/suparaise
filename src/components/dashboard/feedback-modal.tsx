@@ -1,13 +1,18 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Button as ExpandButton } from '@/components/design/button-expand'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowRight, Eraser } from 'lucide-react'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
-import { motion, AnimatePresence } from 'framer-motion'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { useSidebar } from '@/components/ui/sidebar'
 
 type Sentiment =
   | 'very_positive'
@@ -17,25 +22,25 @@ type Sentiment =
   | 'null'
 
 const emojis: { [key in Sentiment]: string } = {
-  very_positive: '😀',
+  very_positive: '🤩',
   positive: '🙂',
   negative: '🙁',
-  very_negative: '😞',
+  very_negative: '🤬',
   null: '',
 }
 
 interface FeedbackModalProps {
   isOpen: boolean
   onClose: () => void
+  children: React.ReactNode // The trigger element
 }
 
-export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
+export default function FeedbackModal({ isOpen, onClose, children }: FeedbackModalProps) {
   const { currentStartupId } = useUser()
   const [message, setMessage] = useState('')
   const [sentiment, setSentiment] = useState<Sentiment>('null')
-  const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const formRef = useRef<HTMLDivElement>(null)
+  const { isMobile } = useSidebar()
 
   const { user, supabase } = useUser()
   const { toast } = useToast()
@@ -52,25 +57,6 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       console.log('Error loading sound:', error)
     }
   }
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (formRef.current && !formRef.current.contains(event.target as Node)) {
-        if (!isSubmitted) {
-          playClickSound()
-          onClose()
-        }
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isOpen, isSubmitted, onClose])
 
   const handleSubmit = async () => {
     playClickSound()
@@ -137,7 +123,6 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   const resetForm = () => {
     setMessage('')
     setSentiment('null')
-    setIsSubmitted(false)
   }
 
   const handleClear = () => {
@@ -146,85 +131,89 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
     setSentiment('null')
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center select-none">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="bg-background border border-border shadow-lg z-50 rounded-sm sm:max-w-md w-full max-w-lg"
-          ref={formRef}
-        >
-          <div className="p-4">
-            <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Feedback</h3>
-              <p className="text-sm text-muted-foreground">
-                Help us improve by sharing your thoughts and suggestions.
-              </p>
+    <DropdownMenu
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose()
+          resetForm()
+        }
+      }}
+    >
+      <DropdownMenuTrigger asChild>
+        {children}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="w-96 p-0 bg-sidebar border-sidebar-border rounded-sm"
+        side={isMobile ? 'bottom' : 'right'}
+        align="center"
+        sideOffset={18}
+      >
+        <div className="px-3 py-3">
+          <Textarea
+            placeholder="Tell us what you think about this page."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="min-h-[100px] max-h-[135px] mb-3 text-sm placeholder:text-sm bg-background text-foreground rounded-sm resize-none select-auto overflow-y-auto"
+            style={{
+              resize: 'vertical',
+              minHeight: '100px',
+              maxHeight: '135px',
+              transformOrigin: 'bottom',
+            }}
+          />
+
+          <div className="flex items-center justify-between">
+            <div className="flex space-x-2 mr-3">
+              {(Object.keys(emojis) as Sentiment[])
+                .filter((key) => key !== 'null')
+                .map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      playClickSound()
+                      setSentiment(key)
+                    }}
+                    className={`text-xl w-8 h-8 rounded-sm transition-all duration-200 hover:bg-sidebar-accent border ${sentiment === key
+                      ? 'bg-sidebar-accent border-sidebar-border shadow-sm scale-105'
+                      : 'border-transparent hover:border-sidebar-border/30'
+                      }`}
+                  >
+                    {emojis[key]}
+                  </button>
+                ))}
             </div>
 
-            <Textarea
-              placeholder="Tell us what you think about this page."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="min-h-[100px] mb-4 text-sm placeholder:text-sm bg-white dark:bg-[#121317] text-gray-900 dark:text-gray-100 rounded-sm resize-y select-auto"
-            />
+            <div className="flex space-x-2 flex-shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClear}
+                className="px-2 rounded-sm w-8 h-8 transition-all duration-250 ease-out hover:bg-sidebar-accent active:scale-95"
+                disabled={isSubmitting}
+              >
+                <Eraser className="h-3.5 w-3.5" />
+              </Button>
 
-            <div className="flex items-center justify-between">
-              <div className="flex space-x-3">
-                {(Object.keys(emojis) as Sentiment[])
-                  .filter((key) => key !== 'null')
-                  .map((key) => (
-                    <button
-                      key={key}
-                      onClick={() => {
-                        playClickSound()
-                        setSentiment(key)
-                      }}
-                      className={`text-lg w-10 h-10 rounded-sm transition-all duration-200 hover:bg-background border ${sentiment === key
-                          ? 'bg-background border-border shadow-sm scale-105'
-                          : 'border-transparent hover:border-border/30'
-                        }`}
-                    >
-                      {emojis[key]}
-                    </button>
-                  ))}
-              </div>
-
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="default"
-                  onClick={handleClear}
-                  className="px-2 rounded-sm w-8 transition-all duration-250 ease-out hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30] active:scale-95"
-                  disabled={isSubmitting}
-                >
-                  <Eraser className="h-4 w-4" />
-                </Button>
-
-                <ExpandButton
-                  onClick={handleSubmit}
-                  disabled={!message.trim() || isSubmitting}
-                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm shadow-none px-4 disabled:opacity-50 disabled:hover:bg-green-50 disabled:dark:hover:bg-green-900/30"
-                  Icon={ArrowRight}
-                  iconPlacement="right"
-                  size="default"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit'}
-                </ExpandButton>
-              </div>
+              <ExpandButton
+                onClick={handleSubmit}
+                disabled={!message.trim() || isSubmitting}
+                className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm shadow-none px-3 py-1 h-8 text-xs disabled:opacity-50 disabled:hover:bg-green-50 disabled:dark:hover:bg-green-900/30 [&>div>svg]:h-3 [&>div>svg]:w-3"
+                Icon={ArrowRight}
+                iconPlacement="right"
+                size="sm"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </ExpandButton>
             </div>
           </div>
+        </div>
 
-          <div className="text-xs text-gray-500 dark:text-gray-400 p-2 border-t border-gray-200 dark:border-gray-700">
-            Your feedback helps us improve the platform.
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+        <div className="text-xs text-sidebar-foreground/70 px-3 py-2 border-t border-sidebar-border">
+          Your feedback helps us improve the platform.
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

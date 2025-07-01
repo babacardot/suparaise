@@ -177,7 +177,7 @@ export default function AgentSettings() {
     if (field === 'enableDebugMode') {
       if (!isAdvancedFeatureAvailable()) {
         toast({
-          variant: 'destructive',
+          variant: 'info',
           title: 'Feature locked',
           description:
             'Developer mode is only available for MAX users. Please upgrade your plan.',
@@ -189,7 +189,7 @@ export default function AgentSettings() {
     if (field === 'preferredTone' || field === 'customInstructions') {
       if (!isProPlusFeatureAvailable()) {
         toast({
-          variant: 'destructive',
+          variant: 'info',
           title: 'Feature locked',
           description:
             'This feature is only available for PRO and MAX users. Please upgrade your plan.',
@@ -480,7 +480,7 @@ export default function AgentSettings() {
                         !isOptionAllowed(selectedOption.tier)
                       ) {
                         toast({
-                          variant: 'destructive',
+                          variant: 'info',
                           title: 'Feature locked',
                           description: `This option requires ${selectedOption.tier} plan. Please upgrade to access it.`,
                         })
@@ -532,7 +532,7 @@ export default function AgentSettings() {
                         !isOptionAllowed(selectedOption.tier)
                       ) {
                         toast({
-                          variant: 'destructive',
+                          variant: 'info',
                           title: 'Feature locked',
                           description: `This option requires ${selectedOption.tier} plan. Please upgrade to access it.`,
                         })
