@@ -244,7 +244,7 @@ export function useValidation({
       } else {
         const missingFieldNames = missingFields.map((f) => f.label).join(', ')
         toast({
-          variant: 'destructive',
+          variant: 'info',
           title: 'Profile incomplete',
           description: `Please complete: ${missingFieldNames}`,
         })

@@ -667,6 +667,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Company updated',
+        variant: 'success',
         description: `${formatFieldName(field)} has been updated successfully.`,
       })
     } catch (error) {
@@ -763,6 +764,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Logo updated',
+        variant: 'success',
         description: 'Your company logo has been updated successfully.',
       })
     } catch (error) {
@@ -820,6 +822,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Logo removed',
+        variant: 'success',
         description: 'Your company logo has been removed.',
       })
     } catch (error) {
@@ -850,6 +853,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Startup deleted',
+        variant: 'success',
         description: `The startup "${formData.name}" has been deleted.`,
       })
 
@@ -901,6 +905,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Account deleted',
+        variant: 'success',
         description: 'Your account has been deleted successfully.',
       })
 
@@ -983,6 +988,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Pitch deck uploaded',
+        variant: 'success',
         description: 'Your pitch deck has been uploaded successfully.',
       })
     } catch (error) {
@@ -1060,6 +1066,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Video uploaded',
+        variant: 'success',
         description: 'Your demo video has been uploaded successfully.',
       })
     } catch (error) {
@@ -1091,6 +1098,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Pitch deck removed',
+        variant: 'success',
         description: 'Your pitch deck has been removed.',
       })
     } catch (error) {
@@ -1120,6 +1128,7 @@ export default function CompanySettings() {
       playCompletionSound()
       toast({
         title: 'Video removed',
+        variant: 'success',
         description: 'Your demo video has been removed.',
       })
     } catch (error) {

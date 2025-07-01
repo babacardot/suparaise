@@ -148,7 +148,7 @@ export default function SupportModal({ isOpen, onClose, children }: SupportModal
           console.error('Error uploading image:', uploadError)
           toast({
             variant: 'destructive',
-            title: 'Upload Error',
+            title: 'Upload error',
             description: 'Failed to upload image. Please try again.',
           })
           setIsSubmitting(false)
@@ -183,12 +183,13 @@ export default function SupportModal({ isOpen, onClose, children }: SupportModal
         console.error('Error submitting support request:', supportRequestError)
         toast({
           variant: 'destructive',
-          title: 'Submission Error',
+          title: 'Submission error',
           description:
             'There was a problem submitting your request. Please try again later.',
         })
       } else {
         toast({
+          variant: 'success',
           title: 'Support request submitted',
           duration: 2000,
           description:

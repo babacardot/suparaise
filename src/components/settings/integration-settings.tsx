@@ -317,6 +317,7 @@ export default function IntegrationSettings() {
     if (integration.status === 'coming_soon') {
       playClickSound()
       toast({
+        variant: 'info',
         title: 'Coming soon',
         description: `${integration.name} integration is not yet available. We're working on it!`,
       })
@@ -327,7 +328,7 @@ export default function IntegrationSettings() {
     if (integration.isPremium && !hasMaxAccess) {
       playClickSound()
       toast({
-        variant: 'destructive',
+        variant: 'info',
         title: 'Premium feature',
         description: `${integration.name} integration is only available for MAX users. Please upgrade your plan.`,
       })
@@ -349,6 +350,7 @@ export default function IntegrationSettings() {
         })
         toast({
           title: 'Integration disconnected',
+          variant: 'success',
           description: `${integration.name} has been disconnected from your account.`,
         })
       } else {
@@ -356,6 +358,7 @@ export default function IntegrationSettings() {
         playCompletionSound()
         toast({
           title: 'Integration connected',
+          variant: 'success',
           description: `${integration.name} has been successfully connected to your account.`,
         })
       }
@@ -479,6 +482,7 @@ export default function IntegrationSettings() {
                           playClickSound()
                           toast({
                             title: 'Integration settings',
+                            variant: 'default',
                             description: `Configure ${integration.name} integration settings.`,
                           })
                         }}

@@ -237,6 +237,7 @@ export default function AgentSettings() {
       setEditingField(null)
       toast({
         title: 'Agents settings updated',
+        variant: 'success',
         description: `${formatFieldName(field)} has been updated successfully.`,
       })
     } catch (error) {

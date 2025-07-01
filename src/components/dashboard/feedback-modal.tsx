@@ -73,7 +73,7 @@ export default function FeedbackModal({ isOpen, onClose, children }: FeedbackMod
 
     if (!message.trim()) {
       toast({
-        variant: 'destructive',
+        variant: 'info',
         title: 'Missing information',
         description: 'Please enter your feedback message.',
       })
@@ -102,7 +102,7 @@ export default function FeedbackModal({ isOpen, onClose, children }: FeedbackMod
         toast({
           title: 'Feedback submitted',
           duration: 2000,
-          variant: 'default',
+          variant: 'success',
           description: 'Thank you for your feedback! We appreciate your input.',
         })
         resetForm()

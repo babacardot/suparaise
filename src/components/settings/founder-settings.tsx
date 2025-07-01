@@ -396,6 +396,7 @@ export default function ProfileSettings() {
       playCompletionSound()
       toast({
         title: 'Profile updated',
+        variant: 'success',
         description: `${formatFieldName(field)} has been updated successfully.`,
       })
     } catch (error) {
@@ -467,6 +468,7 @@ export default function ProfileSettings() {
       playCompletionSound()
       toast({
         title: 'Avatar updated',
+        variant: 'success',
         description: 'Your profile picture has been updated.',
       })
     } catch (error) {
@@ -499,6 +501,7 @@ export default function ProfileSettings() {
       playCompletionSound()
       toast({
         title: 'Avatar removed',
+        variant: 'success',
         description: 'Your profile picture has been removed.',
       })
 
@@ -617,6 +620,7 @@ export default function ProfileSettings() {
       playCompletionSound()
       toast({
         title: 'Founder added',
+        variant: 'success',
         description: 'The new founder has been added successfully.',
       })
     } catch (error) {
@@ -660,6 +664,7 @@ export default function ProfileSettings() {
       playCompletionSound()
       toast({
         title: 'Founder removed',
+        variant: 'success',
         description: 'The founder has been removed successfully.',
       })
     } catch (error) {

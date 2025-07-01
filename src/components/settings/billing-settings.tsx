@@ -156,6 +156,7 @@ export default function BillingSettings() {
     } else if (canceled === 'true') {
       toast({
         title: 'Payment canceled',
+        variant: 'info',
         description: 'No charges were made. You can try again anytime.',
       })
     }

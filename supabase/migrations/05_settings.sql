@@ -753,12 +753,21 @@ BEGIN
     ) INTO settings_exist;
 
     IF settings_exist THEN
-        -- Update existing settings
+        -- Update existing settings (only update fields that are present in p_data)
         UPDATE agent_settings
         SET 
-            submission_delay = COALESCE((p_data->>'submissionDelay')::agent_submission_delay, submission_delay),
-            max_parallel_submissions = COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, max_parallel_submissions),
-            max_queue_size = COALESCE((p_data->>'maxQueueSize')::INTEGER, max_queue_size),
+            submission_delay = CASE 
+                WHEN p_data ? 'submissionDelay' THEN (p_data->>'submissionDelay')::agent_submission_delay
+                ELSE submission_delay
+            END,
+            max_parallel_submissions = CASE 
+                WHEN p_data ? 'maxParallelSubmissions' THEN (p_data->>'maxParallelSubmissions')::agent_parallel_submissions
+                ELSE max_parallel_submissions
+            END,
+            max_queue_size = CASE 
+                WHEN p_data ? 'maxQueueSize' THEN (p_data->>'maxQueueSize')::INTEGER
+                ELSE max_queue_size
+            END,
             preferred_tone = CASE 
                 WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
                 THEN (p_data->>'preferredTone')::agent_tone
@@ -769,8 +778,14 @@ BEGIN
                 THEN (p_data->>'enableDebugMode')::BOOLEAN
                 ELSE debug_mode
             END,
-            stealth = COALESCE((p_data->>'enableStealth')::BOOLEAN, stealth),
-            custom_instructions = COALESCE(p_data->>'customInstructions', custom_instructions),
+            stealth = CASE 
+                WHEN p_data ? 'enableStealth' THEN (p_data->>'enableStealth')::BOOLEAN
+                ELSE stealth
+            END,
+            custom_instructions = CASE 
+                WHEN p_data ? 'customInstructions' THEN p_data->>'customInstructions'
+                ELSE custom_instructions
+            END,
             updated_at = NOW()
         WHERE startup_id = p_startup_id AND user_id = p_user_id;
     ELSE
@@ -781,21 +796,28 @@ BEGIN
             debug_mode, stealth, custom_instructions
         ) VALUES (
             p_startup_id, p_user_id,
-            COALESCE((p_data->>'submissionDelay')::agent_submission_delay, '30'),
-            COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, 
-                CASE 
-                    WHEN user_permission = 'FREE' THEN '1'
-                    WHEN user_permission = 'PRO' THEN '3'
-                    WHEN user_permission = 'MAX' THEN '5'
-                    ELSE '1'
+            CASE 
+                WHEN p_data ? 'submissionDelay' THEN (p_data->>'submissionDelay')::agent_submission_delay
+                ELSE '30'::agent_submission_delay
+            END,
+            CASE 
+                WHEN p_data ? 'maxParallelSubmissions' THEN (p_data->>'maxParallelSubmissions')::agent_parallel_submissions
+                ELSE CASE 
+                    WHEN user_permission = 'FREE' THEN '1'::agent_parallel_submissions
+                    WHEN user_permission = 'PRO' THEN '3'::agent_parallel_submissions
+                    WHEN user_permission = 'MAX' THEN '5'::agent_parallel_submissions
+                    ELSE '1'::agent_parallel_submissions
                 END
-            ),
-            COALESCE((p_data->>'maxQueueSize')::INTEGER, CASE 
-                WHEN user_permission = 'FREE' THEN 0
-                WHEN user_permission = 'PRO' THEN 10
-                WHEN user_permission = 'MAX' THEN 25
-                ELSE 0
-            END),
+            END,
+            CASE 
+                WHEN p_data ? 'maxQueueSize' THEN (p_data->>'maxQueueSize')::INTEGER
+                ELSE CASE 
+                    WHEN user_permission = 'FREE' THEN 0
+                    WHEN user_permission = 'PRO' THEN 10
+                    WHEN user_permission = 'MAX' THEN 25
+                    ELSE 0
+                END
+            END,
             CASE 
                 WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
                 THEN (p_data->>'preferredTone')::agent_tone
@@ -806,8 +828,14 @@ BEGIN
                 THEN (p_data->>'enableDebugMode')::BOOLEAN
                 ELSE false
             END,
-            COALESCE((p_data->>'enableStealth')::BOOLEAN, true),
-            COALESCE(p_data->>'customInstructions', '')
+            CASE 
+                WHEN p_data ? 'enableStealth' THEN (p_data->>'enableStealth')::BOOLEAN
+                ELSE true
+            END,
+            CASE 
+                WHEN p_data ? 'customInstructions' THEN p_data->>'customInstructions'
+                ELSE ''
+            END
         );
     END IF;
     

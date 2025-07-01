@@ -35,7 +35,7 @@ const pricingTiers: PricingTier[] = [
     name: 'Pro',
     price: 30,
     priceSuffix: '/mo',
-    description: 'For startups actively raising their first funding round',
+    description: 'For startups actively raising their first round',
     features: [
       '50 runs per month',
       'Access to 1,200 global funds',
