@@ -518,9 +518,9 @@ CREATE POLICY "Allow users to insert their own profile" ON profiles FOR INSERT W
 
 -- Users can only manage their own startup (optimized with select auth.uid())
 ALTER TABLE startups ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow users to read their own startup" ON startups FOR SELECT USING ((select auth.uid()) = user_id AND is_active = TRUE AND (SELECT is_active FROM profiles WHERE id = user_id) = TRUE);
-CREATE POLICY "Allow users to create their own startup" ON startups FOR INSERT WITH CHECK ((select auth.uid()) = user_id AND (SELECT is_active FROM profiles WHERE id = user_id) = TRUE);
-CREATE POLICY "Allow users to update their own startup" ON startups FOR UPDATE USING ((select auth.uid()) = user_id AND is_active = TRUE AND (SELECT is_active FROM profiles WHERE id = user_id) = TRUE);
+CREATE POLICY "Allow users to read their own startup" ON startups FOR SELECT USING ((select auth.uid()) = user_id AND is_active = TRUE);
+CREATE POLICY "Allow users to create their own startup" ON startups FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
+CREATE POLICY "Allow users to update their own startup" ON startups FOR UPDATE USING ((select auth.uid()) = user_id AND is_active = TRUE);
 
 -- Users can only manage founders of their own startup (optimized with select auth.uid())
 ALTER TABLE founders ENABLE ROW LEVEL SECURITY;
@@ -545,7 +545,7 @@ USING ((select auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id
 -- Row Level Security for agent_settings
 ALTER TABLE agent_settings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow users to manage agent settings for their own startup" ON agent_settings FOR ALL
-USING ((select auth.uid()) = user_id AND (SELECT is_active FROM profiles WHERE id = user_id) = TRUE);
+USING ((select auth.uid()) = user_id);
 
 -- =================================================================
 -- ANALYZE TABLES FOR OPTIMAL QUERY PLANNING
