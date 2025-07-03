@@ -89,13 +89,14 @@ interface CompanyStepProps {
   setStartup: (startup: StartupData) => void
   logoUploadProps: FileUploadProps
   pitchDeckUploadProps: FileUploadProps
-  videoUploadProps: FileUploadProps
+  // videoUploadProps: FileUploadProps // Temporarily commented out
   fieldErrors: StartupFieldErrors
 }
 
 interface FundraisingStepProps {
   startup: StartupData
   setStartup: (startup: StartupData) => void
+  fieldErrors: StartupFieldErrors
 }
 
 interface ReviewStepProps {
@@ -108,26 +109,62 @@ const getFileTypeColor = (fileName: string): string => {
   const extension = fileName.split('.').pop()?.toLowerCase()
   switch (extension) {
     case 'png':
-      return 'bg-green-100 text-green-500 dark:bg-green-900 dark:text-green-400'
+      return 'bg-green-500 text-white dark:bg-green-600'
     case 'jpg':
     case 'jpeg':
-      return 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-400'
+      return 'bg-blue-500 text-white dark:bg-blue-600'
     case 'svg':
-      return 'bg-purple-100 text-purple-500 dark:bg-purple-900 dark:text-purple-400'
+      return 'bg-purple-500 text-white dark:bg-purple-600'
     case 'webp':
-      return 'bg-orange-100 text-orange-500 dark:bg-orange-900 dark:text-orange-400'
+      return 'bg-orange-500 text-white dark:bg-orange-600'
     case 'pdf':
-      return 'bg-red-100 text-red-500 dark:bg-red-900 dark:text-red-400'
+      return 'bg-red-500 text-white dark:bg-red-600'
     case 'ppt':
     case 'pptx':
-      return 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-400'
+      return 'bg-yellow-500 text-white dark:bg-yellow-600'
     case 'mp4':
     case 'mov':
     case 'avi':
     case 'webm':
-      return 'bg-indigo-100 text-indigo-500 dark:bg-indigo-900 dark:text-indigo-400'
+      return 'bg-indigo-500 text-white dark:bg-indigo-600'
+    case 'xls':
+    case 'xlsx':
+      return 'bg-emerald-500 text-white dark:bg-emerald-600'
+    case 'doc':
+    case 'docx':
+      return 'bg-cyan-500 text-white dark:bg-cyan-600'
     default:
-      return 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+      return 'bg-gray-500 text-white dark:bg-gray-600'
+  }
+}
+
+const getFileTypeText = (fileName: string): string => {
+  const extension = fileName.split('.').pop()?.toLowerCase()
+  switch (extension) {
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'svg':
+    case 'webp':
+      return 'IMG'
+    case 'pdf':
+      return 'PDF'
+    case 'ppt':
+    case 'pptx':
+      return 'PPT'
+    case 'mp4':
+    case 'mov':
+    case 'avi':
+    case 'webm':
+      return 'VID'
+    case 'xls':
+    case 'xlsx':
+      return 'XLS'
+    case 'doc':
+    case 'docx':
+      return 'DOC'
+    default:
+      return 'FILE'
   }
 }
 
@@ -195,7 +232,7 @@ const CompetitorInput: React.FC<{
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex gap-2">
         <Input
           value={inputValue}
@@ -255,46 +292,120 @@ const FileUploadComponent: React.FC<
   maxSize,
   description,
 }) => {
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-    useEffect(() => {
-      if ((type === 'logo' || type === 'introVideo') && file) {
-        const url = URL.createObjectURL(file)
-        setPreviewUrl(url)
+  useEffect(() => {
+    if (type === 'logo' && file) {
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
 
-        return () => {
-          URL.revokeObjectURL(url)
-          setPreviewUrl(null)
-        }
-      } else {
+      return () => {
+        URL.revokeObjectURL(url)
         setPreviewUrl(null)
       }
-    }, [file, type])
+    } else {
+      setPreviewUrl(null)
+    }
+  }, [file, type])
 
-    return (
-      <div className="space-y-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={(e) => {
-            const selectedFile = e.target.files?.[0]
-            if (selectedFile) onUpload(type, selectedFile)
-          }}
-          disabled={uploadStatus === 'uploading'}
-        />
-        {!file ? (
-          <div className="flex items-center space-x-4">
-            <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-              <LottieIcon
-                animationData={animations.fileplus}
-                size={32}
-                loop={false}
-                autoplay={false}
-              />
-            </div>
-            <div className="space-x-2">
+  return (
+    <div className="space-y-3">
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => {
+          const selectedFile = e.target.files?.[0]
+          if (selectedFile) onUpload(type, selectedFile)
+        }}
+        disabled={uploadStatus === 'uploading'}
+      />
+      {!file ? (
+        <div className="flex items-center space-x-4">
+          <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+            <LottieIcon
+              animationData={animations.fileplus}
+              size={32}
+              loop={false}
+              autoplay={false}
+            />
+          </div>
+          <div className="space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploadStatus === 'uploading'}
+              className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+            >
+              {uploadStatus === 'uploading' ? (
+                <>
+                  <Spinner className="h-3 w-3 mr-2" />
+                </>
+              ) : (
+                'Upload'
+              )}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center space-x-4">
+          <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
+            {previewUrl ? (
+              type === 'logo' ? (
+                <Image
+                  src={previewUrl}
+                  alt="Logo preview"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 rounded-sm object-contain"
+                />
+              ) : (
+                <video
+                  src={previewUrl}
+                  muted
+                  playsInline
+                  className="h-20 w-20 rounded-sm object-contain"
+                />
+              )
+            ) : (
+              <div
+                className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}
+              >
+                <span className="text-xs font-bold">
+                  {getFileTypeText(file.name)}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{file.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {uploadStatus === 'uploading'
+                ? `${formatFileSize(
+                    (uploadProgress / 100) * file.size,
+                  )} of ${formatFileSize(file.size)}`
+                : formatFileSize(file.size)}
+            </p>
+            {uploadStatus === 'uploading' && (
+              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+                <div
+                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+            {uploadStatus === 'failed' && (
+              <button
+                onClick={() => onUpload(type, file)}
+                className="text-sm text-red-500 hover:underline"
+              >
+                Try again
+              </button>
+            )}
+            <div className="space-x-2 mt-2">
               <Button
                 type="button"
                 variant="outline"
@@ -308,107 +419,30 @@ const FileUploadComponent: React.FC<
                     <Spinner className="h-3 w-3 mr-2" />
                   </>
                 ) : (
-                  'Upload'
+                  'Update'
                 )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  playClickSound()
+                  onRemove()
+                }}
+                className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+              >
+                Remove
               </Button>
             </div>
           </div>
-        ) : (
-          <div className="flex items-center space-x-4">
-            <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
-              {previewUrl ? (
-                type === 'logo' ? (
-                  <Image
-                    src={previewUrl}
-                    alt="Logo preview"
-                    width={80}
-                    height={80}
-                    className="h-20 w-20 rounded-sm object-contain"
-                  />
-                ) : (
-                  <video
-                    src={previewUrl}
-                    muted
-                    playsInline
-                    className="h-20 w-20 rounded-sm object-contain"
-                  />
-                )
-              ) : (
-                <div
-                  className={`h-20 w-20 p-2 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}
-                >
-                  <LottieIcon
-                    animationData={animations.fileplus}
-                    size={32}
-                    loop={false}
-                    autoplay={false}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {uploadStatus === 'uploading'
-                  ? `${formatFileSize(
-                    (uploadProgress / 100) * file.size,
-                  )} of ${formatFileSize(file.size)}`
-                  : formatFileSize(file.size)}
-              </p>
-              {uploadStatus === 'uploading' && (
-                <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
-                  <div
-                    className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              )}
-              {uploadStatus === 'failed' && (
-                <button
-                  onClick={() => onUpload(type, file)}
-                  className="text-sm text-red-500 hover:underline"
-                >
-                  Try again
-                </button>
-              )}
-              <div className="space-x-2 mt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => inputRef.current?.click()}
-                  disabled={uploadStatus === 'uploading'}
-                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                >
-                  {uploadStatus === 'uploading' ? (
-                    <>
-                      <Spinner className="h-3 w-3 mr-2" />
-                    </>
-                  ) : (
-                    'Update'
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    playClickSound()
-                    onRemove()
-                  }}
-                  className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-                >
-                  Remove
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-        <p className="text-xs text-muted-foreground">
-          {description} (max {maxSize})
-        </p>
-      </div>
-    )
-  }
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">
+        {description} (max {maxSize})
+      </p>
+    </div>
+  )
+}
 
 const MultiSelectCountries: React.FC<{
   selected: string[]
@@ -434,8 +468,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -450,7 +485,7 @@ const MultiSelectCountries: React.FC<{
           e.stopPropagation()
         }}
       >
-        <Command shouldFilter={false}>
+        <Command>
           <CommandInput placeholder="Search country..." />
           <CommandList
             className="max-h-48 [&>div]:overflow-y-auto [&>div]:scroll-smooth"
@@ -490,7 +525,13 @@ const MultiSelectCountries: React.FC<{
 // Step 1: Team Information
 export const TeamStep: React.FC<
   TeamStepProps & { isFirstStartup?: boolean }
-> = ({ founders, setFounders, fieldErrors, isFirstStartup = true, prefilledFields }) => {
+> = ({
+  founders,
+  setFounders,
+  fieldErrors,
+  isFirstStartup = true,
+  prefilledFields,
+}) => {
   const addFounder = () => {
     setFounders([
       ...founders,
@@ -562,8 +603,10 @@ export const TeamStep: React.FC<
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-fname`}>First name *</Label>
+              <div className="space-y-3">
+                <Label htmlFor={`founder-${index}-fname`}>
+                  First name <span className="required-asterisk">*</span>
+                </Label>
                 <Input
                   id={`founder-${index}-fname`}
                   value={founder.firstName}
@@ -585,8 +628,10 @@ export const TeamStep: React.FC<
                   </p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-lname`}>Last name *</Label>
+              <div className="space-y-3">
+                <Label htmlFor={`founder-${index}-lname`}>
+                  Last name <span className="required-asterisk">*</span>
+                </Label>
                 <Input
                   id={`founder-${index}-lname`}
                   value={founder.lastName}
@@ -610,8 +655,10 @@ export const TeamStep: React.FC<
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-role`}>Role *</Label>
+              <div className="space-y-3">
+                <Label htmlFor={`founder-${index}-role`}>
+                  Role <span className="required-asterisk">*</span>
+                </Label>
                 <div className="relative">
                   <select
                     id={`founder-${index}-role`}
@@ -635,8 +682,10 @@ export const TeamStep: React.FC<
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-email`}>Email *</Label>
+              <div className="space-y-3">
+                <Label htmlFor={`founder-${index}-email`}>
+                  Email <span className="required-asterisk">*</span>
+                </Label>
                 <Input
                   id={`founder-${index}-email`}
                   type="email"
@@ -663,8 +712,10 @@ export const TeamStep: React.FC<
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor={`founder-${index}-phone`}>Phone *</Label>
+              <div className="space-y-3">
+                <Label htmlFor={`founder-${index}-phone`}>
+                  Phone <span className="required-asterisk">*</span>
+                </Label>
                 <PhoneNumberInput
                   value={founder.phone}
                   onChange={(value) =>
@@ -683,7 +734,7 @@ export const TeamStep: React.FC<
                   </p>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor={`founder-${index}-linkedin`}>LinkedIn</Label>
                 <Input
                   id={`founder-${index}-linkedin`}
@@ -713,7 +764,7 @@ export const TeamStep: React.FC<
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor={`founder-${index}-github`}>Github</Label>
                 <Input
                   id={`founder-${index}-github`}
@@ -735,7 +786,7 @@ export const TeamStep: React.FC<
                   </p>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor={`founder-${index}-twitter`}>X</Label>
                 <Input
                   id={`founder-${index}-twitter`}
@@ -764,7 +815,7 @@ export const TeamStep: React.FC<
                 )}
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor={`founder-${index}-website`}>
                 Personal website
               </Label>
@@ -788,7 +839,7 @@ export const TeamStep: React.FC<
                 </p>
               )}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor={`founder-${index}-bio`}>Bio</Label>
               <Textarea
                 id={`founder-${index}-bio`}
@@ -830,7 +881,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
   setStartup,
   logoUploadProps,
   pitchDeckUploadProps,
-  videoUploadProps,
+  // videoUploadProps, // Temporarily commented out
   fieldErrors,
 }) => {
   return (
@@ -847,8 +898,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="company-name">Name *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="company-name">
+              Name <span className="required-asterisk">*</span>
+            </Label>
             <Input
               id="company-name"
               value={startup.name}
@@ -864,8 +917,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               <p className="text-sm text-red-600 mt-1">{fieldErrors.name}</p>
             )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="company-website">Website</Label>
+          <div className="space-y-3">
+            <Label htmlFor="company-website">
+              Website <span className="required-asterisk">*</span>
+            </Label>
             <Input
               id="company-website"
               value={startup.website}
@@ -885,8 +940,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="founded-year">Founded year *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="founded-year">
+              Founded year <span className="required-asterisk">*</span>
+            </Label>
             <Input
               id="founded-year"
               type="number"
@@ -913,8 +970,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               </p>
             )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="location">Country *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="location">
+              Country <span className="required-asterisk">*</span>
+            </Label>
             <Input
               id="location"
               value={startup.location}
@@ -938,65 +997,74 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="industry">Industry *</Label>
-          <div className="relative">
-            <select
-              id="industry"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
-                ? 'border-red-500 focus:border-red-500'
-                : 'border-input'
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <Label htmlFor="industry">
+              Industry <span className="required-asterisk">*</span>
+            </Label>
+            <div className="relative">
+              <select
+                id="industry"
+                className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
+                  fieldErrors.industry
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-input'
                 }`}
-              value={startup.industry || ''}
-              onChange={(e) =>
-                setStartup({
-                  ...startup,
-                  industry: e.target.value as IndustryType,
-                })
-              }
-              required
-            >
-              <option value="">Select an industry</option>
-              {INDUSTRIES.map((industry) => (
-                <option key={industry} value={industry}>
-                  {industry}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                value={startup.industry || ''}
+                onChange={(e) =>
+                  setStartup({
+                    ...startup,
+                    industry: e.target.value as IndustryType,
+                  })
+                }
+                required
+              >
+                <option value="">Select an industry</option>
+                {INDUSTRIES.map((industry) => (
+                  <option key={industry} value={industry}>
+                    {industry}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+            {fieldErrors.industry && (
+              <p className="text-sm text-red-600 mt-1">
+                {fieldErrors.industry}
+              </p>
+            )}
           </div>
-          {fieldErrors.industry && (
-            <p className="text-sm text-red-600 mt-1">{fieldErrors.industry}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="legal-structure">Legal structure</Label>
-          <div className="relative">
-            <select
-              id="legal-structure"
-              className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-              value={startup.legalStructure || ''}
-              onChange={(e) =>
-                setStartup({
-                  ...startup,
-                  legalStructure: e.target.value as LegalStructure,
-                })
-              }
-            >
-              <option value="">Select a legal structure</option>
-              {LEGAL_STRUCTURES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <div className="space-y-3">
+            <Label htmlFor="legal-structure">
+              Legal structure <span className="required-asterisk">*</span>
+            </Label>
+            <div className="relative">
+              <select
+                id="legal-structure"
+                className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                value={startup.legalStructure || ''}
+                onChange={(e) =>
+                  setStartup({
+                    ...startup,
+                    legalStructure: e.target.value as LegalStructure,
+                  })
+                }
+                required
+              >
+                <option value="">Select a legal structure</option>
+                {LEGAL_STRUCTURES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label>Is your company incorporated?</Label>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -1006,7 +1074,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   setStartup({ ...startup, isIncorporated: false })
                 }}
                 className={cn(
-                  'flex items-center justify-center rounded-sm border-2 px-4 py-3 text-sm font-medium transition-all',
+                  'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                   !startup.isIncorporated
                     ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-300'
                     : 'border-border bg-background text-muted-foreground hover:bg-muted',
@@ -1021,7 +1089,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   setStartup({ ...startup, isIncorporated: true })
                 }}
                 className={cn(
-                  'flex items-center justify-center rounded-sm border-2 px-4 py-3 text-sm font-medium transition-all',
+                  'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                   startup.isIncorporated
                     ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-400'
                     : 'border-border bg-background text-muted-foreground hover:bg-muted',
@@ -1034,7 +1102,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
           {startup.isIncorporated && (
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="incorporation-country">
                   Incorporation country
                 </Label>
@@ -1060,7 +1128,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="incorporation-city">Incorporation city</Label>
                 <Input
                   id="incorporation-city"
@@ -1078,9 +1146,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label htmlFor="operating-countries">
-              Countries where you operate
+              Countries where you operate{' '}
+              <span className="required-asterisk">*</span>
             </Label>
             <MultiSelectCountries
               selected={startup.operatingCountries}
@@ -1121,8 +1190,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="one-liner">One-liner *</Label>
+        <div className="space-y-3">
+          <Label htmlFor="one-liner">
+            One-liner <span className="required-asterisk">*</span>
+          </Label>
           <Textarea
             id="one-liner"
             value={startup.descriptionShort}
@@ -1158,8 +1229,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="elevator-pitch">Elevator pitch *</Label>
+        <div className="space-y-3">
+          <Label htmlFor="elevator-pitch">
+            Elevator pitch <span className="required-asterisk">*</span>
+          </Label>
           <Textarea
             id="elevator-pitch"
             value={startup.descriptionMedium}
@@ -1195,8 +1268,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="full-description">Full description *</Label>
+        <div className="space-y-3">
+          <Label htmlFor="full-description">
+            Full description <span className="required-asterisk">*</span>
+          </Label>
           <Textarea
             id="full-description"
             value={startup.descriptionLong}
@@ -1228,65 +1303,6 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="revenue-model">Revenue model</Label>
-          <div className="relative">
-            <select
-              id="revenue-model"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.revenueModel
-                ? 'border-red-500 focus:border-red-500'
-                : 'border-input'
-                }`}
-              value={startup.revenueModel || ''}
-              onChange={(e) =>
-                setStartup({
-                  ...startup,
-                  revenueModel: e.target.value as RevenueModelType,
-                })
-              }
-            >
-              <option value="">Select a revenue model</option>
-              {REVENUE_MODELS.map((model) => (
-                <option key={model} value={model}>
-                  {model}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-          </div>
-          {fieldErrors.revenueModel && (
-            <p className="text-sm text-red-600 mt-1">
-              {fieldErrors.revenueModel}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="google-drive-url">Google Drive URL</Label>
-          <Input
-            id="google-drive-url"
-            value={startup.googleDriveUrl}
-            onChange={(e) =>
-              setStartup({ ...startup, googleDriveUrl: e.target.value })
-            }
-            placeholder="https://docs.google.com/..."
-            autoComplete="url"
-            className={
-              fieldErrors.googleDriveUrl
-                ? 'border-red-500 focus:border-red-500'
-                : ''
-            }
-          />
-          <p className="text-xs text-muted-foreground">
-            Link to a folder with your pitch deck, financials, etc.
-          </p>
-          {fieldErrors.googleDriveUrl && (
-            <p className="text-sm text-red-600 mt-1">
-              {fieldErrors.googleDriveUrl}
-            </p>
-          )}
-        </div>
-
         <div className="space-y-6">
           <div className="space-y-3">
             <Label>Logo</Label>
@@ -1308,6 +1324,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             />
           </div>
 
+          {/* Temporarily commented out - Demo upload
           <div className="space-y-3">
             <Label>Demo</Label>
             <FileUploadComponent
@@ -1316,6 +1333,33 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               maxSize="100MB"
               description="MP4, MOV, AVI, or WebM"
             />
+          </div>
+          */}
+
+          <div className="space-y-3">
+            <Label htmlFor="google-drive-url">Cloud storage URL</Label>
+            <Input
+              id="google-drive-url"
+              value={startup.googleDriveUrl}
+              onChange={(e) =>
+                setStartup({ ...startup, googleDriveUrl: e.target.value })
+              }
+              placeholder="https://docs.google.com/..."
+              autoComplete="url"
+              className={
+                fieldErrors.googleDriveUrl
+                  ? 'border-red-500 focus:border-red-500'
+                  : ''
+              }
+            />
+            <p className="text-xs text-muted-foreground">
+              Link to a folder with your pitch deck, financials, etc.
+            </p>
+            {fieldErrors.googleDriveUrl && (
+              <p className="text-sm text-red-600 mt-1">
+                {fieldErrors.googleDriveUrl}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -1327,6 +1371,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 export const FundraisingStep: React.FC<FundraisingStepProps> = ({
   startup,
   setStartup,
+  fieldErrors,
 }) => {
   return (
     <div className="space-y-6">
@@ -1340,61 +1385,142 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
         </p>
       </div>
       <div className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="funding-round">What round are you raising? *</Label>
-          <div className="relative">
-            <select
-              id="funding-round"
-              className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-              value={startup.fundingRound || ''}
-              onChange={(e) =>
-                setStartup({
-                  ...startup,
-                  fundingRound: e.target.value as InvestmentStage,
-                })
-              }
-              required
-            >
-              <option value="">Select a round</option>
-              {FUNDING_ROUNDS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <Label htmlFor="funding-round">
+              What round are you raising?{' '}
+              <span className="required-asterisk">*</span>
+            </Label>
+            <div className="relative">
+              <select
+                id="funding-round"
+                className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                value={startup.fundingRound || ''}
+                onChange={(e) =>
+                  setStartup({
+                    ...startup,
+                    fundingRound: e.target.value as InvestmentStage,
+                  })
+                }
+                required
+              >
+                <option value="">Select a round</option>
+                {FUNDING_ROUNDS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="investment-instrument">
-            What type of investment are you seeking? *
-          </Label>
-          <div className="relative">
-            <select
-              id="investment-instrument"
-              className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-              value={startup.investmentInstrument || ''}
-              onChange={(e) =>
-                setStartup({
-                  ...startup,
-                  investmentInstrument: e.target.value as InvestmentInstrument,
-                })
-              }
-              required
-            >
-              <option value="">Select an instrument</option>
-              {INVESTMENT_INSTRUMENTS.map((i) => (
-                <option key={i} value={i}>
-                  {i}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <div className="space-y-3">
+            <Label htmlFor="investment-instrument">
+              What type of investment are you seeking?{' '}
+              <span className="required-asterisk">*</span>
+            </Label>
+            <div className="relative">
+              <select
+                id="investment-instrument"
+                className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                value={startup.investmentInstrument || ''}
+                onChange={(e) =>
+                  setStartup({
+                    ...startup,
+                    investmentInstrument: e.target
+                      .value as InvestmentInstrument,
+                  })
+                }
+                required
+              >
+                <option value="">Select an instrument</option>
+                {INVESTMENT_INSTRUMENTS.map((i) => (
+                  <option key={i} value={i}>
+                    {i}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="funding-amount">How much are you raising? *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="revenue-model">
+              Revenue model <span className="required-asterisk">*</span>
+            </Label>
+            <div className="relative">
+              <select
+                id="revenue-model"
+                className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
+                  fieldErrors.revenueModel
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-input'
+                }`}
+                value={startup.revenueModel || ''}
+                onChange={(e) =>
+                  setStartup({
+                    ...startup,
+                    revenueModel: e.target.value as RevenueModelType,
+                  })
+                }
+                required
+              >
+                <option value="">Select a revenue model</option>
+                {REVENUE_MODELS.map((model) => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+            {fieldErrors.revenueModel && (
+              <p className="text-sm text-red-600 mt-1">
+                {fieldErrors.revenueModel}
+              </p>
+            )}
+          </div>
+          <div className="space-y-3">
+            <Label htmlFor="current-runway">
+              Runway <span className="required-asterisk">*</span>
+            </Label>
+            <div className="relative">
+              <select
+                id="current-runway"
+                className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                value={startup.currentRunway}
+                onChange={(e) =>
+                  setStartup({
+                    ...startup,
+                    currentRunway: parseInt(e.target.value) || 0,
+                  })
+                }
+                required
+              >
+                <option value={0}>Select runway</option>
+                <option value={3}>3 months</option>
+                <option value={6}>6 months</option>
+                <option value={9}>9 months</option>
+                <option value={12}>12 months</option>
+                <option value={15}>15 months</option>
+                <option value={18}>18 months</option>
+                <option value={21}>21 months</option>
+                <option value={24}>24 months</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              How many months of funding you have left
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <Label htmlFor="funding-amount">
+              How much are you raising?{' '}
+              <span className="required-asterisk">*</span>
+            </Label>
             <Input
               id="funding-amount"
               type="text"
@@ -1413,8 +1539,10 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="pre-money-valuation">Pre-money valuation</Label>
+          <div className="space-y-3">
+            <Label htmlFor="pre-money-valuation">
+              Pre-money valuation <span className="required-asterisk">*</span>
+            </Label>
             <Input
               id="pre-money-valuation"
               type="text"
@@ -1430,14 +1558,17 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               leftAddon="$"
               rightAddon="USD"
               className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              required
             />
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="employee-count">Team size *</Label>
+            <div className="space-y-3">
+              <Label htmlFor="employee-count">
+                Team size <span className="required-asterisk">*</span>
+              </Label>
               <div className="relative">
                 <select
                   id="employee-count"
@@ -1466,8 +1597,10 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="mrr">MRR *</Label>
+            <div className="space-y-3">
+              <Label htmlFor="mrr">
+                MRR <span className="required-asterisk">*</span>
+              </Label>
               <Input
                 id="mrr"
                 type="text"
@@ -1489,8 +1622,10 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 If pre-revenue, enter 0
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="arr">ARR *</Label>
+            <div className="space-y-3">
+              <Label htmlFor="arr">
+                ARR <span className="required-asterisk">*</span>
+              </Label>
               <Input
                 id="arr"
                 type="text"
@@ -1514,39 +1649,10 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="current-runway">Current runway</Label>
-            <div className="relative">
-              <select
-                id="current-runway"
-                className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                value={startup.currentRunway}
-                onChange={(e) =>
-                  setStartup({
-                    ...startup,
-                    currentRunway: parseInt(e.target.value) || 0,
-                  })
-                }
-              >
-                <option value={0}>Select runway</option>
-                <option value={3}>3 months</option>
-                <option value={6}>6 months</option>
-                <option value={9}>9 months</option>
-                <option value={12}>12 months</option>
-                <option value={15}>15 months</option>
-                <option value={18}>18 months</option>
-                <option value={21}>21 months</option>
-                <option value={24}>24 months</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              How many months of funding you have left
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="traction">Traction *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="traction">
+              Traction <span className="required-asterisk">*</span>
+            </Label>
             <Textarea
               id="traction"
               value={startup.tractionSummary}
@@ -1568,8 +1674,10 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="market">Market *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="market">
+              Market <span className="required-asterisk">*</span>
+            </Label>
             <Textarea
               id="market"
               value={startup.marketSummary}
@@ -1591,7 +1699,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label htmlFor="key-customers">Key customers</Label>
             <Textarea
               id="key-customers"
@@ -1613,7 +1721,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label htmlFor="competitors">Competitors</Label>
             <CompetitorInput
               competitors={startup.competitorsList || []}
@@ -1749,7 +1857,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               </div>
             )}
 
-            <div className="pt-2 border-t space-y-2">
+            <div className="pt-2 border-t space-y-3">
               <div>
                 <span className="font-medium text-muted-foreground text-sm">
                   One-liner
@@ -1763,7 +1871,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   <span className="font-medium text-muted-foreground text-sm">
                     Elevator pitch
                   </span>
-                  <p className="text-sm break-words whitespace-pre-wrap">{startup.descriptionMedium}</p>
+                  <p className="text-sm break-words whitespace-pre-wrap">
+                    {startup.descriptionMedium}
+                  </p>
                 </div>
               )}
               {startup.descriptionLong && (
@@ -1771,7 +1881,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   <span className="font-medium text-muted-foreground text-sm">
                     Full description
                   </span>
-                  <p className="text-sm break-words whitespace-pre-wrap">{startup.descriptionLong}</p>
+                  <p className="text-sm break-words whitespace-pre-wrap">
+                    {startup.descriptionLong}
+                  </p>
                 </div>
               )}
             </div>
@@ -1806,7 +1918,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   )}
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-sm">Google Drive</span>
+                  <span className="text-sm">Cloud storage</span>
                   {startup.googleDriveUrl ? (
                     <Check className="h-3 w-3 pt-1 text-green-500" />
                   ) : (
@@ -1952,32 +2064,39 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               startup.marketSummary ||
               startup.keyCustomers ||
               startup.competitors) && (
-                <div className="pt-2 border-t space-y-2">
-                  {startup.tractionSummary && (
-                    <div>
-                      <span className="font-medium text-muted-foreground text-sm">
-                        Traction
-                      </span>
-                      <p className="text-sm break-words whitespace-pre-wrap">{startup.tractionSummary}</p>
-                    </div>
-                  )}
-                  {startup.marketSummary && (
-                    <div>
-                      <span className="font-medium text-muted-foreground text-sm">
-                        Market
-                      </span>
-                      <p className="text-sm break-words whitespace-pre-wrap">{startup.marketSummary}</p>
-                    </div>
-                  )}
-                  {startup.keyCustomers && (
-                    <div>
-                      <span className="font-medium text-muted-foreground text-sm">
-                        Key customers
-                      </span>
-                      <p className="text-sm break-words whitespace-pre-wrap">{startup.keyCustomers}</p>
-                    </div>
-                  )}
-                  {startup.competitorsList && startup.competitorsList.length > 0 && (
+              <div className="pt-2 border-t space-y-3">
+                {startup.tractionSummary && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Traction
+                    </span>
+                    <p className="text-sm break-words whitespace-pre-wrap">
+                      {startup.tractionSummary}
+                    </p>
+                  </div>
+                )}
+                {startup.marketSummary && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Market
+                    </span>
+                    <p className="text-sm break-words whitespace-pre-wrap">
+                      {startup.marketSummary}
+                    </p>
+                  </div>
+                )}
+                {startup.keyCustomers && (
+                  <div>
+                    <span className="font-medium text-muted-foreground text-sm">
+                      Key customers
+                    </span>
+                    <p className="text-sm break-words whitespace-pre-wrap">
+                      {startup.keyCustomers}
+                    </p>
+                  </div>
+                )}
+                {startup.competitorsList &&
+                  startup.competitorsList.length > 0 && (
                     <div>
                       <span className="font-medium text-muted-foreground text-sm">
                         Competitors
@@ -1994,8 +2113,8 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                       </div>
                     </div>
                   )}
-                </div>
-              )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

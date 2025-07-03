@@ -121,6 +121,67 @@ const handleNumericChange = (
   setter(numericValue)
 }
 
+// File upload utilities
+const getFileTypeColor = (fileName: string): string => {
+  const extension = fileName.split('.').pop()?.toLowerCase()
+  switch (extension) {
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'svg':
+    case 'webp':
+      return 'bg-green-500 text-white dark:bg-green-600'
+    case 'pdf':
+      return 'bg-red-500 text-white dark:bg-red-600'
+    case 'ppt':
+    case 'pptx':
+      return 'bg-yellow-500 text-white dark:bg-yellow-600'
+    case 'mp4':
+    case 'mov':
+    case 'avi':
+    case 'webm':
+      return 'bg-indigo-500 text-white dark:bg-indigo-600'
+    case 'xls':
+    case 'xlsx':
+      return 'bg-emerald-500 text-white dark:bg-emerald-600'
+    case 'doc':
+    case 'docx':
+      return 'bg-cyan-500 text-white dark:bg-cyan-600'
+    default:
+      return 'bg-gray-500 text-white dark:bg-gray-600'
+  }
+}
+
+const getFileTypeText = (fileName: string): string => {
+  const extension = fileName.split('.').pop()?.toLowerCase()
+  switch (extension) {
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'svg':
+    case 'webp':
+      return 'IMG'
+    case 'pdf':
+      return 'PDF'
+    case 'ppt':
+    case 'pptx':
+      return 'PPT'
+    case 'mp4':
+    case 'mov':
+    case 'avi':
+    case 'webm':
+      return 'VID'
+    case 'xls':
+    case 'xlsx':
+      return 'XLS'
+    case 'doc':
+    case 'docx':
+      return 'DOC'
+    default:
+      return 'FILE'
+  }
+}
+
 // Helper function to format field names for display
 const formatFieldName = (fieldName: string): string => {
   const fieldLabels: Record<string, string> = {
@@ -155,7 +216,7 @@ const formatFieldName = (fieldName: string): string => {
     introVideoUrl: 'Demo',
     financialProjectionsUrl: 'Financial projections',
     businessPlanUrl: 'Business plan',
-    googleDriveUrl: 'Google Drive',
+    googleDriveUrl: 'Cloud storage',
   }
   return fieldLabels[fieldName] || fieldName
 }
@@ -1971,7 +2032,7 @@ export default function CompanySettings() {
                   }}
                   disabled={isLoading}
                   className={cn(
-                    'flex items-center justify-center rounded-sm border-2 px-4 py-3 text-sm font-medium transition-all',
+                    'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     !formData.isIncorporated
                       ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-300'
                       : 'border-border bg-background text-muted-foreground hover:bg-muted',
@@ -2007,7 +2068,7 @@ export default function CompanySettings() {
                   }}
                   disabled={isLoading}
                   className={cn(
-                    'flex items-center justify-center rounded-sm border-2 px-4 py-3 text-sm font-medium transition-all',
+                    'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     formData.isIncorporated
                       ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-400'
                       : 'border-border bg-background text-muted-foreground hover:bg-muted',
@@ -2396,9 +2457,9 @@ export default function CompanySettings() {
             </div>
           </div>
 
-          {/* Google Drive Link */}
+          {/* Cloud storage */}
           <div className="space-y-2">
-            <Label htmlFor="googleDriveUrl">Google Drive Folder</Label>
+            <Label htmlFor="googleDriveUrl">Cloud storage URL</Label>
             <div className="relative">
               <Input
                 id="googleDriveUrl"
@@ -2431,8 +2492,11 @@ export default function CompanySettings() {
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Link to a shared folder with your pitch deck, financials, etc.
-              This can be used by the agent instead of individual file uploads.
+              Link to a shared folder with your pitch deck, financials, and
+              other materials. While the agent can use this instead of
+              individual uploads, we recommend uploading your deck and demo
+              separately for better security and because most funds require
+              these files to be submitted individually.
             </p>
           </div>
 
@@ -2455,7 +2519,7 @@ export default function CompanySettings() {
                 />
                 {!formData.pitchDeckUrl ? (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                    <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
                       <LottieIcon
                         animationData={animations.fileplus}
                         size={32}
@@ -2487,13 +2551,12 @@ export default function CompanySettings() {
                   </div>
                 ) : (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-sm flex items-center justify-center">
-                      <LottieIcon
-                        animationData={animations.fileplus}
-                        size={32}
-                        loop={false}
-                        autoplay={false}
-                      />
+                    <div
+                      className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('deck.pdf')}`}
+                    >
+                      <span className="text-xs font-bold">
+                        {getFileTypeText('deck.pdf')}
+                      </span>
                     </div>
                     <div className="space-x-2">
                       <Button
@@ -2550,7 +2613,7 @@ export default function CompanySettings() {
                 />
                 {!formData.introVideoUrl ? (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                    <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
                       <LottieIcon
                         animationData={animations.fileplus}
                         size={32}
@@ -2582,13 +2645,12 @@ export default function CompanySettings() {
                   </div>
                 ) : (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-sm flex items-center justify-center">
-                      <LottieIcon
-                        animationData={animations.fileplus}
-                        size={32}
-                        loop={false}
-                        autoplay={false}
-                      />
+                    <div
+                      className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('demo.mp4')}`}
+                    >
+                      <span className="text-xs font-bold">
+                        {getFileTypeText('demo.mp4')}
+                      </span>
                     </div>
                     <div className="space-x-2">
                       <Button
@@ -2647,7 +2709,7 @@ export default function CompanySettings() {
                 />
                 {!formData.financialProjectionsUrl ? (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                    <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
                       <LottieIcon
                         animationData={animations.fileplus}
                         size={32}
@@ -2679,13 +2741,12 @@ export default function CompanySettings() {
                   </div>
                 ) : (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-sm flex items-center justify-center">
-                      <LottieIcon
-                        animationData={animations.fileplus}
-                        size={32}
-                        loop={false}
-                        autoplay={false}
-                      />
+                    <div
+                      className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('financials.xlsx')}`}
+                    >
+                      <span className="text-xs font-bold">
+                        {getFileTypeText('financials.xlsx')}
+                      </span>
                     </div>
                     <div className="space-x-2">
                       <Button
@@ -2742,7 +2803,7 @@ export default function CompanySettings() {
                 />
                 {!formData.businessPlanUrl ? (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                    <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
                       <LottieIcon
                         animationData={animations.fileplus}
                         size={32}
@@ -2774,13 +2835,12 @@ export default function CompanySettings() {
                   </div>
                 ) : (
                   <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-sm flex items-center justify-center">
-                      <LottieIcon
-                        animationData={animations.fileplus}
-                        size={32}
-                        loop={false}
-                        autoplay={false}
-                      />
+                    <div
+                      className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('business-plan.docx')}`}
+                    >
+                      <span className="text-xs font-bold">
+                        {getFileTypeText('business-plan.docx')}
+                      </span>
                     </div>
                     <div className="space-x-2">
                       <Button

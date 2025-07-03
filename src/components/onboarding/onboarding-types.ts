@@ -117,12 +117,12 @@ export interface StartupFieldErrors {
   googleDriveUrl?: string
 }
 
-export interface FileUploadProps {
-  type: 'logo' | 'pitchDeck' | 'introVideo'
+export type FileUploadProps = {
+  type: 'logo' | 'pitchDeck'
   file: File | null
   uploadStatus: 'idle' | 'uploading' | 'completed' | 'failed'
   uploadProgress: number
-  onUpload: (type: 'logo' | 'pitchDeck' | 'introVideo', file: File) => void
+  onUpload: (type: 'logo' | 'pitchDeck', file: File) => void
   onRemove: () => void
   inputRef: React.RefObject<HTMLInputElement | null>
 }

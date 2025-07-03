@@ -162,6 +162,16 @@
     outline: none !important;
     box-shadow: none !important;
   }
+
+  /* Required field asterisk styling */
+  .required-asterisk {
+    color: #ef4444; /* Red color */
+    margin-left: 2px;
+  }
+
+  .dark .required-asterisk {
+    color: #f87171; /* Lighter red for dark mode */
+  }
 }
 
 /* Custom selection color for inputs and textareas */

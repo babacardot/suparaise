@@ -196,10 +196,5 @@ CREATE INDEX IF NOT EXISTS idx_targets_updated_at_id ON targets(updated_at DESC,
 CREATE INDEX IF NOT EXISTS idx_targets_submission_type_name ON targets(submission_type, name);
 CREATE INDEX IF NOT EXISTS idx_targets_form_complexity_name ON targets(form_complexity, name) WHERE form_complexity IS NOT NULL;
 
--- Optimize for filtering queries
-CREATE INDEX IF NOT EXISTS idx_targets_stage_focus_name ON targets USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_targets_industry_focus_name ON targets USING GIN(industry_focus) WHERE industry_focus IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_targets_region_focus_name ON targets USING GIN(region_focus) WHERE region_focus IS NOT NULL;
-
 -- Update table statistics for better query planning
 ANALYZE targets;

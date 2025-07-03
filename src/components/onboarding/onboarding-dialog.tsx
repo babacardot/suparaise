@@ -42,19 +42,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-      title: 'Welcome to suparaise.com',
-      subtitle:
-        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-      image: '/random/onboarding.svg',
-      statusText: 'Onboarding',
-    }
+        title: 'Welcome to suparaise.com',
+        subtitle:
+          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+        image: '/random/onboarding.svg',
+        statusText: 'Onboarding',
+      }
     : {
-      title: 'Ready to launch another venture ?',
-      subtitle:
-        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-      image: '/random/test_your_app.svg',
-      statusText: 'New venture',
-    }
+        title: 'Ready to launch another venture ?',
+        subtitle:
+          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+        image: '/random/test_your_app.svg',
+        statusText: 'New venture',
+      }
 
   return (
     <motion.div
@@ -126,10 +126,6 @@ export function OnboardingDialog({
   const [pitchDeckUploadStatus, setPitchDeckUploadStatus] = useState<
     'idle' | 'uploading' | 'completed' | 'failed'
   >('idle')
-  const [videoUploadProgress, setVideoUploadProgress] = useState(0)
-  const [videoUploadStatus, setVideoUploadStatus] = useState<
-    'idle' | 'uploading' | 'completed' | 'failed'
-  >('idle')
 
   const [founders, setFounders] = useState<FounderData[]>([
     {
@@ -182,7 +178,6 @@ export function OnboardingDialog({
 
   const logoInputRef = useRef<HTMLInputElement>(null)
   const pitchDeckInputRef = useRef<HTMLInputElement>(null)
-  const videoInputRef = useRef<HTMLInputElement>(null)
 
   // Use UserContext instead of creating new supabase client
   const { user, supabase, refreshStartups, selectStartupById } = useUser()
@@ -238,13 +233,13 @@ export function OnboardingDialog({
             // Pre-populate LinkedIn URL if available from OAuth
             if (user.user_metadata?.linkedin_url && !firstFounder.linkedin) {
               firstFounder.linkedin = user.user_metadata.linkedin_url
-              setPrefilledFields(prev => ({ ...prev, linkedin: true }))
+              setPrefilledFields((prev) => ({ ...prev, linkedin: true }))
             }
 
             // Pre-populate Twitter URL if available from OAuth
             if (user.user_metadata?.twitter_url && !firstFounder.twitterUrl) {
               firstFounder.twitterUrl = user.user_metadata.twitter_url
-              setPrefilledFields(prev => ({ ...prev, twitter: true }))
+              setPrefilledFields((prev) => ({ ...prev, twitter: true }))
             }
 
             newFounders[0] = firstFounder
@@ -364,7 +359,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-              founder.email.trim().toLowerCase(),
+                founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -376,7 +371,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-            (user?.email || '').toLowerCase()
+              (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -387,6 +382,7 @@ export function OnboardingDialog({
 
       case 2:
         if (!startup.name.trim()) errors.push('Company name is required')
+        if (!startup.website.trim()) errors.push('Company website is required')
         if (!startup.descriptionShort.trim())
           errors.push('One-liner is required')
         if (!startup.descriptionMedium.trim())
@@ -407,7 +403,7 @@ export function OnboardingDialog({
           errors.push('Company website URL is invalid')
         }
         if (startup.googleDriveUrl && !isValidUrl(startup.googleDriveUrl)) {
-          errors.push('Google Drive URL is invalid')
+          errors.push('Cloud storage URL is invalid')
         }
         break
 
@@ -416,8 +412,16 @@ export function OnboardingDialog({
         if (!startup.fundingRound) errors.push('Funding round is required')
         if (!startup.investmentInstrument)
           errors.push('Investment instrument is required')
-        if (startup.fundingAmountSought <= 0)
-          errors.push('Funding amount is required')
+        if (!startup.operatingCountries.length)
+          errors.push('Operating countries are required')
+        if (!startup.legalStructure) errors.push('Legal structure is required')
+        if (!startup.revenueModel) errors.push('Revenue model is required')
+        if (!startup.currentRunway) errors.push('Current runway is required')
+        if (!startup.preMoneyValuation)
+          errors.push('Pre-money valuation is required')
+        if (!startup.keyCustomers.trim())
+          if (startup.fundingAmountSought <= 0)
+            errors.push('Funding amount is required')
         if (!startup.employeeCount || startup.employeeCount <= 0)
           errors.push('Team size is required')
         if (!startup.tractionSummary.trim()) errors.push('Traction is required')
@@ -487,6 +491,8 @@ export function OnboardingDialog({
     // Required field errors - only show if validation has been attempted
     if (validationAttempted) {
       if (!startup.name.trim()) errors.name = 'Company name is required'
+      if (!startup.website.trim())
+        errors.website = 'Company website is required'
       if (!startup.descriptionShort.trim())
         errors.descriptionShort = 'One-liner is required'
       if (!startup.descriptionMedium.trim())
@@ -510,20 +516,17 @@ export function OnboardingDialog({
       startup.googleDriveUrl.trim() &&
       !isValidUrl(startup.googleDriveUrl)
     ) {
-      errors.googleDriveUrl = 'Invalid Google Drive URL'
+      errors.googleDriveUrl = 'Invalid Cloud storage URL'
     }
 
     return errors
   }
 
-  const handleFileUpload = async (
-    type: 'logo' | 'pitchDeck' | 'introVideo',
-    file: File,
-  ) => {
+  const handleFileUpload = async (type: 'logo' | 'pitchDeck', file: File) => {
     // File size validation
-    const maxSize = type === 'introVideo' ? 100 * 1024 * 1024 : 5 * 1024 * 1024 // 100MB for video, 5MB for others
+    const maxSize = 5 * 1024 * 1024 // 5MB for others
     if (file.size > maxSize) {
-      const maxSizeText = type === 'introVideo' ? '100MB' : '5MB'
+      const maxSizeText = '5MB'
       alert(`File size must be less than ${maxSizeText}`)
       return
     }
@@ -543,12 +546,6 @@ export function OnboardingDialog({
         alert('Pitch deck must be PDF, PPT, or PPTX format')
         return
       }
-    } else if (type === 'introVideo') {
-      const fileExtension = file.name.split('.').pop()?.toLowerCase()
-      if (!['mp4', 'mov', 'avi', 'webm'].includes(fileExtension || '')) {
-        alert('Intro video must be MP4, MOV, AVI, or WebM format')
-        return
-      }
     }
 
     // Set upload status and progress based on type
@@ -558,60 +555,42 @@ export function OnboardingDialog({
     } else if (type === 'pitchDeck') {
       setPitchDeckUploadStatus('uploading')
       setPitchDeckUploadProgress(0)
-    } else if (type === 'introVideo') {
-      setVideoUploadStatus('uploading')
-      setVideoUploadProgress(0)
     }
 
     // Simulate progress
-    const progressInterval = setInterval(
-      () => {
-        if (type === 'logo') {
-          setLogoUploadProgress((oldProgress) => {
-            if (oldProgress >= 100) {
-              clearInterval(progressInterval)
-              setLogoUploadStatus('completed')
-              return 100
-            }
-            const increment = Math.random() * 15
-            return Math.min(oldProgress + increment, 95)
-          })
-        } else if (type === 'pitchDeck') {
-          setPitchDeckUploadProgress((oldProgress) => {
-            if (oldProgress >= 100) {
-              clearInterval(progressInterval)
-              setPitchDeckUploadStatus('completed')
-              return 100
-            }
-            const increment = Math.random() * 15
-            return Math.min(oldProgress + increment, 95)
-          })
-        } else if (type === 'introVideo') {
-          setVideoUploadProgress((oldProgress) => {
-            if (oldProgress >= 100) {
-              clearInterval(progressInterval)
-              setVideoUploadStatus('completed')
-              return 100
-            }
-            const increment = Math.random() * 10 // Slower for video
-            return Math.min(oldProgress + increment, 90)
-          })
-        }
-      },
-      type === 'introVideo' ? 200 : 100,
-    ) // Slower progress for video
+    const progressInterval = setInterval(() => {
+      if (type === 'logo') {
+        setLogoUploadProgress((oldProgress) => {
+          if (oldProgress >= 100) {
+            clearInterval(progressInterval)
+            setLogoUploadStatus('completed')
+            return 100
+          }
+          const increment = Math.random() * 15
+          return Math.min(oldProgress + increment, 95)
+        })
+      } else if (type === 'pitchDeck') {
+        setPitchDeckUploadProgress((oldProgress) => {
+          if (oldProgress >= 100) {
+            clearInterval(progressInterval)
+            setPitchDeckUploadStatus('completed')
+            return 100
+          }
+          const increment = Math.random() * 15
+          return Math.min(oldProgress + increment, 95)
+        })
+      }
+    }, 100)
 
     // Update state with file
     if (type === 'logo') {
       setStartup({ ...startup, logoFile: file })
     } else if (type === 'pitchDeck') {
       setStartup({ ...startup, pitchDeckFile: file })
-    } else if (type === 'introVideo') {
-      setStartup({ ...startup, introVideoFile: file })
     }
 
     // Complete the progress
-    const completionTime = type === 'introVideo' ? 1500 : 800
+    const completionTime = 800
     setTimeout(() => {
       if (type === 'logo') {
         setLogoUploadProgress(100)
@@ -619,9 +598,6 @@ export function OnboardingDialog({
       } else if (type === 'pitchDeck') {
         setPitchDeckUploadProgress(100)
         setPitchDeckUploadStatus('completed')
-      } else if (type === 'introVideo') {
-        setVideoUploadProgress(100)
-        setVideoUploadStatus('completed')
       }
       clearInterval(progressInterval)
     }, completionTime)
@@ -642,15 +618,6 @@ export function OnboardingDialog({
     setPitchDeckUploadProgress(0)
     if (pitchDeckInputRef.current) {
       pitchDeckInputRef.current.value = ''
-    }
-  }
-
-  const handleVideoRemove = () => {
-    setStartup({ ...startup, introVideoFile: null })
-    setVideoUploadStatus('idle')
-    setVideoUploadProgress(0)
-    if (videoInputRef.current) {
-      videoInputRef.current.value = ''
     }
   }
 
@@ -686,7 +653,6 @@ export function OnboardingDialog({
       // Upload files if they exist
       let logoUrl = ''
       let pitchDeckUrl = ''
-      let introVideoUrl = ''
 
       if (startup.logoFile) {
         logoUrl = await uploadFile(
@@ -701,14 +667,6 @@ export function OnboardingDialog({
           startup.pitchDeckFile,
           'decks',
           `${userId}/pitch-deck-${Date.now()}`,
-        )
-      }
-
-      if (startup.introVideoFile) {
-        introVideoUrl = await uploadFile(
-          startup.introVideoFile,
-          'videos',
-          `${userId}/intro-video-${Date.now()}`,
         )
       }
 
@@ -743,7 +701,7 @@ export function OnboardingDialog({
         competitors: startup.competitors,
         logo_url: logoUrl,
         pitch_deck_url: pitchDeckUrl,
-        intro_video_url: introVideoUrl,
+        intro_video_url: '',
         google_drive_url: startup.googleDriveUrl,
         founders: founders.filter(
           (f) => f.firstName.trim() && f.lastName.trim(),
@@ -913,16 +871,6 @@ export function OnboardingDialog({
     inputRef: pitchDeckInputRef,
   }
 
-  const videoUploadProps: FileUploadProps = {
-    type: 'introVideo',
-    file: startup.introVideoFile,
-    uploadStatus: videoUploadStatus,
-    uploadProgress: videoUploadProgress,
-    onUpload: handleFileUpload,
-    onRemove: handleVideoRemove,
-    inputRef: videoInputRef,
-  }
-
   const getStepTitle = () => {
     switch (currentStep) {
       case 0:
@@ -1056,7 +1004,6 @@ export function OnboardingDialog({
                     setStartup={setStartup}
                     logoUploadProps={logoUploadProps}
                     pitchDeckUploadProps={pitchDeckUploadProps}
-                    videoUploadProps={videoUploadProps}
                     fieldErrors={getStartupFieldErrors()}
                   />
                 </motion.div>
@@ -1070,7 +1017,11 @@ export function OnboardingDialog({
                   exit={{ opacity: 0, y: -30 }}
                   transition={{ duration: 0.4, ease: 'easeInOut' }}
                 >
-                  <FundraisingStep startup={startup} setStartup={setStartup} />
+                  <FundraisingStep
+                    startup={startup}
+                    setStartup={setStartup}
+                    fieldErrors={getStartupFieldErrors()}
+                  />
                 </motion.div>
               )}
 
