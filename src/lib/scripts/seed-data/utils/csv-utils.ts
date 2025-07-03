@@ -108,7 +108,6 @@ export interface TargetRecord {
         | 'financial_projections'
         | 'business_plan'
         | 'traction_data'
-        | 'legal_documents'
       )[]
     | null
   notes: string | null
@@ -172,7 +171,6 @@ export interface AngelRecord {
         | 'financial_projections'
         | 'business_plan'
         | 'traction_data'
-        | 'legal_documents'
       )[]
     | null
   notable_investments: string[] | null
@@ -230,7 +228,6 @@ export interface AcceleratorRecord {
         | 'financial_projections'
         | 'business_plan'
         | 'traction_data'
-        | 'legal_documents'
       )[]
     | null
   program_fee: number | null

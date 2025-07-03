@@ -803,6 +803,7 @@ export type Database = {
       startups: {
         Row: {
           arr: number | null
+          business_plan_url: string | null
           competitors: string | null
           created_at: string | null
           current_runway: number | null
@@ -811,9 +812,11 @@ export type Database = {
           description_medium: string | null
           description_short: string | null
           employee_count: number | null
+          financial_projections_url: string | null
           founded_year: number | null
           funding_amount_sought: number | null
           funding_round: Database['public']['Enums']['investment_stage'] | null
+          google_drive_url: string | null
           id: string
           incorporation_city: string | null
           incorporation_country: string | null
@@ -845,6 +848,7 @@ export type Database = {
         }
         Insert: {
           arr?: number | null
+          business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
           current_runway?: number | null
@@ -853,9 +857,11 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
+          financial_projections_url?: string | null
           founded_year?: number | null
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
+          google_drive_url?: string | null
           id?: string
           incorporation_city?: string | null
           incorporation_country?: string | null
@@ -889,6 +895,7 @@ export type Database = {
         }
         Update: {
           arr?: number | null
+          business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
           current_runway?: number | null
@@ -897,9 +904,11 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
+          financial_projections_url?: string | null
           founded_year?: number | null
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
+          google_drive_url?: string | null
           id?: string
           incorporation_city?: string | null
           incorporation_country?: string | null
@@ -938,6 +947,7 @@ export type Database = {
           archived_at: string
           archived_reason: string
           arr: number | null
+          business_plan_url: string | null
           competitors: string | null
           created_at: string | null
           current_runway: number | null
@@ -946,9 +956,11 @@ export type Database = {
           description_medium: string | null
           description_short: string | null
           employee_count: number | null
+          financial_projections_url: string | null
           founded_year: number | null
           funding_amount_sought: number | null
           funding_round: Database['public']['Enums']['investment_stage'] | null
+          google_drive_url: string | null
           id: string
           incorporation_city: string | null
           incorporation_country: string | null
@@ -984,6 +996,7 @@ export type Database = {
           archived_at?: string
           archived_reason?: string
           arr?: number | null
+          business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
           current_runway?: number | null
@@ -992,9 +1005,11 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
+          financial_projections_url?: string | null
           founded_year?: number | null
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
+          google_drive_url?: string | null
           id?: string
           incorporation_city?: string | null
           incorporation_country?: string | null
@@ -1032,6 +1047,7 @@ export type Database = {
           archived_at?: string
           archived_reason?: string
           arr?: number | null
+          business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
           current_runway?: number | null
@@ -1040,9 +1056,11 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
+          financial_projections_url?: string | null
           founded_year?: number | null
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
+          google_drive_url?: string | null
           id?: string
           incorporation_city?: string | null
           incorporation_country?: string | null
@@ -1371,10 +1389,6 @@ export type Database = {
         }
         Returns: string
       }
-      get_all_targets: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
       get_archived_user_data: {
         Args: { p_original_user_id: string }
         Returns: Json
@@ -1406,6 +1420,30 @@ export type Database = {
       }
       get_subscription_data: {
         Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_targets_paginated: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_order_by?: string
+          p_order_direction?: string
+        }
+        Returns: Json
+      }
+      get_targets_simple: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_sort_by?: string
+          p_sort_direction?: string
+          p_submission_types?: string[]
+          p_stage_focus?: string[]
+          p_industry_focus?: string[]
+          p_region_focus?: string[]
+          p_form_complexity?: string[]
+          p_required_documents?: string[]
+        }
         Returns: Json
       }
       get_user_agent_settings: {
@@ -1489,23 +1527,14 @@ export type Database = {
         Returns: Json
       }
       update_subscription_status: {
-        Args:
-          | {
-              p_stripe_customer_id: string
-              p_subscription_id: string
-              p_status: Database['public']['Enums']['subscription_status']
-              p_current_period_end?: string
-              p_is_subscribed?: boolean
-              p_plan_name?: string
-            }
-          | {
-              p_stripe_customer_id: string
-              p_subscription_id: string
-              p_status: string
-              p_current_period_end?: string
-              p_is_subscribed?: boolean
-              p_plan_name?: string
-            }
+        Args: {
+          p_stripe_customer_id: string
+          p_subscription_id: string
+          p_status: Database['public']['Enums']['subscription_status']
+          p_current_period_end?: string
+          p_is_subscribed?: boolean
+          p_plan_name?: string
+        }
         Returns: Json
       }
       update_user_agent_settings: {
@@ -1667,7 +1696,6 @@ export type Database = {
         | 'financial_projections'
         | 'business_plan'
         | 'traction_data'
-        | 'legal_documents'
       response_time: '1-3 days' | '1 week' | '2 weeks' | '1 month' | '2+ months'
       revenue_model_type:
         | 'Subscription'
@@ -1692,6 +1720,7 @@ export type Database = {
         | 'past_due'
         | 'canceled'
         | 'unpaid'
+        | 'paused'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1962,7 +1991,6 @@ export const Constants = {
         'financial_projections',
         'business_plan',
         'traction_data',
-        'legal_documents',
       ],
       response_time: ['1-3 days', '1 week', '2 weeks', '1 month', '2+ months'],
       revenue_model_type: [
@@ -1989,6 +2017,7 @@ export const Constants = {
         'past_due',
         'canceled',
         'unpaid',
+        'paused',
       ],
     },
   },

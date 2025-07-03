@@ -8,8 +8,7 @@ CREATE TYPE required_document_type AS ENUM (
     'video', 
     'financial_projections', 
     'business_plan', 
-    'traction_data', 
-    'legal_documents'
+    'traction_data'
 );
 CREATE TYPE region_type AS ENUM (
     'Global',
@@ -304,6 +303,9 @@ CREATE TABLE startups (
     logo_url TEXT,
     pitch_deck_url TEXT,
     intro_video_url TEXT,
+    financial_projections_url TEXT,
+    business_plan_url TEXT,
+    google_drive_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     -- Constraints
@@ -625,6 +627,9 @@ CREATE TABLE startups_archive (
     logo_url TEXT,
     pitch_deck_url TEXT,
     intro_video_url TEXT,
+    financial_projections_url TEXT,
+    business_plan_url TEXT,
+    google_drive_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     -- Archive-specific fields

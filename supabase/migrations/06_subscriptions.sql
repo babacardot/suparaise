@@ -359,7 +359,7 @@ $$;
 
 -- Grant execute permissions
 GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT, TEXT, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, TEXT, TIMESTAMPTZ, BOOLEAN, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, subscription_status, TIMESTAMPTZ, BOOLEAN, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION cancel_subscription(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION handle_payment_success(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION handle_payment_failure(TEXT) TO authenticated;
@@ -369,7 +369,7 @@ GRANT EXECUTE ON FUNCTION increment_submission_count(UUID) TO authenticated;
 
 -- Also grant to service role for webhook operations
 GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT, TEXT, TEXT) TO service_role;
-GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, TEXT, TIMESTAMPTZ, BOOLEAN, TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, subscription_status, TIMESTAMPTZ, BOOLEAN, TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION cancel_subscription(TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION handle_payment_success(TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION handle_payment_failure(TEXT) TO service_role;

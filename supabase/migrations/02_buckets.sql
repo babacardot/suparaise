@@ -27,6 +27,16 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- 6. Create the 'financial_projections' bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('financial_projections', 'financial_projections', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 7. Create the 'business_plans' bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('business_plans', 'business_plans', true)
+ON CONFLICT (id) DO NOTHING;
+
 -- --------------------------------------------------
 -- Storage Security Policies
 -- --------------------------------------------------
@@ -130,3 +140,38 @@ USING (
   bucket_id = 'avatars' AND
   auth.uid() = (storage.foldername(name))[1]::uuid
 ); 
+
+-- Financial Projections: Same policies as logos/decks
+CREATE POLICY "Allow public read on financial_projections"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'financial_projections');
+
+CREATE POLICY "Allow authenticated users to manage their financial_projections"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'financial_projections' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Allow authenticated users to update their own financial_projections"
+ON storage.objects FOR UPDATE
+USING (bucket_id = 'financial_projections' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Allow authenticated users to delete their own financial_projections"
+ON storage.objects FOR DELETE
+USING (bucket_id = 'financial_projections' AND auth.role() = 'authenticated');
+
+
+-- Business Plans: Same policies as logos/decks
+CREATE POLICY "Allow public read on business_plans"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'business_plans');
+
+CREATE POLICY "Allow authenticated users to manage their business_plans"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'business_plans' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Allow authenticated users to update their own business_plans"
+ON storage.objects FOR UPDATE
+USING (bucket_id = 'business_plans' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Allow authenticated users to delete their own business_plans"
+ON storage.objects FOR DELETE
+USING (bucket_id = 'business_plans' AND auth.role() = 'authenticated'); 

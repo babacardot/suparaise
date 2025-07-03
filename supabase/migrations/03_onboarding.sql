@@ -20,7 +20,7 @@ BEGIN
         traction_summary, market_summary, mrr, arr, employee_count,
         founded_year, revenue_model, current_runway, 
         key_customers, competitors,
-        logo_url, pitch_deck_url, intro_video_url, onboarded
+        logo_url, pitch_deck_url, intro_video_url, google_drive_url, onboarded
     )
     VALUES (
         (p_data->>'user_id')::UUID,
@@ -53,6 +53,7 @@ BEGIN
         p_data->>'logo_url',
         p_data->>'pitch_deck_url',
         p_data->>'intro_video_url',
+        p_data->>'google_drive_url',
         COALESCE((p_data->>'onboarded')::BOOLEAN, TRUE) -- Allow setting onboarded status, default to TRUE
     )
     RETURNING id INTO new_startup_id;

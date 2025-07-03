@@ -1252,6 +1252,32 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           )}
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="google-drive-url">Google Drive URL</Label>
+          <Input
+            id="google-drive-url"
+            value={startup.googleDriveUrl}
+            onChange={(e) =>
+              setStartup({ ...startup, googleDriveUrl: e.target.value })
+            }
+            placeholder="https://docs.google.com/..."
+            autoComplete="url"
+            className={
+              fieldErrors.googleDriveUrl
+                ? 'border-red-500 focus:border-red-500'
+                : ''
+            }
+          />
+          <p className="text-xs text-muted-foreground">
+            Link to a folder with your pitch deck, financials, etc.
+          </p>
+          {fieldErrors.googleDriveUrl && (
+            <p className="text-sm text-red-600 mt-1">
+              {fieldErrors.googleDriveUrl}
+            </p>
+          )}
+        </div>
+
         <div className="space-y-6">
           <FileUploadComponent
             {...logoUploadProps}
@@ -1756,6 +1782,14 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 <div className="flex items-center gap-1">
                   <span className="text-sm">Product video</span>
                   {startup.introVideoFile ? (
+                    <Check className="h-3 w-3 pt-1 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 pt-1 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm">Google Drive</span>
+                  {startup.googleDriveUrl ? (
                     <Check className="h-3 w-3 pt-1 text-green-500" />
                   ) : (
                     <X className="h-3 w-3 pt-1 text-muted-foreground" />

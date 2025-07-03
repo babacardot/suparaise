@@ -25,57 +25,35 @@ type Target = {
 interface FundsTableWrapperProps {
   targets: Target[]
   startupId: string
+  paginationData: {
+    totalCount: number
+    hasMore: boolean
+    currentPage: number
+    limit: number
+  } | null
+  offset: number
+  isLoading: boolean
+  onPreviousPage: () => void
+  onNextPage: () => void
+  filters: FundsFilters
+  onFiltersChange: (filters: FundsFilters) => void
+  sortConfig: { key: string | null; direction: 'asc' | 'desc' }
+  onSortChange: (key: string) => void
 }
-
-const FILTERS_STORAGE_KEY = 'funds-table-filters'
 
 const FundsTableWrapper = React.memo(function FundsTableWrapper({
   targets,
   startupId,
+  paginationData,
+  offset,
+  isLoading,
+  onPreviousPage,
+  onNextPage,
+  filters,
+  onFiltersChange,
+  sortConfig,
+  onSortChange,
 }: FundsTableWrapperProps) {
-  // Initialize filters from localStorage if available
-  const [filters, setFilters] = React.useState<FundsFilters>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedFilters = localStorage.getItem(FILTERS_STORAGE_KEY)
-        if (savedFilters) {
-          const parsed = JSON.parse(savedFilters)
-          // Ensure backward compatibility - add requiredDocuments if missing
-          return {
-            submissionTypes: parsed.submissionTypes || [],
-            stageFocus: parsed.stageFocus || [],
-            industryFocus: parsed.industryFocus || [],
-            regionFocus: parsed.regionFocus || [],
-            formComplexity: parsed.formComplexity || [],
-            requiredDocuments: parsed.requiredDocuments || [],
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to load saved filters:', error)
-      }
-    }
-    return {
-      submissionTypes: [],
-      stageFocus: [],
-      industryFocus: [],
-      regionFocus: [],
-      formComplexity: [],
-      requiredDocuments: [],
-    }
-  })
-
-  // Persist filters to localStorage whenever they change
-  const handleFiltersChange = React.useCallback((newFilters: FundsFilters) => {
-    setFilters(newFilters)
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(newFilters))
-      } catch (error) {
-        console.warn('Failed to save filters:', error)
-      }
-    }
-  }, [])
-
   return (
     <div
       className="h-full"
@@ -89,8 +67,15 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
       <FundsTable
         targets={targets}
         filters={filters}
-        onFiltersChange={handleFiltersChange}
+        onFiltersChange={onFiltersChange}
         startupId={startupId}
+        paginationData={paginationData}
+        offset={offset}
+        isLoading={isLoading}
+        onPreviousPage={onPreviousPage}
+        onNextPage={onNextPage}
+        sortConfig={sortConfig}
+        onSortChange={onSortChange}
       />
     </div>
   )

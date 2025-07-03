@@ -15,6 +15,12 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+} from 'lucide-react'
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -51,6 +57,18 @@ interface FundsTableProps {
   filters: FundsFiltersType
   onFiltersChange: (filters: FundsFiltersType) => void
   startupId: string
+  paginationData: {
+    totalCount: number
+    hasMore: boolean
+    currentPage: number
+    limit: number
+  } | null
+  offset: number
+  isLoading: boolean
+  onPreviousPage: () => void
+  onNextPage: () => void
+  sortConfig: { key: string | null; direction: 'asc' | 'desc' }
+  onSortChange: (key: string) => void
 }
 
 interface ColumnVisibility {
@@ -62,7 +80,6 @@ interface ColumnVisibility {
   complexity: boolean
 }
 
-const SORT_STORAGE_KEY = 'funds-table-sort'
 const COLUMN_VISIBILITY_STORAGE_KEY = 'funds-table-columns'
 
 const FundsTable = React.memo(function FundsTable({
@@ -70,6 +87,13 @@ const FundsTable = React.memo(function FundsTable({
   filters,
   onFiltersChange,
   startupId,
+  paginationData,
+  offset,
+  isLoading,
+  onPreviousPage,
+  onNextPage,
+  sortConfig,
+  onSortChange,
 }: FundsTableProps) {
   const { user } = useUser()
   const { toast } = useToast()
@@ -86,24 +110,6 @@ const FundsTable = React.memo(function FundsTable({
     availableQueueSlots: number
     canSubmitMore: boolean
   } | null>(null)
-
-  // Initialize sort config from localStorage if available
-  const [sortConfig, setSortConfig] = React.useState<{
-    key: string | null
-    direction: 'asc' | 'desc'
-  }>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedSort = localStorage.getItem(SORT_STORAGE_KEY)
-        if (savedSort) {
-          return JSON.parse(savedSort)
-        }
-      } catch (error) {
-        console.warn('Failed to load saved sort:', error)
-      }
-    }
-    return { key: null, direction: 'asc' }
-  })
 
   // Initialize column visibility from localStorage, with complexity hidden by default
   const [columnVisibility, setColumnVisibility] =
@@ -155,139 +161,15 @@ const FundsTable = React.memo(function FundsTable({
   )
 
   // Filter and sort targets based on active filters and sort configuration
-  const filteredAndSortedTargets = React.useMemo(() => {
-    const result = targets.filter((target) => {
-      // Filter by submission type
-      if (
-        filters.submissionTypes.length > 0 &&
-        !filters.submissionTypes.includes(target.submission_type)
-      ) {
-        return false
-      }
+  // Client-side filtering and sorting is now disabled. Data is pre-sorted and filtered by the server.
+  const filteredAndSortedTargets = targets
 
-      // Filter by stage focus
-      if (filters.stageFocus.length > 0) {
-        const hasMatchingStage = target.stage_focus?.some((stage) =>
-          filters.stageFocus.includes(stage),
-        )
-        if (!hasMatchingStage) return false
-      }
-
-      // Filter by industry focus
-      if (filters.industryFocus.length > 0) {
-        const hasMatchingIndustry = target.industry_focus?.some((industry) =>
-          filters.industryFocus.includes(industry),
-        )
-        if (!hasMatchingIndustry) return false
-      }
-
-      // Filter by region focus
-      if (filters.regionFocus.length > 0) {
-        const hasMatchingRegion = target.region_focus?.some((region) =>
-          filters.regionFocus.includes(region),
-        )
-        if (!hasMatchingRegion) return false
-      }
-
-      // Filter by form complexity
-      if (
-        filters.formComplexity.length > 0 &&
-        target.form_complexity &&
-        !filters.formComplexity.includes(target.form_complexity)
-      ) {
-        return false
-      }
-
-      // Filter by required documents
-      if (filters.requiredDocuments && filters.requiredDocuments.length > 0) {
-        const hasMatchingDocument = target.required_documents?.some((doc) =>
-          filters.requiredDocuments.includes(doc),
-        )
-        if (!hasMatchingDocument) return false
-      }
-
-      return true
-    })
-
-    // Apply sorting
-    if (sortConfig.key) {
-      result.sort((a, b) => {
-        let aValue: string | number
-        let bValue: string | number
-
-        switch (sortConfig.key) {
-          case 'name':
-            aValue = a.name.toLowerCase()
-            bValue = b.name.toLowerCase()
-            break
-          case 'type':
-            aValue = a.submission_type
-            bValue = b.submission_type
-            break
-          case 'focus':
-            aValue = a.stage_focus?.join(', ') || ''
-            bValue = b.stage_focus?.join(', ') || ''
-            break
-          case 'industry':
-            aValue = a.industry_focus?.join(', ') || ''
-            bValue = b.industry_focus?.join(', ') || ''
-            break
-          case 'complexity':
-            const complexityOrder = { simple: 1, standard: 2, comprehensive: 3 }
-            aValue =
-              complexityOrder[
-                a.form_complexity as keyof typeof complexityOrder
-              ] || 0
-            bValue =
-              complexityOrder[
-                b.form_complexity as keyof typeof complexityOrder
-              ] || 0
-            break
-          case 'requirements':
-            aValue = a.required_documents?.length || 0
-            bValue = b.required_documents?.length || 0
-            break
-          case 'region':
-            aValue = a.region_focus?.join(', ') || ''
-            bValue = b.region_focus?.join(', ') || ''
-            break
-          default:
-            return 0
-        }
-
-        if (aValue < bValue) {
-          return sortConfig.direction === 'asc' ? -1 : 1
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === 'asc' ? 1 : -1
-        }
-        return 0
-      })
-    }
-
-    return result
-  }, [targets, filters, sortConfig])
-
-  const handleSort = React.useCallback((key: string) => {
-    setSortConfig((prevConfig) => {
-      const config = {
-        key,
-        direction: (prevConfig.key === key && prevConfig.direction === 'asc'
-          ? 'desc'
-          : 'asc') as 'asc' | 'desc',
-      }
-
-      // Persist sort config to localStorage
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify(config))
-        } catch (error) {
-          console.warn('Failed to save sort config:', error)
-        }
-      }
-      return config
-    })
-  }, [])
+  const handleSort = React.useCallback(
+    (key: string) => {
+      onSortChange(key)
+    },
+    [onSortChange],
+  )
 
   // Filter targets based on active filters (keeping for backward compatibility)
   const filteredTargets = filteredAndSortedTargets
@@ -501,13 +383,13 @@ const FundsTable = React.memo(function FundsTable({
             'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800',
           customColor: [0.543, 0.361, 0.839] as [number, number, number], // violet-600
         }
-      case 'team_bios':
+      case 'business_plan':
         return {
-          label: 'Team',
-          animation: animations.group,
+          label: 'Business Plan',
+          animation: animations.work,
           color:
-            'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800',
-          customColor: [0.373, 0.361, 0.804] as [number, number, number], // indigo-600
+            'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800',
+          customColor: [0.08, 0.55, 0.82] as [number, number, number], // sky-600
         }
       default:
         return {
@@ -699,9 +581,9 @@ const FundsTable = React.memo(function FundsTable({
               </div>
             </div>
           ) : (
-            <div className="h-full rounded-sm border overflow-hidden">
+            <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[76vh]">
               <div
-                className="h-full overflow-auto hide-scrollbar max-h-[88vh]"
+                className="flex-1 overflow-auto hide-scrollbar"
                 data-scroll-preserve="funds-table-scroll"
               >
                 <Table>
@@ -713,6 +595,15 @@ const FundsTable = React.memo(function FundsTable({
                           className="flex items-center hover:text-foreground transition-colors font-medium"
                         >
                           Name
+                          {sortConfig.key === 'name' && (
+                            <span className="ml-1">
+                              {sortConfig.direction === 'asc' ? (
+                                <ChevronUpIcon className="h-4 w-4" />
+                              ) : (
+                                <ChevronDownIcon className="h-4 w-4" />
+                              )}
+                            </span>
+                          )}
                         </button>
                       </TableHead>
                       {columnVisibility.region && (
@@ -722,6 +613,15 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Region
+                            {sortConfig.key === 'region' && (
+                              <span className="ml-1">
+                                {sortConfig.direction === 'asc' ? (
+                                  <ChevronUpIcon className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                )}
+                              </span>
+                            )}
                           </button>
                         </TableHead>
                       )}
@@ -732,6 +632,15 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Focus
+                            {sortConfig.key === 'focus' && (
+                              <span className="ml-1">
+                                {sortConfig.direction === 'asc' ? (
+                                  <ChevronUpIcon className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                )}
+                              </span>
+                            )}
                           </button>
                         </TableHead>
                       )}
@@ -742,6 +651,15 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Industry
+                            {sortConfig.key === 'industry' && (
+                              <span className="ml-1">
+                                {sortConfig.direction === 'asc' ? (
+                                  <ChevronUpIcon className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                )}
+                              </span>
+                            )}
                           </button>
                         </TableHead>
                       )}
@@ -752,6 +670,15 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Type
+                            {sortConfig.key === 'type' && (
+                              <span className="ml-1">
+                                {sortConfig.direction === 'asc' ? (
+                                  <ChevronUpIcon className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                )}
+                              </span>
+                            )}
                           </button>
                         </TableHead>
                       )}
@@ -762,6 +689,15 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Requirements
+                            {sortConfig.key === 'requirements' && (
+                              <span className="ml-1">
+                                {sortConfig.direction === 'asc' ? (
+                                  <ChevronUpIcon className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                )}
+                              </span>
+                            )}
                           </button>
                         </TableHead>
                       )}
@@ -772,6 +708,15 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Complexity
+                            {sortConfig.key === 'complexity' && (
+                              <span className="ml-1">
+                                {sortConfig.direction === 'asc' ? (
+                                  <ChevronUpIcon className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                )}
+                              </span>
+                            )}
                           </button>
                         </TableHead>
                       )}
@@ -1148,6 +1093,48 @@ const FundsTable = React.memo(function FundsTable({
                   </TableBody>
                 </Table>
               </div>
+              {/* Pagination Controls */}
+              {paginationData &&
+                paginationData.totalCount > paginationData.limit && (
+                  <div className="flex items-center justify-between border-t border-border px-4 py-4 bg-background">
+                    <div className="flex-1 text-sm text-muted-foreground">
+                      <span className="hidden md:inline">
+                        Showing {offset + 1} to{' '}
+                        {Math.min(
+                          offset + paginationData.limit,
+                          paginationData.totalCount,
+                        )}{' '}
+                        of {paginationData.totalCount} entries
+                      </span>
+                      <span className="md:hidden">
+                        Page {paginationData.currentPage} of{' '}
+                        {Math.ceil(
+                          paginationData.totalCount / paginationData.limit,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        className="h-8 w-8 p-0 rounded-sm"
+                        onClick={onPreviousPage}
+                        disabled={offset === 0 || isLoading}
+                      >
+                        <span className="sr-only">Previous page</span>
+                        <ChevronLeftIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="h-8 w-8 p-0 rounded-sm"
+                        onClick={onNextPage}
+                        disabled={!paginationData.hasMore || isLoading}
+                      >
+                        <span className="sr-only">Next page</span>
+                        <ChevronRightIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
             </div>
           )}
         </div>

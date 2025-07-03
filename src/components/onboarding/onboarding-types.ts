@@ -67,6 +67,7 @@ export interface StartupData {
   keyCustomers: string
   competitors: string
   competitorsList: string[]
+  googleDriveUrl: string
   logoFile: File | null
   pitchDeckFile: File | null
   introVideoFile: File | null
@@ -113,6 +114,7 @@ export interface StartupFieldErrors {
   currentRunway?: string
   keyCustomers?: string
   competitors?: string
+  googleDriveUrl?: string
 }
 
 export interface FileUploadProps {

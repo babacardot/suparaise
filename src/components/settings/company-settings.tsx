@@ -153,6 +153,9 @@ const formatFieldName = (fieldName: string): string => {
     marketSummary: 'Market',
     pitchDeckUrl: 'Pitch deck',
     introVideoUrl: 'Demo',
+    financialProjectionsUrl: 'Financial projections',
+    businessPlanUrl: 'Business plan',
+    googleDriveUrl: 'Google Drive',
   }
   return fieldLabels[fieldName] || fieldName
 }
@@ -480,13 +483,21 @@ export default function CompanySettings() {
     marketSummary: '',
     pitchDeckUrl: null as string | null,
     introVideoUrl: null as string | null,
+    financialProjectionsUrl: null as string | null,
+    businessPlanUrl: null as string | null,
+    googleDriveUrl: '',
   })
 
   // File upload states
   const [pitchDeckUploading, setPitchDeckUploading] = useState(false)
   const [videoUploading, setVideoUploading] = useState(false)
+  const [financialProjectionsUploading, setFinancialProjectionsUploading] =
+    useState(false)
+  const [businessPlanUploading, setBusinessPlanUploading] = useState(false)
   const pitchDeckInputRef = useRef<HTMLInputElement>(null)
   const videoInputRef = useRef<HTMLInputElement>(null)
+  const financialProjectionsInputRef = useRef<HTMLInputElement>(null)
+  const businessPlanInputRef = useRef<HTMLInputElement>(null)
 
   // Fetch startup data when component mounts or startup changes
   // Optimized to only depend on essential values that actually change
@@ -541,6 +552,9 @@ export default function CompanySettings() {
             marketSummary: data.marketSummary || '',
             pitchDeckUrl: data.pitchDeckUrl || null,
             introVideoUrl: data.introVideoUrl || null,
+            financialProjectionsUrl: data.financialProjectionsUrl || null,
+            businessPlanUrl: data.businessPlanUrl || null,
+            googleDriveUrl: data.googleDriveUrl || '',
           })
         }
       } catch (error) {
@@ -630,8 +644,8 @@ export default function CompanySettings() {
       return
     }
 
-    // Validate URLs for website field
-    if (field === 'website') {
+    // Validate URLs for website and google drive fields
+    if (field === 'website' || field === 'googleDriveUrl') {
       const fieldValue = formData[field as keyof typeof formData] as string
       if (!validateUrl(fieldValue, field)) {
         return // Don't save if validation fails
@@ -1082,6 +1096,172 @@ export default function CompanySettings() {
     }
   }
 
+  const handleFinancialProjectionsUpload = async (file: File) => {
+    if (!currentStartupId) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'No startup selected.',
+      })
+      return
+    }
+
+    // File size validation (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: 'destructive',
+        title: 'File too large',
+        description: 'Financial projections must be less than 5MB.',
+      })
+      return
+    }
+
+    // File type validation
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid file type',
+        description: 'File must be PDF, XLS, or XLSX format.',
+      })
+      return
+    }
+
+    setFinancialProjectionsUploading(true)
+
+    try {
+      const fileName = `${user.id}/financial-projections-${Date.now()}-${file.name}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('financial_projections')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true,
+        })
+
+      if (uploadError) throw uploadError
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('financial_projections').getPublicUrl(fileName)
+
+      const { data, error } = await supabase.rpc('update_user_startup_data', {
+        p_user_id: user.id,
+        p_startup_id: currentStartupId,
+        p_data: { financialProjectionsUrl: publicUrl },
+      })
+
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+
+      setFormData((prev) => ({ ...prev, financialProjectionsUrl: publicUrl }))
+
+      playCompletionSound()
+      toast({
+        title: 'Financial projections uploaded',
+        variant: 'success',
+        description:
+          'Your financial projections have been uploaded successfully.',
+      })
+    } catch (error) {
+      console.error('Error uploading financial projections:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description:
+          'Failed to upload financial projections. Please try again.',
+      })
+    } finally {
+      setFinancialProjectionsUploading(false)
+    }
+  }
+
+  const handleBusinessPlanUpload = async (file: File) => {
+    if (!currentStartupId) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'No startup selected.',
+      })
+      return
+    }
+
+    // File size validation (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: 'destructive',
+        title: 'File too large',
+        description: 'Business plan must be less than 5MB.',
+      })
+      return
+    }
+
+    // File type validation
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ]
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid file type',
+        description: 'Business plan must be PDF, DOC, or DOCX format.',
+      })
+      return
+    }
+
+    setBusinessPlanUploading(true)
+
+    try {
+      const fileName = `${user.id}/business-plan-${Date.now()}-${file.name}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('business_plans')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true,
+        })
+
+      if (uploadError) throw uploadError
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('business_plans').getPublicUrl(fileName)
+
+      const { data, error } = await supabase.rpc('update_user_startup_data', {
+        p_user_id: user.id,
+        p_startup_id: currentStartupId,
+        p_data: { businessPlanUrl: publicUrl },
+      })
+
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+
+      setFormData((prev) => ({ ...prev, businessPlanUrl: publicUrl }))
+
+      playCompletionSound()
+      toast({
+        title: 'Business plan uploaded',
+        variant: 'success',
+        description: 'Your business plan has been uploaded successfully.',
+      })
+    } catch (error) {
+      console.error('Error uploading business plan:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: 'Failed to upload business plan. Please try again.',
+      })
+    } finally {
+      setBusinessPlanUploading(false)
+    }
+  }
+
   const handlePitchDeckRemove = async () => {
     if (!currentStartupId) return
 
@@ -1138,6 +1318,67 @@ export default function CompanySettings() {
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to remove video. Please try again.',
+      })
+    }
+  }
+
+  const handleFinancialProjectionsRemove = async () => {
+    if (!currentStartupId) return
+
+    try {
+      const { error } = await supabase.rpc('update_user_startup_data', {
+        p_user_id: user.id,
+        p_startup_id: currentStartupId,
+        p_data: { financialProjectionsUrl: null },
+      })
+
+      if (error) throw error
+
+      setFormData((prev) => ({ ...prev, financialProjectionsUrl: null }))
+
+      playCompletionSound()
+      toast({
+        title: 'Financial projections removed',
+        variant: 'success',
+        description: 'Your financial projections have been removed.',
+      })
+    } catch (error) {
+      console.error('Error removing financial projections:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description:
+          'Failed to remove financial projections. Please try again.',
+      })
+    }
+  }
+
+  const handleBusinessPlanRemove = async () => {
+    if (!currentStartupId) return
+
+    try {
+      const { error } = await supabase.rpc('update_user_startup_data', {
+        p_user_id: user.id,
+        p_startup_id: currentStartupId,
+        p_data: { businessPlanUrl: null },
+      })
+
+      if (error) throw error
+
+      setFormData((prev) => ({ ...prev, businessPlanUrl: null }))
+
+      playCompletionSound()
+      toast({
+        title: 'Business plan removed',
+        variant: 'success',
+        description: 'Your business plan has been removed.',
+      })
+    } catch (error) {
+      console.error('Error removing business plan:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to remove business plan. Please try again.',
       })
     }
   }
@@ -2155,6 +2396,46 @@ export default function CompanySettings() {
             </div>
           </div>
 
+          {/* Google Drive Link */}
+          <div className="space-y-2">
+            <Label htmlFor="googleDriveUrl">Google Drive Folder</Label>
+            <div className="relative">
+              <Input
+                id="googleDriveUrl"
+                value={formData.googleDriveUrl}
+                onChange={(e) =>
+                  handleInputChange('googleDriveUrl', e.target.value)
+                }
+                className={cn(
+                  'rounded-sm pr-8',
+                  editingField !== 'googleDriveUrl' && 'dark:bg-muted',
+                )}
+                readOnly={editingField !== 'googleDriveUrl'}
+                placeholder="https://drive.google.com/drive/folders/..."
+              />
+              {editingField !== 'googleDriveUrl' ? (
+                <button
+                  onClick={() => handleFieldEdit('googleDriveUrl')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
+                >
+                  <PencilIcon className="h-3 w-3" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleFieldSave('googleDriveUrl')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
+                  disabled={isLoading}
+                >
+                  <CheckIcon className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Link to a shared folder with your pitch deck, financials, etc.
+              This can be used by the agent instead of individual file uploads.
+            </p>
+          </div>
+
           {/* File Uploads */}
           <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
@@ -2345,6 +2626,198 @@ export default function CompanySettings() {
                 )}
                 <p className="text-xs text-muted-foreground">
                   MP4, MOV, AVI, or WebM (max 100MB)
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Financial Projections Upload */}
+              <div className="space-y-2">
+                <Label>Financials</Label>
+                <input
+                  ref={financialProjectionsInputRef}
+                  type="file"
+                  accept=".pdf,.xls,.xlsx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const selectedFile = e.target.files?.[0]
+                    if (selectedFile)
+                      handleFinancialProjectionsUpload(selectedFile)
+                  }}
+                  disabled={financialProjectionsUploading}
+                />
+                {!formData.financialProjectionsUrl ? (
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                      <LottieIcon
+                        animationData={animations.fileplus}
+                        size={32}
+                        loop={false}
+                        autoplay={false}
+                      />
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          financialProjectionsInputRef.current?.click()
+                        }}
+                        disabled={financialProjectionsUploading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      >
+                        {financialProjectionsUploading ? (
+                          <>
+                            <Spinner className="h-3 w-3 mr-2" />
+                          </>
+                        ) : (
+                          'Upload'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-sm flex items-center justify-center">
+                      <LottieIcon
+                        animationData={animations.fileplus}
+                        size={32}
+                        loop={false}
+                        autoplay={false}
+                      />
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          financialProjectionsInputRef.current?.click()
+                        }}
+                        disabled={financialProjectionsUploading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      >
+                        {financialProjectionsUploading ? (
+                          <>
+                            <Spinner className="h-3 w-3 mr-2" />
+                          </>
+                        ) : (
+                          'Update'
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          handleFinancialProjectionsRemove()
+                        }}
+                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  PDF, XLS, or XLSX (max 5MB)
+                </p>
+              </div>
+
+              {/* Business Plan Upload */}
+              <div className="space-y-2">
+                <Label>Business Plan</Label>
+                <input
+                  ref={businessPlanInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const selectedFile = e.target.files?.[0]
+                    if (selectedFile) handleBusinessPlanUpload(selectedFile)
+                  }}
+                  disabled={businessPlanUploading}
+                />
+                {!formData.businessPlanUrl ? (
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                      <LottieIcon
+                        animationData={animations.fileplus}
+                        size={32}
+                        loop={false}
+                        autoplay={false}
+                      />
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          businessPlanInputRef.current?.click()
+                        }}
+                        disabled={businessPlanUploading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      >
+                        {businessPlanUploading ? (
+                          <>
+                            <Spinner className="h-3 w-3 mr-2" />
+                          </>
+                        ) : (
+                          'Upload'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-sm flex items-center justify-center">
+                      <LottieIcon
+                        animationData={animations.fileplus}
+                        size={32}
+                        loop={false}
+                        autoplay={false}
+                      />
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          businessPlanInputRef.current?.click()
+                        }}
+                        disabled={businessPlanUploading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      >
+                        {businessPlanUploading ? (
+                          <>
+                            <Spinner className="h-3 w-3 mr-2" />
+                          </>
+                        ) : (
+                          'Update'
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playClickSound()
+                          handleBusinessPlanRemove()
+                        }}
+                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  PDF, DOC, or DOCX (max 5MB)
                 </p>
               </div>
             </div>

@@ -106,8 +106,8 @@ const REQUIRED_DOCUMENTS = [
   { value: 'pitch_deck', label: 'Deck' },
   { value: 'video', label: 'Video' },
   { value: 'financial_projections', label: 'Financials' },
+  { value: 'business_plan', label: 'Business Plan' },
   { value: 'traction_data', label: 'Traction' },
-  { value: 'team_bios', label: 'Team' },
 ]
 
 export default function FundsFilters({
@@ -295,8 +295,8 @@ export default function FundsFilters({
         return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
       if (value === 'traction_data')
         return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40'
-      if (value === 'team_bios')
-        return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+      if (value === 'business_plan')
+        return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
     }
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
   }

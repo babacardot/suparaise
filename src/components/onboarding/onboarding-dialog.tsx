@@ -168,6 +168,7 @@ export function OnboardingDialog({
     keyCustomers: '',
     competitors: '',
     competitorsList: [],
+    googleDriveUrl: '',
     logoFile: null,
     pitchDeckFile: null,
     introVideoFile: null,
@@ -397,6 +398,9 @@ export function OnboardingDialog({
         if (startup.website && !isValidUrl(startup.website)) {
           errors.push('Company website URL is invalid')
         }
+        if (startup.googleDriveUrl && !isValidUrl(startup.googleDriveUrl)) {
+          errors.push('Google Drive URL is invalid')
+        }
         break
 
       case 3:
@@ -416,7 +420,12 @@ export function OnboardingDialog({
         // Final validation - all previous required steps must be valid
         const step1Validation = validateStep(1)
         const step2Validation = validateStep(2)
-        errors.push(...step1Validation.errors, ...step2Validation.errors)
+        const step3Validation = validateStep(3)
+        errors.push(
+          ...step1Validation.errors,
+          ...step2Validation.errors,
+          ...step3Validation.errors,
+        )
         break
     }
 
@@ -487,6 +496,13 @@ export function OnboardingDialog({
       !isValidUrl(startup.website)
     ) {
       errors.website = 'Invalid website URL'
+    }
+    if (
+      startup.googleDriveUrl &&
+      startup.googleDriveUrl.trim() &&
+      !isValidUrl(startup.googleDriveUrl)
+    ) {
+      errors.googleDriveUrl = 'Invalid Google Drive URL'
     }
 
     return errors
@@ -720,6 +736,7 @@ export function OnboardingDialog({
         logo_url: logoUrl,
         pitch_deck_url: pitchDeckUrl,
         intro_video_url: introVideoUrl,
+        google_drive_url: startup.googleDriveUrl,
         founders: founders.filter(
           (f) => f.firstName.trim() && f.lastName.trim(),
         ),
