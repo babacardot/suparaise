@@ -34,15 +34,15 @@ const MIN_CHAR_REQUIREMENTS = {
 interface TextareaProps extends React.ComponentProps<'textarea'> {
   enableAI?: boolean
   aiFieldType?:
-    | 'bio'
-    | 'description-short'
-    | 'description-medium'
-    | 'description-long'
-    | 'traction'
-    | 'market'
-    | 'customers'
-    | 'competitors'
-    | 'instructions'
+  | 'bio'
+  | 'description-short'
+  | 'description-medium'
+  | 'description-long'
+  | 'traction'
+  | 'market'
+  | 'customers'
+  | 'competitors'
+  | 'instructions'
   aiContext?: {
     companyName?: string
     industry?: string
@@ -100,8 +100,16 @@ function Textarea({
       const { enhancedText } = await response.json()
 
       if (enhancedText && enhancedText.trim() !== value.trim()) {
-        setSuggestion(enhancedText)
-        setShowSuggestion(true)
+        if (type === 'grammar') {
+          // For grammar fixes, apply the change directly
+          if (onAIEnhance) {
+            onAIEnhance(enhancedText)
+          }
+        } else {
+          // For full enhancements, show the suggestion UI
+          setSuggestion(enhancedText)
+          setShowSuggestion(true)
+        }
       }
     } catch (error) {
       console.error('AI enhancement error:', error)
