@@ -466,6 +466,16 @@ CREATE INDEX IF NOT EXISTS idx_targets_industry_focus ON targets USING GIN(indus
 CREATE INDEX IF NOT EXISTS idx_targets_region_focus ON targets USING GIN(region_focus) WHERE region_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_required_documents ON targets USING GIN(required_documents) WHERE required_documents IS NOT NULL;
 
+-- Text search indexes for fast search functionality
+CREATE INDEX IF NOT EXISTS idx_targets_name_search ON targets USING gin(to_tsvector('english', name));
+CREATE INDEX IF NOT EXISTS idx_targets_notes_search ON targets USING gin(to_tsvector('english', COALESCE(notes, ''))) WHERE notes IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_targets_name_ilike ON targets(name text_pattern_ops);
+CREATE INDEX IF NOT EXISTS idx_targets_notes_ilike ON targets(notes text_pattern_ops) WHERE notes IS NOT NULL;
+
+-- Note: Website domain extraction index removed due to immutable function requirement
+-- Simple website index can be used instead for basic website filtering
+CREATE INDEX IF NOT EXISTS idx_targets_website ON targets(website) WHERE website IS NOT NULL;
+
 -- Performance indexes for agent_settings table
 CREATE INDEX IF NOT EXISTS idx_agent_settings_startup_id ON agent_settings(startup_id);
 CREATE INDEX IF NOT EXISTS idx_agent_settings_user_id ON agent_settings(user_id);

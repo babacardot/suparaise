@@ -59,6 +59,7 @@ export default function FundsPage({
         if (savedFilters) {
           const parsed = JSON.parse(savedFilters)
           return {
+            search: parsed.search || '',
             submissionTypes: parsed.submissionTypes || [],
             stageFocus: parsed.stageFocus || [],
             industryFocus: parsed.industryFocus || [],
@@ -72,6 +73,7 @@ export default function FundsPage({
       }
     }
     return {
+      search: '',
       submissionTypes: [],
       stageFocus: [],
       industryFocus: [],
@@ -100,6 +102,17 @@ export default function FundsPage({
 
   const supabase = createSupabaseBrowserClient()
 
+  // Debounced search effect to avoid too many API calls
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(filters.search)
+    }, 300) // 300ms debounce
+
+    return () => clearTimeout(timer)
+  }, [filters.search])
+
   const fetchTargets = useCallback(
     async (currentOffset: number) => {
       setIsLoading(true)
@@ -109,6 +122,7 @@ export default function FundsPage({
         p_limit: PAGE_SIZE,
         p_sort_by: sortConfig.key ?? 'name',
         p_sort_direction: sortConfig.direction,
+        p_search: debouncedSearch?.trim() || undefined,
         p_submission_types:
           filters.submissionTypes.length > 0
             ? filters.submissionTypes
@@ -165,7 +179,17 @@ export default function FundsPage({
         setIsLoading(false)
       }
     },
-    [supabase, filters, sortConfig],
+    [
+      supabase,
+      debouncedSearch,
+      filters.submissionTypes,
+      filters.stageFocus,
+      filters.industryFocus,
+      filters.regionFocus,
+      filters.formComplexity,
+      filters.requiredDocuments,
+      sortConfig,
+    ],
   )
 
   useEffect(() => {
@@ -174,7 +198,16 @@ export default function FundsPage({
 
   useEffect(() => {
     setOffset(0)
-  }, [filters, sortConfig])
+  }, [
+    debouncedSearch,
+    filters.submissionTypes,
+    filters.stageFocus,
+    filters.industryFocus,
+    filters.regionFocus,
+    filters.formComplexity,
+    filters.requiredDocuments,
+    sortConfig,
+  ])
 
   const handleFiltersChange = useCallback((newFilters: FundsFilters) => {
     setFilters(newFilters)

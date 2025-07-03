@@ -57,10 +57,12 @@ export async function POST(req: NextRequest) {
         const customerId = subscription.customer as string
         const subscriptionId = subscription.id
         const status = subscription.status
-        
+
         // Handle current_period_end which exists on active subscriptions
-        const subscriptionWithPeriod = subscription as Stripe.Subscription & { current_period_end?: number }
-        const currentPeriodEnd = subscriptionWithPeriod.current_period_end 
+        const subscriptionWithPeriod = subscription as Stripe.Subscription & {
+          current_period_end?: number
+        }
+        const currentPeriodEnd = subscriptionWithPeriod.current_period_end
           ? new Date(subscriptionWithPeriod.current_period_end * 1000)
           : new Date()
 

@@ -209,6 +209,7 @@ const FundsTable = React.memo(function FundsTable({
 
   const clearFilters = React.useCallback(() => {
     onFiltersChange({
+      search: '',
       submissionTypes: [],
       stageFocus: [],
       industryFocus: [],

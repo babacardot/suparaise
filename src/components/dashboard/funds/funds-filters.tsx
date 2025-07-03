@@ -3,6 +3,7 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Popover,
   PopoverContent,
@@ -12,6 +13,7 @@ import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 
 export interface FundsFilters {
+  search: string
   submissionTypes: string[]
   stageFocus: string[]
   industryFocus: string[]
@@ -122,10 +124,13 @@ export default function FundsFilters({
     value: string,
     checked: boolean,
   ) => {
-    const currentValues = filters[filterKey]
+    // Skip non-array filters like search
+    if (filterKey === 'search') return
+
+    const currentValues = filters[filterKey] as string[]
     const newValues = checked
       ? [...currentValues, value]
-      : currentValues.filter((v) => v !== value)
+      : currentValues.filter((v: string) => v !== value)
 
     onFiltersChange({
       ...filters,
@@ -134,17 +139,29 @@ export default function FundsFilters({
   }
 
   const clearFilter = (filterKey: keyof FundsFilters) => {
-    onFiltersChange({
-      ...filters,
-      [filterKey]: [],
-    })
+    if (filterKey === 'search') {
+      onFiltersChange({
+        ...filters,
+        [filterKey]: '',
+      })
+    } else {
+      onFiltersChange({
+        ...filters,
+        [filterKey]: [],
+      })
+    }
   }
 
   const getActiveFiltersCount = () => {
-    return Object.values(filters).reduce(
-      (count, filterArray) => count + filterArray.length,
+    const searchCount = filters.search?.trim() ? 1 : 0
+    const arrayFiltersCount = Object.entries(filters).reduce(
+      (count, [key, value]) => {
+        if (key === 'search') return count
+        return count + (Array.isArray(value) ? value.length : 0)
+      },
       0,
     )
+    return searchCount + arrayFiltersCount
   }
 
   const hasActiveFilters = getActiveFiltersCount() > 0
@@ -402,6 +419,39 @@ export default function FundsFilters({
       onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
     >
       <div className="flex flex-wrap items-center gap-4">
+        {/* Search Input */}
+        <div className="w-full sm:w-64">
+          <div className="relative">
+            <LottieIcon
+              animationData={animations.search}
+              size={16}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none z-10"
+            />
+            <Input
+              type="text"
+              placeholder="Search funds..."
+              value={filters.search || ''}
+              onChange={(e) => {
+                // Update immediately for UI responsiveness
+                onFiltersChange({ ...filters, search: e.target.value })
+              }}
+              className="pl-10 h-10 rounded-sm bg-card border-border text-card-foreground placeholder:text-muted-foreground"
+            />
+            {filters.search && (
+              <button
+                onClick={() => onFiltersChange({ ...filters, search: '' })}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-sm hover:bg-muted flex items-center justify-center transition-colors"
+                title="Clear search"
+              >
+                <LottieIcon
+                  animationData={animations.cross}
+                  size={12}
+                  className="opacity-50 hover:opacity-100"
+                />
+              </button>
+            )}
+          </div>
+        </div>
         {/* Region Filter - 5% width reduction */}
         {columnVisibility.region && (
           <div className="w-full sm:w-44">

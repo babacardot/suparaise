@@ -175,7 +175,9 @@ GRANT EXECUTE ON FUNCTION check_and_reset_free_users() TO service_role;
 GRANT EXECUTE ON FUNCTION check_and_reset_paid_users() TO service_role;
 GRANT EXECUTE ON FUNCTION run_automatic_subscription_resets() TO service_role;
 
--- Create a simple view for monitoring subscription usage (without SECURITY DEFINER)
+-- Create a simple view for monitoring subscription usage (explicitly without SECURITY DEFINER)
+-- This view uses the permissions of the querying user, not the view creator
+DROP VIEW IF EXISTS subscription_usage_summary;
 CREATE VIEW subscription_usage_summary AS
 SELECT 
     permission_level,
