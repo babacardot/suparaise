@@ -194,3 +194,5 @@ ORDER BY permission_level;
 -- Grant select on the view
 GRANT SELECT ON subscription_usage_summary TO authenticated;
 GRANT SELECT ON subscription_usage_summary TO service_role; 
+
+ALTER VIEW public.subscription_usage_summary SET (security_invoker=on);
