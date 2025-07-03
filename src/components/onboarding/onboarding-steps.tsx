@@ -78,6 +78,10 @@ interface TeamStepProps {
   founders: FounderData[]
   setFounders: (founders: FounderData[]) => void
   fieldErrors: FounderFieldErrors[]
+  prefilledFields?: {
+    linkedin: boolean
+    twitter: boolean
+  }
 }
 
 interface CompanyStepProps {
@@ -251,123 +255,46 @@ const FileUploadComponent: React.FC<
   maxSize,
   description,
 }) => {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  useEffect(() => {
-    if ((type === 'logo' || type === 'introVideo') && file) {
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
+    useEffect(() => {
+      if ((type === 'logo' || type === 'introVideo') && file) {
+        const url = URL.createObjectURL(file)
+        setPreviewUrl(url)
 
-      return () => {
-        URL.revokeObjectURL(url)
+        return () => {
+          URL.revokeObjectURL(url)
+          setPreviewUrl(null)
+        }
+      } else {
         setPreviewUrl(null)
       }
-    } else {
-      setPreviewUrl(null)
-    }
-  }, [file, type])
+    }, [file, type])
 
-  return (
-    <div className="space-y-2">
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => {
-          const selectedFile = e.target.files?.[0]
-          if (selectedFile) onUpload(type, selectedFile)
-        }}
-        disabled={uploadStatus === 'uploading'}
-      />
-      {!file ? (
-        <div className="flex items-center space-x-4">
-          <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-            <LottieIcon
-              animationData={animations.fileplus}
-              size={32}
-              loop={false}
-              autoplay={false}
-            />
-          </div>
-          <div className="space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => inputRef.current?.click()}
-              disabled={uploadStatus === 'uploading'}
-              className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-            >
-              {uploadStatus === 'uploading' ? (
-                <>
-                  <Spinner className="h-3 w-3 mr-2" />
-                </>
-              ) : (
-                'Upload'
-              )}
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center space-x-4">
-          <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
-            {previewUrl ? (
-              type === 'logo' ? (
-                <Image
-                  src={previewUrl}
-                  alt="Logo preview"
-                  width={80}
-                  height={80}
-                  className="h-20 w-20 rounded-sm object-contain"
-                />
-              ) : (
-                <video
-                  src={previewUrl}
-                  muted
-                  playsInline
-                  className="h-20 w-20 rounded-sm object-contain"
-                />
-              )
-            ) : (
-              <div
-                className={`h-20 w-20 p-2 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}
-              >
-                <LottieIcon
-                  animationData={animations.fileplus}
-                  size={32}
-                  loop={false}
-                  autoplay={false}
-                />
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{file.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {uploadStatus === 'uploading'
-                ? `${formatFileSize(
-                    (uploadProgress / 100) * file.size,
-                  )} of ${formatFileSize(file.size)}`
-                : formatFileSize(file.size)}
-            </p>
-            {uploadStatus === 'uploading' && (
-              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
-                <div
-                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            )}
-            {uploadStatus === 'failed' && (
-              <button
-                onClick={() => onUpload(type, file)}
-                className="text-sm text-red-500 hover:underline"
-              >
-                Try again
-              </button>
-            )}
-            <div className="space-x-2 mt-2">
+    return (
+      <div className="space-y-2">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => {
+            const selectedFile = e.target.files?.[0]
+            if (selectedFile) onUpload(type, selectedFile)
+          }}
+          disabled={uploadStatus === 'uploading'}
+        />
+        {!file ? (
+          <div className="flex items-center space-x-4">
+            <div className="h-20 w-20 bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+              <LottieIcon
+                animationData={animations.fileplus}
+                size={32}
+                loop={false}
+                autoplay={false}
+              />
+            </div>
+            <div className="space-x-2">
               <Button
                 type="button"
                 variant="outline"
@@ -381,30 +308,107 @@ const FileUploadComponent: React.FC<
                     <Spinner className="h-3 w-3 mr-2" />
                   </>
                 ) : (
-                  'Update'
+                  'Upload'
                 )}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  playClickSound()
-                  onRemove()
-                }}
-                className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-              >
-                Remove
               </Button>
             </div>
           </div>
-        </div>
-      )}
-      <p className="text-xs text-muted-foreground">
-        {description} (max {maxSize})
-      </p>
-    </div>
-  )
-}
+        ) : (
+          <div className="flex items-center space-x-4">
+            <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
+              {previewUrl ? (
+                type === 'logo' ? (
+                  <Image
+                    src={previewUrl}
+                    alt="Logo preview"
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 rounded-sm object-contain"
+                  />
+                ) : (
+                  <video
+                    src={previewUrl}
+                    muted
+                    playsInline
+                    className="h-20 w-20 rounded-sm object-contain"
+                  />
+                )
+              ) : (
+                <div
+                  className={`h-20 w-20 p-2 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}
+                >
+                  <LottieIcon
+                    animationData={animations.fileplus}
+                    size={32}
+                    loop={false}
+                    autoplay={false}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{file.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {uploadStatus === 'uploading'
+                  ? `${formatFileSize(
+                    (uploadProgress / 100) * file.size,
+                  )} of ${formatFileSize(file.size)}`
+                  : formatFileSize(file.size)}
+              </p>
+              {uploadStatus === 'uploading' && (
+                <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+                  <div
+                    className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              )}
+              {uploadStatus === 'failed' && (
+                <button
+                  onClick={() => onUpload(type, file)}
+                  className="text-sm text-red-500 hover:underline"
+                >
+                  Try again
+                </button>
+              )}
+              <div className="space-x-2 mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => inputRef.current?.click()}
+                  disabled={uploadStatus === 'uploading'}
+                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                >
+                  {uploadStatus === 'uploading' ? (
+                    <>
+                      <Spinner className="h-3 w-3 mr-2" />
+                    </>
+                  ) : (
+                    'Update'
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    playClickSound()
+                    onRemove()
+                  }}
+                  className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                >
+                  Remove
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {description} (max {maxSize})
+        </p>
+      </div>
+    )
+  }
 
 const MultiSelectCountries: React.FC<{
   selected: string[]
@@ -430,9 +434,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -487,7 +490,7 @@ const MultiSelectCountries: React.FC<{
 // Step 1: Team Information
 export const TeamStep: React.FC<
   TeamStepProps & { isFirstStartup?: boolean }
-> = ({ founders, setFounders, fieldErrors, isFirstStartup = true }) => {
+> = ({ founders, setFounders, fieldErrors, isFirstStartup = true, prefilledFields }) => {
   const addFounder = () => {
     setFounders([
       ...founders,
@@ -702,7 +705,7 @@ export const TeamStep: React.FC<
                   </p>
                 )}
                 {/* Show hint if LinkedIn URL was pre-populated */}
-                {founder.linkedin && index === 0 && (
+                {prefilledFields?.linkedin && index === 0 && (
                   <p className="text-xs text-green-600 mt-1">
                     ✓ Pre-filled from your profile
                   </p>
@@ -754,7 +757,7 @@ export const TeamStep: React.FC<
                   </p>
                 )}
                 {/* Show hint if Twitter URL was pre-populated */}
-                {founder.twitterUrl && index === 0 && (
+                {prefilledFields?.twitter && index === 0 && (
                   <p className="text-xs text-green-600 mt-1">
                     ✓ Pre-filled from your profile
                   </p>
@@ -940,11 +943,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="industry"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
-                fieldErrors.industry
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-input'
-              }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
+                ? 'border-red-500 focus:border-red-500'
+                : 'border-input'
+                }`}
               value={startup.industry || ''}
               onChange={(e) =>
                 setStartup({
@@ -996,29 +998,37 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Is your company incorporated?</Label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="incorporated"
-                  checked={startup.isIncorporated === true}
-                  onChange={() =>
-                    setStartup({ ...startup, isIncorporated: true })
-                  }
-                />
-                <span>Yes</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="incorporated"
-                  checked={startup.isIncorporated === false}
-                  onChange={() =>
-                    setStartup({ ...startup, isIncorporated: false })
-                  }
-                />
-                <span>No</span>
-              </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound()
+                  setStartup({ ...startup, isIncorporated: false })
+                }}
+                className={cn(
+                  'flex items-center justify-center rounded-sm border-2 px-4 py-3 text-sm font-medium transition-all',
+                  !startup.isIncorporated
+                    ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-300'
+                    : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                )}
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound()
+                  setStartup({ ...startup, isIncorporated: true })
+                }}
+                className={cn(
+                  'flex items-center justify-center rounded-sm border-2 px-4 py-3 text-sm font-medium transition-all',
+                  startup.isIncorporated
+                    ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-400'
+                    : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                )}
+              >
+                Yes
+              </button>
             </div>
           </div>
 
@@ -1223,11 +1233,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           <div className="relative">
             <select
               id="revenue-model"
-              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
-                fieldErrors.revenueModel
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-input'
-              }`}
+              className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.revenueModel
+                ? 'border-red-500 focus:border-red-500'
+                : 'border-input'
+                }`}
               value={startup.revenueModel || ''}
               onChange={(e) =>
                 setStartup({
@@ -1279,26 +1288,35 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
         </div>
 
         <div className="space-y-6">
-          <FileUploadComponent
-            {...logoUploadProps}
-            accept=".jpg,.jpeg,.png,.svg,.webp"
-            maxSize="5MB"
-            description="PNG, JPG, JPEG, SVG, or WebP"
-          />
+          <div className="space-y-3">
+            <Label>Logo</Label>
+            <FileUploadComponent
+              {...logoUploadProps}
+              accept=".jpg,.jpeg,.png,.svg,.webp"
+              maxSize="5MB"
+              description="PNG, JPG, JPEG, SVG, or WebP"
+            />
+          </div>
 
-          <FileUploadComponent
-            {...pitchDeckUploadProps}
-            accept=".pdf,.ppt,.pptx"
-            maxSize="5MB"
-            description="PDF, PPT, or PPTX"
-          />
+          <div className="space-y-3">
+            <Label>Pitch deck</Label>
+            <FileUploadComponent
+              {...pitchDeckUploadProps}
+              accept=".pdf,.ppt,.pptx"
+              maxSize="5MB"
+              description="PDF, PPT, or PPTX"
+            />
+          </div>
 
-          <FileUploadComponent
-            {...videoUploadProps}
-            accept=".mp4,.mov,.avi,.webm"
-            maxSize="100MB"
-            description="MP4, MOV, AVI, or WebM"
-          />
+          <div className="space-y-3">
+            <Label>Demo</Label>
+            <FileUploadComponent
+              {...videoUploadProps}
+              accept=".mp4,.mov,.avi,.webm"
+              maxSize="100MB"
+              description="MP4, MOV, AVI, or WebM"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -1631,7 +1649,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       <div className="space-y-4">
         {/* Company Information */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-0">
             <CardTitle className="flex items-center gap-2 text-base">
               <LottieIcon
                 animationData={animations.work}
@@ -1736,7 +1754,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 <span className="font-medium text-muted-foreground text-sm">
                   One-liner
                 </span>
-                <p className="text-sm">
+                <p className="text-sm break-words whitespace-pre-wrap">
                   {startup.descriptionShort || 'Not provided'}
                 </p>
               </div>
@@ -1745,7 +1763,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   <span className="font-medium text-muted-foreground text-sm">
                     Elevator pitch
                   </span>
-                  <p className="text-sm">{startup.descriptionMedium}</p>
+                  <p className="text-sm break-words whitespace-pre-wrap">{startup.descriptionMedium}</p>
                 </div>
               )}
               {startup.descriptionLong && (
@@ -1753,7 +1771,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   <span className="font-medium text-muted-foreground text-sm">
                     Full description
                   </span>
-                  <p className="text-sm">{startup.descriptionLong}</p>
+                  <p className="text-sm break-words whitespace-pre-wrap">{startup.descriptionLong}</p>
                 </div>
               )}
             </div>
@@ -1802,7 +1820,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 
         {/* Team */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-0">
             <CardTitle className="flex items-center gap-2 text-base">
               <LottieIcon
                 animationData={animations.group}
@@ -1836,7 +1854,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                       <p>Website: {founder.personalWebsiteUrl}</p>
                     )}
                     {founder.bio && (
-                      <p className="mt-1 text-xs leading-relaxed">
+                      <p className="mt-1 text-xs leading-relaxed break-words whitespace-pre-wrap text-foreground">
                         {founder.bio}
                       </p>
                     )}
@@ -1849,7 +1867,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 
         {/* Fundraising */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-0">
             <CardTitle className="flex items-center gap-2 text-base">
               <LottieIcon
                 animationData={animations.cash}
@@ -1934,41 +1952,50 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               startup.marketSummary ||
               startup.keyCustomers ||
               startup.competitors) && (
-              <div className="pt-2 border-t space-y-2">
-                {startup.tractionSummary && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Traction
-                    </span>
-                    <p className="text-sm">{startup.tractionSummary}</p>
-                  </div>
-                )}
-                {startup.marketSummary && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Market
-                    </span>
-                    <p className="text-sm">{startup.marketSummary}</p>
-                  </div>
-                )}
-                {startup.keyCustomers && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Key customers
-                    </span>
-                    <p className="text-sm">{startup.keyCustomers}</p>
-                  </div>
-                )}
-                {startup.competitors && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Competitors
-                    </span>
-                    <p className="text-sm">{startup.competitors}</p>
-                  </div>
-                )}
-              </div>
-            )}
+                <div className="pt-2 border-t space-y-2">
+                  {startup.tractionSummary && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Traction
+                      </span>
+                      <p className="text-sm break-words whitespace-pre-wrap">{startup.tractionSummary}</p>
+                    </div>
+                  )}
+                  {startup.marketSummary && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Market
+                      </span>
+                      <p className="text-sm break-words whitespace-pre-wrap">{startup.marketSummary}</p>
+                    </div>
+                  )}
+                  {startup.keyCustomers && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Key customers
+                      </span>
+                      <p className="text-sm break-words whitespace-pre-wrap">{startup.keyCustomers}</p>
+                    </div>
+                  )}
+                  {startup.competitorsList && startup.competitorsList.length > 0 && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Competitors
+                      </span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {startup.competitorsList.map((competitor, index) => (
+                          <Badge
+                            key={competitor}
+                            className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
+                          >
+                            {competitor}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
           </CardContent>
         </Card>
       </div>

@@ -470,8 +470,8 @@ export function generateCSVTemplate(
   outputDir: string,
 ): void {
   const templates = {
-    targets: `name,website,application_url,application_email,submission_type,stage_focus,industry_focus,region_focus,form_complexity,question_count_range,required_documents,notes
-"Example VC Fund","https://example-vc.com","https://example-vc.com/apply","apply@example-vc.com","form","Pre-seed,Seed","B2B SaaS,Fintech","North America,Europe","standard","11-20","pitch_deck,video","Focus on early-stage tech companies"`,
+    targets: `name,notes,website,application_url,application_email,submission_type,stage_focus,industry_focus,region_focus,form_complexity,question_count_range,required_documents
+"Example VC Fund","Focus on early-stage tech companies","https://example-vc.com","https://example-vc.com/apply","apply@example-vc.com","form","Pre-seed,Seed","B2B SaaS,Fintech","North America,Europe","standard","11-20","pitch_deck,video"`,
 
     angels: `first_name,last_name,email,linkedin,twitter,personal_website,location,bio,check_size,stage_focus,industry_focus,region_focus,investment_approach,previous_exits,domain_expertise,response_time,submission_type,application_url,application_email,form_complexity,required_documents,notable_investments,is_active,notes
 "John","Doe","john@example.com","https://linkedin.com/in/johndoe","https://twitter.com/johndoe","https://johndoe.com","San Francisco, CA","Former founder with 2 exits","25K-50K","Pre-seed,Seed","B2B SaaS,AI/ML","North America","hands-on","Company A,Company B","Product,Marketing","1 week","email",,,"simple","pitch_deck","Unicorn Corp,Great Startup","true","Prefers warm intros"`,
@@ -503,6 +503,7 @@ export function generateExcelTemplate(
     targets: [
       {
         name: 'Example VC Fund',
+        notes: 'Focus on early-stage tech companies',
         website: 'https://example-vc.com',
         application_url: 'https://example-vc.com/apply',
         application_email: 'apply@example-vc.com',
@@ -513,7 +514,6 @@ export function generateExcelTemplate(
         form_complexity: 'standard',
         question_count_range: '11-20',
         required_documents: 'pitch_deck, video',
-        notes: 'Focus on early-stage tech companies',
       },
     ],
     angels: [
