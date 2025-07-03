@@ -4,7 +4,7 @@ This directory contains tools and templates for managing large-scale data import
 
 ## Quick Start
 
-1. **Initial Bulk Seeding (1000 VCs, 100 angels, 100 accelerators)**
+1. **Initial Bulk Seeding (500 VCs, 100 angels, 100 accelerators)**
 
    ```bash
    bun run scripts/seed-data/bulk-seed.ts

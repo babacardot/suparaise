@@ -367,8 +367,8 @@ async function bulkSeed() {
   }
 
   // Generate targets (VCs)
-  console.log('📈 Generating 1000 VC/Fund targets...')
-  const targetsData = generateTargetsData(1000)
+  console.log('📈 Generating 500 VC/Fund targets...')
+  const targetsData = generateTargetsData(500)
   const targetsFile = path.join(dataDir, 'targets-bulk.csv')
   writeCSV(targetsData, targetsFile)
   console.log(
@@ -435,7 +435,7 @@ function printHelp() {
 Bulk Seed Data Generator for Suparaise
 
 This script generates sample data for initial testing:
-- 1000 VC/Fund targets
+- 500 VC/Fund targets
 - 100 Angel investors  
 - 100 Accelerators
 
@@ -462,7 +462,7 @@ async function main() {
 
   if (options.needsConfirmation) {
     console.log(
-      '⚠️  This will generate 1200 sample records (1000 VCs, 100 angels, 100 accelerators)',
+      '⚠️  This will generate 700 sample records (500 VCs, 100 angels, 100 accelerators)',
     )
     console.log('⚠️  This is FAKE data for testing purposes only')
     console.log('\nProceed? Add --confirm to skip this prompt')
