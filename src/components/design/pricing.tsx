@@ -18,7 +18,7 @@ interface PricingTier {
 
 const pricingTiers: PricingTier[] = [
   {
-    name: 'Starter',
+    name: 'Core',
     price: 'Free',
     priceSuffix: '',
     description: 'Get started with agentic fundraising',

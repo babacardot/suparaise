@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/sheet'
 import { cn } from '@/lib/actions/utils'
 import { useScroll } from 'motion/react'
-import { useTheme } from 'next-themes'
 import { useUser } from '@/lib/contexts/user-context'
 
 interface MenuItem {
@@ -228,24 +227,12 @@ export const Header = () => {
 }
 
 const Logo = ({ className }: { className?: string }) => {
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Determine which logos to use based on resolved theme, defaulting to light theme for SSR
-  const iconSrc =
-    mounted && resolvedTheme === 'dark' ? '/green.webp' : '/green.webp'
-  const textLogoSrc =
-    mounted && resolvedTheme === 'dark' ? '/sw.webp' : '/sb.webp'
+  const iconSrc = '/green.webp'
 
   return (
     <div className={cn('flex items-center space-x-1 -mr-4', className)}>
       {/* Theme-sensitive Icon */}
       <Image
-        key={`icon-${iconSrc}`} // Force re-render when icon changes
         src={iconSrc}
         alt="Suparaise icon"
         className="h-10 w-auto" // Increased size
@@ -256,13 +243,21 @@ const Logo = ({ className }: { className?: string }) => {
       />
       {/* Theme-sensitive Text Logo */}
       <Image
-        key={`text-${textLogoSrc}`} // Force re-render when text logo changes
-        src={textLogoSrc}
+        src="/sb.webp"
         alt="Suparaise text logo"
         width={120}
         height={30}
         priority
-        className="h-auto"
+        className="h-auto dark:hidden"
+        style={{ width: '120px' }} // Maintain aspect ratio
+      />
+      <Image
+        src="/sw.webp"
+        alt="Suparaise text logo"
+        width={120}
+        height={30}
+        priority
+        className="h-auto hidden dark:block"
         style={{ width: '120px' }} // Maintain aspect ratio
       />
     </div>

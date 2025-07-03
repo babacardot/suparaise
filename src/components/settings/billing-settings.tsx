@@ -294,38 +294,44 @@ export default function BillingSettings() {
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
           {/* Current Plan */}
-          <div className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold -mt-1">Current plan</h3>
-                {isSubscribed && subscription?.permission_level && (
-                  <Badge
-                    className={cn(
-                      'border',
-                      subscription.permission_level === 'MAX'
-                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                        : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-                    )}
-                  >
-                    <Crown className="h-3 w-3 mr-1" />
-                    {subscription.permission_level}
-                  </Badge>
-                )}
+          <div className="bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900/30 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-sm bg-white dark:bg-zinc-800 shadow-sm">
+                  <Crown className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-semibold">Current plan</h3>
+                  {isSubscribed && subscription?.permission_level && (
+                    <Badge
+                      className={cn(
+                        'border text-xs font-medium',
+                        subscription.permission_level === 'MAX'
+                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                          : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                      )}
+                    >
+                      {subscription.permission_level}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
 
             {isSubscribed ? (
-              <p className="text-muted-foreground">
-                Your subscription is {subscriptionStatus}
-                {periodEndDate &&
-                  ` and renews on ${periodEndDate.toLocaleDateString()}`}
-              </p>
-            ) : (
-              <div className="space-y-2 -mt-2">
-                <p className="text-muted-foreground">
-                  You&apos;re on the free plan.
-                </p>
+              <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
+                  Your subscription is <span className="font-medium text-foreground">{subscriptionStatus}</span>
+                  {periodEndDate &&
+                    ` and renews on ${periodEndDate.toLocaleDateString()}`}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  You&apos;re on the <span className="font-medium text-foreground">free plan</span>.
+                </p>
+                <p className="text-xs text-muted-foreground">
                   Subscribe for more runs, expanded access, and advanced features.
                 </p>
               </div>
@@ -334,17 +340,17 @@ export default function BillingSettings() {
 
           {/* Subscription Plans */}
           {!isSubscribed && (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-2">
               {/* Pro Plan */}
-              <Card className="relative border-2 border-green-200 dark:border-green-800">
+              <Card className="relative border-2 border-green-200 dark:border-green-800 shadow-lg hover:shadow-xl transition-shadow duration-200">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <span className="bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 text-sm font-medium px-3 py-1 rounded-sm">
+                  <span className="bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 text-sm font-medium px-4 py-1.5 rounded-sm shadow-sm">
                     Recommended
                   </span>
                 </div>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    {SUBSCRIPTION_PLANS.pro_monthly.name}
+                    <span className="text-xl font-semibold">{SUBSCRIPTION_PLANS.pro_monthly.name}</span>
                     <div className="text-right">
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.pro_monthly.price}
@@ -375,22 +381,22 @@ export default function BillingSettings() {
                   <Button
                     onClick={() => handleSubscribe('pro_monthly')}
                     disabled={isLoading}
-                    className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                    className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
                     {isLoading && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    Start Pro
+                    {isLoading ? 'Processing...' : 'Start Pro'}
                   </Button>
                 </CardContent>
               </Card>
 
               {/* Max Plan */}
-              <Card className="relative">
+              <Card className="relative shadow-lg hover:shadow-xl transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    {SUBSCRIPTION_PLANS.max_monthly.name}
+                    <span className="text-xl font-semibold">{SUBSCRIPTION_PLANS.max_monthly.name}</span>
                     <div className="text-right">
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.max_monthly.price}
@@ -400,7 +406,7 @@ export default function BillingSettings() {
                       </div>
                     </div>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm">
                     {SUBSCRIPTION_PLANS.max_monthly.description}
                   </CardDescription>
                 </CardHeader>
@@ -421,13 +427,13 @@ export default function BillingSettings() {
                   <Button
                     onClick={() => handleSubscribe('max_monthly')}
                     disabled={isLoading}
-                    className="w-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800"
+                    className="w-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
                     {isLoading && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    Go Max
+                    {isLoading ? 'Processing...' : 'Go Max'}
                   </Button>
                 </CardContent>
               </Card>
@@ -436,26 +442,31 @@ export default function BillingSettings() {
 
           {/* Subscription Management */}
           {isSubscribed && (
-            <Card className="p-6">
+            <Card className="p-6 shadow-lg border-l-4 border-l-blue-500 dark:border-l-blue-400">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold leading-none tracking-tight">
-                    Manage subscription
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1.5">
-                    Update your payment details, view invoices, or cancel subscription.
-                  </p>
+                <div className="flex items-start gap-4">
+                  <div className="p-2 rounded-sm bg-blue-50 dark:bg-blue-900/30">
+                    <Crown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold leading-none tracking-tight">
+                      Manage subscription
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Update your payment details, view invoices, or cancel subscription.
+                    </p>
+                  </div>
                 </div>
                 <div>
                   <Button
                     onClick={handleManageBilling}
                     disabled={isPortalLoading}
-                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 translate-y-1 text-sm"
+                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-6 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
                   >
                     {isPortalLoading && (
-                      <Spinner className="h-5 w-5 -translate-x-2" />
+                      <Spinner className="h-4 w-4 mr-2" />
                     )}
-                    Update
+                    {isPortalLoading ? 'Opening...' : 'Manage Billing'}
                   </Button>
                 </div>
               </div>
@@ -466,14 +477,14 @@ export default function BillingSettings() {
 
       {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" showCloseButton={false}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="flex flex-col items-center justify-center space-y-4 text-center"
           >
-            <div className="relative w-32 h-32">
+            <div className="relative w-40 h-40 -mb-2">
               <Image
                 src={successPlan.includes('max') ? "/random/max.svg" : "/random/going_live.svg"}
                 alt="Subscription activated"
@@ -483,33 +494,67 @@ export default function BillingSettings() {
               />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Welcome to {successPlan.includes('max') ? 'Max' : 'Pro'}!
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Welcome to {successPlan.includes('max') ? 'Max' : 'Pro'}
               </h2>
-              <p className="text-base text-gray-600 dark:text-gray-400 max-w-sm">
-                Your subscription is now active. Here are the new features you have
-                unlocked:
+              <p className="text-base text-gray-600 dark:text-gray-400 max-w-md">
+                Your subscription is now active.
+                <br />
+                Here are the new features you have unlocked:
               </p>
             </div>
 
             <div className="w-full rounded-sm border bg-zinc-50 dark:bg-zinc-900/30 p-4 text-left">
-              <ul className="list-disc list-inside space-y-2 text-sm">
+              <ul className="space-y-2 text-sm">
                 {successPlan.includes('max') ? (
                   <>
-                    <li>125 runs per month</li>
-                    <li>Access to 2,000+ global funds</li>
-                    <li>5 parallel submissions</li>
-                    <li>Advanced application tracking</li>
-                    <li>Developer mode</li>
-                    <li>Priority support</li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      125 runs per month
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      Access to 2,000+ global funds
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      5 parallel submissions
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      Advanced application tracking
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      Developer mode
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      Priority support
+                    </li>
                   </>
                 ) : (
                   <>
-                    <li>50 runs per month</li>
-                    <li>Access to 1,200+ global funds</li>
-                    <li>3 parallel submissions</li>
-                    <li>Smart queuing system</li>
-                    <li>Agent customization</li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      50 runs per month
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      Access to 1,200+ global funds
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      3 parallel submissions
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      Background runs
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      Agent customization
+                    </li>
                   </>
                 )}
               </ul>
@@ -518,7 +563,7 @@ export default function BillingSettings() {
             <Button
               onClick={() => setShowSuccessModal(false)}
               size="lg"
-              className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+              className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm font-medium py-3 shadow-sm hover:shadow transition-all duration-200"
               variant="outline"
             >
               Continue
