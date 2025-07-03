@@ -38,9 +38,6 @@ export async function POST(req: NextRequest) {
     event.type.startsWith('invoice.payment_')
   ) {
     try {
-      const subscription = event.data.object as Stripe.Subscription
-      const customerId = subscription.customer as string
-
       let subscriptionData: {
         customerId: string
         eventType: string
@@ -50,18 +47,22 @@ export async function POST(req: NextRequest) {
         planName?: string
         priceId?: string
       } = {
-        customerId,
+        customerId: '',
         eventType: event.type,
       }
 
       // Handle subscription events
       if (event.type.startsWith('customer.subscription.')) {
+        const subscription = event.data.object as Stripe.Subscription
+        const customerId = subscription.customer as string
         const subscriptionId = subscription.id
         const status = subscription.status
-        // @ts-expect-error - Stripe types might be inconsistent
-        const currentPeriodEnd = new Date(
-          subscription.current_period_end * 1000,
-        )
+        
+        // Handle current_period_end which exists on active subscriptions
+        const subscriptionWithPeriod = subscription as Stripe.Subscription & { current_period_end?: number }
+        const currentPeriodEnd = subscriptionWithPeriod.current_period_end 
+          ? new Date(subscriptionWithPeriod.current_period_end * 1000)
+          : new Date()
 
         // Get plan name from metadata or line items
         const planName = subscription.metadata?.plan
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
 
         subscriptionData = {
           ...subscriptionData,
+          customerId,
           subscriptionId,
           status,
           currentPeriodEnd: currentPeriodEnd.toISOString(),
