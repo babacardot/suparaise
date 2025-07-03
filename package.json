@@ -9,7 +9,12 @@
     "lint": "next lint",
     "agent:run": "ts-node src/agent/index.ts",
     "format": "prettier --write .",
-    "update:types": "bunx supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts"
+    "update:types": "bunx supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts",
+    "seed:templates": "bun run scripts/seed-data/generate-templates.ts",
+    "seed:bulk": "bun run scripts/seed-data/bulk-seed.ts",
+    "seed:import": "bun run scripts/seed-data/csv-import.ts",
+    "seed:validate": "bun run scripts/seed-data/validate-csv.ts",
+    "seed:validate-env": "bun run scripts/seed-data/validate-env.ts"
   },
   "keywords": [],
   "author": "",

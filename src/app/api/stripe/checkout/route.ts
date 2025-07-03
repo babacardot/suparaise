@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: startupId 
+      success_url: startupId
         ? `${req.nextUrl.origin}/dashboard/${startupId}/settings/billing?success=true&plan=${plan}`
         : `${req.nextUrl.origin}/dashboard?success=true&plan=${plan}`,
       cancel_url: startupId

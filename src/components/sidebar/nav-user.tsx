@@ -43,7 +43,7 @@ export function NavUser({
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      audio.play().catch(() => { })
+      audio.play().catch(() => {})
     }
   }
 

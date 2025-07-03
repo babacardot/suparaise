@@ -278,8 +278,7 @@ export default function RootLayout({
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Suparaise',
-    description:
-      'Agents that apply to funds for you, on autopilot.',
+    description: 'Agents that apply to funds for you, on autopilot.',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     offers: {

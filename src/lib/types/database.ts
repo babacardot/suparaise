@@ -1489,14 +1489,23 @@ export type Database = {
         Returns: Json
       }
       update_subscription_status: {
-        Args: {
-          p_stripe_customer_id: string
-          p_subscription_id: string
-          p_status: string
-          p_current_period_end?: string
-          p_is_subscribed?: boolean
-          p_plan_name?: string
-        }
+        Args:
+          | {
+              p_stripe_customer_id: string
+              p_subscription_id: string
+              p_status: Database['public']['Enums']['subscription_status']
+              p_current_period_end?: string
+              p_is_subscribed?: boolean
+              p_plan_name?: string
+            }
+          | {
+              p_stripe_customer_id: string
+              p_subscription_id: string
+              p_status: string
+              p_current_period_end?: string
+              p_is_subscribed?: boolean
+              p_plan_name?: string
+            }
         Returns: Json
       }
       update_user_agent_settings: {

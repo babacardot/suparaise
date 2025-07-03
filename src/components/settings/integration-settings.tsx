@@ -414,7 +414,7 @@ export default function IntegrationSettings() {
                 className={cn(
                   'transition-all duration-200',
                   isConnected &&
-                  'bg-green-50/50 dark:bg-green-950/30 border-green-200 dark:border-green-800',
+                    'bg-green-50/50 dark:bg-green-950/30 border-green-200 dark:border-green-800',
                   requiresUpgrade && 'opacity-75',
                 )}
               >
@@ -452,7 +452,7 @@ export default function IntegrationSettings() {
                           ? 'bg-green-600'
                           : 'bg-gray-200 dark:bg-gray-700',
                         (isConnecting || isComingSoon) &&
-                        'opacity-50 cursor-not-allowed',
+                          'opacity-50 cursor-not-allowed',
                       )}
                     >
                       <span

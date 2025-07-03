@@ -321,7 +321,10 @@ export default function BillingSettings() {
             {isSubscribed ? (
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Your subscription is <span className="font-medium text-foreground">{subscriptionStatus}</span>
+                  Your subscription is{' '}
+                  <span className="font-medium text-foreground">
+                    {subscriptionStatus}
+                  </span>
                   {periodEndDate &&
                     ` and renews on ${periodEndDate.toLocaleDateString()}`}
                 </p>
@@ -329,10 +332,13 @@ export default function BillingSettings() {
             ) : (
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  You&apos;re on the <span className="font-medium text-foreground">free plan</span>.
+                  You&apos;re on the{' '}
+                  <span className="font-medium text-foreground">free plan</span>
+                  .
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Subscribe for more runs, expanded access, and advanced features.
+                  Subscribe for more runs, expanded access, and advanced
+                  features.
                 </p>
               </div>
             )}
@@ -350,7 +356,9 @@ export default function BillingSettings() {
                 </div>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span className="text-xl font-semibold">{SUBSCRIPTION_PLANS.pro_monthly.name}</span>
+                    <span className="text-xl font-semibold">
+                      {SUBSCRIPTION_PLANS.pro_monthly.name}
+                    </span>
                     <div className="text-right">
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.pro_monthly.price}
@@ -396,7 +404,9 @@ export default function BillingSettings() {
               <Card className="relative shadow-lg hover:shadow-xl transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span className="text-xl font-semibold">{SUBSCRIPTION_PLANS.max_monthly.name}</span>
+                    <span className="text-xl font-semibold">
+                      {SUBSCRIPTION_PLANS.max_monthly.name}
+                    </span>
                     <div className="text-right">
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.max_monthly.price}
@@ -453,7 +463,8 @@ export default function BillingSettings() {
                       Manage subscription
                     </h3>
                     <p className="text-sm text-muted-foreground mt-2">
-                      Update your payment details, view invoices, or cancel subscription.
+                      Update your payment details, view invoices, or cancel
+                      subscription.
                     </p>
                   </div>
                 </div>
@@ -463,9 +474,7 @@ export default function BillingSettings() {
                     disabled={isPortalLoading}
                     className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-6 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
                   >
-                    {isPortalLoading && (
-                      <Spinner className="h-4 w-4 mr-2" />
-                    )}
+                    {isPortalLoading && <Spinner className="h-4 w-4 mr-2" />}
                     {isPortalLoading ? 'Opening...' : 'Manage Billing'}
                   </Button>
                 </div>
@@ -486,7 +495,11 @@ export default function BillingSettings() {
           >
             <div className="relative w-40 h-40 -mb-2">
               <Image
-                src={successPlan.includes('max') ? "/random/max.svg" : "/random/going_live.svg"}
+                src={
+                  successPlan.includes('max')
+                    ? '/random/max.svg'
+                    : '/random/going_live.svg'
+                }
                 alt="Subscription activated"
                 fill
                 className="object-contain"

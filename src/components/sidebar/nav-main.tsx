@@ -101,7 +101,7 @@ export function NavMain({
                   'h-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!',
                   '[&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
                   isActive &&
-                  'bg-sidebar-accent text-sidebar-accent-foreground',
+                    'bg-sidebar-accent text-sidebar-accent-foreground',
                 )}
                 onMouseEnter={() => setHoveredItem(item.title)}
                 onMouseLeave={() => setHoveredItem(null)}

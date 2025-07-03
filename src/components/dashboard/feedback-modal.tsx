@@ -35,7 +35,11 @@ interface FeedbackModalProps {
   children: React.ReactNode // The trigger element
 }
 
-export default function FeedbackModal({ isOpen, onClose, children }: FeedbackModalProps) {
+export default function FeedbackModal({
+  isOpen,
+  onClose,
+  children,
+}: FeedbackModalProps) {
   const { currentStartupId } = useUser()
   const [message, setMessage] = useState('')
   const [sentiment, setSentiment] = useState<Sentiment>('null')
@@ -140,9 +144,7 @@ export default function FeedbackModal({ isOpen, onClose, children }: FeedbackMod
         }
       }}
     >
-      <DropdownMenuTrigger asChild>
-        {children}
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-96 p-0 bg-sidebar border-sidebar-border rounded-sm"
         side={isMobile ? 'bottom' : 'right'}
@@ -174,10 +176,11 @@ export default function FeedbackModal({ isOpen, onClose, children }: FeedbackMod
                       playClickSound()
                       setSentiment(key)
                     }}
-                    className={`text-xl w-8 h-8 rounded-sm transition-all duration-200 hover:bg-sidebar-accent border ${sentiment === key
-                      ? 'bg-sidebar-accent border-sidebar-border shadow-sm scale-105'
-                      : 'border-transparent hover:border-sidebar-border/30'
-                      }`}
+                    className={`text-xl w-8 h-8 rounded-sm transition-all duration-200 hover:bg-sidebar-accent border ${
+                      sentiment === key
+                        ? 'bg-sidebar-accent border-sidebar-border shadow-sm scale-105'
+                        : 'border-transparent hover:border-sidebar-border/30'
+                    }`}
                   >
                     {emojis[key]}
                   </button>

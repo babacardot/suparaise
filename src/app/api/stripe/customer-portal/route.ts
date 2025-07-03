@@ -27,10 +27,7 @@ export async function POST(req: NextRequest) {
 
     if (profileError || !profile?.stripe_customer_id) {
       console.error('Profile error:', profileError)
-      return NextResponse.json(
-        { error: 'Customer not found' },
-        { status: 404 },
-      )
+      return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
     }
 
     // Initialize Stripe
@@ -54,4 +51,4 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     )
   }
-} 
+}

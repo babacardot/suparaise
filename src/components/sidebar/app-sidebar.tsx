@@ -82,8 +82,6 @@ export function AppSidebar({
   const { subscription, user: contextUser } = useUser()
   const [isToggleHovered, setIsToggleHovered] = React.useState(false)
 
-
-
   // Check if user profile is complete
   const { isValid: isProfileComplete } = useValidation({
     requirements: VALIDATION_PRESETS.BASIC_APPLICATION,
@@ -115,10 +113,10 @@ export function AppSidebar({
   // Create display startup object for the switcher with formatted name
   const displayStartupForSwitcher = currentStartup
     ? {
-      id: currentStartup.id,
-      name: displayText, // Use formatted display text
-      logo_url: currentStartup.logo_url,
-    }
+        id: currentStartup.id,
+        name: displayText, // Use formatted display text
+        logo_url: currentStartup.logo_url,
+      }
     : null
 
   // Debug logging
@@ -140,14 +138,8 @@ export function AppSidebar({
 
   // Generate navigation URLs based on current startup
   const getNavUrl = (path: string) => {
-    return currentStartupId
-      ? `/dashboard/${currentStartupId}/${path}`
-      : '#' // Prevent navigation when no startup is selected
+    return currentStartupId ? `/dashboard/${currentStartupId}/${path}` : '#' // Prevent navigation when no startup is selected
   }
-
-
-
-
 
   const handleCompleteProfileClick = () => {
     playClickSound()
@@ -192,14 +184,14 @@ export function AppSidebar({
       // Show Complete your onboarding if profile is incomplete
       ...(!isProfileComplete && currentStartupId
         ? [
-          {
-            title: 'Complete your onboarding',
-            url: '#',
-            animation: animations.checkmark,
-            onClick: handleCompleteProfileClick,
-            isSpecial: true,
-          },
-        ]
+            {
+              title: 'Complete your onboarding',
+              url: '#',
+              animation: animations.checkmark,
+              onClick: handleCompleteProfileClick,
+              isSpecial: true,
+            },
+          ]
         : []),
       {
         title: 'Support',
@@ -213,9 +205,7 @@ export function AppSidebar({
       },
       {
         title: 'Settings',
-        url: currentStartupId
-          ? `/dashboard/${currentStartupId}/settings`
-          : '#', // Prevent navigation when no startup is selected
+        url: currentStartupId ? `/dashboard/${currentStartupId}/settings` : '#', // Prevent navigation when no startup is selected
         animation: animations.settings,
       },
     ],
@@ -233,8 +223,8 @@ export function AppSidebar({
                 currentStartupId={currentStartupId}
                 currentStartupDisplay={displayStartupForSwitcher}
                 firstName={firstName}
-                onStartupSelect={onStartupSelect || (() => { })}
-                onCreateNew={onCreateNewStartup || (() => { })}
+                onStartupSelect={onStartupSelect || (() => {})}
+                onCreateNew={onCreateNewStartup || (() => {})}
                 isCollapsed={state === 'collapsed'}
               />
             </SidebarMenuItem>
@@ -257,10 +247,6 @@ export function AppSidebar({
         </SidebarFooter>
       </Sidebar>
 
-
-
-
-
       {/* Collapse/Expand Button - Always visible, fixed to viewport center */}
       <Button
         onClick={() => {
@@ -271,10 +257,11 @@ export function AppSidebar({
         onMouseLeave={() => setIsToggleHovered(false)}
         variant="ghost"
         size="sm"
-        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-sm bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
-          ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
-          : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
-          }`}
+        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-sm bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
+          state === 'collapsed'
+            ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
+            : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
+        }`}
       >
         <LottieIcon
           animationData={animations.nineGrid}

@@ -33,11 +33,14 @@ export async function POST(req: NextRequest) {
   }
 
   // Handle subscription events by calling Edge Function
-  if (event.type.startsWith('customer.subscription.') || event.type.startsWith('invoice.payment_')) {
+  if (
+    event.type.startsWith('customer.subscription.') ||
+    event.type.startsWith('invoice.payment_')
+  ) {
     try {
       const subscription = event.data.object as Stripe.Subscription
       const customerId = subscription.customer as string
-      
+
       let subscriptionData: {
         customerId: string
         eventType: string
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
         priceId?: string
       } = {
         customerId,
-        eventType: event.type
+        eventType: event.type,
       }
 
       // Handle subscription events
@@ -56,21 +59,23 @@ export async function POST(req: NextRequest) {
         const subscriptionId = subscription.id
         const status = subscription.status
         // @ts-expect-error - Stripe types might be inconsistent
-        const currentPeriodEnd = new Date(subscription.current_period_end * 1000)
-        
+        const currentPeriodEnd = new Date(
+          subscription.current_period_end * 1000,
+        )
+
         // Get plan name from metadata or line items
         const planName = subscription.metadata?.plan
         const priceId = subscription.items?.data?.[0]?.price?.id
-        
+
         subscriptionData = {
           ...subscriptionData,
           subscriptionId,
           status,
           currentPeriodEnd: currentPeriodEnd.toISOString(),
           planName,
-          priceId
+          priceId,
         }
-      } 
+      }
       // Handle invoice events
       else if (event.type.startsWith('invoice.payment_')) {
         const invoice = event.data.object as Stripe.Invoice
@@ -85,7 +90,7 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
         },
         body: JSON.stringify(subscriptionData),
       })
@@ -102,7 +107,6 @@ export async function POST(req: NextRequest) {
 
       console.log('Edge Function success:', result)
       return NextResponse.json({ received: true, result })
-
     } catch (error) {
       console.error('Error calling Edge Function:', error)
       return NextResponse.json(
