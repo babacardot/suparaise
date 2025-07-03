@@ -10,8 +10,8 @@
     "agent:run": "ts-node src/agent/index.ts",
     "format": "prettier --write .",
     "update:types": "bunx supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts",
-    "seed:templates": "bun run src/lib/scripts/seed-data/generate-templates.ts",
-    "seed:bulk": "bun run src/lib/scripts/seed-data/bulk-seed.ts",
+    "seed:templates": "bun run src/lib/scripts/seed-data/generate-templates.ts --format excel",
+    "seed:bulk": "bun run src/lib/scripts/seed-data/bulk-seed.ts --format excel",
     "seed:import": "bun run src/lib/scripts/seed-data/csv-import.ts",
     "seed:validate": "bun run src/lib/scripts/seed-data/validate-csv.ts",
     "seed:validate-env": "bun run src/lib/scripts/seed-data/validate-env.ts"
@@ -61,6 +61,7 @@
     "tailwind-merge": "^3.3.1",
     "ts-node": "^10.9.2",
     "types": "^0.1.1",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.6"
   },
   "devDependencies": {

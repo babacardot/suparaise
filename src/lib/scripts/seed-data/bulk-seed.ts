@@ -1,7 +1,16 @@
 #!/usr/bin/env bun
-import { writeCSV } from './utils/csv-utils'
+import { writeCSV, writeExcel } from './utils/csv-utils'
 import { ENUM_VALUES } from './utils/db-utils'
 import path from 'path'
+import fs from 'fs'
+
+// Default configuration
+const DEFAULT_TABLES = ['targets', 'angels', 'accelerators']
+const DEFAULT_COUNTS: Record<string, number> = {
+  targets: 500,
+  angels: 100,
+  accelerators: 100,
+}
 
 // Sample data generators for realistic but fake data
 const VC_NAMES = [
@@ -344,141 +353,168 @@ function generateAcceleratorsData(
   return data
 }
 
-// Main bulk seeding function
+// Main bulk seed function
 async function bulkSeed() {
-  console.log('🚀 Starting bulk seed data generation for Suparaise')
-  console.log(
-    'This will generate sample data for initial testing and development',
-  )
-  console.log('📊 Using enum values from database schema for perfect alignment')
-  console.log('─'.repeat(60))
-
-  const dataDir = path.join(__dirname, 'data')
-
-  // Create data directory if it doesn't exist
-  try {
-    const fs = await import('fs')
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
-    }
-  } catch (error) {
-    console.error('Failed to create data directory:', error)
-    return
+  const args = parseArguments()
+  if (!args) {
+    printHelp()
+    process.exit(1)
   }
 
-  // Generate targets (VCs)
-  console.log('📈 Generating 500 VC/Fund targets...')
-  const targetsData = generateTargetsData(500)
-  const targetsFile = path.join(dataDir, 'targets-bulk.csv')
-  writeCSV(targetsData, targetsFile)
-  console.log(
-    `✅ Generated ${targetsData.length} targets and saved to ${targetsFile}`,
-  )
+  const { tables, counts, format } = args
 
-  // Generate angels
-  console.log('👼 Generating 100 angel investors...')
-  const angelsData = generateAngelsData(100)
-  const angelsFile = path.join(dataDir, 'angels-bulk.csv')
-  writeCSV(angelsData, angelsFile)
-  console.log(
-    `✅ Generated ${angelsData.length} angels and saved to ${angelsFile}`,
-  )
+  console.log(`🚀 Starting bulk data generation...`)
+  console.log(`📊 Format: ${format.toUpperCase()}`)
+  console.log(`📁 Output directory: src/lib/scripts/seed-data/data/`)
+  console.log('─'.repeat(50))
 
-  // Generate accelerators
-  console.log('🚀 Generating 100 accelerators...')
-  const acceleratorsData = generateAcceleratorsData(100)
-  const acceleratorsFile = path.join(dataDir, 'accelerators-bulk.csv')
-  writeCSV(acceleratorsData, acceleratorsFile)
-  console.log(
-    `✅ Generated ${acceleratorsData.length} accelerators and saved to ${acceleratorsFile}`,
-  )
+  const dataDir = path.join(__dirname, 'data')
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true })
+  }
 
-  console.log('\n🎉 Bulk seed data generation completed!')
-  console.log('\nNext steps:')
-  console.log('1. Review the generated CSV files in the data/ directory')
-  console.log('2. Import the data using:')
+  for (const table of tables) {
+    const count = counts[table] || DEFAULT_COUNTS[table] || 100
+    console.log(`\n🔄 Generating ${count} ${table} records...`)
+
+    let data: Array<Record<string, string>>
+    switch (table) {
+      case 'targets':
+        data = generateTargetsData(count)
+        break
+      case 'angels':
+        data = generateAngelsData(count)
+        break
+      case 'accelerators':
+        data = generateAcceleratorsData(count)
+        break
+      default:
+        console.error(`❌ Unknown table: ${table}`)
+        continue
+    }
+
+    const fileExtension = format === 'excel' ? 'xlsx' : 'csv'
+    const fileName = `${table}-bulk.${fileExtension}`
+    const filePath = path.join(dataDir, fileName)
+
+    if (format === 'excel') {
+      writeExcel(data, filePath)
+    } else {
+      writeCSV(data, filePath)
+    }
+
+    console.log(`✅ Generated ${data.length} ${table} records`)
+  }
+
+  console.log('\n🎉 Bulk data generation completed!')
   console.log(
-    '   bun run scripts/seed-data/csv-import.ts --table targets --file scripts/seed-data/data/targets-bulk.csv',
-  )
-  console.log(
-    '   bun run scripts/seed-data/csv-import.ts --table angels --file scripts/seed-data/data/angels-bulk.csv',
-  )
-  console.log(
-    '   bun run scripts/seed-data/csv-import.ts --table accelerators --file scripts/seed-data/data/accelerators-bulk.csv',
-  )
-  console.log(
-    '\n⚠️  Note: This is sample data for testing. Replace with real data for production use.',
-  )
-  console.log(
-    '\n✅ All generated data uses exact enum values from the database schema',
+    '\nNext steps:\n' +
+      '1. Review the generated files in src/lib/scripts/seed-data/data/\n' +
+      '2. Edit any data as needed\n' +
+      `3. Import using: bun run seed:import --table <table_name> --file <path_to_${format}_file>`,
   )
 }
 
-// Parse command line arguments
 function parseArguments() {
   const args = process.argv.slice(2)
-
-  if (args.includes('--help')) {
-    printHelp()
-    return null
+  const result: {
+    tables: string[]
+    counts: Record<string, number>
+    format: 'csv' | 'excel'
+  } = {
+    tables: [],
+    counts: {},
+    format: 'csv', // Default to CSV
   }
 
-  if (args.includes('--confirm')) {
-    return { confirmed: true }
+  for (let i = 0; i < args.length; i++) {
+    switch (args[i]) {
+      case '--tables':
+        result.tables = args[++i]?.split(',') || []
+        break
+      case '--count':
+        const countArg = args[++i]
+        if (countArg?.includes(':')) {
+          // Format: table:count
+          const [table, count] = countArg.split(':')
+          result.counts[table] = parseInt(count)
+        } else {
+          // Apply to all tables
+          const count = parseInt(countArg)
+          DEFAULT_TABLES.forEach((table: string) => {
+            result.counts[table] = count
+          })
+        }
+        break
+      case '--format':
+        const formatArg = args[++i]?.toLowerCase()
+        if (formatArg === 'excel' || formatArg === 'xlsx') {
+          result.format = 'excel'
+        } else if (formatArg === 'csv') {
+          result.format = 'csv'
+        } else {
+          console.error(`❌ Invalid format: ${formatArg}. Use 'csv' or 'excel'`)
+          return null
+        }
+        break
+      case '--help':
+        return null
+      default:
+        console.error(`❌ Unknown argument: ${args[i]}`)
+        return null
+    }
   }
 
-  return { needsConfirmation: true }
+  // Default to all tables if none specified
+  if (result.tables.length === 0) {
+    result.tables = DEFAULT_TABLES
+  }
+
+  // Validate table names
+  for (const table of result.tables) {
+    if (!DEFAULT_TABLES.includes(table)) {
+      console.error(`❌ Invalid table: ${table}`)
+      console.error(`Valid tables: ${DEFAULT_TABLES.join(', ')}`)
+      return null
+    }
+  }
+
+  return result
 }
 
 function printHelp() {
   console.log(`
 Bulk Seed Data Generator for Suparaise
 
-This script generates sample data for initial testing:
-- 500 VC/Fund targets
-- 100 Angel investors  
-- 100 Accelerators
-
 Usage: bun run bulk-seed.ts [options]
 
 Options:
-  --confirm    Skip confirmation prompt and generate data
-  --help       Show this help message
+  --tables <list>       Comma-separated tables to generate (default: all)
+                        Options: targets,angels,accelerators
+  
+  --count <number>      Number of records per table (default varies by table)
+  --count <table:num>   Specific count for a table (e.g., targets:1000)
+  
+  --format <format>     Output format: csv or excel (default: csv)
+                        Use 'excel' for .xlsx files that open easily in macOS
+  
+  --help               Show this help message
 
-Example:
-  bun run bulk-seed.ts --confirm
+Examples:
+  bun run bulk-seed.ts                                    # Generate all tables in CSV
+  bun run bulk-seed.ts --format excel                     # Generate all tables in Excel
+  bun run bulk-seed.ts --tables targets --count 1000      # 1000 targets in CSV
+  bun run bulk-seed.ts --tables targets --format excel    # Targets in Excel
+  bun run bulk-seed.ts --count targets:500,angels:200     # Mixed counts in CSV
 
-Note: This generates FAKE data for testing purposes only.
+Generated files will be saved to: src/lib/scripts/seed-data/data/
+
+Default counts:
+  - Targets: ${DEFAULT_COUNTS.targets} records
+  - Angels: ${DEFAULT_COUNTS.angels} records  
+  - Accelerators: ${DEFAULT_COUNTS.accelerators} records
 `)
 }
 
-// Main execution
-async function main() {
-  const options = parseArguments()
-
-  if (!options) {
-    process.exit(1)
-  }
-
-  if (options.needsConfirmation) {
-    console.log(
-      '⚠️  This will generate 700 sample records (500 VCs, 100 angels, 100 accelerators)',
-    )
-    console.log('⚠️  This is FAKE data for testing purposes only')
-    console.log('\nProceed? Add --confirm to skip this prompt')
-    process.exit(0)
-  }
-
-  try {
-    await bulkSeed()
-  } catch (error) {
-    console.error(
-      '❌ Bulk seed generation failed:',
-      error instanceof Error ? error.message : error,
-    )
-    process.exit(1)
-  }
-}
-
 // Run the script
-main()
+bulkSeed()

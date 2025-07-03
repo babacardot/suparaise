@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import * as XLSX from 'xlsx'
 
 export interface ParsedCSVData {
   headers: string[]
@@ -53,6 +54,92 @@ export function parseCSV(filePath: string): ParsedCSVData {
       `Error reading file: ${error instanceof Error ? error.message : 'Unknown error'}`,
     )
     return { headers: [], rows: [], errors }
+  }
+}
+
+// Parse Excel file and return structured data (same interface as CSV)
+export function parseExcel(filePath: string): ParsedCSVData {
+  const errors: string[] = []
+
+  if (!fs.existsSync(filePath)) {
+    errors.push(`File not found: ${filePath}`)
+    return { headers: [], rows: [], errors }
+  }
+
+  try {
+    // Read the Excel file
+    const workbook = XLSX.readFile(filePath)
+    const sheetName = workbook.SheetNames[0] // Use first sheet
+
+    if (!sheetName) {
+      errors.push('No sheets found in Excel file')
+      return { headers: [], rows: [], errors }
+    }
+
+    const worksheet = workbook.Sheets[sheetName]
+
+    // Convert to JSON with header row
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
+
+    if (jsonData.length === 0) {
+      errors.push('Excel file is empty')
+      return { headers: [], rows: [], errors }
+    }
+
+    // Extract headers from first row
+    const headers = (jsonData[0] as string[]).map((h) => String(h || '').trim())
+
+    // Process data rows
+    const rows: Record<string, string>[] = []
+    for (let i = 1; i < jsonData.length; i++) {
+      const rowData = jsonData[i] as (string | number | boolean | null)[]
+
+      // Skip empty rows
+      if (
+        !rowData ||
+        rowData.every(
+          (cell) => cell === null || cell === undefined || cell === '',
+        )
+      ) {
+        continue
+      }
+
+      const row: Record<string, string> = {}
+      headers.forEach((header, index) => {
+        const cellValue = rowData[index]
+        row[header] =
+          cellValue !== null && cellValue !== undefined
+            ? String(cellValue).trim()
+            : ''
+      })
+      rows.push(row)
+    }
+
+    return { headers, rows, errors }
+  } catch (error) {
+    errors.push(
+      `Error reading Excel file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
+    return { headers: [], rows: [], errors }
+  }
+}
+
+// Parse file (CSV or Excel) based on extension
+export function parseFile(filePath: string): ParsedCSVData {
+  const extension = path.extname(filePath).toLowerCase()
+
+  if (extension === '.xlsx' || extension === '.xls') {
+    return parseExcel(filePath)
+  } else if (extension === '.csv') {
+    return parseCSV(filePath)
+  } else {
+    return {
+      headers: [],
+      rows: [],
+      errors: [
+        `Unsupported file format: ${extension}. Use .csv, .xlsx, or .xls`,
+      ],
+    }
   }
 }
 
@@ -407,6 +494,99 @@ export function generateCSVTemplate(
   }
 }
 
+// Generate Excel template files with exact database column names
+export function generateExcelTemplate(
+  tableName: string,
+  outputDir: string,
+): void {
+  const templateData = {
+    targets: [
+      {
+        name: 'Example VC Fund',
+        website: 'https://example-vc.com',
+        application_url: 'https://example-vc.com/apply',
+        application_email: 'apply@example-vc.com',
+        submission_type: 'form',
+        stage_focus: 'Pre-seed, Seed',
+        industry_focus: 'B2B SaaS, Fintech',
+        region_focus: 'North America, Europe',
+        form_complexity: 'standard',
+        question_count_range: '11-20',
+        required_documents: 'pitch_deck, video',
+        notes: 'Focus on early-stage tech companies',
+      },
+    ],
+    angels: [
+      {
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        linkedin: 'https://linkedin.com/in/johndoe',
+        twitter: 'https://twitter.com/johndoe',
+        personal_website: 'https://johndoe.com',
+        location: 'San Francisco, CA',
+        bio: 'Former founder with 2 exits',
+        check_size: '25K-50K',
+        stage_focus: 'Pre-seed, Seed',
+        industry_focus: 'B2B SaaS, AI/ML',
+        region_focus: 'North America',
+        investment_approach: 'hands-on',
+        previous_exits: 'Company A, Company B',
+        domain_expertise: 'Product, Marketing',
+        response_time: '1 week',
+        submission_type: 'email',
+        application_url: '',
+        application_email: '',
+        form_complexity: 'simple',
+        required_documents: 'pitch_deck',
+        notable_investments: 'Unicorn Corp, Great Startup',
+        is_active: 'true',
+        notes: 'Prefers warm intros',
+      },
+    ],
+    accelerators: [
+      {
+        name: 'Example Accelerator',
+        website: 'https://example-accelerator.com',
+        application_url: 'https://example-accelerator.com/apply',
+        application_email: 'apply@example-accelerator.com',
+        submission_type: 'form',
+        program_type: 'hybrid',
+        program_duration: '3 months',
+        location: 'San Francisco, CA',
+        is_remote_friendly: 'true',
+        batch_size: '11-20',
+        batches_per_year: '2',
+        next_application_deadline: '2024-12-31',
+        stage_focus: 'Pre-seed, Seed',
+        industry_focus: 'B2B SaaS, AI/ML',
+        region_focus: 'Global',
+        equity_taken: '4-6%',
+        funding_provided: '50K-100K',
+        acceptance_rate: '1-5%',
+        form_complexity: 'standard',
+        required_documents: 'pitch_deck, video',
+        program_fee: '0',
+        is_active: 'true',
+        notes: 'Rolling applications accepted',
+      },
+    ],
+  }
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true })
+  }
+
+  const data = templateData[tableName as keyof typeof templateData]
+  if (data) {
+    const filePath = path.join(outputDir, `${tableName}-template.xlsx`)
+    writeExcel(data, filePath)
+    console.log(`✅ Excel template created: ${filePath}`)
+  } else {
+    console.error(`❌ Unknown table name: ${tableName}`)
+  }
+}
+
 // Write data to CSV file
 export function writeCSV(
   data: Array<Record<string, unknown>>,
@@ -433,6 +613,52 @@ export function writeCSV(
 
   fs.writeFileSync(filePath, csvContent)
   console.log(`✅ CSV written: ${filePath}`)
+}
+
+// Write data to Excel file
+export function writeExcel(
+  data: Array<Record<string, unknown>>,
+  filePath: string,
+): void {
+  if (data.length === 0) return
+
+  // Transform data for Excel: handle arrays by joining them with commas
+  const excelData = data.map((row) => {
+    const transformedRow: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(row)) {
+      if (Array.isArray(value)) {
+        transformedRow[key] = value.join(', ')
+      } else {
+        transformedRow[key] = value
+      }
+    }
+    return transformedRow
+  })
+
+  // Create workbook and worksheet
+  const workbook = XLSX.utils.book_new()
+  const worksheet = XLSX.utils.json_to_sheet(excelData)
+
+  // Auto-size columns
+  const colWidths = Object.keys(data[0]).map((header) => {
+    const maxLength = Math.max(
+      header.length,
+      ...data.map((row) => {
+        const value = row[header]
+        if (value === null || value === undefined) return 0
+        return value.toString().length
+      }),
+    )
+    return { wch: Math.min(maxLength + 2, 50) } // Cap at 50 characters
+  })
+  worksheet['!cols'] = colWidths
+
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data')
+
+  // Write to file
+  XLSX.writeFile(workbook, filePath)
+  console.log(`✅ Excel written: ${filePath}`)
 }
 
 // Validation functions using the typed interfaces

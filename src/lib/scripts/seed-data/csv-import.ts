@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import {
-  parseCSV,
+  parseFile,
   transformToTargetData,
   transformToAngelData,
   transformToAcceleratorData,
@@ -29,7 +29,7 @@ const REQUIRED_FIELDS: Record<TableName, string[]> = {
   accelerators: ['name'],
 }
 
-// Transform CSV data based on table type with proper typing
+// Transform CSV/Excel data based on table type with proper typing
 function transformData(
   table: TableName,
   rows: Record<string, string>[],
@@ -47,8 +47,12 @@ function transformData(
 }
 
 // Main import function
-async function importCSV(options: ImportOptions) {
-  console.log(`🚀 Starting CSV import for ${options.table} table`)
+async function importData(options: ImportOptions) {
+  const fileExtension = options.file.split('.').pop()?.toLowerCase()
+  const fileType =
+    fileExtension === 'xlsx' || fileExtension === 'xls' ? 'Excel' : 'CSV'
+
+  console.log(`🚀 Starting ${fileType} import for ${options.table} table`)
   console.log(`📁 File: ${options.file}`)
   console.log(`📊 Batch size: ${options.batchSize || 1000}`)
   console.log(`🔄 Mode: ${options.dryRun ? 'Dry run' : 'Live import'}`)
@@ -64,21 +68,21 @@ async function importCSV(options: ImportOptions) {
     return
   }
 
-  // Parse CSV file
-  console.log('📖 Parsing CSV file...')
-  const csvData = parseCSV(options.file)
+  // Parse file (CSV or Excel)
+  console.log(`📖 Parsing ${fileType} file...`)
+  const fileData = parseFile(options.file)
 
-  if (csvData.errors.length > 0) {
-    console.error('❌ CSV parsing errors:')
-    csvData.errors.forEach((error) => console.error(`  ${error}`))
+  if (fileData.errors.length > 0) {
+    console.error(`❌ ${fileType} parsing errors:`)
+    fileData.errors.forEach((error) => console.error(`  ${error}`))
     return
   }
 
-  console.log(`✅ Parsed ${csvData.rows.length} rows`)
+  console.log(`✅ Parsed ${fileData.rows.length} rows`)
 
   // Transform data based on table type
   console.log('🔄 Transforming data...')
-  const transformedData = transformData(options.table, csvData.rows)
+  const transformedData = transformData(options.table, fileData.rows)
 
   // Validate required fields using the typed interfaces
   console.log('✅ Validating required fields...')
@@ -192,13 +196,13 @@ function parseArguments(): ImportOptions | null {
 
 function printHelp() {
   console.log(`
-CSV Import Tool for Suparaise
+Data Import Tool for Suparaise
 
-Usage: bun run csv-import.ts --table <table_name> --file <csv_file> [options]
+Usage: bun run csv-import.ts --table <table_name> --file <file_path> [options]
 
 Required Arguments:
   --table <name>        Table to import to (targets, angels, accelerators)
-  --file <path>         Path to CSV file
+  --file <path>         Path to data file (supports .csv, .xlsx, .xls)
 
 Optional Arguments:
   --batch-size <num>    Number of records per batch (default: 1000)
@@ -206,20 +210,23 @@ Optional Arguments:
   --help               Show this help message
 
 Examples:
-  bun run csv-import.ts --table targets --file data/vcs.csv
+  bun run csv-import.ts --table targets --file data/vcs.xlsx
   bun run csv-import.ts --table angels --file data/angels.csv --batch-size 500 --dry-run
-  bun run csv-import.ts --table accelerators --file data/accelerators.csv
+  bun run csv-import.ts --table accelerators --file data/accelerators.xlsx
 
-CSV Format:
-  Use the template generator to create properly formatted CSV files:
-  bun run generate-templates.ts
+File Format Support:
+  ✅ Excel files (.xlsx, .xls) - Recommended for macOS
+  ✅ CSV files (.csv) - Traditional format
+  
+  Use the template generator to create properly formatted files:
+  bun run generate-templates.ts --format excel
 
 Environment Variables Required:
   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 Column Requirements:
-  All CSV column names must match the database table column names exactly.
+  All column names must match the database table column names exactly.
   See the database schema in supabase/migrations/01_db.sql for reference.
 
   Required columns by table:
@@ -238,7 +245,7 @@ async function main() {
   }
 
   try {
-    await importCSV(options)
+    await importData(options)
   } catch (error) {
     console.error(
       '❌ Import failed:',
@@ -248,7 +255,4 @@ async function main() {
   }
 }
 
-// Check if this script is being run directly
-if (process.argv[1] === import.meta.url.replace('file://', '')) {
-  main()
-}
+main()
