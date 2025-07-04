@@ -31,7 +31,102 @@ CREATE POLICY "Users can create their own support requests"
     ON support_requests FOR INSERT
     WITH CHECK ((select auth.uid()) = user_id);
 
--- Storage bucket and policies for support request images are defined in 02_buckets.sql
+-- =================================================================
+-- SUPPORT REQUEST TRIGGER
+-- =================================================================
+
+-- Trigger function to automatically send emails when support request is created
+CREATE OR REPLACE FUNCTION public.handle_support_request_created()
+RETURNS TRIGGER AS $$
+DECLARE
+  request_id bigint;
+  function_url text;
+  supabase_url text;
+  service_role_key text;
+  v_user_name TEXT;
+  v_user_email TEXT;
+BEGIN
+  -- We shouldn't block the support request creation process if the email fails.
+  -- The Edge Function will handle its own errors.
+  BEGIN
+    -- Get user details
+    SELECT 
+        COALESCE(full_name, email),
+        email
+    INTO v_user_name, v_user_email
+    FROM profiles 
+    WHERE id = NEW.user_id;
+    
+    -- Fallback to auth.users if not found in profiles
+    IF v_user_name IS NULL OR v_user_email IS NULL THEN
+        SELECT 
+            COALESCE(raw_user_meta_data->>'full_name', email),
+            email
+        INTO v_user_name, v_user_email
+        FROM auth.users 
+        WHERE id = NEW.user_id;
+    END IF;
+    
+    -- Set defaults if still missing
+    v_user_name := COALESCE(v_user_name, 'Unknown User');
+    v_user_email := COALESCE(v_user_email, 'no-reply@suparaise.com');
+
+    -- Get configuration values
+    supabase_url := secrets.get_config('supabase_url');
+    service_role_key := secrets.get_config('service_role_key');
+    function_url := supabase_url || '/functions/v1/send-email';
+    
+    -- Send notification to support team
+    SELECT INTO request_id net.http_post(
+      url := function_url,
+      body := jsonb_build_object(
+        'emailType', 'support_request_admin',
+        'userName', v_user_name,
+        'userEmail', v_user_email,
+        'category', NEW.category,
+        'subject', NEW.subject,
+        'message', NEW.message,
+        'imageUrl', NEW.image_url,
+        'createdAt', NEW.created_at,
+        'supportRequestId', NEW.id
+      ),
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer ' || service_role_key
+      )
+    );
+
+    -- Add a debugging log
+    RAISE WARNING 'Attempting to send support confirmation to: %', v_user_email;
+
+    -- Send confirmation to user
+    SELECT INTO request_id net.http_post(
+      url := function_url,
+      body := jsonb_build_object(
+        'emailType', 'support_request_confirmation',
+        'userEmail', v_user_email,
+        'supportRequestId', NEW.id
+      ),
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer ' || service_role_key
+      )
+    );
+    
+  EXCEPTION WHEN OTHERS THEN
+    -- Log the error but don't fail the support request creation
+    RAISE WARNING 'Failed to send support request emails for request %: %', NEW.id, SQLERRM;
+  END;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, secrets, net, pg_temp;
+
+-- Create trigger on support_requests table
+CREATE TRIGGER on_support_request_created
+  AFTER INSERT ON public.support_requests
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_support_request_created();
 
 -- Create RPC function to create support request
 CREATE OR REPLACE FUNCTION create_support_request(

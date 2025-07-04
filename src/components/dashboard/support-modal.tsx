@@ -39,21 +39,19 @@ const CustomSelect = ({ value, onChange, options }: CustomSelectProps) => {
   return (
     <div ref={selectRef} className="relative">
       <div
-        className={`rounded-sm bg-background text-foreground p-2 cursor-pointer border border-sidebar-border hover:border-sidebar-border/50 transition-colors duration-200 flex items-center justify-between ${
-          isOpen ? 'border-sidebar-border/50' : ''
-        }`}
+        className={`rounded-sm bg-background text-foreground p-2 cursor-pointer border border-sidebar-border hover:border-sidebar-border/50 transition-colors duration-200 flex items-center justify-between ${isOpen ? 'border-sidebar-border/50' : ''
+          }`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="text-sm">
           {value
             ? options.find((opt: SelectOption) => opt.value === value)?.label ||
-              ''
+            ''
             : 'Select category'}
         </span>
         <svg
-          className={`w-3 h-3 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-3 h-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+            }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -332,11 +330,10 @@ export default function SupportModal({
               <div className="border border-sidebar-border rounded-sm p-2 relative bg-background max-w-full overflow-hidden">
                 <div className="flex items-center space-x-2">
                   <div
-                    className={`rounded-sm p-1 flex-shrink-0 ${
-                      image.type.includes('png')
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                    }`}
+                    className={`rounded-sm p-1 flex-shrink-0 ${image.type.includes('png')
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      }`}
                   >
                     <FileIcon className="h-3 w-3" />
                   </div>
