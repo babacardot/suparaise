@@ -62,7 +62,7 @@ const FIELD_LABELS: Record<
   // Financial fields
   fundingAmountSought: { label: 'Funding amount', page: 'company' },
   preMoneyValuation: { label: 'Pre-money valuation', page: 'company' },
-  investmentInstrument: { label: 'Investment type', page: 'company' },
+  investmentInstrument: { label: 'Instrument', page: 'company' },
   mrr: { label: 'MRR', page: 'company' },
   arr: { label: 'ARR', page: 'company' },
 

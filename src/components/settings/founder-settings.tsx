@@ -118,39 +118,39 @@ function ProfileSettingsSkeleton() {
 
           {/* Personal Information Skeleton */}
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-9 w-full" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-9 w-full" />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-12" />
               <Skeleton className="h-9 w-full" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-12" />
               <Skeleton className="h-9 w-full" />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-8" />
               <Skeleton className="h-9 w-full" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-16" />
               <Skeleton className="h-9 w-full" />
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Skeleton className="h-4 w-8" />
             <Skeleton className="h-20 w-full" />
           </div>
@@ -159,15 +159,15 @@ function ProfileSettingsSkeleton() {
           <div className="space-y-4">
             <Skeleton className="h-6 w-16" />
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-16" />
                 <Skeleton className="h-9 w-full" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-12" />
                 <Skeleton className="h-9 w-full" />
               </div>
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-3 md:col-span-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-9 w-full" />
               </div>
@@ -863,7 +863,7 @@ export default function ProfileSettings() {
 
               {/* Personal Information */}
               <div className="grid gap-4 md:grid-cols-2 mb-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor={`${founder.id}-firstName`}>First name</Label>
                   <div className="relative">
                     <Input
@@ -879,7 +879,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-firstName` &&
-                          'dark:bg-muted',
+                        'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-firstName`}
                       placeholder="Enter first name"
@@ -903,7 +903,7 @@ export default function ProfileSettings() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor={`${founder.id}-lastName`}>Last name</Label>
                   <div className="relative">
                     <Input
@@ -919,7 +919,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-lastName` &&
-                          'dark:bg-muted',
+                        'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-lastName`}
                       placeholder="Enter last name"
@@ -945,7 +945,7 @@ export default function ProfileSettings() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 mb-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor={`${founder.id}-email`}>Email</Label>
                   <div className="relative">
                     <Input
@@ -958,7 +958,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-email` &&
-                          'dark:bg-muted',
+                        'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-email`}
                       placeholder="Enter email"
@@ -982,7 +982,7 @@ export default function ProfileSettings() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <PhoneNumberInput
                     value={founder.phone}
                     onChange={(value) =>
@@ -997,7 +997,7 @@ export default function ProfileSettings() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 mb-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor={`${founder.id}-role`}>Role</Label>
                   <div className="relative">
                     <select
@@ -1023,7 +1023,7 @@ export default function ProfileSettings() {
 
                 {/* User ID only for first founder */}
                 {founderIndex === 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="user-id">User ID</Label>
                     <div className="flex">
                       <Input
@@ -1057,7 +1057,7 @@ export default function ProfileSettings() {
 
                 {/* Founder ID only for co-founders */}
                 {founderIndex > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-founder-id`}>ID</Label>
                     <Input
                       id={`${founder.id}-founder-id`}
@@ -1069,7 +1069,7 @@ export default function ProfileSettings() {
                 )}
               </div>
 
-              <div className="space-y-2 mb-6">
+              <div className="space-y-3 mb-6">
                 <Label htmlFor={`${founder.id}-bio`}>Bio</Label>
                 <div className="relative">
                   <Textarea
@@ -1083,7 +1083,7 @@ export default function ProfileSettings() {
                       editingField !== `${founder.id}-bio` && 'dark:bg-muted',
                     )}
                     readOnly={editingField !== `${founder.id}-bio`}
-                    placeholder="Tell us about this founder..."
+                    placeholder="Tell agents a little bit more about yourself..."
                     rows={3}
                     enableAI={editingField === `${founder.id}-bio`}
                     aiFieldType="bio"
@@ -1117,9 +1117,8 @@ export default function ProfileSettings() {
 
               {/* Social Links */}
               <div className="space-y-4 mb-6">
-                <h4 className="text-md font-medium">Socials</h4>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-linkedin`}>LinkedIn</Label>
                     <div className="relative">
                       <Input
@@ -1135,7 +1134,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-linkedin` &&
-                            'dark:bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-linkedin`}
                         placeholder="https://linkedin.com/in/profile"
@@ -1163,7 +1162,7 @@ export default function ProfileSettings() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-githubUrl`}>Github</Label>
                     <div className="relative">
                       <Input
@@ -1179,7 +1178,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-githubUrl` &&
-                            'dark:bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-githubUrl`}
                         placeholder="https://github.com/username"
@@ -1207,7 +1206,7 @@ export default function ProfileSettings() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-personalWebsiteUrl`}>
                       Personal website
                     </Label>
@@ -1225,7 +1224,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-personalWebsiteUrl` &&
-                            'dark:bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={
                           editingField !== `${founder.id}-personalWebsiteUrl`
@@ -1255,7 +1254,7 @@ export default function ProfileSettings() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-twitterUrl`}>X</Label>
                     <div className="relative">
                       <Input
@@ -1271,7 +1270,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-twitterUrl` &&
-                            'dark:bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-twitterUrl`}
                         placeholder="https://x.com/username"
@@ -1316,7 +1315,7 @@ export default function ProfileSettings() {
                 <h3 className="text-lg font-medium">Co-founder</h3>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="new-firstName">First name *</Label>
                     <Input
                       id="new-firstName"
@@ -1328,7 +1327,7 @@ export default function ProfileSettings() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="new-lastName">Last name *</Label>
                     <Input
                       id="new-lastName"
@@ -1342,7 +1341,7 @@ export default function ProfileSettings() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="new-email">Email *</Label>
                     <Input
                       id="new-email"
@@ -1355,7 +1354,7 @@ export default function ProfileSettings() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <PhoneNumberInput
                       value={newFounderData.phone}
                       onChange={(value) =>
@@ -1367,7 +1366,7 @@ export default function ProfileSettings() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="new-role">Role</Label>
                   <div className="relative">
                     <select
@@ -1393,7 +1392,7 @@ export default function ProfileSettings() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="new-bio">Bio</Label>
                   <Textarea
                     id="new-bio"
@@ -1401,7 +1400,7 @@ export default function ProfileSettings() {
                     onChange={(e) =>
                       handleNewFounderInputChange('bio', e.target.value)
                     }
-                    placeholder="Tell us about this co-founder..."
+                    placeholder="Tell agents about your co-founder..."
                     rows={3}
                     enableAI={true}
                     aiFieldType="bio"
@@ -1417,7 +1416,7 @@ export default function ProfileSettings() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="new-linkedin">LinkedIn</Label>
                     <Input
                       id="new-linkedin"
@@ -1429,7 +1428,7 @@ export default function ProfileSettings() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="new-githubUrl">Github</Label>
                     <Input
                       id="new-githubUrl"
@@ -1441,7 +1440,7 @@ export default function ProfileSettings() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="new-personalWebsiteUrl">
                       Personal website
                     </Label>
@@ -1458,7 +1457,7 @@ export default function ProfileSettings() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="new-twitterUrl">X</Label>
                     <Input
                       id="new-twitterUrl"

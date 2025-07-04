@@ -205,7 +205,7 @@ const formatFieldName = (fieldName: string): string => {
     incorporationCountry: 'Incorporation country',
     incorporationCity: 'Incorporation city',
     operatingCountries: 'Operating countries',
-    investmentInstrument: 'Investment type',
+    investmentInstrument: 'Instrument',
     fundingAmountSought: 'Funding amount',
     preMoneyValuation: 'Pre-money valuation',
     mrr: 'MRR',
@@ -249,54 +249,54 @@ function CompanySettingsSkeleton() {
           {/* Basic Information Skeleton */}
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-9 w-full" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-16" />
                 <Skeleton className="h-9 w-full" />
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-9 w-full" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-16" />
                 <Skeleton className="h-9 w-full" />
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-16" />
                 <Skeleton className="h-9 w-full" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-9 w-full" />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-16" />
               <Skeleton className="h-9 w-full" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-20 w-full" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-24 w-full" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-9 w-full" />
             </div>
@@ -305,32 +305,32 @@ function CompanySettingsSkeleton() {
           {/* Company Details Skeleton */}
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-9 w-full" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-9 w-full" />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-9 w-full" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-16" />
               <Skeleton className="h-9 w-full" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-20 w-full" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-20 w-full" />
             </div>
@@ -378,9 +378,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -460,7 +459,7 @@ const CompetitorInput: React.FC<{
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex gap-2">
         <Input
           value={inputValue}
@@ -1522,7 +1521,7 @@ export default function CompanySettings() {
           {/* Basic Information */}
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="name">Company name</Label>
                 <div className="relative">
                   <Input
@@ -1555,7 +1554,7 @@ export default function CompanySettings() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="website">Website</Label>
                 <div className="relative">
                   <Input
@@ -1592,7 +1591,7 @@ export default function CompanySettings() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="foundedYear">Founded year</Label>
                 <div className="relative">
                   <Input
@@ -1633,7 +1632,7 @@ export default function CompanySettings() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="industry">Industry</Label>
                 <div className="relative">
                   <select
@@ -1660,7 +1659,7 @@ export default function CompanySettings() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="location">Location</Label>
                 <div className="relative">
                   <Input
@@ -1695,7 +1694,7 @@ export default function CompanySettings() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="employeeCount">Team size</Label>
                 <div className="relative">
                   <select
@@ -1725,7 +1724,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="descriptionShort">One-liner</Label>
               <div className="relative">
                 <Textarea
@@ -1770,7 +1769,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="descriptionMedium">Elevator pitch</Label>
               <div className="relative">
                 <Textarea
@@ -1815,7 +1814,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="descriptionLong">Full description</Label>
               <div className="relative">
                 <Textarea
@@ -1859,37 +1858,56 @@ export default function CompanySettings() {
                 )}
               </div>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="revenueModel">Revenue model</Label>
+          {/* Company Details */}
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <Label htmlFor="legalStructure">Legal structure</Label>
               <div className="relative">
                 <select
-                  id="revenueModel"
+                  id="legalStructure"
                   className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                  value={formData.revenueModel || ''}
+                  value={formData.legalStructure || ''}
                   onChange={async (e) => {
-                    const newValue = e.target.value as RevenueModelType
-                    handleInputChange('revenueModel', newValue)
-                    await handleFieldSave('revenueModel')
+                    const newValue = e.target.value as LegalStructure
+                    handleInputChange('legalStructure', newValue)
+
+                    // Auto-update incorporation status based on legal structure
+                    const isNotIncorporated = newValue === 'Not yet incorporated'
+                    handleInputChange('isIncorporated', !isNotIncorporated)
+
+                    // Save both fields
+                    await handleFieldSave('legalStructure')
+                    if (formData.isIncorporated !== !isNotIncorporated) {
+                      try {
+                        const { data, error } = await supabase.rpc('update_user_startup_data', {
+                          p_user_id: user.id,
+                          p_startup_id: currentStartupId,
+                          p_data: { isIncorporated: !isNotIncorporated },
+                        })
+                        if (error) throw error
+                        if (data?.error) throw new Error(data.error)
+                      } catch (error) {
+                        console.error('Error saving incorporation status:', error)
+                      }
+                    }
                   }}
                   disabled={isLoading}
                 >
-                  <option value="">Select a revenue model</option>
-                  {REVENUE_MODELS.map((model) => (
-                    <option key={model} value={model}>
-                      {model}
+                  <option value="">Select legal structure</option>
+                  {LEGAL_STRUCTURES.map((structure) => (
+                    <option key={structure} value={structure}>
+                      {structure}
                     </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
             </div>
-          </div>
 
-          {/* Company Details */}
-          <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="fundingRound">Funding stage</Label>
                 <div className="relative">
                   <select
@@ -1914,24 +1932,24 @@ export default function CompanySettings() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="legalStructure">Legal structure</Label>
+              <div className="space-y-3">
+                <Label htmlFor="investmentInstrument">Instrument</Label>
                 <div className="relative">
                   <select
-                    id="legalStructure"
+                    id="investmentInstrument"
                     className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={formData.legalStructure || ''}
+                    value={formData.investmentInstrument || ''}
                     onChange={async (e) => {
-                      const newValue = e.target.value as LegalStructure
-                      handleInputChange('legalStructure', newValue)
-                      await handleFieldSave('legalStructure')
+                      const newValue = e.target.value as InvestmentInstrument
+                      handleInputChange('investmentInstrument', newValue)
+                      await handleFieldSave('investmentInstrument')
                     }}
                     disabled={isLoading}
                   >
-                    <option value="">Select legal structure</option>
-                    {LEGAL_STRUCTURES.map((structure) => (
-                      <option key={structure} value={structure}>
-                        {structure}
+                    <option value="">Select an instrument</option>
+                    {INVESTMENT_INSTRUMENTS.map((instrument) => (
+                      <option key={instrument} value={instrument}>
+                        {instrument}
                       </option>
                     ))}
                   </select>
@@ -1941,36 +1959,31 @@ export default function CompanySettings() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="employeeCount">Team size</Label>
+              <div className="space-y-3">
+                <Label htmlFor="revenueModel">Revenue model</Label>
                 <div className="relative">
                   <select
-                    id="employeeCount"
+                    id="revenueModel"
                     className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={formData.employeeCount}
+                    value={formData.revenueModel || ''}
                     onChange={async (e) => {
-                      const newValue = parseInt(e.target.value) || 1
-                      handleInputChange('employeeCount', newValue)
-                      await handleFieldSave('employeeCount')
+                      const newValue = e.target.value as RevenueModelType
+                      handleInputChange('revenueModel', newValue)
+                      await handleFieldSave('revenueModel')
                     }}
                     disabled={isLoading}
                   >
-                    <option value={1}>Just me</option>
-                    <option value={2}>2 people</option>
-                    <option value={3}>3 people</option>
-                    <option value={4}>4 people</option>
-                    <option value={5}>5 people</option>
-                    <option value={10}>6-10 people</option>
-                    <option value={20}>11-20 people</option>
-                    <option value={50}>21-50 people</option>
-                    <option value={100}>51-100 people</option>
-                    <option value={200}>100+ people</option>
+                    <option value="">Select a revenue model</option>
+                    {REVENUE_MODELS.map((model) => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
-
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="currentRunway">Runway</Label>
                 <div className="relative">
                   <select
@@ -2009,15 +2022,15 @@ export default function CompanySettings() {
                     if (formData.isIncorporated) {
                       playClickSound()
                       handleInputChange('isIncorporated', false)
-                      // Save without toast or completion sound
+                      handleInputChange('legalStructure', 'Not yet incorporated')
+                      // Save both fields
                       try {
-                        const updateData = { isIncorporated: false }
                         const { data, error } = await supabase.rpc(
                           'update_user_startup_data',
                           {
                             p_user_id: user.id,
                             p_startup_id: currentStartupId,
-                            p_data: updateData,
+                            p_data: { isIncorporated: false, legalStructure: 'Not yet incorporated' },
                           },
                         )
                         if (error) throw error
@@ -2030,12 +2043,13 @@ export default function CompanySettings() {
                       }
                     }
                   }}
-                  disabled={isLoading}
+                  disabled={isLoading || !formData.isIncorporated || (formData.legalStructure !== null && formData.legalStructure !== 'Not yet incorporated')}
                   className={cn(
                     'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     !formData.isIncorporated
                       ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-300'
                       : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                    'disabled:opacity-50 disabled:cursor-not-allowed'
                   )}
                 >
                   No
@@ -2045,15 +2059,15 @@ export default function CompanySettings() {
                     if (!formData.isIncorporated) {
                       playClickSound()
                       handleInputChange('isIncorporated', true)
-                      // Save without toast or completion sound
+                      handleInputChange('legalStructure', null)
+                      // Save incorporation status, clear legal structure so user can select appropriate one
                       try {
-                        const updateData = { isIncorporated: true }
                         const { data, error } = await supabase.rpc(
                           'update_user_startup_data',
                           {
                             p_user_id: user.id,
                             p_startup_id: currentStartupId,
-                            p_data: updateData,
+                            p_data: { isIncorporated: true, legalStructure: null },
                           },
                         )
                         if (error) throw error
@@ -2066,12 +2080,13 @@ export default function CompanySettings() {
                       }
                     }
                   }}
-                  disabled={isLoading}
+                  disabled={isLoading || formData.isIncorporated || formData.legalStructure === 'Not yet incorporated'}
                   className={cn(
                     'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     formData.isIncorporated
                       ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-400'
                       : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                    'disabled:opacity-50 disabled:cursor-not-allowed'
                   )}
                 >
                   Yes
@@ -2081,7 +2096,7 @@ export default function CompanySettings() {
 
             {formData.isIncorporated && (
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="incorporationCountry">
                     Incorporation country
                   </Label>
@@ -2109,7 +2124,7 @@ export default function CompanySettings() {
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="incorporationCity">Incorporation city</Label>
                   <div className="relative">
                     <Input
@@ -2146,7 +2161,7 @@ export default function CompanySettings() {
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="operating-countries">
                 Countries where you operate
               </Label>
@@ -2194,32 +2209,7 @@ export default function CompanySettings() {
           {/* Investment & Financial Information */}
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="investmentInstrument">Investment type</Label>
-                <div className="relative">
-                  <select
-                    id="investmentInstrument"
-                    className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={formData.investmentInstrument || ''}
-                    onChange={async (e) => {
-                      const newValue = e.target.value as InvestmentInstrument
-                      handleInputChange('investmentInstrument', newValue)
-                      await handleFieldSave('investmentInstrument')
-                    }}
-                    disabled={isLoading}
-                  >
-                    <option value="">Select an instrument</option>
-                    {INVESTMENT_INSTRUMENTS.map((instrument) => (
-                      <option key={instrument} value={instrument}>
-                        {instrument}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="fundingAmountSought">Funding amount</Label>
                 <Input
                   id="fundingAmountSought"
@@ -2239,10 +2229,8 @@ export default function CompanySettings() {
                   className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
-            </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="preMoneyValuation">Pre-money valuation</Label>
                 <Input
                   id="preMoneyValuation"
@@ -2262,8 +2250,10 @@ export default function CompanySettings() {
                   className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
+            </div>
 
-              <div className="space-y-2">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-3">
                 <Label htmlFor="mrr">MRR</Label>
                 <Input
                   id="mrr"
@@ -2283,33 +2273,33 @@ export default function CompanySettings() {
                   className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="arr">ARR</Label>
-              <Input
-                id="arr"
-                type="text"
-                inputMode="numeric"
-                value={formatCurrency(formData.arr)}
-                onChange={(e) =>
-                  handleNumericChange(
-                    (val) => handleInputChange('arr', val),
-                    e.target.value,
-                  )
-                }
-                onBlur={() => handleFieldSave('arr')}
-                placeholder="300,000"
-                leftAddon="$"
-                rightAddon="USD"
-                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
+              <div className="space-y-3">
+                <Label htmlFor="arr">ARR</Label>
+                <Input
+                  id="arr"
+                  type="text"
+                  inputMode="numeric"
+                  value={formatCurrency(formData.arr)}
+                  onChange={(e) =>
+                    handleNumericChange(
+                      (val) => handleInputChange('arr', val),
+                      e.target.value,
+                    )
+                  }
+                  onBlur={() => handleFieldSave('arr')}
+                  placeholder="300,000"
+                  leftAddon="$"
+                  rightAddon="USD"
+                  className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
             </div>
           </div>
 
           {/* Traction & Market */}
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="tractionSummary">Traction</Label>
               <div className="relative">
                 <Textarea
@@ -2354,7 +2344,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="marketSummary">Market</Label>
               <div className="relative">
                 <Textarea
@@ -2399,7 +2389,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="keyCustomers">Key customers</Label>
               <div className="relative">
                 <Textarea
@@ -2444,7 +2434,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="competitors">Competitors</Label>
               <CompetitorInput
                 competitors={formData.competitorsList || []}
@@ -2458,7 +2448,7 @@ export default function CompanySettings() {
           </div>
 
           {/* Cloud storage */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label htmlFor="googleDriveUrl">Cloud storage URL</Label>
             <div className="relative">
               <Input
@@ -2504,7 +2494,7 @@ export default function CompanySettings() {
           <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               {/* Pitch Deck Upload */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label>Deck</Label>
                 <input
                   ref={pitchDeckInputRef}
@@ -2598,7 +2588,7 @@ export default function CompanySettings() {
               </div>
 
               {/* Video Upload */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label>Demo</Label>
                 <input
                   ref={videoInputRef}
@@ -2693,7 +2683,7 @@ export default function CompanySettings() {
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               {/* Financial Projections Upload */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label>Financials</Label>
                 <input
                   ref={financialProjectionsInputRef}
@@ -2788,7 +2778,7 @@ export default function CompanySettings() {
               </div>
 
               {/* Business Plan Upload */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label>Business Plan</Label>
                 <input
                   ref={businessPlanInputRef}
@@ -2914,7 +2904,7 @@ export default function CompanySettings() {
                           all its data from our servers. This cannot be undone.
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-2 pt-0">
+                      <div className="space-y-3 pt-0">
                         <Label
                           htmlFor="startup-confirm"
                           className="text-sm font-medium"
@@ -2941,7 +2931,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {
@@ -2983,7 +2973,7 @@ export default function CompanySettings() {
                           startup data. This cannot be undone.
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-2 pt-0">
+                      <div className="space-y-3 pt-0">
                         <Label
                           htmlFor="confirm"
                           className="text-sm font-medium"
@@ -3053,7 +3043,7 @@ export default function CompanySettings() {
                         startup data. This cannot be undone.
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-2 pt-0">
+                    <div className="space-y-3 pt-0">
                       <Label htmlFor="confirm" className="text-sm font-medium">
                         Please type{' '}
                         <span className="font-semibold text-red-500">
