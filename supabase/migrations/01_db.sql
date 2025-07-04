@@ -359,8 +359,14 @@ CREATE TABLE submissions (
     queued_at TIMESTAMPTZ, -- When it was added to queue
     started_at TIMESTAMPTZ, -- When processing actually started
     UNIQUE(startup_id, target_id),
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TRIGGER set_submissions_timestamp
+BEFORE UPDATE ON submissions
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- --------------------------------------------------
 -- Table: angel_submissions
@@ -374,8 +380,14 @@ CREATE TABLE angel_submissions (
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
     UNIQUE(startup_id, angel_id),
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TRIGGER set_angel_submissions_timestamp
+BEFORE UPDATE ON angel_submissions
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- --------------------------------------------------
 -- Table: accelerator_submissions
@@ -389,8 +401,14 @@ CREATE TABLE accelerator_submissions (
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
     UNIQUE(startup_id, accelerator_id),
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TRIGGER set_accelerator_submissions_timestamp
+BEFORE UPDATE ON accelerator_submissions
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- --------------------------------------------------
 -- Table: agent_settings

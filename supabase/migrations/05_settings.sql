@@ -85,7 +85,6 @@ CREATE OR REPLACE FUNCTION update_user_founder_profile(
 RETURNS JSONB AS $$
 DECLARE
     founder_id UUID;
-    result JSONB;
 BEGIN
     -- Get the founder ID for this user in this startup
     SELECT f.id INTO founder_id
@@ -878,7 +877,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE OR REPLACE FUNCTION soft_delete_user_account(p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
-    archive_count INTEGER := 0;
     startup_ids UUID[];
 BEGIN
     -- Check if user exists and is active
@@ -903,8 +901,6 @@ BEGIN
         created_at, updated_at, id, startup_id, user_id
     FROM agent_settings 
     WHERE user_id = p_user_id;
-
-    GET DIAGNOSTICS archive_count = ROW_COUNT;
 
     -- Archive submissions
     INSERT INTO submissions_archive (

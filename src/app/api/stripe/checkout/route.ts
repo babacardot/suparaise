@@ -25,8 +25,6 @@ export async function POST(req: NextRequest) {
       'get_or_create_stripe_customer',
       {
         p_user_id: user.id,
-        p_email: user.email || '',
-        p_full_name: undefined,
         p_stripe_customer_id: undefined,
       },
     )
@@ -77,8 +75,6 @@ export async function POST(req: NextRequest) {
         'get_or_create_stripe_customer',
         {
           p_user_id: user.id,
-          p_email: user.email || '',
-          p_full_name: profile?.full_name || undefined,
           p_stripe_customer_id: customerId,
         },
       )

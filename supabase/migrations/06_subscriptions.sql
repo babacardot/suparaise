@@ -6,8 +6,6 @@
 -- Function to get or create Stripe customer
 CREATE OR REPLACE FUNCTION get_or_create_stripe_customer(
     p_user_id UUID,
-    p_email TEXT,
-    p_full_name TEXT DEFAULT NULL,
     p_stripe_customer_id TEXT DEFAULT NULL
 )
 RETURNS JSON
@@ -16,7 +14,6 @@ SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     v_profile RECORD;
-    v_result JSON;
 BEGIN
     -- Get user profile
     SELECT * INTO v_profile
@@ -358,7 +355,7 @@ END;
 $$;
 
 -- Grant execute permissions
-GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, subscription_status, TIMESTAMPTZ, BOOLEAN, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION cancel_subscription(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION handle_payment_success(TEXT) TO authenticated;
@@ -368,7 +365,7 @@ GRANT EXECUTE ON FUNCTION check_submission_limit(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION increment_submission_count(UUID) TO authenticated;
 
 -- Also grant to service role for webhook operations
-GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT, TEXT, TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION get_or_create_stripe_customer(UUID, TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION update_subscription_status(TEXT, TEXT, subscription_status, TIMESTAMPTZ, BOOLEAN, TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION cancel_subscription(TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION handle_payment_success(TEXT) TO service_role;

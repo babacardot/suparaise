@@ -18,6 +18,7 @@ export type Database = {
           startup_id: string
           status: Database["public"]["Enums"]["submission_status"] | null
           submission_date: string | null
+          updated_at: string | null
         }
         Insert: {
           accelerator_id: string
@@ -27,6 +28,7 @@ export type Database = {
           startup_id: string
           status?: Database["public"]["Enums"]["submission_status"] | null
           submission_date?: string | null
+          updated_at?: string | null
         }
         Update: {
           accelerator_id?: string
@@ -36,6 +38,7 @@ export type Database = {
           startup_id?: string
           status?: Database["public"]["Enums"]["submission_status"] | null
           submission_date?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -326,6 +329,7 @@ export type Database = {
           startup_id: string
           status: Database["public"]["Enums"]["submission_status"] | null
           submission_date: string | null
+          updated_at: string | null
         }
         Insert: {
           agent_notes?: string | null
@@ -335,6 +339,7 @@ export type Database = {
           startup_id: string
           status?: Database["public"]["Enums"]["submission_status"] | null
           submission_date?: string | null
+          updated_at?: string | null
         }
         Update: {
           agent_notes?: string | null
@@ -344,6 +349,7 @@ export type Database = {
           startup_id?: string
           status?: Database["public"]["Enums"]["submission_status"] | null
           submission_date?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1108,6 +1114,7 @@ export type Database = {
           status: Database["public"]["Enums"]["submission_status"] | null
           submission_date: string | null
           target_id: string
+          updated_at: string | null
         }
         Insert: {
           agent_notes?: string | null
@@ -1120,6 +1127,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["submission_status"] | null
           submission_date?: string | null
           target_id: string
+          updated_at?: string | null
         }
         Update: {
           agent_notes?: string | null
@@ -1132,6 +1140,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["submission_status"] | null
           submission_date?: string | null
           target_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1393,13 +1402,16 @@ export type Database = {
         Args: { p_original_user_id: string }
         Returns: Json
       }
+      get_cached_user_session_data: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_dashboard_data_batch: {
+        Args: { p_user_id: string; p_startup_id?: string }
+        Returns: Json
+      }
       get_or_create_stripe_customer: {
-        Args: {
-          p_user_id: string
-          p_email: string
-          p_full_name?: string
-          p_stripe_customer_id?: string
-        }
+        Args: { p_user_id: string; p_stripe_customer_id?: string }
         Returns: Json
       }
       get_queue_status: {
@@ -1498,22 +1510,6 @@ export type Database = {
       run_automatic_subscription_resets: {
         Args: Record<PropertyKey, never>
         Returns: Json
-      }
-      send_agent_completion_admin_email: {
-        Args: { p_submission_id: string }
-        Returns: undefined
-      }
-      send_agent_completion_customer_email: {
-        Args: { p_submission_id: string }
-        Returns: undefined
-      }
-      send_subscription_upgrade_email: {
-        Args: { user_email: string; user_name: string; plan_name: string }
-        Returns: undefined
-      }
-      send_suparaise_welcome_email: {
-        Args: { user_email: string; user_name: string }
-        Returns: undefined
       }
       soft_delete_startup: {
         Args: { p_user_id: string; p_startup_id: string }
