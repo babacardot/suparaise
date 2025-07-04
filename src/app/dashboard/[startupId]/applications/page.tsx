@@ -20,12 +20,12 @@ export async function generateMetadata({
     const startupName = startup?.name || 'Company'
 
     return {
-      title: `${startupName} | Applications`,
+      title: `${startupName} | Applications | Suparaise`,
       description: `Track and manage your applications.`,
     }
   } catch {
     return {
-      title: 'Suparaise | Applications',
+      title: 'Applications | Suparaise',
       description: 'Track and manage your applications.',
     }
   }

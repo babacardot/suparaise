@@ -3,7 +3,7 @@ import { Footer } from '@/components/design/footer'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Suparaise | Privacy',
+  title: 'Privacy | Suparaise',
   description: 'Learn how we protect your privacy and handle your data.',
 }
 

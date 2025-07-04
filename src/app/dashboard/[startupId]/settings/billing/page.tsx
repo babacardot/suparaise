@@ -22,12 +22,12 @@ export async function generateMetadata({
     const startupName = startup?.name || 'Company'
 
     return {
-      title: `${startupName} | Billing`,
+      title: `${startupName} | Billing | Suparaise`,
       description: `Manage your subscription and billing information.`,
     }
   } catch {
     return {
-      title: 'Suparaise | Billing',
+      title: 'Billing | Suparaise',
       description: 'Manage your subscription and billing information.',
     }
   }

@@ -3,7 +3,7 @@ import { Footer } from '@/components/design/footer'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Suparaise | Terms',
+  title: 'Terms | Suparaise',
   description: 'Read the terms and conditions for using our services.',
 }
 

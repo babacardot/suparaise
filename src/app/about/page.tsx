@@ -5,7 +5,7 @@ import { About } from '@/components/design/about'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Suparaise | About us',
+  title: 'About us | Suparaise',
   description:
     'Learn about our mission to automate fundraising for founders using AI agents.',
 }

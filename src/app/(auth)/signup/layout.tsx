@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Suparaise | Sign up',
+  title: 'Sign up | Suparaise',
   description: 'Create an account to automate fundraising.',
 }
 

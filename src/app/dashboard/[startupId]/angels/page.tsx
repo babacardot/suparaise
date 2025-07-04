@@ -20,12 +20,12 @@ export async function generateMetadata({
     const startupName = startup?.name || 'Company'
 
     return {
-      title: `${startupName} | Angels`,
+      title: `${startupName} | Angels | Suparaise`,
       description: `Browse and apply to angels.`,
     }
   } catch {
     return {
-      title: 'Suparaise | Angels',
+      title: 'Angels | Suparaise',
       description: 'Browse and apply to angels.',
     }
   }
