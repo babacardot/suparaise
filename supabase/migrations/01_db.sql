@@ -141,6 +141,7 @@ CREATE TABLE targets (
     question_count_range question_count_range,
     required_documents required_document_type[],
     notes TEXT, -- For special instructions
+    visibility_level permission_level DEFAULT 'FREE' NOT NULL, -- Controls who can see this target
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -180,6 +181,7 @@ CREATE TABLE angels (
     notable_investments TEXT[], -- Notable companies in their portfolio
     is_active BOOLEAN DEFAULT TRUE,
     notes TEXT, -- For special instructions or additional info
+    visibility_level permission_level DEFAULT 'FREE' NOT NULL, -- Controls who can see this angel
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -218,6 +220,7 @@ CREATE TABLE accelerators (
     program_fee NUMERIC(10, 2), -- Some charge program fees
     is_active BOOLEAN DEFAULT TRUE,
     notes TEXT, -- For special instructions
+    visibility_level permission_level DEFAULT 'FREE' NOT NULL, -- Controls who can see this accelerator
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -483,6 +486,7 @@ CREATE INDEX IF NOT EXISTS idx_targets_stage_focus ON targets USING GIN(stage_fo
 CREATE INDEX IF NOT EXISTS idx_targets_industry_focus ON targets USING GIN(industry_focus) WHERE industry_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_region_focus ON targets USING GIN(region_focus) WHERE region_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_required_documents ON targets USING GIN(required_documents) WHERE required_documents IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_targets_visibility_level ON targets(visibility_level);
 
 -- Text search indexes for fast search functionality
 CREATE INDEX IF NOT EXISTS idx_targets_name_search ON targets USING gin(to_tsvector('english', name));
@@ -509,6 +513,7 @@ CREATE INDEX IF NOT EXISTS idx_angels_investment_approach ON angels(investment_a
 CREATE INDEX IF NOT EXISTS idx_angels_check_size ON angels(check_size) WHERE check_size IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_angels_response_time ON angels(response_time) WHERE response_time IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_angels_is_active ON angels(is_active);
+CREATE INDEX IF NOT EXISTS idx_angels_visibility_level ON angels(visibility_level);
 
 -- Performance indexes for accelerators table
 CREATE INDEX IF NOT EXISTS idx_accelerators_stage_focus ON accelerators USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;
@@ -523,22 +528,56 @@ CREATE INDEX IF NOT EXISTS idx_accelerators_acceptance_rate ON accelerators(acce
 CREATE INDEX IF NOT EXISTS idx_accelerators_is_remote_friendly ON accelerators(is_remote_friendly);
 CREATE INDEX IF NOT EXISTS idx_accelerators_is_active ON accelerators(is_active);
 CREATE INDEX IF NOT EXISTS idx_accelerators_next_application_deadline ON accelerators(next_application_deadline) WHERE next_application_deadline IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerators_visibility_level ON accelerators(visibility_level);
 
 -- --------------------------------------------------
 -- Row Level Security (RLS) Policies
 -- --------------------------------------------------
 
--- Targets are restricted - only authenticated users can view
+-- Targets are restricted - only authenticated users can view, filtered by visibility level
 ALTER TABLE targets ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow authenticated users to read targets" ON targets FOR SELECT USING ((select auth.role()) = 'authenticated');
+CREATE POLICY "Allow authenticated users to read targets based on permission level" ON targets FOR SELECT USING (
+    (select auth.role()) = 'authenticated' AND
+    (
+        visibility_level = 'FREE' OR
+        (visibility_level = 'PRO' AND (
+            SELECT permission_level FROM profiles WHERE id = auth.uid()
+        ) IN ('PRO', 'MAX')) OR
+        (visibility_level = 'MAX' AND (
+            SELECT permission_level FROM profiles WHERE id = auth.uid()
+        ) = 'MAX')
+    )
+);
 
--- Angels are restricted - only authenticated users can view
+-- Angels are restricted - only authenticated users can view, filtered by visibility level
 ALTER TABLE angels ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow authenticated users to read angels" ON angels FOR SELECT USING ((select auth.role()) = 'authenticated' AND is_active = TRUE);
+CREATE POLICY "Allow authenticated users to read angels based on permission level" ON angels FOR SELECT USING (
+    (select auth.role()) = 'authenticated' AND is_active = TRUE AND
+    (
+        visibility_level = 'FREE' OR
+        (visibility_level = 'PRO' AND (
+            SELECT permission_level FROM profiles WHERE id = auth.uid()
+        ) IN ('PRO', 'MAX')) OR
+        (visibility_level = 'MAX' AND (
+            SELECT permission_level FROM profiles WHERE id = auth.uid()
+        ) = 'MAX')
+    )
+);
 
--- Accelerators are restricted - only authenticated users can view
+-- Accelerators are restricted - only authenticated users can view, filtered by visibility level
 ALTER TABLE accelerators ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow authenticated users to read accelerators" ON accelerators FOR SELECT USING ((select auth.role()) = 'authenticated' AND is_active = TRUE);
+CREATE POLICY "Allow authenticated users to read accelerators based on permission level" ON accelerators FOR SELECT USING (
+    (select auth.role()) = 'authenticated' AND is_active = TRUE AND
+    (
+        visibility_level = 'FREE' OR
+        (visibility_level = 'PRO' AND (
+            SELECT permission_level FROM profiles WHERE id = auth.uid()
+        ) IN ('PRO', 'MAX')) OR
+        (visibility_level = 'MAX' AND (
+            SELECT permission_level FROM profiles WHERE id = auth.uid()
+        ) = 'MAX')
+    )
+);
 
 -- Users can only see their own profile (optimized with select auth.uid())
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;

@@ -1,40 +1,55 @@
-import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
-import React from 'react'
+'use client'
 
-export async function generateMetadata({
-    params,
-}: {
-    params: { startupId: string }
-}): Promise<Metadata> {
-    const { startupId } = params
+import { useParams } from 'next/navigation'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import React, { useEffect, useState } from 'react'
 
-    try {
-        const supabase = await createClient()
-        const { data: startup } = await supabase
-            .from('startups')
-            .select('name')
-            .eq('id', startupId)
-            .single()
-
-        const startupName = startup?.name || 'Company'
-
-        return {
-            title: `${startupName} | Funds | Suparaise`,
-            description: `Search and apply to funds.`,
-        }
-    } catch {
-        return {
-            title: 'Funds | Suparaise',
-            description: 'Search and apply to funds.',
-        }
-    }
-}
-
+// We need to export this as a client component for Next.js 15
 export default function FundsLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const params = useParams()
+    const startupId = params.startupId as string
+    const [metadata, setMetadata] = useState<{
+        title: string
+        description: string
+    }>({
+        title: 'Funds | Suparaise',
+        description: 'Search and apply to funds.',
+    })
+
+    useEffect(() => {
+        const updateMetadata = async () => {
+            if (!startupId) return
+
+            try {
+                const supabase = createSupabaseBrowserClient()
+                const { data: startup } = await supabase
+                    .from('startups')
+                    .select('name')
+                    .eq('id', startupId)
+                    .single()
+
+                const startupName = startup?.name || 'Company'
+
+                setMetadata({
+                    title: `${startupName} | Funds | Suparaise`,
+                    description: 'Search and apply to funds.',
+                })
+            } catch {
+                // Keep default metadata on error
+            }
+        }
+
+        updateMetadata()
+    }, [startupId])
+
+    // Update document title
+    useEffect(() => {
+        document.title = metadata.title
+    }, [metadata.title])
+
     return <>{children}</>
 } 

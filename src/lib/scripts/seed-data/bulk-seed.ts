@@ -185,6 +185,13 @@ function generateTargetsData(count: number): Array<Record<string, string>> {
   const data: Array<Record<string, string>> = []
   const usedNames = new Set<string>()
 
+  // Define visibility level distribution for 500 targets: 150 FREE, 250 PRO, 100 MAX
+  const getVisibilityLevel = (index: number): string => {
+    if (index < 150) return 'FREE'
+    if (index < 400) return 'PRO' // 150 + 250 = 400
+    return 'MAX'
+  }
+
   for (let i = 0; i < count; i++) {
     let name: string
 
@@ -225,6 +232,7 @@ function generateTargetsData(count: number): Array<Record<string, string>> {
         2,
       ).join(','),
       notes: randomBoolean() ? 'Generated sample data for testing' : '',
+      visibility_level: getVisibilityLevel(i),
     })
   }
 
@@ -283,6 +291,7 @@ function generateAngelsData(count: number): Array<Record<string, string>> {
       notable_investments: `BigCorp ${i + 1},TechStart ${i + 2}`,
       is_active: 'true',
       notes: 'Generated sample data for testing',
+      visibility_level: i < 30 ? 'FREE' : i < 70 ? 'PRO' : 'MAX', // 30 FREE, 40 PRO, 30 MAX for 100 angels
     })
   }
 
@@ -347,6 +356,7 @@ function generateAcceleratorsData(
         : Math.floor(Math.random() * 10000).toString(),
       is_active: 'true',
       notes: 'Generated sample data for testing',
+      visibility_level: i < 30 ? 'FREE' : i < 70 ? 'PRO' : 'MAX', // 30 FREE, 40 PRO, 30 MAX for 100 accelerators
     })
   }
 

@@ -14,7 +14,10 @@
     "seed:bulk": "bun run src/lib/scripts/seed-data/bulk-seed.ts --format excel",
     "seed:import": "bun run src/lib/scripts/seed-data/csv-import.ts",
     "seed:validate": "bun run src/lib/scripts/seed-data/validate-csv.ts",
-    "seed:validate-env": "bun run src/lib/scripts/seed-data/validate-env.ts"
+    "seed:validate-env": "bun run src/lib/scripts/seed-data/validate-env.ts",
+    "seed:import-targets": "bun run src/lib/scripts/seed-data/csv-import.ts --table targets --file src/lib/scripts/seed-data/data/targets-bulk.xlsx",
+    "seed:import-angels": "bun run src/lib/scripts/seed-data/csv-import.ts --table angels --file src/lib/scripts/seed-data/data/angels-bulk.xlsx",
+    "seed:import-accelerators": "bun run src/lib/scripts/seed-data/csv-import.ts --table accelerators --file src/lib/scripts/seed-data/data/accelerators-bulk.xlsx"
   },
   "keywords": [],
   "author": "",

@@ -198,6 +198,7 @@ export interface TargetRecord {
       )[]
     | null
   notes: string | null
+  visibility_level: 'FREE' | 'PRO' | 'MAX'
 }
 
 export interface AngelRecord {
@@ -263,6 +264,7 @@ export interface AngelRecord {
   notable_investments: string[] | null
   is_active: boolean
   notes: string | null
+  visibility_level: 'FREE' | 'PRO' | 'MAX'
 }
 
 export interface AcceleratorRecord {
@@ -320,6 +322,7 @@ export interface AcceleratorRecord {
   program_fee: number | null
   is_active: boolean
   notes: string | null
+  visibility_level: 'FREE' | 'PRO' | 'MAX'
 }
 
 // Transform CSV data to database format using typed interfaces
@@ -347,6 +350,7 @@ export function transformToTargetData(
       row.required_documents,
     ) as TargetRecord['required_documents'],
     notes: row.notes || null,
+    visibility_level: (row.visibility_level as TargetRecord['visibility_level']) || 'FREE',
   }))
 }
 
@@ -383,6 +387,7 @@ export function transformToAngelData(
     notable_investments: parseArrayField(row.notable_investments),
     is_active: row.is_active === 'false' ? false : true,
     notes: row.notes || null,
+    visibility_level: (row.visibility_level as AngelRecord['visibility_level']) || 'FREE',
   }))
 }
 
@@ -426,6 +431,7 @@ export function transformToAcceleratorData(
     program_fee: row.program_fee ? parseFloat(row.program_fee) : null,
     is_active: row.is_active === 'false' ? false : true,
     notes: row.notes || null,
+    visibility_level: (row.visibility_level as AcceleratorRecord['visibility_level']) || 'FREE',
   }))
 }
 
@@ -470,14 +476,14 @@ export function generateCSVTemplate(
   outputDir: string,
 ): void {
   const templates = {
-    targets: `name,notes,website,application_url,application_email,submission_type,stage_focus,industry_focus,region_focus,form_complexity,question_count_range,required_documents
-"Example VC Fund","Focus on early-stage tech companies","https://example-vc.com","https://example-vc.com/apply","apply@example-vc.com","form","Pre-seed,Seed","B2B SaaS,Fintech","North America,Europe","standard","11-20","pitch_deck,video"`,
+    targets: `name,notes,website,application_url,application_email,submission_type,stage_focus,industry_focus,region_focus,form_complexity,question_count_range,required_documents,visibility_level
+"Example VC Fund","Focus on early-stage tech companies","https://example-vc.com","https://example-vc.com/apply","apply@example-vc.com","form","Pre-seed,Seed","B2B SaaS,Fintech","North America,Europe","standard","11-20","pitch_deck,video","PRO"`,
 
-    angels: `first_name,last_name,email,linkedin,twitter,personal_website,location,bio,check_size,stage_focus,industry_focus,region_focus,investment_approach,previous_exits,domain_expertise,response_time,submission_type,application_url,application_email,form_complexity,required_documents,notable_investments,is_active,notes
-"John","Doe","john@example.com","https://linkedin.com/in/johndoe","https://twitter.com/johndoe","https://johndoe.com","San Francisco, CA","Former founder with 2 exits","25K-50K","Pre-seed,Seed","B2B SaaS,AI/ML","North America","hands-on","Company A,Company B","Product,Marketing","1 week","email",,,"simple","pitch_deck","Unicorn Corp,Great Startup","true","Prefers warm intros"`,
+    angels: `first_name,last_name,email,linkedin,twitter,personal_website,location,bio,check_size,stage_focus,industry_focus,region_focus,investment_approach,previous_exits,domain_expertise,response_time,submission_type,application_url,application_email,form_complexity,required_documents,notable_investments,is_active,notes,visibility_level
+"John","Doe","john@example.com","https://linkedin.com/in/johndoe","https://twitter.com/johndoe","https://johndoe.com","San Francisco, CA","Former founder with 2 exits","25K-50K","Pre-seed,Seed","B2B SaaS,AI/ML","North America","hands-on","Company A,Company B","Product,Marketing","1 week","email",,,"simple","pitch_deck","Unicorn Corp,Great Startup","true","Prefers warm intros","PRO"`,
 
-    accelerators: `name,website,application_url,application_email,submission_type,program_type,program_duration,location,is_remote_friendly,batch_size,batches_per_year,next_application_deadline,stage_focus,industry_focus,region_focus,equity_taken,funding_provided,acceptance_rate,form_complexity,required_documents,program_fee,is_active,notes
-"Example Accelerator","https://example-accelerator.com","https://example-accelerator.com/apply","apply@example-accelerator.com","form","hybrid","3 months","San Francisco, CA","true","11-20","2","2024-12-31","Pre-seed,Seed","B2B SaaS,AI/ML","Global","4-6%","50K-100K","1-5%","standard","pitch_deck,video","0","true","Rolling applications accepted"`,
+    accelerators: `name,website,application_url,application_email,submission_type,program_type,program_duration,location,is_remote_friendly,batch_size,batches_per_year,next_application_deadline,stage_focus,industry_focus,region_focus,equity_taken,funding_provided,acceptance_rate,form_complexity,required_documents,program_fee,is_active,notes,visibility_level
+"Example Accelerator","https://example-accelerator.com","https://example-accelerator.com/apply","apply@example-accelerator.com","form","hybrid","3 months","San Francisco, CA","true","11-20","2","2024-12-31","Pre-seed,Seed","B2B SaaS,AI/ML","Global","4-6%","50K-100K","1-5%","standard","pitch_deck,video","0","true","Rolling applications accepted","PRO"`,
   }
 
   if (!fs.existsSync(outputDir)) {
@@ -514,6 +520,7 @@ export function generateExcelTemplate(
         form_complexity: 'standard',
         question_count_range: '11-20',
         required_documents: 'pitch_deck, video',
+        visibility_level: 'PRO',
       },
     ],
     angels: [
@@ -542,6 +549,7 @@ export function generateExcelTemplate(
         notable_investments: 'Unicorn Corp, Great Startup',
         is_active: 'true',
         notes: 'Prefers warm intros',
+        visibility_level: 'PRO',
       },
     ],
     accelerators: [
@@ -569,6 +577,7 @@ export function generateExcelTemplate(
         program_fee: '0',
         is_active: 'true',
         notes: 'Rolling applications accepted',
+        visibility_level: 'PRO',
       },
     ],
   }

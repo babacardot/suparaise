@@ -130,6 +130,7 @@ export type Database = {
           stage_focus: Database["public"]["Enums"]["investment_stage"][] | null
           submission_type: Database["public"]["Enums"]["submission_type"] | null
           updated_at: string | null
+          visibility_level: Database["public"]["Enums"]["permission_level"]
           website: string | null
         }
         Insert: {
@@ -168,6 +169,7 @@ export type Database = {
             | Database["public"]["Enums"]["submission_type"]
             | null
           updated_at?: string | null
+          visibility_level?: Database["public"]["Enums"]["permission_level"]
           website?: string | null
         }
         Update: {
@@ -206,6 +208,7 @@ export type Database = {
             | Database["public"]["Enums"]["submission_type"]
             | null
           updated_at?: string | null
+          visibility_level?: Database["public"]["Enums"]["permission_level"]
           website?: string | null
         }
         Relationships: []
@@ -443,6 +446,7 @@ export type Database = {
           submission_type: Database["public"]["Enums"]["submission_type"] | null
           twitter: string | null
           updated_at: string | null
+          visibility_level: Database["public"]["Enums"]["permission_level"]
         }
         Insert: {
           application_email?: string | null
@@ -480,6 +484,7 @@ export type Database = {
             | null
           twitter?: string | null
           updated_at?: string | null
+          visibility_level?: Database["public"]["Enums"]["permission_level"]
         }
         Update: {
           application_email?: string | null
@@ -517,6 +522,7 @@ export type Database = {
             | null
           twitter?: string | null
           updated_at?: string | null
+          visibility_level?: Database["public"]["Enums"]["permission_level"]
         }
         Relationships: []
       }
@@ -1271,6 +1277,7 @@ export type Database = {
           stage_focus: Database["public"]["Enums"]["investment_stage"][] | null
           submission_type: Database["public"]["Enums"]["submission_type"] | null
           updated_at: string | null
+          visibility_level: Database["public"]["Enums"]["permission_level"]
           website: string | null
         }
         Insert: {
@@ -1296,6 +1303,7 @@ export type Database = {
             | Database["public"]["Enums"]["submission_type"]
             | null
           updated_at?: string | null
+          visibility_level?: Database["public"]["Enums"]["permission_level"]
           website?: string | null
         }
         Update: {
@@ -1321,6 +1329,7 @@ export type Database = {
             | Database["public"]["Enums"]["submission_type"]
             | null
           updated_at?: string | null
+          visibility_level?: Database["public"]["Enums"]["permission_level"]
           website?: string | null
         }
         Relationships: []
