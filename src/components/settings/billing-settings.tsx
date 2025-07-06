@@ -344,8 +344,40 @@ export default function BillingSettings() {
             )}
           </div>
 
-          {/* Subscription Plans */}
-          {!isSubscribed && (
+          {/* Subscription Management - moved above pricing for Pro+ users */}
+          {isSubscribed && (
+            <Card className={cn(
+              "p-6 shadow-lg border-l-4",
+              subscription?.permission_level === 'MAX'
+                ? "border-l-amber-500 dark:border-l-amber-400"
+                : "border-l-blue-500 dark:border-l-blue-400"
+            )}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold leading-none tracking-tight">
+                    Manage subscription
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Update your payment details, view invoices, or cancel
+                    subscription.
+                  </p>
+                </div>
+                <div>
+                  <Button
+                    onClick={handleManageBilling}
+                    disabled={isPortalLoading}
+                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-6 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
+                  >
+                    {isPortalLoading && <Spinner className="h-4 w-4 mr-2" />}
+                    {isPortalLoading ? 'Opening...' : 'Manage Billing'}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Subscription Plans & Upgrades */}
+          {!isSubscribed ? (
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Pro Plan */}
               <Card className="relative border-2 border-green-200 dark:border-green-800 shadow-lg hover:shadow-xl transition-shadow duration-200">
@@ -448,39 +480,131 @@ export default function BillingSettings() {
                 </CardContent>
               </Card>
             </div>
-          )}
-
-          {/* Subscription Management */}
-          {isSubscribed && (
-            <Card className="p-6 shadow-lg border-l-4 border-l-blue-500 dark:border-l-blue-400">
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-sm bg-blue-50 dark:bg-blue-900/30">
-                    <Crown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold leading-none tracking-tight">
-                      Manage subscription
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Update your payment details, view invoices, or cancel
-                      subscription.
-                    </p>
-                  </div>
-                </div>
-                <div>
+          ) : subscription?.permission_level === 'PRO' ? (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Max Plan */}
+              <Card className="relative shadow-lg hover:shadow-xl transition-shadow duration-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="text-xl font-semibold">
+                      {SUBSCRIPTION_PLANS.max_monthly.name}
+                    </span>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">
+                        ${SUBSCRIPTION_PLANS.max_monthly.price}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        per month
+                      </div>
+                    </div>
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    {SUBSCRIPTION_PLANS.max_monthly.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col h-full">
+                  <ul className="space-y-2 mb-6 flex-1">
+                    {planFeatures.max_monthly.map(
+                      (feature: string, index: number) => (
+                        <li
+                          key={index}
+                          className="flex items-center gap-2 text-sm"
+                        >
+                          <Check className="h-4 w-4 text-green-500" />
+                          {feature}
+                        </li>
+                      ),
+                    )}
+                  </ul>
                   <Button
-                    onClick={handleManageBilling}
-                    disabled={isPortalLoading}
-                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-6 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
+                    onClick={() => handleSubscribe('max_monthly')}
+                    disabled={isLoading}
+                    className="w-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
+                    variant="outline"
                   >
-                    {isPortalLoading && <Spinner className="h-4 w-4 mr-2" />}
-                    {isPortalLoading ? 'Opening...' : 'Manage Billing'}
+                    {isLoading && (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    )}
+                    {isLoading ? 'Processing...' : 'Go Max'}
                   </Button>
+                </CardContent>
+              </Card>
+              {/* Enterprise Plan */}
+              <Card className="relative shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="text-xl font-semibold">Enterprise</span>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">Custom</div>
+                    </div>
+                  </CardTitle>
+                  <CardDescription className="text-sm mt-5">
+                    Volume discounts available
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col h-full flex-1">
+                  <ul className="space-y-2 mb-6 flex-1">
+                    <li className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-500" />
+                      500+ fund applications per month
+                    </li>
+                    <li className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-500" />
+                      Up to 25 parallel submissions
+                    </li>
+                    <li className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-500" />
+                      Premium support
+                    </li>
+                  </ul>
+                  <Button
+                    asChild
+                    className="w-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
+                    variant="outline"
+                  >
+                    <a href="mailto:hello@suparaise.com">Contact Sales</a>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : subscription?.permission_level === 'MAX' ? (
+            <div className="relative flex flex-col rounded-sm border p-8 w-full shadow-lg">
+              <div className="flex justify-between items-start mb-4">
+                <div className="text-left">
+                  <h3 className="text-2xl font-semibold">Enterprise</h3>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Volume discounts available
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-semibold">Custom</div>
                 </div>
               </div>
-            </Card>
-          )}
+
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-8">
+                <div className="flex items-start gap-2 text-sm">
+                  <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                  500+ fund applications per month
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                  Up to 25 parallel submissions
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                  Premium support
+                </div>
+              </div>
+
+              <Button
+                asChild
+                className="w-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
+                variant="outline"
+              >
+                <a href="mailto:hello@suparaise.com">Contact Sales</a>
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>
 
