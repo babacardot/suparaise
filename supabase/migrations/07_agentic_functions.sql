@@ -18,7 +18,7 @@ DECLARE
 BEGIN
     -- Validate order_by parameter
     valid_order_by := CASE 
-        WHEN p_order_by IN ('name', 'created_at', 'updated_at', 'submission_type', 'form_complexity') 
+        WHEN p_order_by IN ('name', 'created_at', 'updated_at', 'submission_type') 
         THEN p_order_by 
         ELSE 'name' 
     END;
@@ -82,8 +82,9 @@ CREATE OR REPLACE FUNCTION get_targets_simple(
     p_stage_focus TEXT[] DEFAULT NULL,
     p_industry_focus TEXT[] DEFAULT NULL,
     p_region_focus TEXT[] DEFAULT NULL,
-    p_form_complexity TEXT[] DEFAULT NULL,
-    p_required_documents TEXT[] DEFAULT NULL
+    p_required_documents TEXT[] DEFAULT NULL,
+    p_startup_id UUID DEFAULT NULL,
+    p_submission_filter TEXT DEFAULT 'all'
 )
 RETURNS JSONB AS $$
 DECLARE
@@ -100,13 +101,12 @@ BEGIN
     IF p_search IS NOT NULL AND length(trim(p_search)) > 0 THEN
         normalized_search := lower(trim(p_search));
         where_conditions := array_append(where_conditions, format('(
-            lower(name) LIKE %L OR
-            lower(COALESCE(notes, '''')) LIKE %L OR
-            EXISTS (SELECT 1 FROM unnest(stage_focus) AS s WHERE lower(s::text) LIKE %L) OR
-            EXISTS (SELECT 1 FROM unnest(industry_focus) AS i WHERE lower(i::text) LIKE %L) OR
-            EXISTS (SELECT 1 FROM unnest(region_focus) AS r WHERE lower(r::text) LIKE %L) OR
-            lower(submission_type::text) LIKE %L OR
-            lower(COALESCE(form_complexity::text, '''')) LIKE %L
+            lower(t.name) LIKE %L OR
+            lower(COALESCE(t.notes, '''')) LIKE %L OR
+            EXISTS (SELECT 1 FROM unnest(t.stage_focus) AS s WHERE lower(s::text) LIKE %L) OR
+            EXISTS (SELECT 1 FROM unnest(t.industry_focus) AS i WHERE lower(i::text) LIKE %L) OR
+            EXISTS (SELECT 1 FROM unnest(t.region_focus) AS r WHERE lower(r::text) LIKE %L) OR
+            lower(t.submission_type::text) LIKE %L
         )', 
         '%' || normalized_search || '%',
         '%' || normalized_search || '%',
@@ -119,42 +119,52 @@ BEGIN
     
     -- Array filter conditions - these use GIN indexes efficiently
     IF p_submission_types IS NOT NULL AND array_length(p_submission_types, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('submission_type = ANY(%L)', p_submission_types));
+        where_conditions := array_append(where_conditions, format('t.submission_type = ANY(%L)', p_submission_types));
     END IF;
     
     IF p_stage_focus IS NOT NULL AND array_length(p_stage_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('stage_focus && %L', p_stage_focus));
+        where_conditions := array_append(where_conditions, format('t.stage_focus && %L', p_stage_focus));
     END IF;
     
     IF p_industry_focus IS NOT NULL AND array_length(p_industry_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('industry_focus && %L', p_industry_focus));
+        where_conditions := array_append(where_conditions, format('t.industry_focus && %L', p_industry_focus));
     END IF;
     
     IF p_region_focus IS NOT NULL AND array_length(p_region_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('region_focus && %L', p_region_focus));
-    END IF;
-    
-    IF p_form_complexity IS NOT NULL AND array_length(p_form_complexity, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('form_complexity = ANY(%L)', p_form_complexity));
+        where_conditions := array_append(where_conditions, format('t.region_focus && %L', p_region_focus));
     END IF;
     
     IF p_required_documents IS NOT NULL AND array_length(p_required_documents, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('required_documents && %L', p_required_documents));
+        where_conditions := array_append(where_conditions, format('t.required_documents && %L', p_required_documents));
     END IF;
 
-    -- Build base query parts
-    base_query := 'FROM targets';
+    -- Submission filter conditions
+    IF p_startup_id IS NOT NULL AND p_submission_filter IS NOT NULL THEN
+        IF p_submission_filter = 'hide_submitted' THEN
+            where_conditions := array_append(where_conditions, format('NOT EXISTS (
+                SELECT 1 FROM submissions s 
+                WHERE s.target_id = t.id AND s.startup_id = %L
+            )', p_startup_id));
+        ELSIF p_submission_filter = 'only_submitted' THEN
+            where_conditions := array_append(where_conditions, format('EXISTS (
+                SELECT 1 FROM submissions s 
+                WHERE s.target_id = t.id AND s.startup_id = %L
+            )', p_startup_id));
+        END IF;
+        -- For 'all', no additional condition is needed
+    END IF;
+
+    -- Build WHERE clause
     IF array_length(where_conditions, 1) > 0 THEN
-        base_query := base_query || ' WHERE ' || array_to_string(where_conditions, ' AND ');
+        base_query := ' WHERE ' || array_to_string(where_conditions, ' AND ');
+    ELSE
+        base_query := '';
     END IF;
 
-    -- Get count and data in single optimized query using CTE
     -- Build sort clause
     sort_clause := CASE
         WHEN p_sort_by = 'name' THEN 'name'
         WHEN p_sort_by = 'type' THEN 'submission_type, name'
-        WHEN p_sort_by = 'complexity' THEN 
-            'CASE form_complexity WHEN ''simple'' THEN 1 WHEN ''standard'' THEN 2 WHEN ''comprehensive'' THEN 3 ELSE 4 END, name'
         WHEN p_sort_by = 'focus' THEN 'array_to_string(stage_focus, '',''), name'
         WHEN p_sort_by = 'industry' THEN 'array_to_string(industry_focus, '',''), name'
         WHEN p_sort_by = 'region' THEN 'array_to_string(region_focus, '',''), name'
@@ -165,7 +175,7 @@ BEGIN
     -- Single query with CTE for better performance
     final_query := format('
         WITH filtered_targets AS (
-            SELECT * %s
+            SELECT t.* FROM targets t%s
         ),
         count_data AS (
             SELECT COUNT(*) as total_count FROM filtered_targets
@@ -201,7 +211,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant permissions
-GRANT EXECUTE ON FUNCTION get_targets_simple(INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT[], TEXT[], TEXT[], TEXT[], TEXT[], TEXT[]) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_targets_simple(INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT[], TEXT[], TEXT[], TEXT[], TEXT[], UUID, TEXT) TO authenticated;
 
 -- ==========================================
 -- PERFORMANCE OPTIMIZATIONS
@@ -212,7 +222,6 @@ CREATE INDEX IF NOT EXISTS idx_targets_name_id ON targets(name, id);
 CREATE INDEX IF NOT EXISTS idx_targets_created_at_id ON targets(created_at DESC, id);
 CREATE INDEX IF NOT EXISTS idx_targets_updated_at_id ON targets(updated_at DESC, id);
 CREATE INDEX IF NOT EXISTS idx_targets_submission_type_name ON targets(submission_type, name);
-CREATE INDEX IF NOT EXISTS idx_targets_form_complexity_name ON targets(form_complexity, name) WHERE form_complexity IS NOT NULL;
 
 -- Update table statistics for better query planning
 ANALYZE targets;
@@ -233,7 +242,6 @@ CREATE INDEX IF NOT EXISTS idx_targets_notes_lower ON targets(lower(notes)) WHER
 
 -- For enum types, we'll use regular indexes and handle case-insensitive search in queries
 CREATE INDEX IF NOT EXISTS idx_targets_submission_type ON targets(submission_type);
-CREATE INDEX IF NOT EXISTS idx_targets_form_complexity ON targets(form_complexity) WHERE form_complexity IS NOT NULL;
 
 -- Ensure we have proper GIN indexes for array operations
 CREATE INDEX IF NOT EXISTS idx_targets_stage_focus_gin ON targets USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;
@@ -245,7 +253,6 @@ CREATE INDEX IF NOT EXISTS idx_targets_required_documents_gin ON targets USING G
 CREATE INDEX IF NOT EXISTS idx_targets_name_asc ON targets(name ASC, id);
 CREATE INDEX IF NOT EXISTS idx_targets_name_desc ON targets(name DESC, id);
 CREATE INDEX IF NOT EXISTS idx_targets_type_name ON targets(submission_type, name);
-CREATE INDEX IF NOT EXISTS idx_targets_complexity_name ON targets(form_complexity, name) WHERE form_complexity IS NOT NULL;
 
 -- Partial indexes for better performance on filtered queries
 CREATE INDEX IF NOT EXISTS idx_targets_active ON targets(name) WHERE submission_type IS NOT NULL;

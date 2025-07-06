@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import FundsTable from './funds-table'
-import { FundsFilters } from './funds-filters'
+import FundsActions from './funds-actions'
 
 type Target = {
   id: string
@@ -18,8 +18,17 @@ type Target = {
   question_count_range?: '1-5' | '6-10' | '11-20' | '21+'
   required_documents?: string[]
   notes?: string
+  visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
+}
+
+interface ColumnVisibility {
+  region: boolean
+  focus: boolean
+  industry: boolean
+  requirements: boolean
+  type: boolean
 }
 
 interface FundsTableWrapperProps {
@@ -32,13 +41,10 @@ interface FundsTableWrapperProps {
     limit: number
   } | null
   offset: number
-  isLoading: boolean
   onPreviousPage: () => void
   onNextPage: () => void
-  filters: FundsFilters
-  onFiltersChange: (filters: FundsFilters) => void
-  sortConfig: { key: string | null; direction: 'asc' | 'desc' }
   onSortChange: (key: string) => void
+  columnVisibility: ColumnVisibility
 }
 
 const FundsTableWrapper = React.memo(function FundsTableWrapper({
@@ -46,38 +52,62 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
   startupId,
   paginationData,
   offset,
-  isLoading,
   onPreviousPage,
   onNextPage,
-  filters,
-  onFiltersChange,
-  sortConfig,
   onSortChange,
+  columnVisibility,
 }: FundsTableWrapperProps) {
+  const [selectedTarget, setSelectedTarget] = useState<Target | null>(null)
+  const [isActionsOpen, setIsActionsOpen] = useState(false)
+
+  const handleTargetClick = useCallback((target: Target) => {
+    setSelectedTarget(target)
+    setIsActionsOpen(true)
+  }, [])
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsActionsOpen(open)
+    if (!open) {
+      setTimeout(() => {
+        setSelectedTarget(null)
+      }, 300) // Animation duration
+    }
+  }, [])
+
+  // Mock submissions data - this would come from your API in real implementation
+  const mockSubmissions = selectedTarget ? [] : []
+
   return (
-    <div
-      className="h-full"
-      style={{
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        MozUserSelect: 'none',
-        msUserSelect: 'none',
-      }}
-    >
-      <FundsTable
-        targets={targets}
-        filters={filters}
-        onFiltersChange={onFiltersChange}
-        startupId={startupId}
-        paginationData={paginationData}
-        offset={offset}
-        isLoading={isLoading}
-        onPreviousPage={onPreviousPage}
-        onNextPage={onNextPage}
-        sortConfig={sortConfig}
-        onSortChange={onSortChange}
+    <>
+      <div
+        className="h-full"
+        style={{
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none',
+        }}
+      >
+        <FundsTable
+          targets={targets}
+          startupId={startupId}
+          paginationData={paginationData}
+          offset={offset}
+          onPreviousPage={onPreviousPage}
+          onNextPage={onNextPage}
+          onSortChange={onSortChange}
+          columnVisibility={columnVisibility}
+          onTargetClick={handleTargetClick}
+        />
+      </div>
+
+      <FundsActions
+        target={selectedTarget}
+        submissions={mockSubmissions}
+        isOpen={isActionsOpen}
+        onOpenChange={handleOpenChange}
       />
-    </div>
+    </>
   )
 })
 

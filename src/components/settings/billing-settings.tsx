@@ -346,12 +346,14 @@ export default function BillingSettings() {
 
           {/* Subscription Management - moved above pricing for Pro+ users */}
           {isSubscribed && (
-            <Card className={cn(
-              "p-6 shadow-lg border-l-4",
-              subscription?.permission_level === 'MAX'
-                ? "border-l-amber-500 dark:border-l-amber-400"
-                : "border-l-blue-500 dark:border-l-blue-400"
-            )}>
+            <Card
+              className={cn(
+                'p-6 shadow-lg border-l-4',
+                subscription?.permission_level === 'MAX'
+                  ? 'border-l-amber-500 dark:border-l-amber-400'
+                  : 'border-l-blue-500 dark:border-l-blue-400',
+              )}
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-semibold leading-none tracking-tight">

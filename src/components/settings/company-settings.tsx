@@ -378,8 +378,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -1874,22 +1875,29 @@ export default function CompanySettings() {
                     handleInputChange('legalStructure', newValue)
 
                     // Auto-update incorporation status based on legal structure
-                    const isNotIncorporated = newValue === 'Not yet incorporated'
+                    const isNotIncorporated =
+                      newValue === 'Not yet incorporated'
                     handleInputChange('isIncorporated', !isNotIncorporated)
 
                     // Save both fields
                     await handleFieldSave('legalStructure')
                     if (formData.isIncorporated !== !isNotIncorporated) {
                       try {
-                        const { data, error } = await supabase.rpc('update_user_startup_data', {
-                          p_user_id: user.id,
-                          p_startup_id: currentStartupId,
-                          p_data: { isIncorporated: !isNotIncorporated },
-                        })
+                        const { data, error } = await supabase.rpc(
+                          'update_user_startup_data',
+                          {
+                            p_user_id: user.id,
+                            p_startup_id: currentStartupId,
+                            p_data: { isIncorporated: !isNotIncorporated },
+                          },
+                        )
                         if (error) throw error
                         if (data?.error) throw new Error(data.error)
                       } catch (error) {
-                        console.error('Error saving incorporation status:', error)
+                        console.error(
+                          'Error saving incorporation status:',
+                          error,
+                        )
                       }
                     }
                   }}
@@ -2022,7 +2030,10 @@ export default function CompanySettings() {
                     if (formData.isIncorporated) {
                       playClickSound()
                       handleInputChange('isIncorporated', false)
-                      handleInputChange('legalStructure', 'Not yet incorporated')
+                      handleInputChange(
+                        'legalStructure',
+                        'Not yet incorporated',
+                      )
                       // Save both fields
                       try {
                         const { data, error } = await supabase.rpc(
@@ -2030,7 +2041,10 @@ export default function CompanySettings() {
                           {
                             p_user_id: user.id,
                             p_startup_id: currentStartupId,
-                            p_data: { isIncorporated: false, legalStructure: 'Not yet incorporated' },
+                            p_data: {
+                              isIncorporated: false,
+                              legalStructure: 'Not yet incorporated',
+                            },
                           },
                         )
                         if (error) throw error
@@ -2043,13 +2057,18 @@ export default function CompanySettings() {
                       }
                     }
                   }}
-                  disabled={isLoading || !formData.isIncorporated || (formData.legalStructure !== null && formData.legalStructure !== 'Not yet incorporated')}
+                  disabled={
+                    isLoading ||
+                    !formData.isIncorporated ||
+                    (formData.legalStructure !== null &&
+                      formData.legalStructure !== 'Not yet incorporated')
+                  }
                   className={cn(
                     'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     !formData.isIncorporated
                       ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-300'
                       : 'border-border bg-background text-muted-foreground hover:bg-muted',
-                    'disabled:opacity-50 disabled:cursor-not-allowed'
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
                   )}
                 >
                   No
@@ -2067,7 +2086,10 @@ export default function CompanySettings() {
                           {
                             p_user_id: user.id,
                             p_startup_id: currentStartupId,
-                            p_data: { isIncorporated: true, legalStructure: null },
+                            p_data: {
+                              isIncorporated: true,
+                              legalStructure: null,
+                            },
                           },
                         )
                         if (error) throw error
@@ -2080,13 +2102,17 @@ export default function CompanySettings() {
                       }
                     }
                   }}
-                  disabled={isLoading || formData.isIncorporated || formData.legalStructure === 'Not yet incorporated'}
+                  disabled={
+                    isLoading ||
+                    formData.isIncorporated ||
+                    formData.legalStructure === 'Not yet incorporated'
+                  }
                   className={cn(
                     'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     formData.isIncorporated
                       ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-400'
                       : 'border-border bg-background text-muted-foreground hover:bg-muted',
-                    'disabled:opacity-50 disabled:cursor-not-allowed'
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
                   )}
                 >
                   Yes
@@ -2931,7 +2957,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                            (formData.name || 'CONFIRM')
+                              (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

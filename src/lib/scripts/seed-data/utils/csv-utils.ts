@@ -350,7 +350,8 @@ export function transformToTargetData(
       row.required_documents,
     ) as TargetRecord['required_documents'],
     notes: row.notes || null,
-    visibility_level: (row.visibility_level as TargetRecord['visibility_level']) || 'FREE',
+    visibility_level:
+      (row.visibility_level as TargetRecord['visibility_level']) || 'FREE',
   }))
 }
 
@@ -387,7 +388,8 @@ export function transformToAngelData(
     notable_investments: parseArrayField(row.notable_investments),
     is_active: row.is_active === 'false' ? false : true,
     notes: row.notes || null,
-    visibility_level: (row.visibility_level as AngelRecord['visibility_level']) || 'FREE',
+    visibility_level:
+      (row.visibility_level as AngelRecord['visibility_level']) || 'FREE',
   }))
 }
 
@@ -431,7 +433,8 @@ export function transformToAcceleratorData(
     program_fee: row.program_fee ? parseFloat(row.program_fee) : null,
     is_active: row.is_active === 'false' ? false : true,
     notes: row.notes || null,
-    visibility_level: (row.visibility_level as AcceleratorRecord['visibility_level']) || 'FREE',
+    visibility_level:
+      (row.visibility_level as AcceleratorRecord['visibility_level']) || 'FREE',
   }))
 }
 

@@ -119,17 +119,6 @@ export function AppSidebar({
       }
     : null
 
-  // Debug logging
-  console.log('AppSidebar Debug:', {
-    propUserName: user?.name,
-    contextUserName: contextUser?.user_metadata?.name,
-    firstName,
-    currentStartupId,
-    currentStartup,
-    displayText,
-    displayStartupForSwitcher,
-  })
-
   const userData = {
     name: contextUser?.user_metadata?.name || user?.name || 'User',
     email: contextUser?.email || user?.email || 'user@example.com',

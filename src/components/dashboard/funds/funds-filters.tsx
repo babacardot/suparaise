@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,8 +18,8 @@ export interface FundsFilters {
   stageFocus: string[]
   industryFocus: string[]
   regionFocus: string[]
-  formComplexity: string[]
   requiredDocuments: string[]
+  submissionFilter: 'all' | 'hide_submitted' | 'only_submitted'
 }
 
 interface ColumnVisibility {
@@ -28,7 +28,6 @@ interface ColumnVisibility {
   industry: boolean
   requirements: boolean
   type: boolean
-  complexity: boolean
 }
 
 interface FundsFiltersProps {
@@ -42,11 +41,12 @@ interface FundsFiltersProps {
   ) => void
 }
 
+// Memoized static data
 const SUBMISSION_TYPES = [
   { value: 'form', label: 'Form', animation: animations.fileplus },
   { value: 'email', label: 'Email', animation: animations.mail },
   { value: 'other', label: 'Other', animation: animations.help },
-]
+] as const
 
 const INVESTMENT_STAGES = [
   'All',
@@ -56,7 +56,7 @@ const INVESTMENT_STAGES = [
   'Series B',
   'Series C',
   'Growth',
-]
+] as const
 
 const INDUSTRIES = [
   'B2B SaaS',
@@ -76,7 +76,7 @@ const INDUSTRIES = [
   'AdTech',
   'Logistics',
   'Web3',
-]
+] as const
 
 const REGIONS = [
   'Global',
@@ -96,13 +96,7 @@ const REGIONS = [
   'Oceania',
   'EMEA',
   'Emerging Markets',
-]
-
-const FORM_COMPLEXITY = [
-  { value: 'simple', label: 'Simple' },
-  { value: 'standard', label: 'Standard' },
-  { value: 'comprehensive', label: 'Comprehensive' },
-]
+] as const
 
 const REQUIRED_DOCUMENTS = [
   { value: 'pitch_deck', label: 'Deck' },
@@ -110,7 +104,9 @@ const REQUIRED_DOCUMENTS = [
   { value: 'financial_projections', label: 'Financials' },
   { value: 'business_plan', label: 'Business Plan' },
   { value: 'traction_data', label: 'Traction' },
-]
+] as const
+
+const DEBOUNCE_DELAY = 1500
 
 export default function FundsFilters({
   filters,
@@ -119,55 +115,126 @@ export default function FundsFilters({
   columnVisibility,
   onColumnVisibilityChange,
 }: FundsFiltersProps) {
-  const updateFilter = (
-    filterKey: keyof FundsFilters,
-    value: string,
-    checked: boolean,
-  ) => {
-    // Skip non-array filters like search
-    if (filterKey === 'search') return
+  const [localFilters, setLocalFilters] = useState(filters)
+  const isMounted = useRef(false)
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    const currentValues = filters[filterKey] as string[]
-    const newValues = checked
-      ? [...currentValues, value]
-      : currentValues.filter((v: string) => v !== value)
+  // Sync local state when parent filters change (e.g., on "Clear all")
+  useEffect(() => {
+    setLocalFilters(filters)
+  }, [filters])
 
-    onFiltersChange({
-      ...filters,
-      [filterKey]: newValues,
-    })
-  }
-
-  const clearFilter = (filterKey: keyof FundsFilters) => {
-    if (filterKey === 'search') {
-      onFiltersChange({
-        ...filters,
-        [filterKey]: '',
-      })
-    } else {
-      onFiltersChange({
-        ...filters,
-        [filterKey]: [],
-      })
+  // Debounce filter changes before sending them to the parent
+  useEffect(() => {
+    // Don't trigger on initial mount
+    if (!isMounted.current) {
+      isMounted.current = true
+      return
     }
-  }
 
-  const getActiveFiltersCount = () => {
-    const searchCount = filters.search?.trim() ? 1 : 0
-    const arrayFiltersCount = Object.entries(filters).reduce(
+    // Clear existing timeout to reset the debounce timer
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+      debounceTimeoutRef.current = null
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      // Only call the parent if the filters have actually changed
+      if (JSON.stringify(localFilters) !== JSON.stringify(filters)) {
+        onFiltersChange(localFilters)
+      }
+      debounceTimeoutRef.current = null
+    }, DEBOUNCE_DELAY)
+
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+        debounceTimeoutRef.current = null
+      }
+    }
+  }, [localFilters, filters, onFiltersChange])
+
+  // Memoize expensive calculations
+  const hasActiveFilters = useMemo(() => {
+    const searchCount = localFilters.search?.trim() ? 1 : 0
+    // Don't count submissionFilter as an active filter - it's a view mode, not a filter
+    const arrayFiltersCount = Object.entries(localFilters).reduce(
       (count, [key, value]) => {
-        if (key === 'search') return count
+        if (key === 'search' || key === 'submissionFilter') return count
         return count + (Array.isArray(value) ? value.length : 0)
       },
       0,
     )
-    return searchCount + arrayFiltersCount
-  }
+    return searchCount + arrayFiltersCount > 0
+  }, [localFilters])
 
-  const hasActiveFilters = getActiveFiltersCount() > 0
+  // Memoized filter update function
+  const updateFilter = useCallback(
+    (filterKey: keyof FundsFilters, value: string, checked: boolean) => {
+      // Skip non-array filters like search and submissionFilter
+      if (filterKey === 'search' || filterKey === 'submissionFilter') return
 
-  // Color mapping functions with improved gradient for investment stages
-  const getStageColor = (stage: string) => {
+      setLocalFilters((prevFilters) => {
+        const currentValues = prevFilters[filterKey] as string[]
+        const newValues = checked
+          ? [...currentValues, value]
+          : currentValues.filter((v: string) => v !== value)
+
+        return {
+          ...prevFilters,
+          [filterKey]: newValues,
+        }
+      })
+    },
+    [],
+  )
+
+  // Memoized clear filter function with immediate update option
+  const clearFilter = useCallback(
+    (filterKey: keyof FundsFilters, immediate = false) => {
+      let newFilters: FundsFilters
+
+      if (filterKey === 'search') {
+        newFilters = { ...localFilters, [filterKey]: '' }
+      } else if (filterKey === 'submissionFilter') {
+        newFilters = { ...localFilters, [filterKey]: 'all' }
+      } else {
+        newFilters = { ...localFilters, [filterKey]: [] }
+      }
+
+      setLocalFilters(newFilters)
+
+      // For immediate updates (like cross icon clicks), bypass debounce
+      if (immediate) {
+        // Clear any pending debounce
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current)
+          debounceTimeoutRef.current = null
+        }
+        // Update immediately
+        onFiltersChange(newFilters)
+      }
+    },
+    [localFilters, onFiltersChange],
+  )
+
+  // Memoized search input handler
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLocalFilters((prevFilters) => ({
+        ...prevFilters,
+        search: e.target.value,
+      }))
+    },
+    [],
+  )
+
+  const handleSearchClear = useCallback(() => {
+    clearFilter('search', true) // Immediate update for search clear
+  }, [clearFilter])
+
+  // Color mapping functions memoized
+  const getStageColor = useCallback((stage: string) => {
     switch (stage) {
       case 'All':
         return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900/40'
@@ -176,7 +243,7 @@ export default function FundsFilters({
       case 'Seed':
         return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
       case 'Series A':
-        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+        return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border border-sky-200 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/40'
       case 'Series B':
         return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
       case 'Series C':
@@ -186,63 +253,33 @@ export default function FundsFilters({
       default:
         return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900/40'
     }
-  }
+  }, [])
 
-  const getIndustryColor = (industry: string) => {
-    // Tech/SaaS group
+  const getIndustryColor = useCallback((industry: string) => {
+    // Industries with a strong physical or hardware component
     if (
       [
-        'B2B SaaS',
-        'AI/ML',
         'Deep tech',
-        'Developer tools',
-        'Cybersecurity',
+        'Healthtech',
+        'Climate tech',
+        'PropTech',
+        'Logistics',
       ].includes(industry)
     ) {
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
-    }
-    // Finance
-    if (industry === 'Fintech') {
-      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
-    }
-    // Health
-    if (industry === 'Healthtech') {
-      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40'
-    }
-    // Consumer/Commerce
-    if (
-      ['Consumer', 'E-commerce', 'Marketplace', 'Gaming'].includes(industry)
-    ) {
-      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
-    }
-    // Climate
-    if (industry === 'Climate tech') {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
     }
-    // Property/Insurance
-    if (['PropTech', 'InsurTech'].includes(industry)) {
-      return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40'
-    }
-    // Advertising/Logistics
-    if (['AdTech', 'Logistics'].includes(industry)) {
-      return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40'
-    }
-    // Web3/Crypto
-    if (industry === 'Web3') {
-      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
-    }
-    // Default
-    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
-  }
+    // Default blue for software/digital industries
+    return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+  }, [])
 
-  const getRegionColor = (region: string) => {
-    // Global and Emerging Markets - Blue
+  const getRegionColor = useCallback((region: string) => {
+    // Global and Emerging Markets - Gray
     if (['Global', 'Emerging Markets'].includes(region)) {
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40 border border-sky-200 dark:border-sky-800'
     }
     // North America - Green
     if (region === 'North America') {
-      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40'
+      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 border border-green-200 dark:border-green-800'
     }
     // Europe - Purple
     if (
@@ -275,53 +312,48 @@ export default function FundsFilters({
     }
     // Default
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
-  }
+  }, [])
 
-  const getOptionColors = (filterKey: keyof FundsFilters, value: string) => {
-    if (filterKey === 'submissionTypes') {
-      if (value === 'form')
-        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
-      if (value === 'email')
-        return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
-      if (value === 'other')
-        return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
-    }
-    if (filterKey === 'formComplexity') {
-      if (value === 'simple')
-        return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
-      if (value === 'standard')
-        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
-      if (value === 'comprehensive')
-        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
-    }
-    if (filterKey === 'regionFocus') {
-      return getRegionColor(value)
-    }
-    if (filterKey === 'stageFocus') {
-      return getStageColor(value)
-    }
-    if (filterKey === 'industryFocus') {
-      return getIndustryColor(value)
-    }
-    if (filterKey === 'requiredDocuments') {
-      if (value === 'pitch_deck')
-        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
-      if (value === 'video')
-        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
-      if (value === 'financial_projections')
-        return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
-      if (value === 'traction_data')
-        return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40'
-      if (value === 'business_plan')
-        return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
-    }
-    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
-  }
+  const getOptionColors = useCallback(
+    (filterKey: keyof FundsFilters, value: string) => {
+      if (filterKey === 'submissionTypes') {
+        if (value === 'form')
+          return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+        if (value === 'email')
+          return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
+        if (value === 'other')
+          return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
+      }
+      if (filterKey === 'regionFocus') {
+        return getRegionColor(value)
+      }
+      if (filterKey === 'stageFocus') {
+        return getStageColor(value)
+      }
+      if (filterKey === 'industryFocus') {
+        return getIndustryColor(value)
+      }
+      if (filterKey === 'requiredDocuments') {
+        if (value === 'pitch_deck')
+          return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
+        if (value === 'video')
+          return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
+        if (value === 'financial_projections')
+          return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
+        if (value === 'traction_data')
+          return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40'
+        if (value === 'business_plan')
+          return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
+      }
+      return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
+    },
+    [getRegionColor, getStageColor, getIndustryColor],
+  )
 
   // Store scroll positions for each filter type
   const scrollPositions = React.useRef<Record<string, number>>({})
 
-  const FilterSection = ({
+  const FilterSection = React.memo(function FilterSection({
     filterKey,
     options,
     hasIcon = false,
@@ -329,7 +361,7 @@ export default function FundsFilters({
     filterKey: keyof FundsFilters
     options: Array<{ value: string; label: string; animation?: object }>
     hasIcon?: boolean
-  }) => {
+  }) {
     const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
     // Restore scroll position after render
@@ -347,22 +379,21 @@ export default function FundsFilters({
       }
     }
 
-    const handleOptionClick = (
-      optionValue: string,
-      isSelected: boolean,
-      e: React.MouseEvent,
-    ) => {
-      e.preventDefault()
-      e.stopPropagation()
+    const handleOptionClick = useCallback(
+      (optionValue: string, isSelected: boolean, e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
 
-      // Store current scroll position before state update
-      if (scrollContainerRef.current) {
-        scrollPositions.current[filterKey] =
-          scrollContainerRef.current.scrollTop
-      }
+        // Store current scroll position before state update
+        if (scrollContainerRef.current) {
+          scrollPositions.current[filterKey] =
+            scrollContainerRef.current.scrollTop
+        }
 
-      updateFilter(filterKey, optionValue, !isSelected)
-    }
+        updateFilter(filterKey, optionValue, !isSelected)
+      },
+      [filterKey],
+    )
 
     return (
       <div className="p-2">
@@ -376,8 +407,9 @@ export default function FundsFilters({
           }}
         >
           {options.map((option) => {
-            const isSelected =
-              filters[filterKey]?.includes(option.value) || false
+            const isSelected = Array.isArray(localFilters[filterKey])
+              ? (localFilters[filterKey] as string[]).includes(option.value)
+              : false
             const colors = getOptionColors(filterKey, option.value)
 
             return (
@@ -403,7 +435,7 @@ export default function FundsFilters({
         </div>
       </div>
     )
-  }
+  })
 
   return (
     <div
@@ -420,7 +452,7 @@ export default function FundsFilters({
     >
       <div className="flex flex-wrap items-center gap-4">
         {/* Search Input */}
-        <div className="w-full sm:w-64">
+        <div className="w-full sm:w-48">
           <div className="relative">
             <LottieIcon
               animationData={animations.search}
@@ -430,16 +462,13 @@ export default function FundsFilters({
             <Input
               type="text"
               placeholder="Search funds..."
-              value={filters.search || ''}
-              onChange={(e) => {
-                // Update immediately for UI responsiveness
-                onFiltersChange({ ...filters, search: e.target.value })
-              }}
+              value={localFilters.search || ''}
+              onChange={handleSearchChange}
               className="pl-10 h-10 rounded-sm bg-card border-border text-card-foreground placeholder:text-muted-foreground"
             />
-            {filters.search && (
+            {localFilters.search && (
               <button
-                onClick={() => onFiltersChange({ ...filters, search: '' })}
+                onClick={handleSearchClear}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-sm hover:bg-muted flex items-center justify-center transition-colors"
                 title="Clear search"
               >
@@ -452,6 +481,7 @@ export default function FundsFilters({
             )}
           </div>
         </div>
+
         {/* Region Filter - 5% width reduction */}
         {columnVisibility.region && (
           <div className="w-full sm:w-44">
@@ -462,8 +492,8 @@ export default function FundsFilters({
                   className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
                 >
                   <div className="flex items-center space-x-2 truncate">
-                    {filters.regionFocus.length > 0 ? (
-                      filters.regionFocus.slice(0, 2).map((region) => {
+                    {localFilters.regionFocus.length > 0 ? (
+                      localFilters.regionFocus.slice(0, 2).map((region) => {
                         const regionColor =
                           getRegionColor(region).split(' hover:')[0] // Remove hover classes for display
                         return (
@@ -481,18 +511,18 @@ export default function FundsFilters({
                         Region
                       </span>
                     )}
-                    {filters.regionFocus.length > 2 && (
+                    {localFilters.regionFocus.length > 2 && (
                       <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
-                        +{filters.regionFocus.length - 2}
+                        +{localFilters.regionFocus.length - 2}
                       </Badge>
                     )}
                   </div>
-                  {filters.regionFocus.length > 0 ? (
+                  {localFilters.regionFocus.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        clearFilter('regionFocus')
+                        clearFilter('regionFocus', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
                     >
@@ -537,8 +567,8 @@ export default function FundsFilters({
                   className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
                 >
                   <div className="flex items-center space-x-2 truncate">
-                    {filters.stageFocus.length > 0 ? (
-                      filters.stageFocus.slice(0, 2).map((stage) => {
+                    {localFilters.stageFocus.length > 0 ? (
+                      localFilters.stageFocus.slice(0, 2).map((stage) => {
                         const stageColor =
                           getStageColor(stage).split(' hover:')[0] // Remove hover classes for display
                         return (
@@ -556,18 +586,18 @@ export default function FundsFilters({
                         Focus
                       </span>
                     )}
-                    {filters.stageFocus.length > 2 && (
+                    {localFilters.stageFocus.length > 2 && (
                       <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
-                        +{filters.stageFocus.length - 2}
+                        +{localFilters.stageFocus.length - 2}
                       </Badge>
                     )}
                   </div>
-                  {filters.stageFocus.length > 0 ? (
+                  {localFilters.stageFocus.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        clearFilter('stageFocus')
+                        clearFilter('stageFocus', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
                     >
@@ -612,8 +642,8 @@ export default function FundsFilters({
                   className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
                 >
                   <div className="flex items-center space-x-2 truncate">
-                    {filters.industryFocus.length > 0 ? (
-                      filters.industryFocus.slice(0, 2).map((industry) => {
+                    {localFilters.industryFocus.length > 0 ? (
+                      localFilters.industryFocus.slice(0, 2).map((industry) => {
                         const industryColor =
                           getIndustryColor(industry).split(' hover:')[0] // Remove hover classes for display
                         return (
@@ -631,18 +661,18 @@ export default function FundsFilters({
                         Industry
                       </span>
                     )}
-                    {filters.industryFocus.length > 2 && (
+                    {localFilters.industryFocus.length > 2 && (
                       <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
-                        +{filters.industryFocus.length - 2}
+                        +{localFilters.industryFocus.length - 2}
                       </Badge>
                     )}
                   </div>
-                  {filters.industryFocus.length > 0 ? (
+                  {localFilters.industryFocus.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        clearFilter('industryFocus')
+                        clearFilter('industryFocus', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
                     >
@@ -687,8 +717,8 @@ export default function FundsFilters({
                   className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
                 >
                   <div className="flex items-center space-x-2 truncate">
-                    {filters.submissionTypes.length > 0 ? (
-                      filters.submissionTypes.map((type) => {
+                    {localFilters.submissionTypes.length > 0 ? (
+                      localFilters.submissionTypes.map((type) => {
                         const typeOption = SUBMISSION_TYPES.find(
                           (t) => t.value === type,
                         )
@@ -714,12 +744,12 @@ export default function FundsFilters({
                       </span>
                     )}
                   </div>
-                  {filters.submissionTypes.length > 0 ? (
+                  {localFilters.submissionTypes.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        clearFilter('submissionTypes')
+                        clearFilter('submissionTypes', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
                     >
@@ -744,7 +774,7 @@ export default function FundsFilters({
               >
                 <FilterSection
                   filterKey="submissionTypes"
-                  options={SUBMISSION_TYPES}
+                  options={[...SUBMISSION_TYPES]}
                   hasIcon={false}
                 />
               </PopoverContent>
@@ -762,9 +792,9 @@ export default function FundsFilters({
                   className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
                 >
                   <div className="flex items-center space-x-2 truncate">
-                    {filters.requiredDocuments &&
-                    filters.requiredDocuments.length > 0 ? (
-                      filters.requiredDocuments.slice(0, 2).map((doc) => {
+                    {localFilters.requiredDocuments &&
+                    localFilters.requiredDocuments.length > 0 ? (
+                      localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = REQUIRED_DOCUMENTS.find(
                           (d) => d.value === doc,
                         )
@@ -787,20 +817,20 @@ export default function FundsFilters({
                         Requirements
                       </span>
                     )}
-                    {filters.requiredDocuments &&
-                      filters.requiredDocuments.length > 2 && (
+                    {localFilters.requiredDocuments &&
+                      localFilters.requiredDocuments.length > 2 && (
                         <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
-                          +{filters.requiredDocuments.length - 2}
+                          +{localFilters.requiredDocuments.length - 2}
                         </Badge>
                       )}
                   </div>
-                  {filters.requiredDocuments &&
-                  filters.requiredDocuments.length > 0 ? (
+                  {localFilters.requiredDocuments &&
+                  localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        clearFilter('requiredDocuments')
+                        clearFilter('requiredDocuments', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
                     >
@@ -825,79 +855,7 @@ export default function FundsFilters({
               >
                 <FilterSection
                   filterKey="requiredDocuments"
-                  options={REQUIRED_DOCUMENTS}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        )}
-
-        {/* Complexity Filter - 5% width reduction */}
-        {columnVisibility.complexity && (
-          <div className="w-full sm:w-36">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
-                >
-                  <div className="flex items-center space-x-2 truncate">
-                    {filters.formComplexity.length > 0 ? (
-                      filters.formComplexity.map((complexity) => {
-                        const color =
-                          complexity === 'simple'
-                            ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
-                            : complexity === 'standard'
-                              ? 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-                              : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                        return (
-                          <Badge
-                            key={complexity}
-                            className={`mr-1 ${color} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
-                            style={{ pointerEvents: 'none' }}
-                          >
-                            {complexity.charAt(0).toUpperCase() +
-                              complexity.slice(1)}
-                          </Badge>
-                        )
-                      })
-                    ) : (
-                      <span className="text-muted-foreground text-sm">
-                        Complexity
-                      </span>
-                    )}
-                  </div>
-                  {filters.formComplexity.length > 0 ? (
-                    <div
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        clearFilter('formComplexity')
-                      }}
-                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
-                    >
-                      <LottieIcon
-                        animationData={animations.cross}
-                        size={16}
-                        className="opacity-50 hover:opacity-100"
-                      />
-                    </div>
-                  ) : (
-                    <LottieIcon
-                      animationData={animations.arrowDown}
-                      size={16}
-                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
-                    />
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-36 p-0 bg-card text-card-foreground rounded-sm"
-                align="start"
-              >
-                <FilterSection
-                  filterKey="formComplexity"
-                  options={FORM_COMPLEXITY}
+                  options={[...REQUIRED_DOCUMENTS]}
                 />
               </PopoverContent>
             </Popover>
@@ -945,13 +903,66 @@ export default function FundsFilters({
                                         `}
                   >
                     <span className="text-sm font-medium capitalize">
-                      {key === 'requirements' ? 'Requirements' : key}
+                      {key === 'requirements'
+                        ? 'Requirements'
+                        : key === 'type'
+                          ? 'Type'
+                          : key}
                     </span>
                   </div>
                 ))}
               </div>
             </PopoverContent>
           </Popover>
+        </div>
+
+        {/* Submission Filter Toggle - 3 States */}
+        <div className="w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => {
+              const nextState: 'all' | 'hide_submitted' | 'only_submitted' =
+                localFilters.submissionFilter === 'all'
+                  ? 'hide_submitted'
+                  : localFilters.submissionFilter === 'hide_submitted'
+                    ? 'only_submitted'
+                    : 'all'
+
+              const newFilters = {
+                ...localFilters,
+                submissionFilter: nextState,
+              }
+              setLocalFilters(newFilters)
+              // Update immediately for toggle
+              onFiltersChange(newFilters)
+            }}
+            className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
+              localFilters.submissionFilter === 'hide_submitted'
+                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
+                : localFilters.submissionFilter === 'only_submitted'
+                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
+                  : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
+            }`}
+            title={
+              localFilters.submissionFilter === 'all'
+                ? 'Showing all funds (click to hide submitted)'
+                : localFilters.submissionFilter === 'hide_submitted'
+                  ? 'Hiding submitted funds (click to show only submitted)'
+                  : 'Showing only submitted funds (click to show all)'
+            }
+          >
+            <LottieIcon
+              animationData={
+                localFilters.submissionFilter === 'hide_submitted'
+                  ? animations.visibility
+                  : localFilters.submissionFilter === 'only_submitted'
+                    ? animations.check
+                    : animations.visibility
+              }
+              size={16}
+              className="opacity-50 hover:opacity-100"
+            />
+          </Button>
         </div>
 
         {/* Clear filters button - inline on desktop */}

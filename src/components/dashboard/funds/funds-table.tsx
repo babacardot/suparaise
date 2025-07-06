@@ -14,12 +14,7 @@ import {
 } from '@/components/design/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -32,7 +27,6 @@ import {
   ValidationGate,
   VALIDATION_PRESETS,
 } from '@/components/ui/validation-gate'
-import FundsFilters, { FundsFilters as FundsFiltersType } from './funds-filters'
 
 type Target = {
   id: string
@@ -48,14 +42,13 @@ type Target = {
   question_count_range?: '1-5' | '6-10' | '11-20' | '21+'
   required_documents?: string[]
   notes?: string
+  visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
 }
 
 interface FundsTableProps {
   targets: Target[]
-  filters: FundsFiltersType
-  onFiltersChange: (filters: FundsFiltersType) => void
   startupId: string
   paginationData: {
     totalCount: number
@@ -64,11 +57,11 @@ interface FundsTableProps {
     limit: number
   } | null
   offset: number
-  isLoading: boolean
   onPreviousPage: () => void
   onNextPage: () => void
-  sortConfig: { key: string | null; direction: 'asc' | 'desc' }
   onSortChange: (key: string) => void
+  columnVisibility: ColumnVisibility
+  onTargetClick?: (target: Target) => void
 }
 
 interface ColumnVisibility {
@@ -77,23 +70,18 @@ interface ColumnVisibility {
   industry: boolean
   requirements: boolean
   type: boolean
-  complexity: boolean
 }
-
-const COLUMN_VISIBILITY_STORAGE_KEY = 'funds-table-columns'
 
 const FundsTable = React.memo(function FundsTable({
   targets,
-  filters,
-  onFiltersChange,
   startupId,
   paginationData,
   offset,
-  isLoading,
   onPreviousPage,
   onNextPage,
-  sortConfig,
   onSortChange,
+  columnVisibility,
+  onTargetClick,
 }: FundsTableProps) {
   const { user } = useUser()
   const { toast } = useToast()
@@ -111,58 +99,8 @@ const FundsTable = React.memo(function FundsTable({
     canSubmitMore: boolean
   } | null>(null)
 
-  // Initialize column visibility from localStorage, with complexity hidden by default
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<ColumnVisibility>(() => {
-      if (typeof window !== 'undefined') {
-        try {
-          const savedVisibility = localStorage.getItem(
-            COLUMN_VISIBILITY_STORAGE_KEY,
-          )
-          if (savedVisibility) {
-            return JSON.parse(savedVisibility)
-          }
-        } catch (error) {
-          console.warn('Failed to load saved column visibility:', error)
-        }
-      }
-      return {
-        region: true,
-        focus: true,
-        industry: true,
-        requirements: true,
-        type: true,
-        complexity: false, // Hidden by default
-      }
-    })
-
-  // Update column visibility and save to localStorage
-  const updateColumnVisibility = React.useCallback(
-    (column: keyof ColumnVisibility, visible: boolean) => {
-      setColumnVisibility((prev) => {
-        const newVisibility = { ...prev, [column]: visible }
-
-        // Save to localStorage
-        if (typeof window !== 'undefined') {
-          try {
-            localStorage.setItem(
-              COLUMN_VISIBILITY_STORAGE_KEY,
-              JSON.stringify(newVisibility),
-            )
-          } catch (error) {
-            console.warn('Failed to save column visibility:', error)
-          }
-        }
-
-        return newVisibility
-      })
-    },
-    [],
-  )
-
-  // Filter and sort targets based on active filters and sort configuration
-  // Client-side filtering and sorting is now disabled. Data is pre-sorted and filtered by the server.
-  const filteredAndSortedTargets = targets
+  // Memoize the filtered targets to prevent unnecessary recalculations
+  const filteredTargets = React.useMemo(() => targets, [targets])
 
   const handleSort = React.useCallback(
     (key: string) => {
@@ -170,9 +108,6 @@ const FundsTable = React.memo(function FundsTable({
     },
     [onSortChange],
   )
-
-  // Filter targets based on active filters (keeping for backward compatibility)
-  const filteredTargets = filteredAndSortedTargets
 
   // Fetch queue status
   React.useEffect(() => {
@@ -207,18 +142,7 @@ const FundsTable = React.memo(function FundsTable({
     return () => clearInterval(interval)
   }, [user?.id, startupId])
 
-  const clearFilters = React.useCallback(() => {
-    onFiltersChange({
-      search: '',
-      submissionTypes: [],
-      stageFocus: [],
-      industryFocus: [],
-      regionFocus: [],
-      formComplexity: [],
-      requiredDocuments: [],
-    })
-  }, [onFiltersChange])
-
+  // Memoize color functions to prevent recreation on every render
   const getSubmissionTypeColor = React.useCallback((type: string) => {
     switch (type) {
       case 'form':
@@ -232,23 +156,10 @@ const FundsTable = React.memo(function FundsTable({
     }
   }, [])
 
-  const getComplexityColor = React.useCallback((complexity: string) => {
-    switch (complexity) {
-      case 'simple':
-        return 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
-      case 'standard':
-        return 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800'
-      case 'comprehensive':
-        return 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
-      default:
-        return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
-    }
-  }, [])
-
   const getRegionColor = React.useCallback((region: string) => {
-    // Global and Emerging Markets - Blue
+    // Global and Emerging Markets - Sky
     if (['Global', 'Emerging Markets'].includes(region)) {
-      return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+      return 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
     }
     // North America - Green
     if (region === 'North America') {
@@ -288,9 +199,9 @@ const FundsTable = React.memo(function FundsTable({
   }, [])
 
   const getRegionIconColor = React.useCallback((region: string) => {
-    // Global and Emerging Markets - Blue
+    // Global and Emerging Markets - Sky
     if (['Global', 'Emerging Markets'].includes(region)) {
-      return [0.219, 0.461, 0.835] as [number, number, number] // blue-600
+      return [0.08, 0.55, 0.82] as [number, number, number] // sky-600
     }
     // North America - Green
     if (region === 'North America') {
@@ -338,7 +249,7 @@ const FundsTable = React.memo(function FundsTable({
       case 'Seed':
         return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
       case 'Series A':
-        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+        return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
       case 'Series B':
         return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
       case 'Series C':
@@ -348,6 +259,23 @@ const FundsTable = React.memo(function FundsTable({
       default:
         return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
     }
+  }, [])
+
+  const getIndustryColor = React.useCallback((industry: string) => {
+    // Industries with a strong physical or hardware component
+    if (
+      [
+        'Deep tech',
+        'Healthtech',
+        'Climate tech',
+        'PropTech',
+        'Logistics',
+      ].includes(industry)
+    ) {
+      return 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
+    }
+    // Default blue for software/digital industries
+    return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
   }, [])
 
   const getDocumentBadge = React.useCallback((docType: string) => {
@@ -557,18 +485,9 @@ const FundsTable = React.memo(function FundsTable({
         onDragStart={(e: React.DragEvent) => e.preventDefault()}
         onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
       >
-        {/* Filters Component */}
-        <FundsFilters
-          filters={filters}
-          onFiltersChange={onFiltersChange}
-          onClearFilters={clearFilters}
-          columnVisibility={columnVisibility}
-          onColumnVisibilityChange={updateColumnVisibility}
-        />
-
         <div className="flex-1 min-h-0">
           {filteredTargets.length === 0 ? (
-            <div className="flex flex-1 items-center justify-center rounded-sm border border-dashed shadow-sm min-h-[74vh]">
+            <div className="flex flex-1 items-center justify-center rounded-sm border border-dashed shadow-sm min-h-[75vh]">
               <div className="flex flex-col items-center gap-6 text-center max-w-md">
                 <div className="relative w-48 h-48">
                   <Image
@@ -582,7 +501,7 @@ const FundsTable = React.memo(function FundsTable({
               </div>
             </div>
           ) : (
-            <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[76vh]">
+            <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[75vh]">
               <div
                 className="flex-1 overflow-auto hide-scrollbar"
                 data-scroll-preserve="funds-table-scroll"
@@ -596,15 +515,6 @@ const FundsTable = React.memo(function FundsTable({
                           className="flex items-center hover:text-foreground transition-colors font-medium"
                         >
                           Name
-                          {sortConfig.key === 'name' && (
-                            <span className="ml-1">
-                              {sortConfig.direction === 'asc' ? (
-                                <ChevronUpIcon className="h-4 w-4" />
-                              ) : (
-                                <ChevronDownIcon className="h-4 w-4" />
-                              )}
-                            </span>
-                          )}
                         </button>
                       </TableHead>
                       {columnVisibility.region && (
@@ -614,15 +524,6 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Region
-                            {sortConfig.key === 'region' && (
-                              <span className="ml-1">
-                                {sortConfig.direction === 'asc' ? (
-                                  <ChevronUpIcon className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDownIcon className="h-4 w-4" />
-                                )}
-                              </span>
-                            )}
                           </button>
                         </TableHead>
                       )}
@@ -633,15 +534,6 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Focus
-                            {sortConfig.key === 'focus' && (
-                              <span className="ml-1">
-                                {sortConfig.direction === 'asc' ? (
-                                  <ChevronUpIcon className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDownIcon className="h-4 w-4" />
-                                )}
-                              </span>
-                            )}
                           </button>
                         </TableHead>
                       )}
@@ -652,15 +544,6 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Industry
-                            {sortConfig.key === 'industry' && (
-                              <span className="ml-1">
-                                {sortConfig.direction === 'asc' ? (
-                                  <ChevronUpIcon className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDownIcon className="h-4 w-4" />
-                                )}
-                              </span>
-                            )}
                           </button>
                         </TableHead>
                       )}
@@ -671,15 +554,6 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Type
-                            {sortConfig.key === 'type' && (
-                              <span className="ml-1">
-                                {sortConfig.direction === 'asc' ? (
-                                  <ChevronUpIcon className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDownIcon className="h-4 w-4" />
-                                )}
-                              </span>
-                            )}
                           </button>
                         </TableHead>
                       )}
@@ -690,34 +564,6 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
                             Requirements
-                            {sortConfig.key === 'requirements' && (
-                              <span className="ml-1">
-                                {sortConfig.direction === 'asc' ? (
-                                  <ChevronUpIcon className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDownIcon className="h-4 w-4" />
-                                )}
-                              </span>
-                            )}
-                          </button>
-                        </TableHead>
-                      )}
-                      {columnVisibility.complexity && (
-                        <TableHead className="w-[90px]">
-                          <button
-                            onClick={() => handleSort('complexity')}
-                            className="flex items-center hover:text-foreground transition-colors font-medium"
-                          >
-                            Complexity
-                            {sortConfig.key === 'complexity' && (
-                              <span className="ml-1">
-                                {sortConfig.direction === 'asc' ? (
-                                  <ChevronUpIcon className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDownIcon className="h-4 w-4" />
-                                )}
-                              </span>
-                            )}
                           </button>
                         </TableHead>
                       )}
@@ -726,7 +572,11 @@ const FundsTable = React.memo(function FundsTable({
                   </TableHeader>
                   <TableBody>
                     {filteredTargets.map((target) => (
-                      <TableRow key={target.id}>
+                      <TableRow
+                        key={target.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => onTargetClick?.(target)}
+                      >
                         <TableCell className="font-medium p-2">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
@@ -844,7 +694,7 @@ const FundsTable = React.memo(function FundsTable({
                                 .map((industry) => (
                                   <Badge
                                     key={industry}
-                                    className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs"
+                                    className={`rounded-sm ${getIndustryColor(industry)} text-xs`}
                                   >
                                     {industry}
                                   </Badge>
@@ -947,19 +797,6 @@ const FundsTable = React.memo(function FundsTable({
                             </div>
                           </TableCell>
                         )}
-                        {columnVisibility.complexity && (
-                          <TableCell className="p-2">
-                            <div className="flex flex-wrap gap-1">
-                              {target.form_complexity && (
-                                <Badge
-                                  className={`rounded-sm text-xs ${getComplexityColor(target.form_complexity)}`}
-                                >
-                                  {capitalizeFirst(target.form_complexity)}
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                        )}
 
                         <TableCell className="text-right p-2">
                           <div className="flex justify-end">
@@ -984,19 +821,18 @@ const FundsTable = React.memo(function FundsTable({
                                     setHoveredButton(`apply-${target.id}`)
                                   }
                                   onMouseLeave={() => setHoveredButton(null)}
-                                  className={`rounded-sm px-3 text-sm h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    queueStatus && !queueStatus.canSubmitMore
-                                      ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
-                                      : queueStatus &&
-                                          queueStatus.availableSlots === 0
-                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                                  }`}
+                                  className={`rounded-sm px-3 text-sm h-8 disabled:opacity-50 disabled:cursor-not-allowed ${queueStatus && !queueStatus.canSubmitMore
+                                    ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                    : queueStatus &&
+                                      queueStatus.availableSlots === 0
+                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                      : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                    }`}
                                   title={
                                     queueStatus && !queueStatus.canSubmitMore
                                       ? 'Queue is full. Cannot add more applications.'
                                       : queueStatus &&
-                                          queueStatus.availableSlots === 0
+                                        queueStatus.availableSlots === 0
                                         ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
                                         : queueStatus
                                           ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
@@ -1008,10 +844,10 @@ const FundsTable = React.memo(function FundsTable({
                                       submittingTargets.has(target.id)
                                         ? animations.autorenew
                                         : queueStatus &&
-                                            !queueStatus.canSubmitMore
+                                          !queueStatus.canSubmitMore
                                           ? animations.cross
                                           : queueStatus &&
-                                              queueStatus.availableSlots === 0
+                                            queueStatus.availableSlots === 0
                                             ? animations.hourglass
                                             : animations.takeoff
                                     }
@@ -1028,7 +864,7 @@ const FundsTable = React.memo(function FundsTable({
                                     : queueStatus && !queueStatus.canSubmitMore
                                       ? 'Queue Full'
                                       : queueStatus &&
-                                          queueStatus.availableSlots === 0
+                                        queueStatus.availableSlots === 0
                                         ? 'Queue'
                                         : 'Apply'}
                                 </Button>
@@ -1060,7 +896,7 @@ const FundsTable = React.memo(function FundsTable({
                                         hoveredButton === `email-${target.id}`
                                       }
                                     />
-                                    Send Email
+                                    Email
                                   </Button>
                                 </ValidationGate>
                               )}
@@ -1084,7 +920,7 @@ const FundsTable = React.memo(function FundsTable({
                                     hoveredButton === `learn-${target.id}`
                                   }
                                 />
-                                Learn More
+                                Learn
                               </Button>
                             )}
                           </div>
@@ -1100,12 +936,8 @@ const FundsTable = React.memo(function FundsTable({
                   <div className="flex items-center justify-between border-t border-border px-4 py-4 bg-background">
                     <div className="flex-1 text-sm text-muted-foreground">
                       <span className="hidden md:inline">
-                        Showing {offset + 1} to{' '}
-                        {Math.min(
-                          offset + paginationData.limit,
-                          paginationData.totalCount,
-                        )}{' '}
-                        of {paginationData.totalCount} entries
+                        Showing {offset + 1} to {offset + targets.length} of{' '}
+                        {paginationData.totalCount} entries
                       </span>
                       <span className="md:hidden">
                         Page {paginationData.currentPage} of{' '}
@@ -1116,19 +948,19 @@ const FundsTable = React.memo(function FundsTable({
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button
-                        variant="outline"
-                        className="h-8 w-8 p-0 rounded-sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 rounded-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                         onClick={onPreviousPage}
-                        disabled={offset === 0 || isLoading}
+                        disabled={offset === 0}
                       >
                         <span className="sr-only">Previous page</span>
                         <ChevronLeftIcon className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant="outline"
-                        className="h-8 w-8 p-0 rounded-sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 rounded-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                         onClick={onNextPage}
-                        disabled={!paginationData.hasMore || isLoading}
+                        disabled={!paginationData.hasMore}
                       >
                         <span className="sr-only">Next page</span>
                         <ChevronRightIcon className="h-4 w-4" />
