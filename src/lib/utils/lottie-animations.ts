@@ -92,6 +92,7 @@ import visibilityAnimation from '@/assets/lottie/visibility.json'
 import editAnimation from '@/assets/lottie/edit.json'
 import ratioAnimation from '@/assets/lottie/ratio.json'
 import crossAnimation from '@/assets/lottie/cross.json'
+import filterAnimation from '@/assets/lottie/filter.json'
 
 // Lottie animation data type
 export interface LottieAnimationData {
@@ -203,6 +204,7 @@ export const animations = {
   edit: editAnimation,
   ratio: ratioAnimation,
   cross: crossAnimation,
+  filter: filterAnimation,
 }
 
 // Also export individual animations for direct import
@@ -300,4 +302,5 @@ export {
   editAnimation,
   ratioAnimation,
   crossAnimation,
+  filterAnimation,
 }

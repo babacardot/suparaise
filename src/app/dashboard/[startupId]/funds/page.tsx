@@ -2,6 +2,23 @@ import { createClient } from '@/lib/supabase/server'
 import FundsPageClient from './FundsPageClient'
 import { FundsFilters as FundsFiltersType } from '@/components/dashboard/funds/funds-filters'
 import React from 'react'
+import type { Metadata } from 'next'
+import { generateStartupMetadata } from '@/lib/utils/metadata'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ startupId: string }>
+}): Promise<Metadata> {
+  const { startupId } = await params
+
+  return generateStartupMetadata({
+    startupId,
+    pageTitle: 'Funds',
+    description: 'Browse and apply to venture capital funds.',
+    fallbackTitle: 'Funds | Suparaise',
+  })
+}
 
 const PAGE_SIZE = 100
 
@@ -44,22 +61,23 @@ export default async function FundsPage({
   params,
   searchParams,
 }: {
-  params: { startupId: string }
-  searchParams: { [key: string]: string | string[] | undefined }
+  params: Promise<{ startupId: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+  const { startupId } = await params
+  const resolvedSearchParams = await searchParams
   const supabase = await createClient()
-  const startupId = params.startupId
 
   // Parse filters from searchParams
   const filters: FundsFiltersType = {
-    search: (searchParams.search as string) || '',
-    submissionTypes: getArray(searchParams.submissionTypes),
-    stageFocus: getArray(searchParams.stageFocus),
-    industryFocus: getArray(searchParams.industryFocus),
-    regionFocus: getArray(searchParams.regionFocus),
-    requiredDocuments: getArray(searchParams.requiredDocuments),
+    search: (resolvedSearchParams.search as string) || '',
+    submissionTypes: getArray(resolvedSearchParams.submissionTypes),
+    stageFocus: getArray(resolvedSearchParams.stageFocus),
+    industryFocus: getArray(resolvedSearchParams.industryFocus),
+    regionFocus: getArray(resolvedSearchParams.regionFocus),
+    requiredDocuments: getArray(resolvedSearchParams.requiredDocuments),
     submissionFilter:
-      (searchParams.submissionFilter as
+      (resolvedSearchParams.submissionFilter as
         | 'all'
         | 'hide_submitted'
         | 'only_submitted') || 'all',
@@ -67,14 +85,14 @@ export default async function FundsPage({
 
   // Parse sort from searchParams
   const sortDirection: 'asc' | 'desc' =
-    (searchParams.sortDirection as string) === 'desc' ? 'desc' : 'asc'
+    (resolvedSearchParams.sortDirection as string) === 'desc' ? 'desc' : 'asc'
   const sortConfig = {
-    key: (searchParams.sortBy as string) || 'name',
+    key: (resolvedSearchParams.sortBy as string) || 'name',
     direction: sortDirection,
   }
 
   // Parse pagination from searchParams
-  const page = parseInt((searchParams.page as string) || '1', 10)
+  const page = parseInt((resolvedSearchParams.page as string) || '1', 10)
   const offset = (page - 1) * PAGE_SIZE
 
   const rpcParams = {
@@ -115,11 +133,11 @@ export default async function FundsPage({
       initialPaginationData={
         responseData
           ? {
-              totalCount: responseData.totalCount,
-              hasMore: responseData.hasMore,
-              currentPage: responseData.currentPage,
-              limit: responseData.limit,
-            }
+            totalCount: responseData.totalCount,
+            hasMore: responseData.hasMore,
+            currentPage: responseData.currentPage,
+            limit: responseData.limit,
+          }
           : null
       }
       initialFilters={filters}
