@@ -64,7 +64,7 @@ BEGIN
         'limit', p_limit
     ));
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
 -- Grant permissions
 GRANT EXECUTE ON FUNCTION get_targets_paginated(INTEGER, INTEGER, TEXT, TEXT) TO authenticated;
@@ -107,8 +107,7 @@ BEGIN
             EXISTS (SELECT 1 FROM unnest(t.industry_focus) AS i WHERE lower(i::text) LIKE %L) OR
             EXISTS (SELECT 1 FROM unnest(t.region_focus) AS r WHERE lower(r::text) LIKE %L) OR
             lower(t.submission_type::text) LIKE %L
-        )', 
-        '%' || normalized_search || '%',
+        )',
         '%' || normalized_search || '%',
         '%' || normalized_search || '%',
         '%' || normalized_search || '%',
@@ -208,7 +207,7 @@ BEGIN
     
     RETURN result;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
 -- Grant permissions
 GRANT EXECUTE ON FUNCTION get_targets_simple(INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT[], TEXT[], TEXT[], TEXT[], TEXT[], UUID, TEXT) TO authenticated;
@@ -259,3 +258,107 @@ CREATE INDEX IF NOT EXISTS idx_targets_active ON targets(name) WHERE submission_
 
 -- Update table statistics for better query planning
 ANALYZE targets;
+
+-- ==========================================
+-- SUBMISSION WIDGET FUNCTIONS
+-- ==========================================
+
+-- Function to get recent submissions for the dashboard widget
+CREATE OR REPLACE FUNCTION fetch_recent_submissions(
+    p_startup_id UUID,
+    p_limit INTEGER DEFAULT 3
+)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    WITH all_submissions AS (
+        SELECT
+            s.id AS submission_id,
+            t.name AS submitted_to_name,
+            'Fund' AS submitted_to_type,
+            s.submission_date AS submitted_at,
+            s.status,
+            t.website as website_url,
+            t.id AS entity_id
+        FROM submissions s
+        JOIN targets t ON s.target_id = t.id
+        WHERE s.startup_id = p_startup_id
+        
+        UNION ALL
+        
+        SELECT
+            asub.id AS submission_id,
+            a.first_name || ' ' || a.last_name AS submitted_to_name,
+            'Angel' AS submitted_to_type,
+            asub.submission_date AS submitted_at,
+            asub.status,
+            a.linkedin as website_url,
+            a.id AS entity_id
+        FROM angel_submissions asub
+        JOIN angels a ON asub.angel_id = a.id
+        WHERE asub.startup_id = p_startup_id
+
+        UNION ALL
+
+        SELECT
+            accs.id AS submission_id,
+            acc.name AS submitted_to_name,
+            'Accelerator' AS submitted_to_type,
+            accs.submission_date AS submitted_at,
+            accs.status,
+            acc.website as website_url,
+            acc.id AS entity_id
+        FROM accelerator_submissions accs
+        JOIN accelerators acc ON accs.accelerator_id = acc.id
+        WHERE accs.startup_id = p_startup_id
+    )
+    SELECT jsonb_agg(sub.*)
+    INTO result
+    FROM (
+        SELECT *
+        FROM all_submissions
+        ORDER BY submitted_at DESC
+        LIMIT p_limit
+    ) sub;
+
+    RETURN COALESCE(result, '[]'::jsonb);
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
+
+-- Function to get daily submission counts for the activity grid
+CREATE OR REPLACE FUNCTION fetch_daily_run_grid_data(
+    p_startup_id UUID,
+    p_days INTEGER DEFAULT 270
+)
+RETURNS TABLE(date TEXT, run_count BIGINT) AS $$
+BEGIN
+    RETURN QUERY
+    WITH all_submission_dates AS (
+        SELECT submission_date::date AS day FROM submissions WHERE startup_id = p_startup_id
+        UNION ALL
+        SELECT submission_date::date AS day FROM angel_submissions WHERE startup_id = p_startup_id
+        UNION ALL
+        SELECT submission_date::date AS day FROM accelerator_submissions WHERE startup_id = p_startup_id
+    )
+    SELECT 
+        d.day::TEXT AS date,
+        COUNT(asd.day) AS run_count
+    FROM 
+        generate_series(
+            (CURRENT_DATE - (p_days - 1) * INTERVAL '1 day'),
+            CURRENT_DATE,
+            '1 day'::interval
+        ) AS d(day)
+    LEFT JOIN 
+        all_submission_dates asd ON d.day = asd.day
+    GROUP BY 
+        d.day
+    ORDER BY 
+        d.day;
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
+
+
+GRANT EXECUTE ON FUNCTION fetch_recent_submissions(UUID, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION fetch_daily_run_grid_data(UUID, INTEGER) TO authenticated;

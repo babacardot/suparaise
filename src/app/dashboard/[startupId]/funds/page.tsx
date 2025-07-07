@@ -40,7 +40,7 @@ interface GetTargetsSimpleResponse {
   limit: number
 }
 
-async function FundsPageContent({
+export default async function FundsPage({
   params,
   searchParams,
 }: {
@@ -115,25 +115,15 @@ async function FundsPageContent({
       initialPaginationData={
         responseData
           ? {
-            totalCount: responseData.totalCount,
-            hasMore: responseData.hasMore,
-            currentPage: responseData.currentPage,
-            limit: responseData.limit,
-          }
+              totalCount: responseData.totalCount,
+              hasMore: responseData.hasMore,
+              currentPage: responseData.currentPage,
+              limit: responseData.limit,
+            }
           : null
       }
       initialFilters={filters}
       initialSortConfig={sortConfig}
     />
   )
-}
-
-export default function FundsPage({
-  params,
-  searchParams,
-}: {
-  params: { startupId: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
-  return <FundsPageContent params={params} searchParams={searchParams} />
 }

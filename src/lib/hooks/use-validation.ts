@@ -224,11 +224,26 @@ export function useValidation({
       setMissingFields(missing)
       setIsValid(missing.length === 0)
     } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        Object.keys(error).length === 0
+      ) {
+        console.warn(
+          'Caught an empty error object during validation. Suppressing toast.',
+        )
+        return
+      }
       console.error('Error checking validation:', error)
+      const errorMessage =
+        error && typeof error === 'object' && 'message' in error
+          ? (error as { message: string }).message
+          : 'Failed to validate requirements.'
+
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to validate requirements.',
+        description: errorMessage,
       })
     } finally {
       setLoading(false)
@@ -249,14 +264,23 @@ export function useValidation({
           description: `Please complete: ${missingFieldNames}`,
         })
       }
+      // the validation gate, which is where this will be triggered from.
+      checkValidation().then(() => {
+        // After re-checking, if now valid, run the action
+        if (isValid) {
+          action()
+        }
+      })
     }
   }
 
+  // Effect to run validation check automatically
   useEffect(() => {
+    // We check user and currentStartupId here as well to prevent unnecessary runs
     if (autoCheck && user && currentStartupId) {
       checkValidation()
     }
-  }, [user, currentStartupId, requirements, autoCheck, checkValidation])
+  }, [user, currentStartupId, autoCheck, checkValidation])
 
   return {
     isValid,

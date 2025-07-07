@@ -1,6 +1,6 @@
 import React from 'react'
-import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import { generateStartupMetadata } from '@/lib/utils/metadata'
 import SettingsLayout from '@/components/settings/settings-layout'
 import AgentSettings from '@/components/settings/agent-settings'
 
@@ -11,26 +11,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { startupId } = await params
 
-  try {
-    const supabase = await createClient()
-    const { data: startup } = await supabase
-      .from('startups')
-      .select('name')
-      .eq('id', startupId)
-      .single()
-
-    const startupName = startup?.name || 'Company'
-
-    return {
-      title: `${startupName} | Agents | Suparaise`,
-      description: `Configure agents and automation parameters.`,
-    }
-  } catch {
-    return {
-      title: 'Agents | Suparaise',
-      description: 'Configure agents and automation parameters.',
-    }
-  }
+  return generateStartupMetadata({
+    startupId,
+    pageTitle: 'Agent',
+    description: 'Configure your AI agent preferences.',
+    fallbackTitle: 'Agent | Suparaise',
+  })
 }
 
 export default function AgentSettingsPage() {

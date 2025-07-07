@@ -1,6 +1,6 @@
 import React from 'react'
-import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import { generateStartupMetadata } from '@/lib/utils/metadata'
 
 export async function generateMetadata({
   params,
@@ -9,26 +9,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { startupId } = await params
 
-  try {
-    const supabase = await createClient()
-    const { data: startup } = await supabase
-      .from('startups')
-      .select('name')
-      .eq('id', startupId)
-      .single()
-
-    const startupName = startup?.name || 'Company'
-
-    return {
-      title: `${startupName} | Angels | Suparaise`,
-      description: `Browse and apply to angels.`,
-    }
-  } catch {
-    return {
-      title: 'Angels | Suparaise',
-      description: 'Browse and apply to angels.',
-    }
-  }
+  return generateStartupMetadata({
+    startupId,
+    pageTitle: 'Angels',
+    description: 'Browse and connect with angel investors.',
+    fallbackTitle: 'Angels | Suparaise',
+  })
 }
 
 export default async function ApplicationsPage() {

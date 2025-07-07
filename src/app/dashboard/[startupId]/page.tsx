@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import { generateStartupMetadata } from '@/lib/utils/metadata'
 
 interface DashboardPageProps {
   params: Promise<{ startupId: string }>
@@ -13,26 +13,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { startupId } = await params
 
-  try {
-    const supabase = await createClient()
-    const { data: startup } = await supabase
-      .from('startups')
-      .select('name')
-      .eq('id', startupId)
-      .single()
-
-    const startupName = startup?.name || 'Company'
-
-    return {
-      title: `${startupName} | Home | Suparaise`,
-      description: `Automate fundraising with agents.`,
-    }
-  } catch {
-    return {
-      title: 'Home | Suparaise',
-      description: 'Automate fundraising with agents.',
-    }
-  }
+  return generateStartupMetadata({
+    startupId,
+    pageTitle: 'Home',
+    description: 'Automate fundraising with agents.',
+    fallbackTitle: 'Home | Suparaise',
+  })
 }
 
 export default async function DashboardPage({ params }: DashboardPageProps) {

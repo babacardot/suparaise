@@ -765,7 +765,10 @@ export default function ProfileSettings() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setFounderToDelete(founder.id)}
+                        onClick={() => {
+                          playClickSound()
+                          setFounderToDelete(founder.id)
+                        }}
                         className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-800 dark:hover:text-red-200 border border-red-200 dark:border-red-800 rounded-sm"
                       >
                         Remove
@@ -834,7 +837,10 @@ export default function ProfileSettings() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => avatarInputRef.current?.click()}
+                      onClick={() => {
+                        playClickSound()
+                        avatarInputRef.current?.click()
+                      }}
                       disabled={avatarUploading}
                       className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
                     >
@@ -851,7 +857,10 @@ export default function ProfileSettings() {
                         variant="outline"
                         size="sm"
                         disabled={avatarUploading}
-                        onClick={handleAvatarRemove}
+                        onClick={() => {
+                          playClickSound()
+                          handleAvatarRemove()
+                        }}
                         className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
                       >
                         Remove
@@ -1499,7 +1508,10 @@ export default function ProfileSettings() {
             <div className="mt-8">
               <Separator className="mb-6" />
               <Button
-                onClick={() => setShowAddFounder(true)}
+                onClick={() => {
+                  playClickSound()
+                  setShowAddFounder(true)
+                }}
                 variant="outline"
                 className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               >

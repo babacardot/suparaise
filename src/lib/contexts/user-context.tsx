@@ -22,6 +22,12 @@ interface StartupData {
   created_at?: string
 }
 
+// Add new interface for startup metadata cache
+interface StartupMetadata {
+  id: string
+  name: string
+}
+
 // Subscription-related interfaces
 interface SubscriptionData {
   is_subscribed: boolean
@@ -60,6 +66,9 @@ interface UserContextType {
   refreshStartups: () => Promise<void>
   selectStartupById: (startupId: string) => Promise<void>
   setNeedsOnboarding: (needs: boolean) => void
+
+  // New: Startup metadata cache
+  getStartupMetadata: (startupId: string) => Promise<StartupMetadata | null>
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -93,6 +102,11 @@ export function UserProvider({ children }: UserProviderProps) {
     null,
   )
   const [subscriptionLoading, setSubscriptionLoading] = useState(true)
+
+  // Add metadata cache state
+  const [metadataCache, setMetadataCache] = useState<
+    Map<string, StartupMetadata>
+  >(new Map())
 
   // Add scroll position preservation
   const scrollPositions = useRef<Map<string, number>>(new Map())
@@ -368,6 +382,38 @@ export function UserProvider({ children }: UserProviderProps) {
     }
   }, [supabase])
 
+  // Get startup metadata with caching
+  const getStartupMetadata = useCallback(
+    async (startupId: string): Promise<StartupMetadata | null> => {
+      // Check cache first
+      if (metadataCache.has(startupId)) {
+        return metadataCache.get(startupId)!
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('get_startup_metadata', {
+          p_startup_id: startupId,
+        })
+
+        if (error) {
+          console.error('Error fetching startup metadata:', error)
+          return null
+        }
+
+        const metadata = data as unknown as StartupMetadata
+
+        // Update cache
+        setMetadataCache((prev) => new Map(prev).set(startupId, metadata))
+
+        return metadata
+      } catch (error) {
+        console.error('Error in getStartupMetadata:', error)
+        return null
+      }
+    },
+    [supabase, metadataCache, setMetadataCache],
+  )
+
   // Sign out function
   const signOut = useCallback(async () => {
     try {
@@ -546,6 +592,9 @@ export function UserProvider({ children }: UserProviderProps) {
       refreshStartups,
       selectStartupById,
       setNeedsOnboarding,
+
+      // New: Startup metadata cache
+      getStartupMetadata,
     }),
     [
       user,
@@ -570,6 +619,7 @@ export function UserProvider({ children }: UserProviderProps) {
       refreshStartups,
       selectStartupById,
       setNeedsOnboarding,
+      getStartupMetadata,
     ],
   )
 

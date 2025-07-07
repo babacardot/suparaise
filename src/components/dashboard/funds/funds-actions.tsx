@@ -43,14 +43,12 @@ type FundsActionsProps = {
   onOpenChange: (open: boolean) => void
 }
 
-export default function FundsActions({
+export default React.memo(function FundsActions({
   target,
   submissions,
   isOpen,
   onOpenChange,
 }: FundsActionsProps) {
-  if (!target) return null
-
   const getSubmissionTypeColor = (type: string) => {
     switch (type) {
       case 'form':
@@ -211,9 +209,11 @@ export default function FundsActions({
     return str.charAt(0).toUpperCase() + str.slice(1)
   }
 
+  if (!target) return null
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md w-full p-0 sm:m-4 h-full sm:h-[calc(100%-2rem)] rounded-sm sm:rounded-sm border-0 sm:border shadow-lg bg-background overflow-hidden flex flex-col">
+      <SheetContent className="sm:max-w-md w-full p-0 sm:m-4 h-full sm:h-[calc(100%-2rem)] rounded-sm sm:rounded-sm border-0 sm:border shadow-lg bg-background overflow-hidden flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-200">
         <Card className="border-0 shadow-none rounded-sm sm:rounded-sm h-full flex flex-col">
           <CardHeader className="sticky top-0 z-10 bg-background border-b px-4 -py-8 flex flex-row items-center justify-between flex-shrink-0">
             <SheetTitle className="text-base font-medium">
@@ -379,4 +379,4 @@ export default function FundsActions({
       </SheetContent>
     </Sheet>
   )
-}
+})

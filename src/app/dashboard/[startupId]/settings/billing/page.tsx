@@ -1,6 +1,6 @@
 import React from 'react'
-import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import { generateStartupMetadata } from '@/lib/utils/metadata'
 import SettingsLayout from '@/components/settings/settings-layout'
 import BillingSettings from '@/components/settings/billing-settings'
 
@@ -11,26 +11,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { startupId } = await params
 
-  try {
-    const supabase = await createClient()
-    const { data: startup } = await supabase
-      .from('startups')
-      .select('name')
-      .eq('id', startupId)
-      .single()
-
-    const startupName = startup?.name || 'Company'
-
-    return {
-      title: `${startupName} | Billing | Suparaise`,
-      description: `Manage your subscription and billing information.`,
-    }
-  } catch {
-    return {
-      title: 'Billing | Suparaise',
-      description: 'Manage your subscription and billing information.',
-    }
-  }
+  return generateStartupMetadata({
+    startupId,
+    pageTitle: 'Billing',
+    description: 'Manage your subscription and billing information.',
+    fallbackTitle: 'Billing | Suparaise',
+  })
 }
 
 export default function BillingPage() {

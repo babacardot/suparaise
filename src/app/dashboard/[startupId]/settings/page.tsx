@@ -1,6 +1,6 @@
 import React from 'react'
-import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import { generateStartupMetadata } from '@/lib/utils/metadata'
 import SettingsLayout from '@/components/settings/settings-layout'
 import ProfileSettings from '@/components/settings/founder-settings'
 
@@ -11,26 +11,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { startupId } = await params
 
-  try {
-    const supabase = await createClient()
-    const { data: startup } = await supabase
-      .from('startups')
-      .select('name')
-      .eq('id', startupId)
-      .single()
-
-    const startupName = startup?.name || 'Company'
-
-    return {
-      title: `${startupName} | Founder | Suparaise`,
-      description: `Manage your settings.`,
-    }
-  } catch {
-    return {
-      title: 'Founder | Suparaise',
-      description: 'Manage your settings.',
-    }
-  }
+  return generateStartupMetadata({
+    startupId,
+    pageTitle: 'Founder',
+    description: 'Manage your settings.',
+    fallbackTitle: 'Founder | Suparaise',
+  })
 }
 
 export default function SettingsPage() {

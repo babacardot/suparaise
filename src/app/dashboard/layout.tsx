@@ -45,26 +45,30 @@ export default function DashboardLayout({
 
   // Memoize breadcrumbs to prevent unnecessary re-renders
   const breadcrumbs = React.useMemo(() => {
+    const dashboardUrl = currentStartupId
+      ? `/dashboard/${currentStartupId}/home`
+      : '/dashboard/home'
+
     if (pathname?.includes('/funds')) {
       return [
-        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Dashboard', href: dashboardUrl },
         { label: 'Funds', isCurrentPage: true },
       ]
     } else if (pathname?.includes('/applications')) {
       return [
-        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Dashboard', href: dashboardUrl },
         { label: 'Applications', isCurrentPage: true },
       ]
     } else if (pathname?.includes('/home')) {
       return [
-        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Dashboard', href: dashboardUrl },
         { label: 'Home', isCurrentPage: true },
       ]
     } else if (pathname?.includes('/settings')) {
       // Settings breadcrumbs
       if (pathname?.includes('/settings/company')) {
         return [
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Dashboard', href: dashboardUrl },
           {
             label: 'Settings',
             href: `/dashboard/${currentStartupId}/settings`,
@@ -73,7 +77,7 @@ export default function DashboardLayout({
         ]
       } else if (pathname?.includes('/settings/agent')) {
         return [
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Dashboard', href: dashboardUrl },
           {
             label: 'Settings',
             href: `/dashboard/${currentStartupId}/settings`,
@@ -82,7 +86,7 @@ export default function DashboardLayout({
         ]
       } else {
         return [
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Dashboard', href: dashboardUrl },
           {
             label: 'Settings',
             href: `/dashboard/${currentStartupId}/settings`,
@@ -92,7 +96,7 @@ export default function DashboardLayout({
       }
     } else {
       return [
-        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Dashboard', href: dashboardUrl },
         { label: 'Overview', isCurrentPage: true },
       ]
     }

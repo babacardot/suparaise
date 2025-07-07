@@ -561,6 +561,7 @@ export default function BillingSettings() {
                   </ul>
                   <Button
                     asChild
+                    onClick={playClickSound}
                     className="w-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
@@ -600,6 +601,7 @@ export default function BillingSettings() {
 
               <Button
                 asChild
+                onClick={playClickSound}
                 className="w-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                 variant="outline"
               >
@@ -700,7 +702,10 @@ export default function BillingSettings() {
             </div>
 
             <Button
-              onClick={() => setShowSuccessModal(false)}
+              onClick={() => {
+                playClickSound()
+                setShowSuccessModal(false)
+              }}
               size="lg"
               className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm font-medium py-3 shadow-sm hover:shadow transition-all duration-200"
               variant="outline"

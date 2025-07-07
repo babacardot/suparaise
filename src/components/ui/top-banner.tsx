@@ -1,3 +1,5 @@
+'use client'
+import React from 'react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,6 +18,16 @@ interface TopBannerProps {
 }
 
 export function TopBanner({ breadcrumbs }: TopBannerProps) {
+  const playClickSound = React.useCallback(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const audio = new Audio('/sounds/light.mp3')
+        audio.volume = 0.4
+        audio.play().catch(() => { })
+      } catch { }
+    }
+  }, [])
+
   // Default breadcrumbs if none provided
   const defaultBreadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -34,13 +46,14 @@ export function TopBanner({ breadcrumbs }: TopBannerProps) {
             )}
             <BreadcrumbItem className="hidden md:block">
               {item.isCurrentPage ? (
-                <BreadcrumbPage className="text-sidebar-foreground/90 hover:text-sidebar-accent-foreground/80 hover:bg-sidebar-accent/30 px-2 py-1.5 rounded-sm transition-colors duration-200">
+                <BreadcrumbPage className="text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent dark:hover:bg-sidebar-accent  px-2 py-1.5 rounded-sm transition-colors duration-200">
                   {item.label}
                 </BreadcrumbPage>
               ) : (
                 <BreadcrumbLink
                   href={item.href || '#'}
-                  className="text-sidebar-foreground/70 hover:text-sidebar-accent-foreground/80 hover:bg-sidebar-accent/20 px-2 py-1.5 rounded-sm transition-colors duration-200"
+                  onClick={playClickSound}
+                  className="text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent dark:hover:bg-sidebar-accent px-2 py-1.5 rounded-sm transition-colors duration-200"
                 >
                   {item.label}
                 </BreadcrumbLink>

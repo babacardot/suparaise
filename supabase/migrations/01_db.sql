@@ -541,10 +541,10 @@ CREATE POLICY "Allow authenticated users to read targets based on permission lev
     (
         visibility_level = 'FREE' OR
         (visibility_level = 'PRO' AND (
-            SELECT permission_level FROM profiles WHERE id = auth.uid()
+            SELECT permission_level FROM profiles WHERE id = (select auth.uid())
         ) IN ('PRO', 'MAX')) OR
         (visibility_level = 'MAX' AND (
-            SELECT permission_level FROM profiles WHERE id = auth.uid()
+            SELECT permission_level FROM profiles WHERE id = (select auth.uid())
         ) = 'MAX')
     )
 );
@@ -556,10 +556,10 @@ CREATE POLICY "Allow authenticated users to read angels based on permission leve
     (
         visibility_level = 'FREE' OR
         (visibility_level = 'PRO' AND (
-            SELECT permission_level FROM profiles WHERE id = auth.uid()
+            SELECT permission_level FROM profiles WHERE id = (select auth.uid())
         ) IN ('PRO', 'MAX')) OR
         (visibility_level = 'MAX' AND (
-            SELECT permission_level FROM profiles WHERE id = auth.uid()
+            SELECT permission_level FROM profiles WHERE id = (select auth.uid())
         ) = 'MAX')
     )
 );
@@ -571,10 +571,10 @@ CREATE POLICY "Allow authenticated users to read accelerators based on permissio
     (
         visibility_level = 'FREE' OR
         (visibility_level = 'PRO' AND (
-            SELECT permission_level FROM profiles WHERE id = auth.uid()
+            SELECT permission_level FROM profiles WHERE id = (select auth.uid())
         ) IN ('PRO', 'MAX')) OR
         (visibility_level = 'MAX' AND (
-            SELECT permission_level FROM profiles WHERE id = auth.uid()
+            SELECT permission_level FROM profiles WHERE id = (select auth.uid())
         ) = 'MAX')
     )
 );

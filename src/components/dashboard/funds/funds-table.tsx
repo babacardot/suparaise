@@ -27,6 +27,7 @@ import {
   ValidationGate,
   VALIDATION_PRESETS,
 } from '@/components/ui/validation-gate'
+import Link from 'next/link'
 
 type Target = {
   id: string
@@ -62,6 +63,8 @@ interface FundsTableProps {
   onSortChange: (key: string) => void
   columnVisibility: ColumnVisibility
   onTargetClick?: (target: Target) => void
+  onTargetHover?: (target: Target) => void
+  onTargetLeave?: () => void
 }
 
 interface ColumnVisibility {
@@ -82,8 +85,10 @@ const FundsTable = React.memo(function FundsTable({
   onSortChange,
   columnVisibility,
   onTargetClick,
+  onTargetHover,
+  onTargetLeave,
 }: FundsTableProps) {
-  const { user } = useUser()
+  const { user, subscription } = useUser()
   const { toast } = useToast()
   const [hoveredButton, setHoveredButton] = React.useState<string | null>(null)
   const [submittingTargets, setSubmittingTargets] = React.useState<Set<string>>(
@@ -98,6 +103,33 @@ const FundsTable = React.memo(function FundsTable({
     availableQueueSlots: number
     canSubmitMore: boolean
   } | null>(null)
+
+  const showUpgradeBanner = React.useMemo(() => {
+    const level = subscription?.permission_level
+    const page = Number(paginationData?.currentPage)
+    if (!level || !page) return false
+
+    // With 150 free funds and 100 per page, free results can appear on pages 1 and 2
+    if (level === 'FREE' && (page === 1 || page === 2)) return true
+    if (level === 'PRO' && page > 1) return true
+
+    return false
+  }, [subscription?.permission_level, paginationData?.currentPage])
+
+  const bannerContent = React.useMemo(() => {
+    const level = subscription?.permission_level
+    if (level === 'FREE') {
+      return {
+        text: 'Upgrade to Pro to unlock over 1,000 more funds and advanced agent capabilities.',
+      }
+    }
+    if (level === 'PRO') {
+      return {
+        text: 'Upgrade to Max to access our full database of 2,000+ funds and powerful developer tools.',
+      }
+    }
+    return null
+  }, [subscription?.permission_level])
 
   // Memoize the filtered targets to prevent unnecessary recalculations
   const filteredTargets = React.useMemo(() => targets, [targets])
@@ -574,8 +606,10 @@ const FundsTable = React.memo(function FundsTable({
                     {filteredTargets.map((target) => (
                       <TableRow
                         key={target.id}
-                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        className="cursor-pointer hover:bg-sidebar-accent/30 hover:text-sidebar-accent-foreground/80 transition-colors duration-200"
                         onClick={() => onTargetClick?.(target)}
+                        onMouseEnter={() => onTargetHover?.(target)}
+                        onMouseLeave={() => onTargetLeave?.()}
                       >
                         <TableCell className="font-medium p-2">
                           <div className="space-y-1">
@@ -821,18 +855,19 @@ const FundsTable = React.memo(function FundsTable({
                                     setHoveredButton(`apply-${target.id}`)
                                   }
                                   onMouseLeave={() => setHoveredButton(null)}
-                                  className={`rounded-sm px-3 text-sm h-8 disabled:opacity-50 disabled:cursor-not-allowed ${queueStatus && !queueStatus.canSubmitMore
-                                    ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
-                                    : queueStatus &&
-                                      queueStatus.availableSlots === 0
-                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                      : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                                    }`}
+                                  className={`rounded-sm px-3 text-sm h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    queueStatus && !queueStatus.canSubmitMore
+                                      ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                      : queueStatus &&
+                                          queueStatus.availableSlots === 0
+                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                  }`}
                                   title={
                                     queueStatus && !queueStatus.canSubmitMore
                                       ? 'Queue is full. Cannot add more applications.'
                                       : queueStatus &&
-                                        queueStatus.availableSlots === 0
+                                          queueStatus.availableSlots === 0
                                         ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
                                         : queueStatus
                                           ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
@@ -844,10 +879,10 @@ const FundsTable = React.memo(function FundsTable({
                                       submittingTargets.has(target.id)
                                         ? animations.autorenew
                                         : queueStatus &&
-                                          !queueStatus.canSubmitMore
+                                            !queueStatus.canSubmitMore
                                           ? animations.cross
                                           : queueStatus &&
-                                            queueStatus.availableSlots === 0
+                                              queueStatus.availableSlots === 0
                                             ? animations.hourglass
                                             : animations.takeoff
                                     }
@@ -864,7 +899,7 @@ const FundsTable = React.memo(function FundsTable({
                                     : queueStatus && !queueStatus.canSubmitMore
                                       ? 'Queue Full'
                                       : queueStatus &&
-                                        queueStatus.availableSlots === 0
+                                          queueStatus.availableSlots === 0
                                         ? 'Queue'
                                         : 'Apply'}
                                 </Button>
@@ -930,14 +965,42 @@ const FundsTable = React.memo(function FundsTable({
                   </TableBody>
                 </Table>
               </div>
+              {/* Upgrade Banner */}
+              {showUpgradeBanner && bannerContent && (
+                <Link
+                  href={`/dashboard/${startupId}/settings/billing`}
+                  className="w-full"
+                >
+                  <div className="relative overflow-hidden border-t border-border p-4 sm:p-6 min-h-[1.5rem] max-h-[1.5rem] flex items-center cursor-pointer hover:bg-muted/20 transition-colors">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center opacity-[0.1] z-0"
+                      style={{
+                        backgroundImage: `url('/random/600x600.webp')`,
+                      }}
+                    />
+                    <div className="absolute inset-0 z-10" />
+                    <div className="relative z-20 flex items-center justify-between w-full">
+                      <div className="flex items-center gap-3">
+                        <LottieIcon
+                          animationData={animations.takeoff}
+                          size={28}
+                        />
+                        <span className="text-sm font-medium text-foreground">
+                          {bannerContent.text}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )}
               {/* Pagination Controls */}
               {paginationData &&
                 paginationData.totalCount > paginationData.limit && (
-                  <div className="flex items-center justify-between border-t border-border px-4 py-4 bg-background">
+                  <div className="flex items-center justify-between border-t border-border px-4 py-2 bg-background">
                     <div className="flex-1 text-sm text-muted-foreground">
                       <span className="hidden md:inline">
                         Showing {offset + 1} to {offset + targets.length} of{' '}
-                        {paginationData.totalCount} entries
+                        {paginationData.totalCount} funds
                       </span>
                       <span className="md:hidden">
                         Page {paginationData.currentPage} of{' '}

@@ -60,6 +60,21 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
   const [selectedTarget, setSelectedTarget] = useState<Target | null>(null)
   const [isActionsOpen, setIsActionsOpen] = useState(false)
 
+  const handleTargetHover = useCallback(
+    (target: Target) => {
+      if (!isActionsOpen) {
+        setSelectedTarget(target)
+      }
+    },
+    [isActionsOpen],
+  )
+
+  const handleTargetLeave = useCallback(() => {
+    if (!isActionsOpen) {
+      setSelectedTarget(null)
+    }
+  }, [isActionsOpen])
+
   const handleTargetClick = useCallback((target: Target) => {
     setSelectedTarget(target)
     setIsActionsOpen(true)
@@ -98,6 +113,8 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
           onSortChange={onSortChange}
           columnVisibility={columnVisibility}
           onTargetClick={handleTargetClick}
+          onTargetHover={handleTargetHover}
+          onTargetLeave={handleTargetLeave}
         />
       </div>
 

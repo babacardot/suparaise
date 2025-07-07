@@ -1,8 +1,8 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import React, { useEffect, useState } from 'react'
+import { useUser } from '@/lib/contexts/user-context'
 
 // We need to export this as a client component for Next.js 15
 export default function FundsLayout({
@@ -12,6 +12,7 @@ export default function FundsLayout({
 }) {
   const params = useParams()
   const startupId = params.startupId as string
+  const { getStartupMetadata } = useUser()
   const [metadata, setMetadata] = useState<{
     title: string
     description: string
@@ -25,14 +26,8 @@ export default function FundsLayout({
       if (!startupId) return
 
       try {
-        const supabase = createSupabaseBrowserClient()
-        const { data: startup } = await supabase
-          .from('startups')
-          .select('name')
-          .eq('id', startupId)
-          .single()
-
-        const startupName = startup?.name || 'Company'
+        const startupMetadata = await getStartupMetadata(startupId)
+        const startupName = startupMetadata?.name || 'Company'
 
         setMetadata({
           title: `${startupName} | Funds | Suparaise`,
@@ -44,7 +39,7 @@ export default function FundsLayout({
     }
 
     updateMetadata()
-  }, [startupId])
+  }, [startupId, getStartupMetadata])
 
   // Update document title
   useEffect(() => {
