@@ -78,7 +78,7 @@ export default function HomePageClient({
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-10 gap-4 items-start mt-4">
         <div className="lg:col-span-7 flex flex-col gap-4">
           <ActivityWidget />
-          <ResourcesSection className="mt-4" />
+          <ResourcesSection className="mt-2" />
         </div>
         <div className="lg:col-span-3">
           <SubmissionsWidget

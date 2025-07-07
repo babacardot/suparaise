@@ -23,7 +23,7 @@ export function ResourcesSection({ className = '' }: ResourcesSectionProps) {
       link: 'https://x.com/suparaise',
       cardColor: '',
       hoverColor: 'hover:text-[#000000] dark:hover:text-[#FFFFFF]',
-      iconSize: 'w-5 h-5',
+      iconSize: 'w-6 h-6',
     },
     {
       icon: PHIcon,
@@ -64,18 +64,18 @@ export function ResourcesSection({ className = '' }: ResourcesSectionProps) {
                 className={`rounded-sm w-40 h-32 ${item.cardColor} hover:shadow-md border overflow-hidden transition-all duration-200 hover:scale-[1.02]`}
               >
                 <CardContent className="px-3 pt-1 pb-2 h-full flex flex-col">
-                  <div className="flex items-start mb-2">
+                  <div className={`flex items-start ${item.icon === 'lottie' ? 'mb-2' : 'mb-3.5'}`}>
                     <motion.div
                       animate={
                         hoveredIndex === index
                           ? {
-                              rotate: [0, 5, -5, 0],
-                              scale: [1, 1.05, 1],
-                            }
+                            rotate: [0, 5, -5, 0],
+                            scale: [1, 1.05, 1],
+                          }
                           : {
-                              rotate: 0,
-                              scale: 1,
-                            }
+                            rotate: 0,
+                            scale: 1,
+                          }
                       }
                       transition={{
                         duration: hoveredIndex === index ? 1.5 : 0.3,
