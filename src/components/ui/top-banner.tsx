@@ -23,8 +23,8 @@ export function TopBanner({ breadcrumbs }: TopBannerProps) {
       try {
         const audio = new Audio('/sounds/light.mp3')
         audio.volume = 0.4
-        audio.play().catch(() => { })
-      } catch { }
+        audio.play().catch(() => {})
+      } catch {}
     }
   }, [])
 

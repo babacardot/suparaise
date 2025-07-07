@@ -107,11 +107,11 @@ async function getDashboardData(startupId: string) {
     ).filter((submission): submission is SubmissionData =>
       Boolean(
         submission.submission_id &&
-        submission.submitted_to_name &&
-        submission.submitted_to_type &&
-        submission.submitted_at &&
-        submission.status &&
-        submission.entity_id,
+          submission.submitted_to_name &&
+          submission.submitted_to_type &&
+          submission.submitted_at &&
+          submission.status &&
+          submission.entity_id,
       ),
     )
 
