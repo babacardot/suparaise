@@ -70,8 +70,10 @@ export function RecommendationModal({
 
     if (result.success) {
       toast({
-        title: 'Recommendation dismissed',
-        description: "We won't show you this again.",
+        title: 'Dismissed',
+        variant: 'default',
+        description: 'We won’t show you this recommendation again.',
+        duration: 3000,
       })
     } else {
       setRecommendations(initialRecommendations || [])
@@ -79,6 +81,7 @@ export function RecommendationModal({
         title: 'Error',
         description: 'Could not dismiss recommendation. Please try again.',
         variant: 'destructive',
+        duration: 3000,
       })
     }
   }

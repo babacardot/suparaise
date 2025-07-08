@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import FundsTableWrapper from '@/components/dashboard/funds/funds-table-wrapper'
 import SecureFundsWrapper from '@/components/dashboard/funds/secure-funds-wrapper'
 import FundsFilters, {
@@ -63,11 +64,34 @@ export default function FundsPageClient({
 
   const [targets, setTargets] = useState<Target[]>(initialTargets)
   const [paginationData, setPaginationData] = useState(initialPaginationData)
+  const [totalSubmissions, setTotalSubmissions] = useState<number>(0)
 
   useEffect(() => {
     setTargets(initialTargets)
     setPaginationData(initialPaginationData)
   }, [initialTargets, initialPaginationData])
+
+  // Fetch total submissions count for this startup
+  useEffect(() => {
+    const fetchTotalSubmissions = async () => {
+      try {
+        const supabase = createSupabaseBrowserClient()
+
+        const { data, error } = await supabase.rpc('get_total_applications_count', {
+          p_startup_id: startupId,
+        })
+
+        if (!error && data) {
+          const responseData = data as unknown as { total_applications: number }
+          setTotalSubmissions(responseData.total_applications || 0)
+        }
+      } catch (error) {
+        console.error('Failed to fetch total submissions:', error)
+      }
+    }
+
+    fetchTotalSubmissions()
+  }, [startupId])
 
   const [filters, setFilters] = useState<FundsFiltersType>(initialFilters)
   const [sortConfig, setSortConfig] = useState(initialSortConfig)
@@ -248,6 +272,7 @@ export default function FundsPageClient({
           onClearFilters={clearFilters}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={updateColumnVisibility}
+          totalSubmissions={totalSubmissions}
         />
         <div className="flex-1 overflow-hidden hide-scrollbar">
           {tableWrapper}

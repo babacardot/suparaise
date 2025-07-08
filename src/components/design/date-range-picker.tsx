@@ -39,7 +39,7 @@ export function DateRangePicker({
             className,
           )}
         >
-          <div className="flex items-center space-x-2 truncate">
+          <div className="flex items-center space-x-2">
             {isDateSet && date ? (
               <span className="text-sm font-medium">
                 {date.from && date.to
@@ -51,7 +51,7 @@ export function DateRangePicker({
               </span>
             ) : (
               <span className="text-muted-foreground text-sm">
-                Date Range
+                Date
               </span>
             )}
           </div>

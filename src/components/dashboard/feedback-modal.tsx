@@ -146,7 +146,7 @@ export default function FeedbackModal({
     >
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-96 p-0 bg-sidebar border-sidebar-border rounded-sm"
+        className="w-96 p-0 bg-sidebar border-sidebar-border rounded-sm translate-y-1"
         side={isMobile ? 'bottom' : 'right'}
         align="center"
         sideOffset={18}
@@ -176,11 +176,10 @@ export default function FeedbackModal({
                       playClickSound()
                       setSentiment(key)
                     }}
-                    className={`text-xl w-8 h-8 rounded-sm transition-all duration-200 hover:bg-sidebar-accent border ${
-                      sentiment === key
-                        ? 'bg-sidebar-accent border-sidebar-border shadow-sm scale-105'
-                        : 'border-transparent hover:border-sidebar-border/30'
-                    }`}
+                    className={`text-xl w-8 h-8 rounded-sm transition-all duration-200 hover:bg-sidebar-accent border ${sentiment === key
+                      ? 'bg-sidebar-accent border-sidebar-border shadow-sm scale-105'
+                      : 'border-transparent hover:border-sidebar-border/30'
+                      }`}
                   >
                     {emojis[key]}
                   </button>

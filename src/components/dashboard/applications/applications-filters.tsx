@@ -300,7 +300,7 @@ export default function ApplicationsFilters({
             onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
         >
             <div className="flex flex-wrap items-center gap-4">
-                <div className="relative w-full sm:w-40">
+                <div className="relative w-full sm:w-48">
                     <LottieIcon
                         animationData={animations.search}
                         size={16}
@@ -308,7 +308,7 @@ export default function ApplicationsFilters({
                     />
                     <Input
                         type="text"
-                        placeholder="Search..."
+                        placeholder="Search applications..."
                         value={localFilters.search || ''}
                         onChange={handleSearchChange}
                         className="pl-10 h-10 rounded-sm bg-card border-border text-card-foreground placeholder:text-muted-foreground"
@@ -456,12 +456,14 @@ export default function ApplicationsFilters({
                     </PopoverContent>
                 </Popover>
 
-                <DateRangePicker
-                    date={localFilters.dateRange}
-                    setDate={handleDateRangeChange}
-                    onClear={handleDateRangeClear}
-                    className="w-full sm:w-40"
-                />
+                <div className="w-full sm:w-auto min-w-40">
+                    <DateRangePicker
+                        date={localFilters.dateRange}
+                        setDate={handleDateRangeChange}
+                        onClear={handleDateRangeClear}
+                        className="w-full"
+                    />
+                </div>
 
                 {hasActiveFilters && (
                     <div className="w-full sm:w-auto">

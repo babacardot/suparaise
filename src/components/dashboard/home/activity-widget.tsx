@@ -221,7 +221,7 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
       ) : (
         <>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Runs</CardTitle>
+            <CardTitle className="text-lg font-medium">Runs</CardTitle>
             <div className="flex items-center gap-2">
               <h2 className="text-sm text-muted-foreground">Last 270 days</h2>
               {totalRuns > 0 && (

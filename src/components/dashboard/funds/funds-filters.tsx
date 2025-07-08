@@ -39,6 +39,7 @@ interface FundsFiltersProps {
     column: keyof ColumnVisibility,
     visible: boolean,
   ) => void
+  totalSubmissions?: number // Add this prop to track total submissions
 }
 
 // Memoized static data
@@ -114,6 +115,7 @@ export default function FundsFilters({
   onClearFilters,
   columnVisibility,
   onColumnVisibilityChange,
+  totalSubmissions = 0, // Default to 0 if not provided
 }: FundsFiltersProps) {
   const [localFilters, setLocalFilters] = useState(filters)
   const isMounted = useRef(false)
@@ -482,9 +484,9 @@ export default function FundsFilters({
           </div>
         </div>
 
-        {/* Region Filter - 5% width reduction */}
+        {/* Region Filter - standardized width */}
         {columnVisibility.region && (
-          <div className="w-full sm:w-44">
+          <div className="w-full sm:w-40">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -542,7 +544,7 @@ export default function FundsFilters({
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-44 p-0 bg-card text-card-foreground rounded-sm"
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
                 align="start"
               >
                 <FilterSection
@@ -557,9 +559,9 @@ export default function FundsFilters({
           </div>
         )}
 
-        {/* Focus Filter - 40% width reduction */}
+        {/* Focus Filter - standardized width */}
         {columnVisibility.focus && (
-          <div className="w-full sm:w-36">
+          <div className="w-full sm:w-40">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -617,7 +619,7 @@ export default function FundsFilters({
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-36 p-0 bg-card text-card-foreground rounded-sm"
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
                 align="start"
               >
                 <FilterSection
@@ -632,7 +634,7 @@ export default function FundsFilters({
           </div>
         )}
 
-        {/* Industry Filter - 10% width reduction */}
+        {/* Industry Filter - standardized width */}
         {columnVisibility.industry && (
           <div className="w-full sm:w-40">
             <Popover>
@@ -707,9 +709,9 @@ export default function FundsFilters({
           </div>
         )}
 
-        {/* Type Filter - 10% width increase from w-28 */}
+        {/* Type Filter - standardized width */}
         {columnVisibility.type && (
-          <div className="w-full sm:w-36">
+          <div className="w-full sm:w-40">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -769,7 +771,7 @@ export default function FundsFilters({
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-36 p-0 bg-card text-card-foreground rounded-sm"
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
                 align="start"
               >
                 <FilterSection
@@ -782,7 +784,7 @@ export default function FundsFilters({
           </div>
         )}
 
-        {/* Requirements Filter */}
+        {/* Requirements Filter - standardized width */}
         {columnVisibility.requirements && (
           <div className="w-full sm:w-40">
             <Popover>
@@ -793,7 +795,7 @@ export default function FundsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
+                      localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = REQUIRED_DOCUMENTS.find(
                           (d) => d.value === doc,
@@ -825,7 +827,7 @@ export default function FundsFilters({
                       )}
                   </div>
                   {localFilters.requiredDocuments &&
-                  localFilters.requiredDocuments.length > 0 ? (
+                    localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
@@ -895,11 +897,10 @@ export default function FundsFilters({
                     }}
                     className={`
                                             flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
-                                            ${
-                                              visible
-                                                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                                            }
+                                            ${visible
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                      }
                                         `}
                   >
                     <span className="text-sm font-medium capitalize">
@@ -916,54 +917,55 @@ export default function FundsFilters({
           </Popover>
         </div>
 
-        {/* Submission Filter Toggle - 3 States */}
-        <div className="w-full sm:w-auto">
-          <Button
-            variant="outline"
-            onClick={() => {
-              const nextState: 'all' | 'hide_submitted' | 'only_submitted' =
-                localFilters.submissionFilter === 'all'
-                  ? 'hide_submitted'
-                  : localFilters.submissionFilter === 'hide_submitted'
-                    ? 'only_submitted'
-                    : 'all'
+        {/* Submission Filter Toggle - 3 States - Only show if there are submissions */}
+        {totalSubmissions > 0 && (
+          <div className="w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const nextState: 'all' | 'hide_submitted' | 'only_submitted' =
+                  localFilters.submissionFilter === 'all'
+                    ? 'hide_submitted'
+                    : localFilters.submissionFilter === 'hide_submitted'
+                      ? 'only_submitted'
+                      : 'all'
 
-              const newFilters = {
-                ...localFilters,
-                submissionFilter: nextState,
-              }
-              setLocalFilters(newFilters)
-              // Update immediately for toggle
-              onFiltersChange(newFilters)
-            }}
-            className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
-              localFilters.submissionFilter === 'hide_submitted'
-                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
-                : localFilters.submissionFilter === 'only_submitted'
-                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
-                  : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
-            }`}
-            title={
-              localFilters.submissionFilter === 'all'
-                ? 'Showing all funds (click to hide submitted)'
-                : localFilters.submissionFilter === 'hide_submitted'
-                  ? 'Hiding submitted funds (click to show only submitted)'
-                  : 'Showing only submitted funds (click to show all)'
-            }
-          >
-            <LottieIcon
-              animationData={
-                localFilters.submissionFilter === 'hide_submitted'
-                  ? animations.visibility
+                const newFilters = {
+                  ...localFilters,
+                  submissionFilter: nextState,
+                }
+                setLocalFilters(newFilters)
+                // Update immediately for toggle
+                onFiltersChange(newFilters)
+              }}
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
+                  ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
                   : localFilters.submissionFilter === 'only_submitted'
-                    ? animations.check
-                    : animations.visibility
+                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
+                    : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
+                }`}
+              title={
+                localFilters.submissionFilter === 'all'
+                  ? 'Showing all funds (click to hide submitted)'
+                  : localFilters.submissionFilter === 'hide_submitted'
+                    ? 'Hiding submitted funds (click to show only submitted)'
+                    : 'Showing only submitted funds (click to show all)'
               }
-              size={16}
-              className="opacity-50 hover:opacity-100"
-            />
-          </Button>
-        </div>
+            >
+              <LottieIcon
+                animationData={
+                  localFilters.submissionFilter === 'hide_submitted'
+                    ? animations.visibility
+                    : localFilters.submissionFilter === 'only_submitted'
+                      ? animations.check
+                      : animations.visibility
+                }
+                size={16}
+                className="opacity-50 hover:opacity-100"
+              />
+            </Button>
+          </div>
+        )}
 
         {/* Clear filters button - inline on desktop */}
         {hasActiveFilters && (

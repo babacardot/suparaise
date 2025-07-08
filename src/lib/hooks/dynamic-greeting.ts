@@ -45,8 +45,8 @@ export function getDynamicGreeting(founderName?: string): DynamicGreeting {
       message: `Dedication pays off.`,
       hours: [19, 20, 21],
     },
-    'Let the agents work while you rest.': {
-      message: 'Let the agents work while you rest.',
+    'Let the agents work while you sleep.': {
+      message: 'Let the agents work while you sleep.',
       hours: [22, 23],
     },
   }

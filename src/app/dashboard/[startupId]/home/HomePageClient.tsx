@@ -65,20 +65,20 @@ export default function HomePageClient({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-2">
+          <TotalApplicationsWidget totalApplications={totalApplications} />
+        </div>
+        <div className="lg:col-span-2">
           <SubmissionsQuotaWidget
             submissionsUsed={submissionsUsed}
             submissionsLimit={submissionsLimit}
           />
-        </div>
-        <div className="lg:col-span-2">
-          <TotalApplicationsWidget totalApplications={totalApplications} />
         </div>
       </div>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-10 gap-4 items-start mt-4">
         <div className="lg:col-span-7 flex flex-col gap-4">
           <ActivityWidget />
-          <ResourcesSection className="mt-2" />
+          <ResourcesSection className="mt-2" startupId={startupId} />
         </div>
         <div className="lg:col-span-3">
           <SubmissionsWidget

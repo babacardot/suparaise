@@ -56,9 +56,10 @@ export function NavMain({
   return (
     <SidebarGroup className="select-none">
       <SidebarMenu>
-        {items.map((item) => {
+        {items.map((item, index) => {
           const isActive = pathname === item.url
           const isHovered = hoveredItem === item.title
+          const isFirstItem = index === 0
 
           // Check if this item requires special permissions
           const requiresProPermission = item.requiresPro || false
@@ -101,7 +102,7 @@ export function NavMain({
                   'h-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!',
                   '[&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
                   isActive &&
-                    'bg-sidebar-accent text-sidebar-accent-foreground',
+                  'bg-sidebar-accent text-sidebar-accent-foreground',
                 )}
                 onMouseEnter={() => setHoveredItem(item.title)}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -134,7 +135,12 @@ export function NavMain({
             )
 
             return (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem
+                key={item.title}
+                className={cn(
+                  isFirstItem && state === 'collapsed' && 'mt-1'
+                )}
+              >
                 <Tooltip>
                   <TooltipTrigger asChild>{lockedButton}</TooltipTrigger>
                   <TooltipContent
@@ -152,7 +158,12 @@ export function NavMain({
           }
 
           return (
-            <SidebarMenuItem key={item.title}>
+            <SidebarMenuItem
+              key={item.title}
+              className={cn(
+                isFirstItem && state === 'collapsed' && 'mt-1'
+              )}
+            >
               <SidebarMenuButton
                 asChild
                 tooltip={item.title}
