@@ -77,9 +77,12 @@ export default function FundsPageClient({
       try {
         const supabase = createSupabaseBrowserClient()
 
-        const { data, error } = await supabase.rpc('get_total_applications_count', {
-          p_startup_id: startupId,
-        })
+        const { data, error } = await supabase.rpc(
+          'get_total_applications_count',
+          {
+            p_startup_id: startupId,
+          },
+        )
 
         if (!error && data) {
           const responseData = data as unknown as { total_applications: number }

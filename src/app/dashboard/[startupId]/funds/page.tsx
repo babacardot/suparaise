@@ -133,11 +133,11 @@ export default async function FundsPage({
       initialPaginationData={
         responseData
           ? {
-            totalCount: responseData.totalCount,
-            hasMore: responseData.hasMore,
-            currentPage: responseData.currentPage,
-            limit: responseData.limit,
-          }
+              totalCount: responseData.totalCount,
+              hasMore: responseData.hasMore,
+              currentPage: responseData.currentPage,
+              limit: responseData.limit,
+            }
           : null
       }
       initialFilters={filters}

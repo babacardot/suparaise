@@ -46,13 +46,12 @@ export function DateRangePicker({
                   ? `${format(date.from, 'LLL d, y')} - ${format(date.to, 'LLL d, y')}`
                   : date.from
                     ? `From ${format(date.from, 'LLL d, y')}`
-                    : date.to ? `To ${format(date.to, 'LLL d, y')}` : ''
-                }
+                    : date.to
+                      ? `To ${format(date.to, 'LLL d, y')}`
+                      : ''}
               </span>
             ) : (
-              <span className="text-muted-foreground text-sm">
-                Date
-              </span>
+              <span className="text-muted-foreground text-sm">Date</span>
             )}
           </div>
           {isDateSet ? (

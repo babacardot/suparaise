@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { startupId, submissionId, submissionType, userId } = await request.json()
+    const { startupId, submissionId, submissionType, userId } =
+      await request.json()
 
     if (!startupId || !submissionId || !submissionType || !userId) {
       return NextResponse.json(
@@ -28,10 +29,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (!user || user.id !== userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 },
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Call the retry_submission function
@@ -50,12 +48,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = data as { error?: string; message?: string; success?: boolean }
+    const result = data as {
+      error?: string
+      message?: string
+      success?: boolean
+    }
     if (result?.error) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
     return NextResponse.json({
@@ -70,4 +69,4 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     )
   }
-} 
+}

@@ -2,6 +2,7 @@ import { Header } from '@/components/design/header'
 import { Footer } from '@/components/design/footer'
 import { BackgroundText } from '@/components/design/background-text'
 import { About } from '@/components/design/about'
+import { FaqAboutSection } from '@/components/design/faq-about'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function AboutPage() {
 
       <main className="flex-1 pt-20">
         <About />
+        <FaqAboutSection />
       </main>
 
       <Footer />

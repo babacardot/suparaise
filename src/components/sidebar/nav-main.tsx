@@ -102,7 +102,7 @@ export function NavMain({
                   'h-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!',
                   '[&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
                   isActive &&
-                  'bg-sidebar-accent text-sidebar-accent-foreground',
+                    'bg-sidebar-accent text-sidebar-accent-foreground',
                 )}
                 onMouseEnter={() => setHoveredItem(item.title)}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -137,9 +137,7 @@ export function NavMain({
             return (
               <SidebarMenuItem
                 key={item.title}
-                className={cn(
-                  isFirstItem && state === 'collapsed' && 'mt-1'
-                )}
+                className={cn(isFirstItem && state === 'collapsed' && 'mt-1')}
               >
                 <Tooltip>
                   <TooltipTrigger asChild>{lockedButton}</TooltipTrigger>
@@ -160,9 +158,7 @@ export function NavMain({
           return (
             <SidebarMenuItem
               key={item.title}
-              className={cn(
-                isFirstItem && state === 'collapsed' && 'mt-1'
-              )}
+              className={cn(isFirstItem && state === 'collapsed' && 'mt-1')}
             >
               <SidebarMenuButton
                 asChild

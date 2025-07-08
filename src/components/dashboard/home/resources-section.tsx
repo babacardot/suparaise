@@ -15,7 +15,10 @@ interface ResourcesSectionProps {
   startupId: string
 }
 
-export function ResourcesSection({ className = '', startupId }: ResourcesSectionProps) {
+export function ResourcesSection({
+  className = '',
+  startupId,
+}: ResourcesSectionProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   const resources = [
@@ -64,10 +67,7 @@ export function ResourcesSection({ className = '', startupId }: ResourcesSection
       <div className="flex gap-4">
         {resources.map((item, index) => {
           return (
-            <div
-              key={index}
-              className="flex-none w-40"
-            >
+            <div key={index} className="flex-none w-40">
               <a
                 href={item.link}
                 target={item.isInternal ? '_self' : '_blank'}
@@ -80,18 +80,20 @@ export function ResourcesSection({ className = '', startupId }: ResourcesSection
                   className={`rounded-sm w-full h-32 ${item.cardColor} hover:shadow-md border overflow-hidden transition-all duration-200 hover:scale-[1.02]`}
                 >
                   <CardContent className="px-3 pt-1 pb-2 h-full flex flex-col">
-                    <div className={`flex items-start ${item.icon === 'lottie' ? 'mb-2' : 'mb-3.5'}`}>
+                    <div
+                      className={`flex items-start ${item.icon === 'lottie' ? 'mb-2' : 'mb-3.5'}`}
+                    >
                       <motion.div
                         animate={
                           hoveredIndex === index
                             ? {
-                              rotate: [0, 5, -5, 0],
-                              scale: [1, 1.05, 1],
-                            }
+                                rotate: [0, 5, -5, 0],
+                                scale: [1, 1.05, 1],
+                              }
                             : {
-                              rotate: 0,
-                              scale: 1,
-                            }
+                                rotate: 0,
+                                scale: 1,
+                              }
                         }
                         transition={{
                           duration: hoveredIndex === index ? 1.5 : 0.3,
@@ -102,7 +104,10 @@ export function ResourcesSection({ className = '', startupId }: ResourcesSection
                         className={`text-muted-foreground transition-colors ${item.hoverColor}`}
                       >
                         {item.icon === 'lottie' ? (
-                          <LottieIcon animationData={animations.star} size={24} />
+                          <LottieIcon
+                            animationData={animations.star}
+                            size={24}
+                          />
                         ) : (
                           <item.icon className={item.iconSize} />
                         )}
@@ -162,16 +167,15 @@ export function ResourcesSection({ className = '', startupId }: ResourcesSection
                     repeatDelay: 1,
                   }}
                   className="text-muted-foreground group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors"
-                >
-                </motion.div>
+                ></motion.div>
               </div>
               <h3 className="font-bold mb-2 text-foreground text-sm">
                 Need more runs and more funds?
               </h3>
               <p className="text-[11px] text-muted-foreground leading-tight">
-                Access 2,000+ funds • 125 runs per month • 5 parallel submissions • Priority support
+                Access 2,000+ funds • 125 runs per month • 5 parallel
+                submissions • Priority support
               </p>
-
             </CardContent>
           </Card>
         </a>

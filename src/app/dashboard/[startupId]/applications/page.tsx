@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { generateStartupMetadata } from '@/lib/utils/metadata'
 import { createClient } from '@/lib/supabase/server'
 import ApplicationsPageClient from './ApplicationsPageClient'
-import { ApplicationsFilters as ApplicationsFiltersType } from '@/components/dashboard/applications/applications-filters'
 
 export async function generateMetadata({
   params,
@@ -64,13 +63,6 @@ interface GetSubmissionsDetailedResponse {
   limit: number
 }
 
-interface GetSubmissionStatisticsResponse {
-  total: { [key: string]: number }
-  funds: { [key: string]: number }
-  angels: { [key: string]: number }
-  accelerators: { [key: string]: number }
-}
-
 export default async function ApplicationsPage({
   params,
   searchParams,
@@ -83,7 +75,8 @@ export default async function ApplicationsPage({
   const supabase = await createClient()
 
   // Parse filters from searchParams
-  const filters: ApplicationsFiltersType = {
+  const filters = {
+    search: (resolvedSearchParams.search as string) || '',
     statusFilter: getArray(resolvedSearchParams.statusFilter),
     typeFilter: getArray(resolvedSearchParams.typeFilter),
     dateFrom: (resolvedSearchParams.dateFrom as string) || '',
@@ -108,36 +101,30 @@ export default async function ApplicationsPage({
     p_offset: offset,
     p_sort_by: sortConfig.key,
     p_sort_direction: sortConfig.direction,
-    p_status_filter: filters.statusFilter.length > 0 ? filters.statusFilter : undefined,
-    p_type_filter: filters.typeFilter.length > 0 ? filters.typeFilter : undefined,
-    p_date_from: filters.dateFrom ? new Date(filters.dateFrom).toISOString().split('T')[0] : undefined,
-    p_date_to: filters.dateTo ? new Date(filters.dateTo).toISOString().split('T')[0] : undefined,
+    p_status_filter:
+      filters.statusFilter.length > 0 ? filters.statusFilter : undefined,
+    p_type_filter:
+      filters.typeFilter.length > 0 ? filters.typeFilter : undefined,
+    p_date_from: filters.dateFrom
+      ? new Date(filters.dateFrom).toISOString().split('T')[0]
+      : undefined,
+    p_date_to: filters.dateTo
+      ? new Date(filters.dateTo).toISOString().split('T')[0]
+      : undefined,
   }
 
   // Fetch submissions data
   const { data: submissionsData, error: submissionsError } = await supabase.rpc(
     'get_all_submissions_detailed',
-    rpcParams
-  )
-
-  // Fetch statistics data
-  const { data: statisticsData, error: statisticsError } = await supabase.rpc(
-    'get_submission_statistics',
-    {
-      p_startup_id: startupId,
-    }
+    rpcParams,
   )
 
   if (submissionsError) {
     console.error('Error fetching submissions:', submissionsError)
   }
 
-  if (statisticsError) {
-    console.error('Error fetching statistics:', statisticsError)
-  }
-
-  const responseData = submissionsData as unknown as GetSubmissionsDetailedResponse
-  const statisticsResponseData = statisticsData as unknown as GetSubmissionStatisticsResponse
+  const responseData =
+    submissionsData as unknown as GetSubmissionsDetailedResponse
 
   return (
     <ApplicationsPageClient
@@ -146,16 +133,15 @@ export default async function ApplicationsPage({
       initialPaginationData={
         responseData
           ? {
-            totalCount: responseData.totalCount,
-            hasMore: responseData.hasMore,
-            currentPage: responseData.currentPage,
-            limit: responseData.limit,
-          }
+              totalCount: responseData.totalCount,
+              hasMore: responseData.hasMore,
+              currentPage: responseData.currentPage,
+              limit: responseData.limit,
+            }
           : null
       }
       initialFilters={filters}
       initialSortConfig={sortConfig}
-      initialStatistics={statisticsResponseData}
     />
   )
 }
