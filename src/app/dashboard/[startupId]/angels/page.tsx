@@ -20,14 +20,14 @@ type Angel = {
   location?: string
   bio?: string
   check_size?:
-    | '1K-10K'
-    | '10K-25K'
-    | '25K-50K'
-    | '50K-100K'
-    | '100K-250K'
-    | '250K-500K'
-    | '500K-1M'
-    | '1M+'
+  | '1K-10K'
+  | '10K-25K'
+  | '25K-50K'
+  | '50K-100K'
+  | '100K-250K'
+  | '250K-500K'
+  | '500K-1M'
+  | '1M+'
   stage_focus?: string[]
   industry_focus?: string[]
   region_focus?: string[]
@@ -82,27 +82,28 @@ export default async function AngelsPage({
   params,
   searchParams,
 }: {
-  params: { startupId: string }
-  searchParams: { [key: string]: string | string[] | undefined }
+  params: Promise<{ startupId: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+  const { startupId } = await params
+  const resolvedSearchParams = await searchParams
   const supabase = await createClient()
-  const { startupId } = params
 
-  const page = Number(searchParams.page || 1)
+  const page = Number(resolvedSearchParams.page || 1)
   const offset = (page - 1) * PAGE_SIZE
-  const sortBy = (searchParams.sortBy as string) || 'name'
-  const sortDirection = (searchParams.sortDirection as string) || 'asc'
+  const sortBy = (resolvedSearchParams.sortBy as string) || 'name'
+  const sortDirection = (resolvedSearchParams.sortDirection as string) || 'asc'
 
   const filters: AngelsFilters = {
-    search: (searchParams.search as string) || '',
-    submissionTypes: getArray(searchParams.submissionTypes),
-    stageFocus: getArray(searchParams.stageFocus),
-    industryFocus: getArray(searchParams.industryFocus),
-    regionFocus: getArray(searchParams.regionFocus),
-    checkSizes: getArray(searchParams.checkSizes),
-    investmentApproaches: getArray(searchParams.investmentApproaches),
+    search: (resolvedSearchParams.search as string) || '',
+    submissionTypes: getArray(resolvedSearchParams.submissionTypes),
+    stageFocus: getArray(resolvedSearchParams.stageFocus),
+    industryFocus: getArray(resolvedSearchParams.industryFocus),
+    regionFocus: getArray(resolvedSearchParams.regionFocus),
+    checkSizes: getArray(resolvedSearchParams.checkSizes),
+    investmentApproaches: getArray(resolvedSearchParams.investmentApproaches),
     submissionFilter:
-      (searchParams.submissionFilter as
+      (resolvedSearchParams.submissionFilter as
         | 'all'
         | 'hide_submitted'
         | 'only_submitted') || 'all',
@@ -143,11 +144,11 @@ export default async function AngelsPage({
   const initialAngels = responseData?.data || []
   const paginationData = responseData
     ? {
-        totalCount: responseData.totalCount,
-        hasMore: responseData.hasMore,
-        currentPage: responseData.currentPage,
-        limit: responseData.limit,
-      }
+      totalCount: responseData.totalCount,
+      hasMore: responseData.hasMore,
+      currentPage: responseData.currentPage,
+      limit: responseData.limit,
+    }
     : null
 
   const initialSortConfig = {
