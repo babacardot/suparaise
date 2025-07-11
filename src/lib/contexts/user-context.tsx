@@ -10,8 +10,11 @@ import React, {
   useRef,
 } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { User, SupabaseClient } from '@supabase/supabase-js'
+import { User } from '@supabase/supabase-js'
 import { useRouter, usePathname } from 'next/navigation'
+
+// Get the actual return type of our supabase client function
+type SupabaseClientType = ReturnType<typeof createSupabaseBrowserClient>
 
 // Startup-related interfaces
 interface StartupData {
@@ -39,7 +42,7 @@ interface SubscriptionData {
 
 interface UserContextType {
   user: User | null
-  supabase: SupabaseClient
+  supabase: SupabaseClientType
   loading: boolean
   signingOut: boolean
   signOut: () => Promise<void>
