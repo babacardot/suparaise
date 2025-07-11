@@ -35,6 +35,7 @@ type Target = {
   form_complexity?: 'simple' | 'standard' | 'comprehensive'
   question_count_range?: '1-5' | '6-10' | '11-20' | '21+'
   required_documents?: string[]
+  tags?: string[]
   notes?: string
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string

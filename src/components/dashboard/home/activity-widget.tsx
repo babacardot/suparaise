@@ -10,7 +10,6 @@ import {
 import { useMemo, useState, useEffect } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import Spinner from '@/components/ui/spinner'
 import { useUser } from '@/lib/contexts/user-context'
 
 interface ActivityWidgetParams {
@@ -147,30 +146,24 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
   const [runMetrics, setRunMetrics] = useState<{
     periods: RunMetricsPeriod[]
   } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchActivity = async () => {
       if (!currentStartupId) {
-        setIsLoading(false)
         return
       }
-      setIsLoading(true)
       const data = await fetchActivityWidget({
         startupId: currentStartupId,
       })
       setRunMetrics(data)
-      setIsLoading(false)
     }
 
     fetchActivity()
   }, [currentStartupId])
 
   const { grid, totalRuns } = useMemo(() => {
-    if (!runMetrics?.periods) {
-      return { grid: [], totalRuns: 0 }
-    }
-    const fullPeriodPeriods = generateFullPeriodGrid(runMetrics.periods, 270)
+    const periods = runMetrics?.periods || []
+    const fullPeriodPeriods = generateFullPeriodGrid(periods, 270)
 
     const gridItems = fullPeriodPeriods
       .map((period: RunMetricsPeriod, i: number) => {
@@ -214,62 +207,56 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
         className,
       )}
     >
-      {isLoading ? (
-        <div className="flex h-full flex-col items-center justify-center p-6">
-          <Spinner />
-        </div>
-      ) : (
-        <>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-medium">Runs</CardTitle>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm text-muted-foreground">Last 270 days</h2>
-              {totalRuns > 0 && (
-                <>
-                  <span className="text-muted-foreground">•</span>
-                  <span className="text-sm text-muted-foreground">
-                    {totalRuns} {totalRuns === 1 ? 'run' : 'runs'}
-                  </span>
-                </>
-              )}
-            </div>
-          </CardHeader>
-          <TooltipProvider>
-            <CardContent className="bg-background/50 dark:bg-background/30 mx-4 mb-2 flex flex-row gap-x-1 rounded-sm p-4">
-              <div className="hidden flex-col font-mono text-[9px] text-muted-foreground xl:flex gap-2">
-                {[null, 'Mon', null, 'Wed', null, 'Fri', null].map((day, i) => (
-                  <div
-                    key={i}
-                    className="h-3 flex items-center justify-start leading-none w-6"
-                  >
-                    {day && <span>{day}</span>}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-flow-col grid-cols-[repeat(39,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-2">
-                {grid}
-              </div>
-            </CardContent>
-          </TooltipProvider>
-          <CardContent className="pt-0 mx-2 pb-4">
-            <div className="flex items-center justify-end">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Less</span>
-                <div className="flex gap-1">
-                  <div className="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-800/60" />
-                  <div className="w-3 h-3 rounded-sm bg-blue-100 dark:bg-blue-900/40" />
-                  <div className="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-800/60" />
-                  <div className="w-3 h-3 rounded-sm bg-blue-300 dark:bg-blue-700/80" />
-                  <div className="w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-600/90" />
-                  <div className="w-3 h-3 rounded-sm bg-blue-500 dark:bg-blue-500" />
-                  <div className="w-3 h-3 rounded-sm bg-blue-600 dark:bg-blue-400" />
+      <>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-medium">Runs</CardTitle>
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm text-muted-foreground">Last 270 days</h2>
+            {totalRuns > 0 && (
+              <>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-sm text-muted-foreground">
+                  {totalRuns} {totalRuns === 1 ? 'run' : 'runs'}
+                </span>
+              </>
+            )}
+          </div>
+        </CardHeader>
+        <TooltipProvider>
+          <CardContent className="bg-background/50 dark:bg-background/30 mx-4 mb-2 flex flex-row gap-x-1 rounded-sm p-4">
+            <div className="hidden flex-col font-mono text-[9px] text-muted-foreground xl:flex gap-2">
+              {[null, 'Mon', null, 'Wed', null, 'Fri', null].map((day, i) => (
+                <div
+                  key={i}
+                  className="h-3 flex items-center justify-start leading-none w-6"
+                >
+                  {day && <span>{day}</span>}
                 </div>
-                <span className="text-xs text-muted-foreground">More</span>
-              </div>
+              ))}
+            </div>
+            <div className="grid grid-flow-col grid-cols-[repeat(39,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-2">
+              {grid}
             </div>
           </CardContent>
-        </>
-      )}
+        </TooltipProvider>
+        <CardContent className="pt-0 mx-2 pb-4">
+          <div className="flex items-center justify-end">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Less</span>
+              <div className="flex gap-1">
+                <div className="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-800/60" />
+                <div className="w-3 h-3 rounded-sm bg-blue-100 dark:bg-blue-900/40" />
+                <div className="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-800/60" />
+                <div className="w-3 h-3 rounded-sm bg-blue-300 dark:bg-blue-700/80" />
+                <div className="w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-600/90" />
+                <div className="w-3 h-3 rounded-sm bg-blue-500 dark:bg-blue-500" />
+                <div className="w-3 h-3 rounded-sm bg-blue-600 dark:bg-blue-400" />
+              </div>
+              <span className="text-xs text-muted-foreground">More</span>
+            </div>
+          </div>
+        </CardContent>
+      </>
     </Card>
   )
 }

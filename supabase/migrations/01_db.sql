@@ -140,6 +140,7 @@ CREATE TABLE targets (
     form_complexity form_complexity,
     question_count_range question_count_range,
     required_documents required_document_type[],
+    tags TEXT[],
     notes TEXT, -- For special instructions
     visibility_level permission_level DEFAULT 'FREE' NOT NULL, -- Controls who can see this target
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -178,6 +179,7 @@ CREATE TABLE angels (
     application_email TEXT,
     form_complexity form_complexity,
     required_documents required_document_type[],
+    tags TEXT[],
     notable_investments TEXT[], -- Notable companies in their portfolio
     is_active BOOLEAN DEFAULT TRUE,
     notes TEXT, -- For special instructions or additional info
@@ -219,6 +221,7 @@ CREATE TABLE accelerators (
     required_documents required_document_type[],
     program_fee NUMERIC(10, 2), -- Some charge program fees
     is_active BOOLEAN DEFAULT TRUE,
+    tags TEXT[],
     notes TEXT, -- For special instructions
     visibility_level permission_level DEFAULT 'FREE' NOT NULL, -- Controls who can see this accelerator
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -487,6 +490,7 @@ CREATE INDEX IF NOT EXISTS idx_targets_industry_focus ON targets USING GIN(indus
 CREATE INDEX IF NOT EXISTS idx_targets_region_focus ON targets USING GIN(region_focus) WHERE region_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_required_documents ON targets USING GIN(required_documents) WHERE required_documents IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_visibility_level ON targets(visibility_level);
+CREATE INDEX IF NOT EXISTS idx_targets_tags ON targets USING GIN(tags) WHERE tags IS NOT NULL;
 
 -- Text search indexes for fast search functionality
 CREATE INDEX IF NOT EXISTS idx_targets_name_search ON targets USING gin(to_tsvector('english', name));
@@ -514,6 +518,7 @@ CREATE INDEX IF NOT EXISTS idx_angels_check_size ON angels(check_size) WHERE che
 CREATE INDEX IF NOT EXISTS idx_angels_response_time ON angels(response_time) WHERE response_time IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_angels_is_active ON angels(is_active);
 CREATE INDEX IF NOT EXISTS idx_angels_visibility_level ON angels(visibility_level);
+CREATE INDEX IF NOT EXISTS idx_angels_tags ON angels USING GIN(tags) WHERE tags IS NOT NULL;
 
 -- Performance indexes for accelerators table
 CREATE INDEX IF NOT EXISTS idx_accelerators_stage_focus ON accelerators USING GIN(stage_focus) WHERE stage_focus IS NOT NULL;
@@ -529,6 +534,7 @@ CREATE INDEX IF NOT EXISTS idx_accelerators_is_remote_friendly ON accelerators(i
 CREATE INDEX IF NOT EXISTS idx_accelerators_is_active ON accelerators(is_active);
 CREATE INDEX IF NOT EXISTS idx_accelerators_next_application_deadline ON accelerators(next_application_deadline) WHERE next_application_deadline IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_accelerators_visibility_level ON accelerators(visibility_level);
+CREATE INDEX IF NOT EXISTS idx_accelerators_tags ON accelerators USING GIN(tags) WHERE tags IS NOT NULL;
 
 -- --------------------------------------------------
 -- Row Level Security (RLS) Policies

@@ -3,27 +3,38 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import FundsTableWrapper from '@/components/dashboard/funds/funds-table-wrapper'
-import SecureFundsWrapper from '@/components/dashboard/funds/secure-funds-wrapper'
-import FundsFilters, {
-  FundsFilters as FundsFiltersType,
-} from '@/components/dashboard/funds/funds-filters'
+import AcceleratorsTableWrapper from '@/components/dashboard/accelerators/accelerators-table-wrapper'
+import SecureAcceleratorsWrapper from '@/components/dashboard/accelerators/secure-accelerators-wrapper'
+import AcceleratorsFilters, {
+  AcceleratorsFilters as AcceleratorsFiltersType,
+} from '@/components/dashboard/accelerators/accelerators-filters'
 
-type Target = {
+type Accelerator = {
   id: string
   name: string
   website?: string
-  application_url: string
+  application_url?: string
   application_email?: string
   submission_type: 'form' | 'email' | 'other'
+  program_type?: 'in-person' | 'remote' | 'hybrid'
+  program_duration?: string
+  location?: string
+  is_remote_friendly?: boolean
+  batch_size?: string
+  batches_per_year?: number
+  next_application_deadline?: string
   stage_focus?: string[]
   industry_focus?: string[]
   region_focus?: string[]
+  equity_taken?: string
+  funding_provided?: string
+  acceptance_rate?: string
   form_complexity?: 'simple' | 'standard' | 'comprehensive'
-  question_count_range?: '1-5' | '6-10' | '11-20' | '21+'
   required_documents?: string[]
-  tags?: string[]
+  program_fee?: number
+  is_active?: boolean
   notes?: string
+  tags?: string[]
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
@@ -35,42 +46,46 @@ interface ColumnVisibility {
   industry: boolean
   requirements: boolean
   type: boolean
+  programType: boolean
+  equity: boolean
+  funding: boolean
 }
 
-interface FundsPageClientProps {
+interface AcceleratorsPageClientProps {
   startupId: string
-  initialTargets: Target[]
+  initialAccelerators: Accelerator[]
   initialPaginationData: {
     totalCount: number
     hasMore: boolean
     currentPage: number
     limit: number
   } | null
-  initialFilters: FundsFiltersType
+  initialFilters: AcceleratorsFiltersType
   initialSortConfig: { key: string | null; direction: 'asc' | 'desc' }
 }
 
-const COLUMN_VISIBILITY_STORAGE_KEY = 'funds-table-columns'
+const COLUMN_VISIBILITY_STORAGE_KEY = 'accelerators-table-columns'
 
-export default function FundsPageClient({
+export default function AcceleratorsPageClient({
   startupId,
-  initialTargets,
+  initialAccelerators,
   initialPaginationData,
   initialFilters,
   initialSortConfig,
-}: FundsPageClientProps) {
+}: AcceleratorsPageClientProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [targets, setTargets] = useState<Target[]>(initialTargets)
+  const [accelerators, setAccelerators] =
+    useState<Accelerator[]>(initialAccelerators)
   const [paginationData, setPaginationData] = useState(initialPaginationData)
   const [totalSubmissions, setTotalSubmissions] = useState<number>(0)
 
   useEffect(() => {
-    setTargets(initialTargets)
+    setAccelerators(initialAccelerators)
     setPaginationData(initialPaginationData)
-  }, [initialTargets, initialPaginationData])
+  }, [initialAccelerators, initialPaginationData])
 
   // Fetch total submissions count for this startup
   useEffect(() => {
@@ -97,7 +112,8 @@ export default function FundsPageClient({
     fetchTotalSubmissions()
   }, [startupId])
 
-  const [filters, setFilters] = useState<FundsFiltersType>(initialFilters)
+  const [filters, setFilters] =
+    useState<AcceleratorsFiltersType>(initialFilters)
   const [sortConfig, setSortConfig] = useState(initialSortConfig)
 
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(
@@ -120,6 +136,9 @@ export default function FundsPageClient({
         industry: true,
         requirements: true,
         type: false,
+        programType: true,
+        equity: true,
+        funding: true,
       }
     },
   )
@@ -150,7 +169,7 @@ export default function FundsPageClient({
   )
 
   const handleFiltersChange = useCallback(
-    (newFilters: FundsFiltersType) => {
+    (newFilters: AcceleratorsFiltersType) => {
       setFilters(newFilters)
       const params = new URLSearchParams(searchParams.toString())
       params.set('page', '1')
@@ -222,13 +241,16 @@ export default function FundsPageClient({
   )
 
   const clearFilters = useCallback(() => {
-    const clearedFilters: FundsFiltersType = {
+    const clearedFilters: AcceleratorsFiltersType = {
       search: '',
       submissionTypes: [],
       stageFocus: [],
       industryFocus: [],
       regionFocus: [],
       requiredDocuments: [],
+      programTypes: [],
+      equityRanges: [],
+      fundingRanges: [],
       submissionFilter: 'all',
     }
     setFilters(clearedFilters)
@@ -241,8 +263,8 @@ export default function FundsPageClient({
 
   const tableWrapper = useMemo(
     () => (
-      <FundsTableWrapper
-        targets={targets}
+      <AcceleratorsTableWrapper
+        accelerators={accelerators}
         startupId={startupId}
         paginationData={paginationData}
         offset={offset}
@@ -253,7 +275,7 @@ export default function FundsPageClient({
       />
     ),
     [
-      targets,
+      accelerators,
       startupId,
       paginationData,
       offset,
@@ -265,12 +287,14 @@ export default function FundsPageClient({
   )
 
   return (
-    <SecureFundsWrapper>
+    <SecureAcceleratorsWrapper>
       <div className="h-full flex flex-col overflow-hidden hide-scrollbar">
         <div className="flex-shrink-0 pb-4">
-          <h1 className="text-3xl font-bold tracking-tight mt-1.5">Funds</h1>
+          <h1 className="text-3xl font-bold tracking-tight mt-1.5">
+            Accelerators
+          </h1>
         </div>
-        <FundsFilters
+        <AcceleratorsFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={clearFilters}
@@ -282,6 +306,6 @@ export default function FundsPageClient({
           {tableWrapper}
         </div>
       </div>
-    </SecureFundsWrapper>
+    </SecureAcceleratorsWrapper>
   )
 }

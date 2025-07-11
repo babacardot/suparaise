@@ -154,7 +154,7 @@ export default function DashboardLayout({
   // Handle redirect when user is null (moved to useEffect to avoid render-time side effects)
   useEffect(() => {
     if (!user && !loading && !signingOut) {
-      router.push('/')
+      router.push('/login')
     }
   }, [user, loading, signingOut, router])
 
@@ -185,6 +185,9 @@ export default function DashboardLayout({
       </div>
     )
   }
+
+  // Determine if onboarding is truly needed only after startups are initialized
+  const showOnboarding = needsOnboarding && startups.length === 0
 
   return (
     <SidebarProvider>
@@ -219,9 +222,9 @@ export default function DashboardLayout({
       </SidebarInset>
 
       {/* First-time onboarding dialog */}
-      {needsOnboarding && user && (
+      {showOnboarding && user && (
         <OnboardingDialog
-          isOpen={needsOnboarding}
+          isOpen={showOnboarding}
           userId={user.id}
           onComplete={handleOnboardingComplete}
           isFirstStartup={true}

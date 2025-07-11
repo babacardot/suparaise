@@ -175,7 +175,7 @@ export function SubmissionsWidget({
       <Card className={twMerge('h-full min-h-[367px] rounded-sm', className)}>
         <div className="flex h-full flex-col items-center justify-center p-6 space-y-4 mt-20">
           <Image
-            src="/placeholder/no_record.webp"
+            src="/placeholder/loading_accounts.webp"
             alt="No submissions found"
             width={200}
             height={200}

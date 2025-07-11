@@ -3,26 +3,45 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import FundsTableWrapper from '@/components/dashboard/funds/funds-table-wrapper'
-import SecureFundsWrapper from '@/components/dashboard/funds/secure-funds-wrapper'
-import FundsFilters, {
-  FundsFilters as FundsFiltersType,
-} from '@/components/dashboard/funds/funds-filters'
+import AngelsTableWrapper from '@/components/dashboard/angels/angels-table-wrapper'
+import SecureAngelsWrapper from '@/components/dashboard/angels/secure-angels-wrapper'
+import AngelsFilters, {
+  AngelsFilters as AngelsFiltersType,
+} from '@/components/dashboard/angels/angels-filters'
 
-type Target = {
+type Angel = {
   id: string
-  name: string
-  website?: string
-  application_url: string
-  application_email?: string
-  submission_type: 'form' | 'email' | 'other'
+  first_name: string
+  last_name: string
+  email?: string
+  linkedin?: string
+  twitter?: string
+  personal_website?: string
+  location?: string
+  bio?: string
+  check_size?:
+    | '1K-10K'
+    | '10K-25K'
+    | '25K-50K'
+    | '50K-100K'
+    | '100K-250K'
+    | '250K-500K'
+    | '500K-1M'
+    | '1M+'
   stage_focus?: string[]
   industry_focus?: string[]
   region_focus?: string[]
+  investment_approach?: 'hands-on' | 'passive' | 'advisory' | 'network-focused'
+  previous_exits?: string[]
+  domain_expertise?: string[]
+  response_time?: '1-3 days' | '1 week' | '2 weeks' | '1 month' | '2+ months'
+  submission_type: 'form' | 'email' | 'other'
+  application_url?: string
+  application_email?: string
   form_complexity?: 'simple' | 'standard' | 'comprehensive'
-  question_count_range?: '1-5' | '6-10' | '11-20' | '21+'
   required_documents?: string[]
-  tags?: string[]
+  notable_investments?: string[]
+  is_active?: boolean
   notes?: string
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
@@ -33,53 +52,53 @@ interface ColumnVisibility {
   region: boolean
   focus: boolean
   industry: boolean
-  requirements: boolean
+  check_size: boolean
+  investment_approach: boolean
   type: boolean
 }
 
-interface FundsPageClientProps {
+interface AngelsPageClientProps {
   startupId: string
-  initialTargets: Target[]
+  initialAngels: Angel[]
   initialPaginationData: {
     totalCount: number
     hasMore: boolean
     currentPage: number
     limit: number
   } | null
-  initialFilters: FundsFiltersType
+  initialFilters: AngelsFiltersType
   initialSortConfig: { key: string | null; direction: 'asc' | 'desc' }
 }
 
-const COLUMN_VISIBILITY_STORAGE_KEY = 'funds-table-columns'
+const COLUMN_VISIBILITY_STORAGE_KEY = 'angels-table-columns'
 
-export default function FundsPageClient({
+export default function AngelsPageClient({
   startupId,
-  initialTargets,
+  initialAngels,
   initialPaginationData,
   initialFilters,
   initialSortConfig,
-}: FundsPageClientProps) {
+}: AngelsPageClientProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [targets, setTargets] = useState<Target[]>(initialTargets)
+  const [angels, setAngels] = useState<Angel[]>(initialAngels)
   const [paginationData, setPaginationData] = useState(initialPaginationData)
   const [totalSubmissions, setTotalSubmissions] = useState<number>(0)
 
   useEffect(() => {
-    setTargets(initialTargets)
+    setAngels(initialAngels)
     setPaginationData(initialPaginationData)
-  }, [initialTargets, initialPaginationData])
+  }, [initialAngels, initialPaginationData])
 
-  // Fetch total submissions count for this startup
   useEffect(() => {
     const fetchTotalSubmissions = async () => {
       try {
         const supabase = createSupabaseBrowserClient()
 
         const { data, error } = await supabase.rpc(
-          'get_total_applications_count',
+          'get_total_angel_applications_count',
           {
             p_startup_id: startupId,
           },
@@ -97,7 +116,7 @@ export default function FundsPageClient({
     fetchTotalSubmissions()
   }, [startupId])
 
-  const [filters, setFilters] = useState<FundsFiltersType>(initialFilters)
+  const [filters, setFilters] = useState<AngelsFiltersType>(initialFilters)
   const [sortConfig, setSortConfig] = useState(initialSortConfig)
 
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(
@@ -118,7 +137,8 @@ export default function FundsPageClient({
         region: true,
         focus: true,
         industry: true,
-        requirements: true,
+        check_size: true,
+        investment_approach: false,
         type: false,
       }
     },
@@ -133,7 +153,6 @@ export default function FundsPageClient({
     [page, paginationData],
   )
 
-  // Prefetch the next page to make navigation feel faster
   useEffect(() => {
     if (paginationData?.hasMore) {
       const params = new URLSearchParams(searchParams.toString())
@@ -150,7 +169,7 @@ export default function FundsPageClient({
   )
 
   const handleFiltersChange = useCallback(
-    (newFilters: FundsFiltersType) => {
+    (newFilters: AngelsFiltersType) => {
       setFilters(newFilters)
       const params = new URLSearchParams(searchParams.toString())
       params.set('page', '1')
@@ -222,13 +241,14 @@ export default function FundsPageClient({
   )
 
   const clearFilters = useCallback(() => {
-    const clearedFilters: FundsFiltersType = {
+    const clearedFilters: AngelsFiltersType = {
       search: '',
       submissionTypes: [],
       stageFocus: [],
       industryFocus: [],
       regionFocus: [],
-      requiredDocuments: [],
+      checkSizes: [],
+      investmentApproaches: [],
       submissionFilter: 'all',
     }
     setFilters(clearedFilters)
@@ -241,8 +261,8 @@ export default function FundsPageClient({
 
   const tableWrapper = useMemo(
     () => (
-      <FundsTableWrapper
-        targets={targets}
+      <AngelsTableWrapper
+        angels={angels}
         startupId={startupId}
         paginationData={paginationData}
         offset={offset}
@@ -253,7 +273,7 @@ export default function FundsPageClient({
       />
     ),
     [
-      targets,
+      angels,
       startupId,
       paginationData,
       offset,
@@ -265,12 +285,12 @@ export default function FundsPageClient({
   )
 
   return (
-    <SecureFundsWrapper>
+    <SecureAngelsWrapper>
       <div className="h-full flex flex-col overflow-hidden hide-scrollbar">
         <div className="flex-shrink-0 pb-4">
-          <h1 className="text-3xl font-bold tracking-tight mt-1.5">Funds</h1>
+          <h1 className="text-3xl font-bold tracking-tight mt-1.5">Angels</h1>
         </div>
-        <FundsFilters
+        <AngelsFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={clearFilters}
@@ -282,6 +302,6 @@ export default function FundsPageClient({
           {tableWrapper}
         </div>
       </div>
-    </SecureFundsWrapper>
+    </SecureAngelsWrapper>
   )
 }

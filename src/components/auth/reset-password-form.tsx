@@ -25,6 +25,16 @@ export function ResetPasswordForm({
 
   const { supabase } = useUser()
 
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.4
+      audio.play().catch(() => {
+        // Silently handle audio play errors (autoplay policies, etc.)
+      })
+    }
+  }
+
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -133,6 +143,7 @@ export function ResetPasswordForm({
               <Link
                 href="/forgot-password"
                 className="underline underline-offset-4 text-muted-foreground hover:text-foreground text-sm"
+                onClick={playClickSound}
               >
                 Request a new reset link
               </Link>
@@ -196,6 +207,7 @@ export function ResetPasswordForm({
                 type="submit"
                 className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
                 disabled={isSubmitting}
+                onClick={playClickSound}
               >
                 {isSubmitting ? (
                   <Spinner className="h-3 w-3" />

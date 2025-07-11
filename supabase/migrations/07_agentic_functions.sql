@@ -83,6 +83,7 @@ CREATE OR REPLACE FUNCTION get_targets_simple(
     p_industry_focus TEXT[] DEFAULT NULL,
     p_region_focus TEXT[] DEFAULT NULL,
     p_required_documents TEXT[] DEFAULT NULL,
+    p_tags TEXT[] DEFAULT NULL,
     p_startup_id UUID DEFAULT NULL,
     p_submission_filter TEXT DEFAULT 'all'
 )
@@ -106,6 +107,7 @@ BEGIN
             EXISTS (SELECT 1 FROM unnest(t.stage_focus) AS s WHERE lower(s::text) LIKE %L) OR
             EXISTS (SELECT 1 FROM unnest(t.industry_focus) AS i WHERE lower(i::text) LIKE %L) OR
             EXISTS (SELECT 1 FROM unnest(t.region_focus) AS r WHERE lower(r::text) LIKE %L) OR
+            EXISTS (SELECT 1 FROM unnest(t.tags) AS ta WHERE lower(ta::text) LIKE %L) OR
             lower(t.submission_type::text) LIKE %L
         )',
         '%' || normalized_search || '%',
@@ -135,6 +137,10 @@ BEGIN
     
     IF p_required_documents IS NOT NULL AND array_length(p_required_documents, 1) > 0 THEN
         where_conditions := array_append(where_conditions, format('t.required_documents && %L', p_required_documents));
+    END IF;
+
+    IF p_tags IS NOT NULL AND array_length(p_tags, 1) > 0 THEN
+        where_conditions := array_append(where_conditions, format('t.tags && %L', p_tags));
     END IF;
 
     -- Submission filter conditions
@@ -210,7 +216,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
 -- Grant permissions
-GRANT EXECUTE ON FUNCTION get_targets_simple(INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT[], TEXT[], TEXT[], TEXT[], TEXT[], UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_targets_simple(INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT[], TEXT[], TEXT[], TEXT[], TEXT[], TEXT[], UUID, TEXT) TO authenticated;
 
 -- ==========================================
 -- PERFORMANCE OPTIMIZATIONS
@@ -247,6 +253,10 @@ CREATE INDEX IF NOT EXISTS idx_targets_stage_focus_gin ON targets USING GIN(stag
 CREATE INDEX IF NOT EXISTS idx_targets_industry_focus_gin ON targets USING GIN(industry_focus) WHERE industry_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_region_focus_gin ON targets USING GIN(region_focus) WHERE region_focus IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_targets_required_documents_gin ON targets USING GIN(required_documents) WHERE required_documents IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_targets_visibility_level ON targets(visibility_level);
+
+-- Full-text search indexes
+CREATE INDEX IF NOT EXISTS idx_targets_name_search_gin ON targets USING gin(to_tsvector('english', name));
 
 -- Composite indexes for common sort patterns
 CREATE INDEX IF NOT EXISTS idx_targets_name_asc ON targets(name ASC, id);

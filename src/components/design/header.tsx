@@ -34,7 +34,7 @@ const authItems: MenuItem[] = [
 
 export const Header = () => {
   const [scrolled, setScrolled] = React.useState(false)
-  const { user } = useUser()
+  const { user, currentStartupId } = useUser()
 
   const { scrollYProgress } = useScroll()
 
@@ -82,6 +82,7 @@ export const Header = () => {
                       <Link
                         href={item.href}
                         className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                        onClick={playClickSound}
                       >
                         <span>{item.name}</span>
                       </Link>
@@ -131,7 +132,12 @@ export const Header = () => {
                           ? // Show navigation + dashboard link for authenticated users
                             [
                               ...menuItems,
-                              { name: 'Dashboard', href: '/dashboard' },
+                              {
+                                name: 'Dashboard',
+                                href: currentStartupId
+                                  ? `/dashboard/${currentStartupId}/home`
+                                  : '/dashboard',
+                              },
                             ].map((item, index) => (
                               <SheetClose asChild key={index}>
                                 <Link
@@ -141,6 +147,7 @@ export const Header = () => {
                                       ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
                                       : 'text-foreground hover:text-muted-foreground'
                                   }`}
+                                  onClick={playClickSound}
                                 >
                                   {item.name}
                                 </Link>
@@ -158,6 +165,7 @@ export const Header = () => {
                                         ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
                                         : 'text-foreground hover:text-muted-foreground'
                                   }`}
+                                  onClick={playClickSound}
                                 >
                                   {item.name}
                                 </Link>
@@ -190,7 +198,14 @@ export const Header = () => {
                   onClick={playClickSound}
                   className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 text-sm"
                 >
-                  <Link href="/dashboard" prefetch={true}>
+                  <Link
+                    href={
+                      currentStartupId
+                        ? `/dashboard/${currentStartupId}/home`
+                        : '/dashboard'
+                    }
+                    prefetch={true}
+                  >
                     <span>Dashboard</span>
                   </Link>
                 </Button>

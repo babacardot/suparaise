@@ -208,7 +208,10 @@ export default function AgentSettings() {
     }, 0)
   }
 
-  const handleFieldSave = async (field: string) => {
+  const handleFieldSave = async (
+    field: string,
+    value?: string | boolean | number,
+  ) => {
     if (!currentStartupId) {
       toast({
         variant: 'destructive',
@@ -220,7 +223,9 @@ export default function AgentSettings() {
 
     setIsLoading(true)
     try {
-      const updateData = { [field]: formData[field as keyof typeof formData] }
+      const valueToSave =
+        value !== undefined ? value : formData[field as keyof typeof formData]
+      const updateData = { [field]: valueToSave }
 
       const { data, error } = await supabase.rpc('update_user_agent_settings', {
         p_user_id: user.id,
@@ -358,8 +363,9 @@ export default function AgentSettings() {
                 </div>
                 <button
                   onClick={async () => {
-                    handleInputChange('enableStealth', !formData.enableStealth)
-                    await handleFieldSave('enableStealth')
+                    const newValue = !formData.enableStealth
+                    handleInputChange('enableStealth', newValue)
+                    await handleFieldSave('enableStealth', newValue)
                   }}
                   className={cn(
                     'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
@@ -429,11 +435,9 @@ export default function AgentSettings() {
                 </div>
                 <button
                   onClick={async () => {
-                    handleInputChange(
-                      'enableDebugMode',
-                      !formData.enableDebugMode,
-                    )
-                    await handleFieldSave('enableDebugMode')
+                    const newValue = !formData.enableDebugMode
+                    handleInputChange('enableDebugMode', newValue)
+                    await handleFieldSave('enableDebugMode', newValue)
                   }}
                   disabled={!isAdvancedFeatureAvailable()}
                   className={cn(
@@ -489,7 +493,7 @@ export default function AgentSettings() {
                       }
 
                       handleInputChange('submissionDelay', newValue)
-                      await handleFieldSave('submissionDelay')
+                      await handleFieldSave('submissionDelay', newValue)
                     }}
                     disabled={isLoading}
                   >
@@ -541,7 +545,7 @@ export default function AgentSettings() {
                       }
 
                       handleInputChange('maxParallelSubmissions', newValue)
-                      await handleFieldSave('maxParallelSubmissions')
+                      await handleFieldSave('maxParallelSubmissions', newValue)
                     }}
                     disabled={isLoading}
                   >
@@ -594,7 +598,7 @@ export default function AgentSettings() {
                     const newValue = e.target
                       .value as typeof formData.preferredTone
                     handleInputChange('preferredTone', newValue)
-                    await handleFieldSave('preferredTone')
+                    await handleFieldSave('preferredTone', newValue)
                   }}
                   disabled={isLoading || !isProPlusFeatureAvailable()}
                 >

@@ -25,6 +25,16 @@ export function LoginForm({
 
   const { supabase } = useUser()
 
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.4
+      audio.play().catch(() => {
+        // Silently handle audio play errors (autoplay policies, etc.)
+      })
+    }
+  }
+
   useEffect(() => {
     const errorParam = searchParams.get('error')
     if (errorParam) {
@@ -69,6 +79,7 @@ export function LoginForm({
                 <button
                   type="button"
                   onClick={async () => {
+                    playClickSound()
                     setIsSubmitting(true)
                     setError(null)
                     try {
@@ -104,6 +115,7 @@ export function LoginForm({
                 <button
                   type="button"
                   onClick={async () => {
+                    playClickSound()
                     setIsSubmitting(true)
                     setError(null)
                     try {
@@ -153,6 +165,7 @@ export function LoginForm({
                 <button
                   type="button"
                   onClick={async () => {
+                    playClickSound()
                     setIsSubmitting(true)
                     setError(null)
                     try {
@@ -188,6 +201,7 @@ export function LoginForm({
                 <button
                   type="button"
                   onClick={async () => {
+                    playClickSound()
                     setIsSubmitting(true)
                     setError(null)
                     try {
@@ -253,6 +267,7 @@ export function LoginForm({
                   <Link
                     href="/forgot-password"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-xs underline-offset-2 hover:underline hover:text-foreground text-blue-500 dark:text-blue-400"
+                    onClick={playClickSound}
                   >
                     Forgot password?
                   </Link>
@@ -263,6 +278,7 @@ export function LoginForm({
                 type="submit"
                 className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
                 disabled={isSubmitting}
+                onClick={playClickSound}
               >
                 {isSubmitting ? <Spinner className="h-3 w-3" /> : 'Login'}
               </Button>
@@ -272,6 +288,7 @@ export function LoginForm({
                   href="/signup"
                   prefetch={true}
                   className="underline underline-offset-4"
+                  onClick={playClickSound}
                 >
                   Sign up
                 </Link>

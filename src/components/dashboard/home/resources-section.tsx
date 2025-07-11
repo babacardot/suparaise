@@ -92,13 +92,13 @@ export function ResourcesSection({
                         animate={
                           hoveredIndex === index
                             ? {
-                              rotate: [0, 5, -5, 0],
-                              scale: [1, 1.05, 1],
-                            }
+                                rotate: [0, 5, -5, 0],
+                                scale: [1, 1.05, 1],
+                              }
                             : {
-                              rotate: 0,
-                              scale: 1,
-                            }
+                                rotate: 0,
+                                scale: 1,
+                              }
                         }
                         transition={{
                           duration: hoveredIndex === index ? 1.5 : 0.3,
@@ -179,7 +179,8 @@ export function ResourcesSection({
                   Ready to scale ?
                 </h3>
                 <p className="text-[10px] text-muted-foreground leading-tight">
-                  500+ applications monthly • 25 parallel submissions • Unlimited queue • Dedicated support
+                  500+ applications monthly • 25 parallel submissions •
+                  Unlimited queue • Dedicated support
                 </p>
               </CardContent>
             </Card>
@@ -226,7 +227,8 @@ export function ResourcesSection({
                   Ready for maximum outreach?
                 </h3>
                 <p className="text-[10px] text-muted-foreground leading-tight">
-                  2,000+ funds • 125 applications monthly • 5 parallel submissions • Priority support
+                  2,000+ funds • 125 applications monthly • 5 parallel
+                  submissions • Priority support
                 </p>
               </CardContent>
             </Card>

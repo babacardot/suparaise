@@ -1,100 +1,47 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import type { Metadata } from 'next'
-import Image from 'next/image'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Home | Suparaise',
-  description: 'Automate fundraising with agents.',
-}
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@/lib/contexts/user-context'
+import Spinner from '@/components/ui/spinner'
 
-export default async function DashboardPage() {
-  const supabase = await createClient()
-
-  // Get current user
+export default function DashboardPage() {
+  const router = useRouter()
   const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+    user,
+    loading,
+    startups,
+    currentStartupId,
+    startupsLoading,
+    startupsInitialized,
+  } = useUser()
 
-  if (authError || !user) {
-    redirect('/login')
-  }
+  useEffect(() => {
+    // If startups are loaded and we have a current startup, redirect
+    if (startupsInitialized && currentStartupId) {
+      router.replace(`/dashboard/${currentStartupId}/home`)
+    } else if (startupsInitialized && startups.length === 0) {
+      // If user has no startups, they might need to go through onboarding
+      // The dashboard layout will handle the onboarding dialog
+      // This page can remain as a loading screen until then
+    } else if (!loading && !user) {
+      // If not logged in, redirect to login
+      router.replace('/login')
+    }
+  }, [
+    router,
+    user,
+    loading,
+    startups,
+    currentStartupId,
+    startupsLoading,
+    startupsInitialized,
+  ])
 
-  // Check user's onboarding status
-  const { data: onboardingStatus, error: onboardingError } = await supabase.rpc(
-    'check_user_onboarding_status',
-    {
-      p_user_id: user.id,
-    },
-  )
-
-  if (onboardingError) {
-    console.error('Error checking onboarding status:', onboardingError)
-    return <div>Error loading dashboard</div>
-  }
-
-  const statusData = onboardingStatus as {
-    needsOnboarding: boolean
-    hasStartup: boolean
-  }
-
-  // If user needs onboarding (no startups or incomplete startups), the layout will handle it
-  // If user has no startups, show startup selection/creation UI
-  if (!statusData.hasStartup) {
-    return (
-      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="flex flex-1 items-center justify-center rounded-sm border border-dashed shadow-sm">
-          <div className="flex flex-col items-center gap-6 text-center max-w-md">
-            <div className="relative w-48 h-48">
-              <Image
-                src="/placeholder/empty_functions.webp"
-                alt="No startups yet"
-                fill
-                className="object-contain opacity-80"
-                priority
-              />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold tracking-tight">
-                Ready to raise funds ?
-              </h3>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // If user has startups, get them and redirect to the most recent one
-  const { data: startups, error } = await supabase.rpc('get_user_startups', {
-    p_user_id: user.id,
-  })
-
-  if (error) {
-    console.error('Error fetching startups:', error)
-    return <div>Error loading startups</div>
-  }
-
-  const startupsArray = startups as Array<{ id: string; name: string }>
-  if (startupsArray && startupsArray.length > 0) {
-    const mostRecentStartup = startupsArray[0]
-    redirect(`/dashboard/${mostRecentStartup.id}/home`)
-  }
-
-  // Fallback if no startups found
+  // Show a loading spinner while we wait for the redirect
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex flex-1 items-center justify-center rounded-sm border border-dashed shadow-sm">
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h3 className="text-2xl font-bold tracking-tight">
-            No startups found
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Something went wrong. Please try refreshing the page.
-          </p>
-        </div>
-      </div>
+    <div className="flex h-full w-full items-center justify-center">
+      <Spinner />
     </div>
   )
 }

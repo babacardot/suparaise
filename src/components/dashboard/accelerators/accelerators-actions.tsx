@@ -7,21 +7,32 @@ import { Separator } from '@/components/ui/separator'
 import { X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
-type Target = {
+type Accelerator = {
   id: string
   name: string
   website?: string
-  application_url: string
+  application_url?: string
   application_email?: string
   submission_type: 'form' | 'email' | 'other'
+  program_type?: 'in-person' | 'remote' | 'hybrid'
+  program_duration?: string
+  location?: string
+  is_remote_friendly?: boolean
+  batch_size?: string
+  batches_per_year?: number
+  next_application_deadline?: string
   stage_focus?: string[]
   industry_focus?: string[]
   region_focus?: string[]
+  equity_taken?: string
+  funding_provided?: string
+  acceptance_rate?: string
   form_complexity?: 'simple' | 'standard' | 'comprehensive'
-  question_count_range?: '1-5' | '6-10' | '11-20' | '21+'
   required_documents?: string[]
-  tags?: string[]
+  program_fee?: number
+  is_active?: boolean
   notes?: string
+  tags?: string[]
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
@@ -37,19 +48,19 @@ type Submission = {
   started_at?: string
 }
 
-type FundsActionsProps = {
-  target: Target | null
+type AcceleratorsActionsProps = {
+  accelerator: Accelerator | null
   submissions: Submission[]
   isOpen: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export default React.memo(function FundsActions({
-  target,
+export default React.memo(function AcceleratorsActions({
+  accelerator,
   submissions,
   isOpen,
   onOpenChange,
-}: FundsActionsProps) {
+}: AcceleratorsActionsProps) {
   const getSubmissionTypeColor = (type: string) => {
     switch (type) {
       case 'form':
@@ -113,7 +124,6 @@ export default React.memo(function FundsActions({
   }
 
   const getIndustryColor = (industry: string) => {
-    // Industries with a strong physical or hardware component
     if (
       [
         'Deep tech',
@@ -125,20 +135,16 @@ export default React.memo(function FundsActions({
     ) {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
     }
-    // Default blue for software/digital industries
     return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
   }
 
   const getRegionColor = (region: string) => {
-    // Global and Emerging Markets - Sky
     if (['Global', 'Emerging Markets'].includes(region)) {
       return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
     }
-    // North America - Green
     if (region === 'North America') {
       return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
     }
-    // Europe - Purple
     if (
       [
         'Europe',
@@ -149,25 +155,20 @@ export default React.memo(function FundsActions({
     ) {
       return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
     }
-    // Asia - Orange
     if (
       ['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)
     ) {
       return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
     }
-    // Latin America - Pink
     if (['LATAM', 'South America'].includes(region)) {
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
     }
-    // Africa, Middle East, and EMEA - Teal
     if (['Africa', 'Middle East', 'EMEA'].includes(region)) {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
     }
-    // Oceania - Cyan
     if (region === 'Oceania') {
       return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
     }
-    // Default
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
   }
 
@@ -214,7 +215,7 @@ export default React.memo(function FundsActions({
     return str.charAt(0).toUpperCase() + str.slice(1)
   }
 
-  if (!target) return null
+  if (!accelerator) return null
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -222,7 +223,7 @@ export default React.memo(function FundsActions({
         <Card className="border-0 shadow-none rounded-sm sm:rounded-sm h-full flex flex-col">
           <CardHeader className="sticky top-0 z-10 bg-background border-b px-4 -py-8 flex flex-row items-center justify-between flex-shrink-0">
             <SheetTitle className="text-base font-medium">
-              {target.name}
+              {accelerator.name}
             </SheetTitle>
             <button
               onMouseDown={() => onOpenChange(false)}
@@ -233,98 +234,108 @@ export default React.memo(function FundsActions({
           </CardHeader>
           <CardContent className="p-4 space-y-3 overflow-auto flex-1 text-xs">
             <div className="space-y-3 pl-4 pr-2 sm:px-0">
-              {/* Basic Info */}
               <div
                 className="flex items-center justify-between"
                 style={{ marginTop: '-15px' }}
               >
                 <span className="text-muted-foreground">Type</span>
                 <Badge
-                  className={`rounded-sm text-[10px] font-normal ${getSubmissionTypeColor(target.submission_type)}`}
+                  className={`rounded-sm text-[10px] font-normal ${getSubmissionTypeColor(accelerator.submission_type)}`}
                 >
-                  {capitalizeFirst(target.submission_type)}
+                  {capitalizeFirst(accelerator.submission_type)}
                 </Badge>
               </div>
 
-              {target.form_complexity && (
+              {accelerator.form_complexity && (
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Complexity</span>
                   <Badge
-                    className={`rounded-sm text-[10px] font-normal ${getComplexityColor(target.form_complexity)}`}
+                    className={`rounded-sm text-[10px] font-normal ${getComplexityColor(accelerator.form_complexity)}`}
                   >
-                    {capitalizeFirst(target.form_complexity)}
+                    {capitalizeFirst(accelerator.form_complexity)}
                   </Badge>
                 </div>
               )}
 
-              {target.notes && (
+              {accelerator.program_type && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Program Type</span>
+                  <Badge className={`rounded-sm text-[10px] font-normal`}>
+                    {capitalizeFirst(accelerator.program_type)}
+                  </Badge>
+                </div>
+              )}
+
+              {accelerator.notes && (
                 <div className="space-y-2">
                   <span className="text-muted-foreground">Description</span>
                   <p className="text-xs text-black dark:text-white pt-2">
-                    {target.notes}
+                    {accelerator.notes}
                   </p>
                 </div>
               )}
 
               <Separator />
 
-              {/* Focus Areas */}
-              {target.stage_focus && target.stage_focus.length > 0 && (
-                <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Focus</span>
-                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
-                    {target.stage_focus.map((stage) => (
-                      <Badge
-                        key={stage}
-                        className={`rounded-sm text-[10px] ${getStageColor(stage)}`}
-                      >
-                        {stage}
-                      </Badge>
-                    ))}
+              {accelerator.stage_focus &&
+                accelerator.stage_focus.length > 0 && (
+                  <div className="flex items-start justify-between">
+                    <span className="text-muted-foreground pt-1">Focus</span>
+                    <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
+                      {accelerator.stage_focus.map((stage) => (
+                        <Badge
+                          key={stage}
+                          className={`rounded-sm text-[10px] ${getStageColor(stage)}`}
+                        >
+                          {stage}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {target.industry_focus && target.industry_focus.length > 0 && (
-                <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Industry</span>
-                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
-                    {target.industry_focus.map((industry) => (
-                      <Badge
-                        key={industry}
-                        className={`rounded-sm text-[10px] ${getIndustryColor(industry)}`}
-                      >
-                        {industry}
-                      </Badge>
-                    ))}
+              {accelerator.industry_focus &&
+                accelerator.industry_focus.length > 0 && (
+                  <div className="flex items-start justify-between">
+                    <span className="text-muted-foreground pt-1">Industry</span>
+                    <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
+                      {accelerator.industry_focus.map((industry) => (
+                        <Badge
+                          key={industry}
+                          className={`rounded-sm text-[10px] ${getIndustryColor(industry)}`}
+                        >
+                          {industry}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {target.region_focus && target.region_focus.length > 0 && (
-                <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Region</span>
-                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
-                    {target.region_focus.map((region) => (
-                      <Badge
-                        key={region}
-                        className={`rounded-sm text-[10px] ${getRegionColor(region)}`}
-                      >
-                        {region}
-                      </Badge>
-                    ))}
+              {accelerator.region_focus &&
+                accelerator.region_focus.length > 0 && (
+                  <div className="flex items-start justify-between">
+                    <span className="text-muted-foreground pt-1">Region</span>
+                    <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
+                      {accelerator.region_focus.map((region) => (
+                        <Badge
+                          key={region}
+                          className={`rounded-sm text-[10px] ${getRegionColor(region)}`}
+                        >
+                          {region}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {target.required_documents &&
-                target.required_documents.length > 0 && (
+              {accelerator.required_documents &&
+                accelerator.required_documents.length > 0 && (
                   <div className="flex items-start justify-between">
                     <span className="text-muted-foreground pt-1">
                       Requirements
                     </span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
-                      {target.required_documents.map((doc) => (
+                      {accelerator.required_documents.map((doc) => (
                         <Badge
                           key={doc}
                           className={`rounded-sm text-[10px] ${getRequiredDocumentColor(doc)}`}
@@ -336,11 +347,29 @@ export default React.memo(function FundsActions({
                   </div>
                 )}
 
-              {target.tags && target.tags.length > 0 && (
+              {accelerator.equity_taken && (
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Equity</span>
+                  <Badge className={`rounded-sm text-[10px]`}>
+                    {accelerator.equity_taken}
+                  </Badge>
+                </div>
+              )}
+
+              {accelerator.funding_provided && (
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Funding</span>
+                  <Badge className={`rounded-sm text-[10px]`}>
+                    {accelerator.funding_provided}
+                  </Badge>
+                </div>
+              )}
+
+              {accelerator.tags && accelerator.tags.length > 0 && (
                 <div className="flex items-start justify-between">
                   <span className="text-muted-foreground pt-1">Tags</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
-                    {target.tags.map((tag) => (
+                    {accelerator.tags.map((tag) => (
                       <Badge
                         key={tag}
                         className={`rounded-sm text-[10px] ${getTagColor()}`}
@@ -354,7 +383,6 @@ export default React.memo(function FundsActions({
 
               <Separator />
 
-              {/* Submission History */}
               {submissions.length > 0 && (
                 <section>
                   <h3 className="text-sm font-medium mb-2">History</h3>

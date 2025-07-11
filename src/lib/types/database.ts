@@ -134,6 +134,7 @@ export type Database = {
             | null
           stage_focus: Database['public']['Enums']['investment_stage'][] | null
           submission_type: Database['public']['Enums']['submission_type'] | null
+          tags: string[] | null
           updated_at: string | null
           visibility_level: Database['public']['Enums']['permission_level']
           website: string | null
@@ -173,6 +174,7 @@ export type Database = {
           submission_type?:
             | Database['public']['Enums']['submission_type']
             | null
+          tags?: string[] | null
           updated_at?: string | null
           visibility_level?: Database['public']['Enums']['permission_level']
           website?: string | null
@@ -212,6 +214,7 @@ export type Database = {
           submission_type?:
             | Database['public']['Enums']['submission_type']
             | null
+          tags?: string[] | null
           updated_at?: string | null
           visibility_level?: Database['public']['Enums']['permission_level']
           website?: string | null
@@ -449,6 +452,7 @@ export type Database = {
           response_time: Database['public']['Enums']['response_time'] | null
           stage_focus: Database['public']['Enums']['investment_stage'][] | null
           submission_type: Database['public']['Enums']['submission_type'] | null
+          tags: string[] | null
           twitter: string | null
           updated_at: string | null
           visibility_level: Database['public']['Enums']['permission_level']
@@ -487,6 +491,7 @@ export type Database = {
           submission_type?:
             | Database['public']['Enums']['submission_type']
             | null
+          tags?: string[] | null
           twitter?: string | null
           updated_at?: string | null
           visibility_level?: Database['public']['Enums']['permission_level']
@@ -525,6 +530,7 @@ export type Database = {
           submission_type?:
             | Database['public']['Enums']['submission_type']
             | null
+          tags?: string[] | null
           twitter?: string | null
           updated_at?: string | null
           visibility_level?: Database['public']['Enums']['permission_level']
@@ -1281,6 +1287,7 @@ export type Database = {
             | null
           stage_focus: Database['public']['Enums']['investment_stage'][] | null
           submission_type: Database['public']['Enums']['submission_type'] | null
+          tags: string[] | null
           updated_at: string | null
           visibility_level: Database['public']['Enums']['permission_level']
           website: string | null
@@ -1307,6 +1314,7 @@ export type Database = {
           submission_type?:
             | Database['public']['Enums']['submission_type']
             | null
+          tags?: string[] | null
           updated_at?: string | null
           visibility_level?: Database['public']['Enums']['permission_level']
           website?: string | null
@@ -1333,6 +1341,7 @@ export type Database = {
           submission_type?:
             | Database['public']['Enums']['submission_type']
             | null
+          tags?: string[] | null
           updated_at?: string | null
           visibility_level?: Database['public']['Enums']['permission_level']
           website?: string | null
@@ -1426,6 +1435,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      check_size_sort_order: {
+        Args: {
+          check_size_val: Database['public']['Enums']['check_size_range']
+        }
+        Returns: number
+      }
       check_submission_limit: {
         Args: { p_user_id: string }
         Returns: Json
@@ -1477,6 +1492,27 @@ export type Database = {
         Args: { p_startup_id: string; p_limit?: number }
         Returns: Json
       }
+      get_accelerators_simple: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_sort_by?: string
+          p_sort_direction?: string
+          p_search?: string
+          p_submission_types?: string[]
+          p_stage_focus?: string[]
+          p_industry_focus?: string[]
+          p_region_focus?: string[]
+          p_required_documents?: string[]
+          p_program_types?: string[]
+          p_equity_ranges?: string[]
+          p_funding_ranges?: string[]
+          p_tags?: string[]
+          p_startup_id?: string
+          p_submission_filter?: string
+        }
+        Returns: Json
+      }
       get_all_submissions_detailed: {
         Args: {
           p_startup_id: string
@@ -1488,6 +1524,24 @@ export type Database = {
           p_type_filter?: string[]
           p_date_from?: string
           p_date_to?: string
+        }
+        Returns: Json
+      }
+      get_angels_simple: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_sort_by?: string
+          p_sort_direction?: string
+          p_search?: string
+          p_submission_types?: string[]
+          p_stage_focus?: string[]
+          p_industry_focus?: string[]
+          p_region_focus?: string[]
+          p_check_sizes?: string[]
+          p_investment_approaches?: string[]
+          p_startup_id?: string
+          p_submission_filter?: string
         }
         Returns: Json
       }
@@ -1583,9 +1637,14 @@ export type Database = {
           p_industry_focus?: string[]
           p_region_focus?: string[]
           p_required_documents?: string[]
+          p_tags?: string[]
           p_startup_id?: string
           p_submission_filter?: string
         }
+        Returns: Json
+      }
+      get_total_angel_applications_count: {
+        Args: { p_startup_id: string }
         Returns: Json
       }
       get_total_applications_count: {
