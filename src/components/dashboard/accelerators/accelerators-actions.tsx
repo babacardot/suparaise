@@ -176,6 +176,38 @@ export default React.memo(function AcceleratorsActions({
     return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
   }
 
+  const getEquityColor = (equity: string) => {
+    if (equity === '0%')
+      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+    if (equity === '1 — 3%')
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+    if (equity === '4 — 6%')
+      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+    if (equity === '7 — 10%')
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+    if (equity === '10% +')
+      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
+    if (equity === 'variable')
+      return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+  }
+
+  const getFundingColor = (funding: string) => {
+    if (funding === '0 — 25K')
+      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+    if (funding === '25K — 50K')
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+    if (funding === '50K — 100K')
+      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+    if (funding === '100K — 250K')
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+    if (funding === '250K — 500K')
+      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
+    if (funding === '500K +')
+      return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+  }
+
   const getRequiredDocumentColor = (doc: string) => {
     if (doc === 'pitch_deck')
       return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
@@ -259,7 +291,7 @@ export default React.memo(function AcceleratorsActions({
 
               {accelerator.program_type && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Program Type</span>
+                  <span className="text-muted-foreground">Category</span>
                   <Badge className={`rounded-sm text-[10px] font-normal`}>
                     {capitalizeFirst(accelerator.program_type)}
                   </Badge>
@@ -350,7 +382,9 @@ export default React.memo(function AcceleratorsActions({
               {accelerator.equity_taken && (
                 <div className="flex items-start justify-between">
                   <span className="text-muted-foreground pt-1">Equity</span>
-                  <Badge className={`rounded-sm text-[10px]`}>
+                  <Badge
+                    className={`rounded-sm text-[10px] ${getEquityColor(accelerator.equity_taken)}`}
+                  >
                     {accelerator.equity_taken}
                   </Badge>
                 </div>
@@ -359,7 +393,9 @@ export default React.memo(function AcceleratorsActions({
               {accelerator.funding_provided && (
                 <div className="flex items-start justify-between">
                   <span className="text-muted-foreground pt-1">Funding</span>
-                  <Badge className={`rounded-sm text-[10px]`}>
+                  <Badge
+                    className={`rounded-sm text-[10px] ${getFundingColor(accelerator.funding_provided)}`}
+                  >
                     {accelerator.funding_provided}
                   </Badge>
                 </div>

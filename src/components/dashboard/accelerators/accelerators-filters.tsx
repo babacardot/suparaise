@@ -116,19 +116,19 @@ const REQUIRED_DOCUMENTS = [
 const PROGRAM_TYPES = ['in-person', 'remote', 'hybrid'] as const
 const EQUITY_RANGES = [
   '0%',
-  '1-3%',
-  '4-6%',
-  '7-10%',
-  '10%+',
+  '1 — 3%',
+  '4 — 6%',
+  '7 — 10%',
+  '10% +',
   'variable',
 ] as const
 const FUNDING_RANGES = [
-  '0-25K',
-  '25K-50K',
-  '50K-100K',
-  '100K-250K',
-  '250K-500K',
-  '500K+',
+  '0 — 25K',
+  '25K — 50K',
+  '50K — 100K',
+  '100K — 250K',
+  '250K — 500K',
+  '500K +',
 ] as const
 
 const DEBOUNCE_DELAY = 1500
@@ -351,8 +351,33 @@ export default function AcceleratorsFilters({
         if (value === 'hybrid')
           return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
       }
-      if (filterKey === 'equityRanges' || filterKey === 'fundingRanges') {
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/40'
+      if (filterKey === 'equityRanges') {
+        if (value === '0%')
+          return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40'
+        if (value === '1 — 3%')
+          return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+        if (value === '4 — 6%')
+          return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
+        if (value === '7 — 10%')
+          return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+        if (value === '10% +')
+          return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
+        if (value === 'variable')
+          return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/40'
+      }
+      if (filterKey === 'fundingRanges') {
+        if (value === '0 — 25K')
+          return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40'
+        if (value === '25K — 50K')
+          return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+        if (value === '50K — 100K')
+          return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
+        if (value === '100K — 250K')
+          return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+        if (value === '250K — 500K')
+          return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
+        if (value === '500K +')
+          return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/40'
       }
       return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
     },
@@ -863,7 +888,7 @@ export default function AcceleratorsFilters({
           </div>
         )}
 
-        {/* Program Type Filter */}
+        {/* Category Filter */}
         {columnVisibility.programType && (
           <div className="w-full sm:w-40">
             <Popover>
@@ -895,7 +920,7 @@ export default function AcceleratorsFilters({
                       })
                     ) : (
                       <span className="text-muted-foreground text-sm">
-                        Program Type
+                        Category
                       </span>
                     )}
                   </div>
@@ -953,22 +978,14 @@ export default function AcceleratorsFilters({
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.equityRanges.length > 0 ? (
                       localFilters.equityRanges.slice(0, 2).map((range) => {
-                        const color =
-                          range === '0%'
-                            ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                            : range === '1-3%'
-                              ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                              : range === '4-6%'
-                                ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                                : range === '7-10%'
-                                  ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                  : range === '10%+'
-                                    ? 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
-                                    : 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+                        const rangeColor = getOptionColors(
+                          'equityRanges',
+                          range,
+                        ).split(' hover:')[0]
                         return (
                           <Badge
                             key={range}
-                            className={`mr-1 ${color} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                            className={`mr-1 ${rangeColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
                             style={{ pointerEvents: 'none' }}
                           >
                             {range}
@@ -977,8 +994,13 @@ export default function AcceleratorsFilters({
                       })
                     ) : (
                       <span className="text-muted-foreground text-sm">
-                        Equity Range
+                        Equity
                       </span>
+                    )}
+                    {localFilters.equityRanges.length > 2 && (
+                      <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                        +{localFilters.equityRanges.length - 2}
+                      </Badge>
                     )}
                   </div>
                   {localFilters.equityRanges.length > 0 ? (
@@ -1013,9 +1035,7 @@ export default function AcceleratorsFilters({
                   filterKey="equityRanges"
                   options={EQUITY_RANGES.map((range) => ({
                     value: range,
-                    label: range
-                      .replace(/-/g, ' ')
-                      .replace(/\b\w/g, (l) => l.toUpperCase()),
+                    label: range,
                   }))}
                 />
               </PopoverContent>
@@ -1035,22 +1055,14 @@ export default function AcceleratorsFilters({
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.fundingRanges.length > 0 ? (
                       localFilters.fundingRanges.slice(0, 2).map((range) => {
-                        const color =
-                          range === '0-25K'
-                            ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                            : range === '25K-50K'
-                              ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                              : range === '50K-100K'
-                                ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                                : range === '100K-250K'
-                                  ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                  : range === '250K-500K'
-                                    ? 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
-                                    : 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+                        const rangeColor = getOptionColors(
+                          'fundingRanges',
+                          range,
+                        ).split(' hover:')[0]
                         return (
                           <Badge
                             key={range}
-                            className={`mr-1 ${color} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                            className={`mr-1 ${rangeColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
                             style={{ pointerEvents: 'none' }}
                           >
                             {range}
@@ -1059,8 +1071,13 @@ export default function AcceleratorsFilters({
                       })
                     ) : (
                       <span className="text-muted-foreground text-sm">
-                        Funding Range
+                        Funding
                       </span>
+                    )}
+                    {localFilters.fundingRanges.length > 2 && (
+                      <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                        +{localFilters.fundingRanges.length - 2}
+                      </Badge>
                     )}
                   </div>
                   {localFilters.fundingRanges.length > 0 ? (
@@ -1095,9 +1112,7 @@ export default function AcceleratorsFilters({
                   filterKey="fundingRanges"
                   options={FUNDING_RANGES.map((range) => ({
                     value: range,
-                    label: range
-                      .replace(/-/g, ' ')
-                      .replace(/\b\w/g, (l) => l.toUpperCase()),
+                    label: range,
                   }))}
                 />
               </PopoverContent>
@@ -1143,7 +1158,9 @@ export default function AcceleratorsFilters({
                     }`}
                   >
                     <span className="text-sm font-medium capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                      {key === 'programType'
+                        ? 'Category'
+                        : key.replace(/([A-Z])/g, ' $1').trim()}
                     </span>
                   </div>
                 ))}

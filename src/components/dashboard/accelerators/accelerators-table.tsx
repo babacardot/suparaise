@@ -348,6 +348,38 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     return str.charAt(0).toUpperCase() + str.slice(1)
   }, [])
 
+  const getEquityColor = React.useCallback((equity: string) => {
+    if (equity === '0%')
+      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
+    if (equity === '1 — 3%')
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+    if (equity === '4 — 6%')
+      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+    if (equity === '7 — 10%')
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
+    if (equity === '10% +')
+      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
+    if (equity === 'variable')
+      return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
+  }, [])
+
+  const getFundingColor = React.useCallback((funding: string) => {
+    if (funding === '0 — 25K')
+      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
+    if (funding === '25K — 50K')
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+    if (funding === '50K — 100K')
+      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+    if (funding === '100K — 250K')
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
+    if (funding === '250K — 500K')
+      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
+    if (funding === '500K +')
+      return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
+  }, [])
+
   const handleApplyForm = React.useCallback(
     async (acceleratorId: string, acceleratorName: string) => {
       if (!user?.id) {
@@ -755,7 +787,9 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                         {columnVisibility.equity &&
                           accelerator.equity_taken && (
                             <TableCell className="p-2">
-                              <Badge className="rounded-sm bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs">
+                              <Badge
+                                className={`rounded-sm ${getEquityColor(accelerator.equity_taken)} text-xs`}
+                              >
                                 {accelerator.equity_taken}
                               </Badge>
                             </TableCell>
@@ -763,7 +797,9 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                         {columnVisibility.funding &&
                           accelerator.funding_provided && (
                             <TableCell className="p-2">
-                              <Badge className="rounded-sm bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 text-xs">
+                              <Badge
+                                className={`rounded-sm ${getFundingColor(accelerator.funding_provided)} text-xs`}
+                              >
                                 {accelerator.funding_provided}
                               </Badge>
                             </TableCell>

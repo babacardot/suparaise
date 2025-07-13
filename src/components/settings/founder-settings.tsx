@@ -908,7 +908,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-firstName` &&
-                        'dark:bg-muted',
+                          'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-firstName`}
                       placeholder="Enter first name"
@@ -948,7 +948,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-lastName` &&
-                        'dark:bg-muted',
+                          'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-lastName`}
                       placeholder="Enter last name"
@@ -987,7 +987,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-email` &&
-                        'dark:bg-muted',
+                          'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-email`}
                       placeholder="Enter email"
@@ -1163,7 +1163,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-linkedin` &&
-                          'dark:bg-muted',
+                            'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-linkedin`}
                         placeholder="https://linkedin.com/in/profile"
@@ -1207,7 +1207,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-githubUrl` &&
-                          'dark:bg-muted',
+                            'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-githubUrl`}
                         placeholder="https://github.com/username"
@@ -1253,7 +1253,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-personalWebsiteUrl` &&
-                          'dark:bg-muted',
+                            'dark:bg-muted',
                         )}
                         readOnly={
                           editingField !== `${founder.id}-personalWebsiteUrl`
@@ -1299,7 +1299,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-twitterUrl` &&
-                          'dark:bg-muted',
+                            'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-twitterUrl`}
                         placeholder="https://x.com/username"

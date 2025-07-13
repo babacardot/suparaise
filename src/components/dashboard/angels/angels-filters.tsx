@@ -101,15 +101,16 @@ const REGIONS = [
 ] as const
 
 const CHECK_SIZES = [
-  '1K-10K',
-  '10K-25K',
-  '25K-50K',
-  '50K-100K',
-  '100K-250K',
-  '250K-500K',
-  '500K-1M',
-  '1M+',
+  '1K — 10K',
+  '10K — 25K',
+  '25K — 50K',
+  '50K — 100K',
+  '100K — 250K',
+  '250K — 500K',
+  '500K — 1M',
+  '1M +',
 ] as const
+
 const INVESTMENT_APPROACHES = [
   'hands-on',
   'passive',
@@ -118,20 +119,6 @@ const INVESTMENT_APPROACHES = [
 ] as const
 
 const DEBOUNCE_DELAY = 1500
-
-type OptionWithLabel = { value: string; label: string; [key: string]: unknown }
-type FilterOption = string | OptionWithLabel
-
-const getOptionLabel = (
-  options: readonly FilterOption[],
-  value: string,
-): string => {
-  const option = options.find(
-    (o) => (typeof o === 'string' ? o : o.value) === value,
-  )
-  if (typeof option === 'string') return option
-  return option?.label ?? value
-}
 
 export default function AngelsFilters({
   filters,
@@ -157,31 +144,34 @@ export default function AngelsFilters({
 
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current)
+      debounceTimeoutRef.current = null
     }
 
     debounceTimeoutRef.current = setTimeout(() => {
       if (JSON.stringify(localFilters) !== JSON.stringify(filters)) {
         onFiltersChange(localFilters)
       }
+      debounceTimeoutRef.current = null
     }, DEBOUNCE_DELAY)
 
     return () => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current)
+        debounceTimeoutRef.current = null
       }
     }
   }, [localFilters, filters, onFiltersChange])
 
   const hasActiveFilters = useMemo(() => {
-    return (
-      (localFilters.search?.trim() ?? '').length > 0 ||
-      localFilters.submissionTypes.length > 0 ||
-      localFilters.stageFocus.length > 0 ||
-      localFilters.industryFocus.length > 0 ||
-      localFilters.regionFocus.length > 0 ||
-      localFilters.checkSizes.length > 0 ||
-      localFilters.investmentApproaches.length > 0
+    const searchCount = localFilters.search?.trim() ? 1 : 0
+    const arrayFiltersCount = Object.entries(localFilters).reduce(
+      (count, [key, value]) => {
+        if (key === 'search' || key === 'submissionFilter') return count
+        return count + (Array.isArray(value) ? value.length : 0)
+      },
+      0,
     )
+    return searchCount + arrayFiltersCount > 0
   }, [localFilters])
 
   const updateFilter = useCallback(
@@ -194,7 +184,10 @@ export default function AngelsFilters({
           ? [...currentValues, value]
           : currentValues.filter((v: string) => v !== value)
 
-        return { ...prevFilters, [filterKey]: newValues }
+        return {
+          ...prevFilters,
+          [filterKey]: newValues,
+        }
       })
     },
     [],
@@ -202,13 +195,23 @@ export default function AngelsFilters({
 
   const clearFilter = useCallback(
     (filterKey: keyof AngelsFilters, immediate = false) => {
-      const newFilters = {
-        ...localFilters,
-        [filterKey]: filterKey === 'search' ? '' : [],
+      let newFilters: AngelsFilters
+
+      if (filterKey === 'search') {
+        newFilters = { ...localFilters, [filterKey]: '' }
+      } else if (filterKey === 'submissionFilter') {
+        newFilters = { ...localFilters, [filterKey]: 'all' }
+      } else {
+        newFilters = { ...localFilters, [filterKey]: [] }
       }
+
       setLocalFilters(newFilters)
+
       if (immediate) {
-        if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current)
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current)
+          debounceTimeoutRef.current = null
+        }
         onFiltersChange(newFilters)
       }
     },
@@ -217,7 +220,10 @@ export default function AngelsFilters({
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLocalFilters((prev) => ({ ...prev, search: e.target.value }))
+      setLocalFilters((prevFilters) => ({
+        ...prevFilters,
+        search: e.target.value,
+      }))
     },
     [],
   )
@@ -227,7 +233,6 @@ export default function AngelsFilters({
   }, [clearFilter])
 
   const getStageColor = useCallback((stage: string) => {
-    // Colors from funds-filters
     switch (stage) {
       case 'All':
         return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900/40'
@@ -249,7 +254,6 @@ export default function AngelsFilters({
   }, [])
 
   const getIndustryColor = useCallback((industry: string) => {
-    // Colors from funds-filters
     if (
       [
         'Deep tech',
@@ -265,7 +269,6 @@ export default function AngelsFilters({
   }, [])
 
   const getRegionColor = useCallback((region: string) => {
-    // Colors from funds-filters
     if (['Global', 'Emerging Markets'].includes(region))
       return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40 border border-sky-200 dark:border-sky-800'
     if (region === 'North America')
@@ -312,6 +315,8 @@ export default function AngelsFilters({
     [getRegionColor, getStageColor, getIndustryColor],
   )
 
+  const scrollPositions = React.useRef<Record<string, number>>({})
+
   const FilterSection = React.memo(function FilterSection({
     filterKey,
     options,
@@ -323,11 +328,45 @@ export default function AngelsFilters({
   }) {
     const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
+    React.useLayoutEffect(() => {
+      if (scrollContainerRef.current && scrollPositions.current[filterKey]) {
+        scrollContainerRef.current.scrollTop =
+          scrollPositions.current[filterKey]
+      }
+    })
+
+    const handleScroll = () => {
+      if (scrollContainerRef.current) {
+        scrollPositions.current[filterKey] =
+          scrollContainerRef.current.scrollTop
+      }
+    }
+
+    const handleOptionClick = useCallback(
+      (optionValue: string, isSelected: boolean, e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        if (scrollContainerRef.current) {
+          scrollPositions.current[filterKey] =
+            scrollContainerRef.current.scrollTop
+        }
+
+        updateFilter(filterKey, optionValue, !isSelected)
+      },
+      [filterKey],
+    )
+
     return (
       <div className="p-2">
         <div
           ref={scrollContainerRef}
-          className="space-y-1 max-h-48 overflow-y-auto hide-scrollbar"
+          onScroll={handleScroll}
+          className="space-y-1 max-h-48 overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
         >
           {options.map((option) => {
             const isSelected = Array.isArray(localFilters[filterKey])
@@ -338,11 +377,11 @@ export default function AngelsFilters({
             return (
               <div
                 key={option.value}
-                onClick={(e) => {
-                  e.preventDefault()
-                  updateFilter(filterKey, option.value, !isSelected)
-                }}
-                className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${isSelected ? colors : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'}`}
+                onClick={(e) => handleOptionClick(option.value, isSelected, e)}
+                className={`
+                  flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
+                  ${isSelected ? colors : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'}
+                `}
               >
                 {hasIcon && option.animation && (
                   <LottieIcon
@@ -360,90 +399,21 @@ export default function AngelsFilters({
     )
   })
 
-  const FilterButton = ({
-    filterKey,
-    label,
-    options,
-    PopoverContentComponent,
-    widthClass = 'sm:w-40',
-  }: {
-    filterKey: keyof AngelsFilters
-    label: string
-    options: readonly FilterOption[]
-    PopoverContentComponent: React.FC
-    widthClass?: string
-  }) => (
-    <div className={`w-full ${widthClass}`}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
-          >
-            <div className="flex items-center space-x-2 truncate">
-              {localFilters[filterKey] &&
-              (localFilters[filterKey] as string[]).length > 0 ? (
-                (localFilters[filterKey] as string[])
-                  .slice(0, 2)
-                  .map((item) => (
-                    <Badge
-                      key={item}
-                      className={`mr-1 ${getOptionColors(filterKey, item).split(' hover:')[0]} rounded-sm transition-none`}
-                      style={{ pointerEvents: 'none' }}
-                    >
-                      {getOptionLabel(options, item)}
-                    </Badge>
-                  ))
-              ) : (
-                <span className="text-muted-foreground text-sm">{label}</span>
-              )}
-              {(localFilters[filterKey] as string[]).length > 2 && (
-                <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
-                  +{(localFilters[filterKey] as string[]).length - 2}
-                </Badge>
-              )}
-            </div>
-            {(localFilters[filterKey] as string[]).length > 0 ? (
-              <div
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  clearFilter(filterKey, true)
-                }}
-                className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
-              >
-                <LottieIcon
-                  animationData={animations.cross}
-                  size={16}
-                  className="opacity-50 hover:opacity-100"
-                />
-              </div>
-            ) : (
-              <LottieIcon
-                animationData={animations.arrowDown}
-                size={16}
-                className="ml-2 shrink-0 opacity-50 hover:opacity-100"
-              />
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className={`p-0 bg-card text-card-foreground rounded-sm ${widthClass.replace('sm:', 'w-')}`}
-          align="start"
-        >
-          <PopoverContentComponent />
-        </PopoverContent>
-      </Popover>
-    </div>
-  )
-
   return (
     <div
       className="w-[calc(100%+2rem)] -ml-4 sm:ml-0 sm:w-full px-4 pt-2 pb-4"
+      style={{
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+        msUserSelect: 'none',
+        WebkitTouchCallout: 'none',
+      }}
       onCopy={(e: React.ClipboardEvent) => e.preventDefault()}
       onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
     >
       <div className="flex flex-wrap items-center gap-4">
+        {/* Search Input */}
         <div className="w-full sm:w-48">
           <div className="relative">
             <LottieIcon
@@ -474,89 +444,468 @@ export default function AngelsFilters({
           </div>
         </div>
 
+        {/* Region Filter */}
         {columnVisibility.region && (
-          <FilterButton
-            filterKey="regionFocus"
-            label="Region"
-            options={REGIONS}
-            PopoverContentComponent={() => (
-              <FilterSection
-                filterKey="regionFocus"
-                options={REGIONS.map((r) => ({ value: r, label: r }))}
-              />
-            )}
-          />
-        )}
-        {columnVisibility.focus && (
-          <FilterButton
-            filterKey="stageFocus"
-            label="Focus"
-            options={INVESTMENT_STAGES}
-            PopoverContentComponent={() => (
-              <FilterSection
-                filterKey="stageFocus"
-                options={INVESTMENT_STAGES.map((s) => ({ value: s, label: s }))}
-              />
-            )}
-          />
-        )}
-        {columnVisibility.industry && (
-          <FilterButton
-            filterKey="industryFocus"
-            label="Industry"
-            options={INDUSTRIES}
-            PopoverContentComponent={() => (
-              <FilterSection
-                filterKey="industryFocus"
-                options={INDUSTRIES.map((i) => ({ value: i, label: i }))}
-              />
-            )}
-          />
-        )}
-        {columnVisibility.check_size && (
-          <FilterButton
-            filterKey="checkSizes"
-            label="Check Size"
-            options={CHECK_SIZES}
-            PopoverContentComponent={() => (
-              <FilterSection
-                filterKey="checkSizes"
-                options={CHECK_SIZES.map((c) => ({ value: c, label: c }))}
-              />
-            )}
-          />
-        )}
-        {columnVisibility.investment_approach && (
-          <FilterButton
-            filterKey="investmentApproaches"
-            label="Approach"
-            options={INVESTMENT_APPROACHES}
-            PopoverContentComponent={() => (
-              <FilterSection
-                filterKey="investmentApproaches"
-                options={INVESTMENT_APPROACHES.map((a) => ({
-                  value: a,
-                  label:
-                    a.charAt(0).toUpperCase() + a.slice(1).replace('-', ' '),
-                }))}
-              />
-            )}
-          />
-        )}
-        {columnVisibility.type && (
-          <FilterButton
-            filterKey="submissionTypes"
-            label="Type"
-            options={SUBMISSION_TYPES}
-            PopoverContentComponent={() => (
-              <FilterSection
-                filterKey="submissionTypes"
-                options={[...SUBMISSION_TYPES]}
-              />
-            )}
-          />
+          <div className="w-full sm:w-40">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    {localFilters.regionFocus.length > 0 ? (
+                      localFilters.regionFocus.slice(0, 2).map((region) => {
+                        const regionColor =
+                          getRegionColor(region).split(' hover:')[0]
+                        return (
+                          <Badge
+                            key={region}
+                            className={`mr-1 ${regionColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            {region}
+                          </Badge>
+                        )
+                      })
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Region
+                      </span>
+                    )}
+                    {localFilters.regionFocus.length > 2 && (
+                      <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                        +{localFilters.regionFocus.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                  {localFilters.regionFocus.length > 0 ? (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearFilter('regionFocus', true)
+                      }}
+                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                    >
+                      <LottieIcon
+                        animationData={animations.cross}
+                        size={16}
+                        className="opacity-50 hover:opacity-100"
+                      />
+                    </div>
+                  ) : (
+                    <LottieIcon
+                      animationData={animations.arrowDown}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
+                    />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+                align="start"
+              >
+                <FilterSection
+                  filterKey="regionFocus"
+                  options={REGIONS.map((region) => ({
+                    value: region,
+                    label: region,
+                  }))}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         )}
 
+        {/* Focus Filter */}
+        {columnVisibility.focus && (
+          <div className="w-full sm:w-40">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    {localFilters.stageFocus.length > 0 ? (
+                      localFilters.stageFocus.slice(0, 2).map((stage) => {
+                        const stageColor =
+                          getStageColor(stage).split(' hover:')[0]
+                        return (
+                          <Badge
+                            key={stage}
+                            className={`mr-1 ${stageColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            {stage}
+                          </Badge>
+                        )
+                      })
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Focus
+                      </span>
+                    )}
+                    {localFilters.stageFocus.length > 2 && (
+                      <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                        +{localFilters.stageFocus.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                  {localFilters.stageFocus.length > 0 ? (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearFilter('stageFocus', true)
+                      }}
+                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                    >
+                      <LottieIcon
+                        animationData={animations.cross}
+                        size={16}
+                        className="opacity-50 hover:opacity-100"
+                      />
+                    </div>
+                  ) : (
+                    <LottieIcon
+                      animationData={animations.arrowDown}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
+                    />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+                align="start"
+              >
+                <FilterSection
+                  filterKey="stageFocus"
+                  options={INVESTMENT_STAGES.map((stage) => ({
+                    value: stage,
+                    label: stage,
+                  }))}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
+
+        {/* Industry Filter */}
+        {columnVisibility.industry && (
+          <div className="w-full sm:w-40">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    {localFilters.industryFocus.length > 0 ? (
+                      localFilters.industryFocus.slice(0, 2).map((industry) => {
+                        const industryColor =
+                          getIndustryColor(industry).split(' hover:')[0]
+                        return (
+                          <Badge
+                            key={industry}
+                            className={`mr-1 ${industryColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            {industry}
+                          </Badge>
+                        )
+                      })
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Industry
+                      </span>
+                    )}
+                    {localFilters.industryFocus.length > 2 && (
+                      <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                        +{localFilters.industryFocus.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                  {localFilters.industryFocus.length > 0 ? (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearFilter('industryFocus', true)
+                      }}
+                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                    >
+                      <LottieIcon
+                        animationData={animations.cross}
+                        size={16}
+                        className="opacity-50 hover:opacity-100"
+                      />
+                    </div>
+                  ) : (
+                    <LottieIcon
+                      animationData={animations.arrowDown}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
+                    />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+                align="start"
+              >
+                <FilterSection
+                  filterKey="industryFocus"
+                  options={INDUSTRIES.map((industry) => ({
+                    value: industry,
+                    label: industry,
+                  }))}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
+
+        {/* Check Size Filter */}
+        {columnVisibility.check_size && (
+          <div className="w-full sm:w-40">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    {localFilters.checkSizes.length > 0 ? (
+                      localFilters.checkSizes.slice(0, 2).map((size) => {
+                        const sizeColor = getOptionColors(
+                          'checkSizes',
+                          size,
+                        ).split(' hover:')[0]
+                        return (
+                          <Badge
+                            key={size}
+                            className={`mr-1 ${sizeColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            {size}
+                          </Badge>
+                        )
+                      })
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Check Size
+                      </span>
+                    )}
+                    {localFilters.checkSizes.length > 2 && (
+                      <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                        +{localFilters.checkSizes.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                  {localFilters.checkSizes.length > 0 ? (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearFilter('checkSizes', true)
+                      }}
+                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                    >
+                      <LottieIcon
+                        animationData={animations.cross}
+                        size={16}
+                        className="opacity-50 hover:opacity-100"
+                      />
+                    </div>
+                  ) : (
+                    <LottieIcon
+                      animationData={animations.arrowDown}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
+                    />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+                align="start"
+              >
+                <FilterSection
+                  filterKey="checkSizes"
+                  options={CHECK_SIZES.map((size) => ({
+                    value: size,
+                    label: size,
+                  }))}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
+
+        {/* Investment Approach Filter */}
+        {columnVisibility.investment_approach && (
+          <div className="w-full sm:w-40">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    {localFilters.investmentApproaches.length > 0 ? (
+                      localFilters.investmentApproaches
+                        .slice(0, 2)
+                        .map((approach) => {
+                          const approachColor = getOptionColors(
+                            'investmentApproaches',
+                            approach,
+                          ).split(' hover:')[0]
+                          const approachLabel =
+                            approach.charAt(0).toUpperCase() +
+                            approach.slice(1).replace('-', ' ')
+                          return (
+                            <Badge
+                              key={approach}
+                              className={`mr-1 ${approachColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                              style={{ pointerEvents: 'none' }}
+                            >
+                              {approachLabel}
+                            </Badge>
+                          )
+                        })
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Approach
+                      </span>
+                    )}
+                    {localFilters.investmentApproaches.length > 2 && (
+                      <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                        +{localFilters.investmentApproaches.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                  {localFilters.investmentApproaches.length > 0 ? (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearFilter('investmentApproaches', true)
+                      }}
+                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                    >
+                      <LottieIcon
+                        animationData={animations.cross}
+                        size={16}
+                        className="opacity-50 hover:opacity-100"
+                      />
+                    </div>
+                  ) : (
+                    <LottieIcon
+                      animationData={animations.arrowDown}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
+                    />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+                align="start"
+              >
+                <FilterSection
+                  filterKey="investmentApproaches"
+                  options={INVESTMENT_APPROACHES.map((approach) => ({
+                    value: approach,
+                    label:
+                      approach.charAt(0).toUpperCase() +
+                      approach.slice(1).replace('-', ' '),
+                  }))}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
+
+        {/* Type Filter */}
+        {columnVisibility.type && (
+          <div className="w-full sm:w-40">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    {localFilters.submissionTypes.length > 0 ? (
+                      localFilters.submissionTypes.map((type) => {
+                        const typeOption = SUBMISSION_TYPES.find(
+                          (t) => t.value === type,
+                        )
+                        const color =
+                          type === 'form'
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                            : type === 'email'
+                              ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                              : 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
+                        return (
+                          <Badge
+                            key={type}
+                            className={`mr-1 ${color} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            {typeOption?.label}
+                          </Badge>
+                        )
+                      })
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Type
+                      </span>
+                    )}
+                  </div>
+                  {localFilters.submissionTypes.length > 0 ? (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearFilter('submissionTypes', true)
+                      }}
+                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                    >
+                      <LottieIcon
+                        animationData={animations.cross}
+                        size={16}
+                        className="opacity-50 hover:opacity-100"
+                      />
+                    </div>
+                  ) : (
+                    <LottieIcon
+                      animationData={animations.arrowDown}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
+                    />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+                align="start"
+              >
+                <FilterSection
+                  filterKey="submissionTypes"
+                  options={[...SUBMISSION_TYPES]}
+                  hasIcon={false}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
+
+        {/* Column visibility toggle */}
         <div className="w-full sm:w-auto">
           <Popover>
             <PopoverTrigger asChild>
@@ -588,7 +937,9 @@ export default function AngelsFilters({
                     className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${visible ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'}`}
                   >
                     <span className="text-sm font-medium capitalize">
-                      {key.replace(/_/g, ' ')}
+                      {key === 'investment_approach'
+                        ? 'Approach'
+                        : key.replace(/_/g, ' ')}
                     </span>
                   </div>
                 ))}
@@ -597,6 +948,7 @@ export default function AngelsFilters({
           </Popover>
         </div>
 
+        {/* Submission Filter Toggle */}
         {totalSubmissions > 0 && (
           <div className="w-full sm:w-auto">
             <Button
@@ -645,6 +997,7 @@ export default function AngelsFilters({
           </div>
         )}
 
+        {/* Clear filters button */}
         {hasActiveFilters && (
           <div className="w-full sm:w-auto">
             <Button

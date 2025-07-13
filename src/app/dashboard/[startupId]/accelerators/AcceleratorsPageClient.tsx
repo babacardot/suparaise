@@ -132,11 +132,11 @@ export default function AcceleratorsPageClient({
       }
       return {
         region: true,
-        focus: true,
+        focus: false,
         industry: true,
-        requirements: true,
+        requirements: false,
         type: false,
-        programType: true,
+        programType: false,
         equity: true,
         funding: true,
       }

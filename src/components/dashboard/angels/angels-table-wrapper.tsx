@@ -16,14 +16,14 @@ type Angel = {
   location?: string
   bio?: string
   check_size?:
-    | '1K-10K'
-    | '10K-25K'
-    | '25K-50K'
-    | '50K-100K'
-    | '100K-250K'
-    | '250K-500K'
-    | '500K-1M'
-    | '1M+'
+    | '1K — 10K'
+    | '10K — 25K'
+    | '25K — 50K'
+    | '50K — 100K'
+    | '100K — 250K'
+    | '250K — 500K'
+    | '500K — 1M'
+    | '1M +'
   stage_focus?: string[]
   industry_focus?: string[]
   region_focus?: string[]
