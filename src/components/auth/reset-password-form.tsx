@@ -108,8 +108,7 @@ export function ResetPasswordForm({
         <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col items-center text-center gap-4">
-              <Spinner className="h-6 w-6" />
-              <p className="text-muted-foreground">Validating reset link...</p>
+              <Spinner className="h-3 w-3 mr-2" />
             </div>
           </CardContent>
         </Card>

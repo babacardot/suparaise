@@ -370,7 +370,7 @@ export default function BillingSettings() {
                     disabled={isPortalLoading}
                     className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-6 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
                   >
-                    {isPortalLoading && <Spinner className="h-4 w-4 mr-2" />}
+                    {isPortalLoading && <Spinner className="h-3 w-3 mr-2" />}
                     {isPortalLoading ? 'Opening...' : 'Manage Billing'}
                   </Button>
                 </div>

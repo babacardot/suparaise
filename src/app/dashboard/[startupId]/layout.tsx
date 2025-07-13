@@ -42,7 +42,7 @@ export default function StartupLayout({ children }: StartupLayoutProps) {
   if (loading && !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner className="h-5 w-5" />
+        <Spinner className="h-3 w-3" />
       </div>
     )
   }
@@ -52,7 +52,7 @@ export default function StartupLayout({ children }: StartupLayoutProps) {
     router.push('/login')
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner className="h-5 w-5" />
+        <Spinner className="h-3 w-3" />
       </div>
     )
   }
@@ -61,7 +61,7 @@ export default function StartupLayout({ children }: StartupLayoutProps) {
   if (startupsLoading || !startupsInitialized) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner className="h-5 w-5" />
+        <Spinner className="h-3 w-3" />
       </div>
     )
   }

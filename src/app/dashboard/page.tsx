@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/lib/contexts/user-context'
-import Spinner from '@/components/ui/spinner'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -38,10 +37,4 @@ export default function DashboardPage() {
     startupsInitialized,
   ])
 
-  // Show a loading spinner while we wait for the redirect
-  return (
-    <div className="flex h-full w-full items-center justify-center">
-      <Spinner />
-    </div>
-  )
 }

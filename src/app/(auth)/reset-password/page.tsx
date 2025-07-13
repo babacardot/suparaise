@@ -9,7 +9,7 @@ export default function ResetPasswordPage() {
       fallback={
         <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-20 pt-20">
           <div className="text-center">
-            <Spinner className="h-5 w-5" />
+            <Spinner className="h-3 w-3" />
           </div>
         </div>
       }

@@ -19,14 +19,14 @@ type Angel = {
   location?: string
   bio?: string
   check_size?:
-    | '1K-10K'
-    | '10K-25K'
-    | '25K-50K'
-    | '50K-100K'
-    | '100K-250K'
-    | '250K-500K'
-    | '500K-1M'
-    | '1M+'
+  | '1K-10K'
+  | '10K-25K'
+  | '25K-50K'
+  | '50K-100K'
+  | '100K-250K'
+  | '250K-500K'
+  | '500K-1M'
+  | '1M+'
   stage_focus?: string[]
   industry_focus?: string[]
   region_focus?: string[]
@@ -306,8 +306,8 @@ export default React.memo(function AngelsActions({
             </div>
 
             {(angel.notable_investments?.length || 0) > 0 ||
-            (angel.previous_exits?.length || 0) > 0 ||
-            (angel.domain_expertise?.length || 0) > 0 ? (
+              (angel.previous_exits?.length || 0) > 0 ||
+              (angel.domain_expertise?.length || 0) > 0 ? (
               <>
                 <Separator className="my-3" />
                 <div className="space-y-3 pl-4 pr-2 sm:px-0">
@@ -375,7 +375,7 @@ export default React.memo(function AngelsActions({
               <div className="text-muted-foreground">History</div>
               {loading ? (
                 <div className="flex justify-center items-center py-4">
-                  <Spinner />
+                  <Spinner className="h-3 w-3" />
                 </div>
               ) : submissions.length > 0 ? (
                 <ul className="space-y-2">

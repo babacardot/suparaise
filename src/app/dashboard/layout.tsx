@@ -163,7 +163,7 @@ export default function DashboardLayout({
   if (loading && !user && !signingOut) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner className="h-5 w-5" />
+        <Spinner className="h-3 w-3" />
       </div>
     )
   }
@@ -171,7 +171,7 @@ export default function DashboardLayout({
   if (signingOut) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner className="h-5 w-5" />
+        <Spinner className="h-3 w-3" />
       </div>
     )
   }
@@ -181,7 +181,7 @@ export default function DashboardLayout({
     // Brief delay to allow for quick authentication checks without showing spinner
     return (
       <div className="flex min-h-screen items-center justify-center opacity-0">
-        <Spinner className="h-5 w-5" />
+        <Spinner className="h-3 w-3" />
       </div>
     )
   }
@@ -195,12 +195,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-                name: user.user_metadata?.full_name || user.email || '',
-                email: user.email || '',
-                avatar: user.user_metadata?.avatar_url,
-                startupName: currentStartup?.name || undefined,
-                startupLogo: currentStartup?.logo_url || undefined,
-              }
+              name: user.user_metadata?.full_name || user.email || '',
+              email: user.email || '',
+              avatar: user.user_metadata?.avatar_url,
+              startupName: currentStartup?.name || undefined,
+              startupLogo: currentStartup?.logo_url || undefined,
+            }
             : null
         }
         startups={startups}
