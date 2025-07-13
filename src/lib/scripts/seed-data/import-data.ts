@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 import { parseExcel } from './utils/sheet-utils'
 import { upsertBatch, testConnection } from './utils/db-utils'
-import { TargetRecord, AngelRecord, AcceleratorRecord } from './utils/sheet-utils'
+import {
+  TargetRecord,
+  AngelRecord,
+  AcceleratorRecord,
+} from './utils/sheet-utils'
 
 // Type definitions for our data
 type TableName = 'targets' | 'angels' | 'accelerators'
@@ -12,7 +16,7 @@ interface ImportOptions {
   file: string
   batchSize?: number
   dryRun?: boolean
-  conflictColumn: string;
+  conflictColumn: string
 }
 
 // Main import function
@@ -36,12 +40,19 @@ async function importData(options: ImportOptions) {
 
   // Parse and validate Excel file
   console.log(`📖 Parsing and validating Excel file...`)
-  const { data, errors } = await parseExcel<TransformedRecord>(options.file, options.table)
+  const { data, errors } = await parseExcel<TransformedRecord>(
+    options.file,
+    options.table,
+  )
 
   if (errors.length > 0) {
     console.error(`❌ Validation errors found in the Excel file:`)
-    errors.forEach((e) => console.error(`  - Row ${e.row}, Field "${e.field}": ${e.message}`))
-    console.error(`\n❌ Found ${errors.length} validation errors. Please fix your data before importing.`)
+    errors.forEach((e) =>
+      console.error(`  - Row ${e.row}, Field "${e.field}": ${e.message}`),
+    )
+    console.error(
+      `\n❌ Found ${errors.length} validation errors. Please fix your data before importing.`,
+    )
     return
   }
 
@@ -109,7 +120,7 @@ function parseArguments(): ImportOptions | null {
         break
       case '--conflict-column':
         options.conflictColumn = args[++i]
-        break;
+        break
       case '--help':
         printHelp()
         return null
@@ -122,12 +133,12 @@ function parseArguments(): ImportOptions | null {
 
   // Set default conflict columns based on table
   if (options.table && !options.conflictColumn) {
-      const defaultConflictColumns: Record<TableName, string> = {
-          targets: 'name',
-          accelerators: 'name',
-          angels: 'email',
-      };
-      options.conflictColumn = defaultConflictColumns[options.table];
+    const defaultConflictColumns: Record<TableName, string> = {
+      targets: 'name',
+      accelerators: 'name',
+      angels: 'email',
+    }
+    options.conflictColumn = defaultConflictColumns[options.table]
   }
 
   // Validate required arguments

@@ -160,7 +160,7 @@ CREATE TABLE angels (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
-    email TEXT,
+    email TEXT UNIQUE,
     linkedin TEXT,
     twitter TEXT,
     personal_website TEXT,

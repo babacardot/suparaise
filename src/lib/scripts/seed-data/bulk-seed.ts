@@ -6,7 +6,7 @@ import ExcelJS from 'exceljs'
 
 // Helper function to write data to an Excel file
 async function writeExcel(
-  data: Array<Record<string, string | number | boolean | null>>,
+  data: Array<Record<string, string | number | boolean | null | Date>>,
   filePath: string,
 ): Promise<void> {
   if (data.length === 0) {
@@ -226,8 +226,11 @@ function generateFakeUrl(name: string): string {
 }
 
 // Generate VC/Fund data using exact enum values
-function generateTargetsData(count: number): Array<Record<string, string>> {
-  const data: Array<Record<string, string>> = []
+function generateTargetsData(
+  count: number,
+): Array<Record<string, string | number | boolean | null | Date>> {
+  const data: Array<Record<string, string | number | boolean | null | Date>> =
+    []
   const usedNames = new Set<string>()
 
   // Define visibility level distribution for 500 targets: 150 FREE, 250 PRO, 100 MAX
@@ -265,7 +268,7 @@ function generateTargetsData(count: number): Array<Record<string, string>> {
       application_url: `${website}/apply`,
       application_email: randomBoolean()
         ? `apply@${website.replace('https://', '')}`
-        : '',
+        : null,
       submission_type: randomChoice([...ENUM_VALUES.submission_type]),
       stage_focus: randomChoices(EARLY_STAGES, 2).join(','),
       industry_focus: randomChoices(TECH_INDUSTRIES, 3).join(','),
@@ -277,7 +280,7 @@ function generateTargetsData(count: number): Array<Record<string, string>> {
         2,
       ).join(','),
       tags: randomChoices(SAMPLE_TAGS, 3).join(','),
-      notes: randomBoolean() ? 'Generated sample data for testing' : '',
+      notes: randomBoolean() ? 'Generated sample data for testing' : null,
       visibility_level: getVisibilityLevel(i),
     })
   }
@@ -286,8 +289,11 @@ function generateTargetsData(count: number): Array<Record<string, string>> {
 }
 
 // Generate Angel data using exact enum values
-function generateAngelsData(count: number): Array<Record<string, string>> {
-  const data: Array<Record<string, string>> = []
+function generateAngelsData(
+  count: number,
+): Array<Record<string, string | number | boolean | null | Date>> {
+  const data: Array<Record<string, string | number | boolean | null | Date>> =
+    []
   const usedNames = new Set<string>()
 
   for (let i = 0; i < count; i++) {
@@ -312,12 +318,14 @@ function generateAngelsData(count: number): Array<Record<string, string>> {
       linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}${lastName.toLowerCase()}`,
       twitter: randomBoolean()
         ? `https://twitter.com/${firstName.toLowerCase()}_${lastName.toLowerCase()}`
-        : '',
+        : null,
       personal_website: randomBoolean()
         ? generateFakeUrl(`${firstName}${lastName}`)
-        : '',
+        : null,
       location: randomChoice(COMMON_LOCATIONS),
-      bio: `Experienced investor and former founder with expertise in ${randomChoice(TECH_INDUSTRIES)}`,
+      bio: `Experienced investor and former founder with expertise in ${randomChoice(
+        TECH_INDUSTRIES,
+      )}`,
       check_size: randomChoice(ENUM_VALUES.check_size_range.slice(0, 5)), // Focus on smaller check sizes
       stage_focus: randomChoices(EARLY_STAGES, 2).join(','),
       industry_focus: randomChoices(TECH_INDUSTRIES, 2).join(','),
@@ -330,13 +338,13 @@ function generateAngelsData(count: number): Array<Record<string, string>> {
       ).join(','),
       response_time: randomChoice(ENUM_VALUES.response_time.slice(0, 4)), // Exclude '2+ months'
       submission_type: 'email',
-      application_url: '',
+      application_url: null,
       application_email: email,
       form_complexity: 'simple',
       required_documents: 'pitch_deck',
       tags: randomChoices(SAMPLE_TAGS, 2).join(','),
       notable_investments: `BigCorp ${i + 1},TechStart ${i + 2}`,
-      is_active: 'true',
+      is_active: true,
       notes: 'Generated sample data for testing',
       visibility_level: i < 30 ? 'FREE' : i < 70 ? 'PRO' : 'MAX', // 30 FREE, 40 PRO, 30 MAX for 100 angels
     })
@@ -348,8 +356,9 @@ function generateAngelsData(count: number): Array<Record<string, string>> {
 // Generate Accelerator data using exact enum values
 function generateAcceleratorsData(
   count: number,
-): Array<Record<string, string>> {
-  const data: Array<Record<string, string>> = []
+): Array<Record<string, string | number | boolean | null | Date>> {
+  const data: Array<Record<string, string | number | boolean | null | Date>> =
+    []
   const usedNames = new Set<string>()
 
   for (let i = 0; i < count; i++) {
@@ -383,10 +392,10 @@ function generateAcceleratorsData(
       program_type: randomChoice([...ENUM_VALUES.program_type]),
       program_duration: randomChoice(ENUM_VALUES.program_duration.slice(0, 3)), // 3,6,12 months only
       location: randomChoice(COMMON_LOCATIONS),
-      is_remote_friendly: randomBoolean().toString(),
+      is_remote_friendly: randomBoolean(),
       batch_size: randomChoice(ENUM_VALUES.batch_size.slice(0, 3)), // Smaller batch sizes
-      batches_per_year: randomChoice(['1', '2', '3', '4']),
-      next_application_deadline: '2024-12-31',
+      batches_per_year: parseInt(randomChoice(['1', '2', '3', '4'])),
+      next_application_deadline: new Date('2024-12-31'),
       stage_focus: randomChoices(EARLY_STAGES.slice(0, 3), 2).join(','), // Focus on Pre-seed, Seed, Series A
       industry_focus: randomChoices(TECH_INDUSTRIES, 3).join(','),
       region_focus: randomChoices(COMMON_REGIONS, 1).join(','),
@@ -398,10 +407,8 @@ function generateAcceleratorsData(
         [...ENUM_VALUES.required_document_type],
         2,
       ).join(','),
-      program_fee: randomBoolean()
-        ? '0'
-        : Math.floor(Math.random() * 10000).toString(),
-      is_active: 'true',
+      program_fee: randomBoolean() ? 0 : Math.floor(Math.random() * 10000),
+      is_active: true,
       tags: randomChoices(SAMPLE_TAGS, 3).join(','),
       notes: 'Generated sample data for testing',
       visibility_level: i < 30 ? 'FREE' : i < 70 ? 'PRO' : 'MAX', // 30 FREE, 40 PRO, 30 MAX for 100 accelerators
@@ -435,7 +442,7 @@ async function bulkSeed() {
     const count = counts[table] || DEFAULT_COUNTS[table] || 100
     console.log(`\n🔄 Generating ${count} ${table} records...`)
 
-    let data: Array<Record<string, string>>
+    let data: Array<Record<string, string | number | boolean | null | Date>>
     switch (table) {
       case 'targets':
         data = generateTargetsData(count)
@@ -462,7 +469,9 @@ async function bulkSeed() {
       const headers = Object.keys(data[0]).join(',')
       const rows = data.map((row) =>
         Object.values(row)
-          .map((val) => `"${String(val).replace(/"/g, '""')}"`)
+          .map((val) =>
+            val === null ? '' : `"${String(val).replace(/"/g, '""')}"`,
+          )
           .join(','),
       )
       fs.writeFileSync(filePath, [headers, ...rows].join('\n'))
@@ -537,7 +546,9 @@ function parseArguments() {
 
   // Validate table names
   for (const table of result.tables) {
-    if (!DEFAULT_TABLES.includes(table as 'targets' | 'angels' | 'accelerators')) {
+    if (
+      !DEFAULT_TABLES.includes(table as 'targets' | 'angels' | 'accelerators')
+    ) {
       console.error(`❌ Invalid table: ${table}`)
       console.error(`Valid tables: ${DEFAULT_TABLES.join(', ')}`)
       return null

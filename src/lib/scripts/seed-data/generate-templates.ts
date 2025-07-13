@@ -23,7 +23,9 @@ function generateAllTemplates() {
   console.log('\n✅ All templates generated successfully!')
   console.log('\nNext steps:')
   console.log('1. Open the Excel template files and fill in your data')
-  console.log('2. Use the `bun run seed` command to load the data into Supabase')
+  console.log(
+    '2. Use the `bun run seed` command to load the data into Supabase',
+  )
 
   console.log('\nTemplate files created:')
   tables.forEach((table) => {

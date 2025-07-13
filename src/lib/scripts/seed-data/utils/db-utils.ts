@@ -69,40 +69,48 @@ export async function upsertBatch(
   conflictColumn: string,
   batchSize: number = 500, // Smaller batch size for upserts
 ): Promise<{ success: number; errors: string[] }> {
-    const client = createDbClient();
-    let successCount = 0;
-    const errors: string[] = [];
+  const client = createDbClient()
+  let successCount = 0
+  const errors: string[] = []
 
-    console.log(`Starting batch upsert for ${tableName} with ${data.length} records on conflict column "${conflictColumn}"`);
+  console.log(
+    `Starting batch upsert for ${tableName} with ${data.length} records on conflict column "${conflictColumn}"`,
+  )
 
-    for (let i = 0; i < data.length; i += batchSize) {
-        const batch = data.slice(i, i + batchSize);
-        const batchNumber = Math.floor(i / batchSize) + 1;
-        const totalBatches = Math.ceil(data.length / batchSize);
+  for (let i = 0; i < data.length; i += batchSize) {
+    const batch = data.slice(i, i + batchSize)
+    const batchNumber = Math.floor(i / batchSize) + 1
+    const totalBatches = Math.ceil(data.length / batchSize)
 
-        console.log(`Processing batch ${batchNumber}/${totalBatches} (${batch.length} records)...`);
+    console.log(
+      `Processing batch ${batchNumber}/${totalBatches} (${batch.length} records)...`,
+    )
 
-        try {
-            const { error, count } = await client
-                .from(tableName)
-                .upsert(batch, { onConflict: conflictColumn, defaultToNull: false })
-                
-            if (error) {
-                const errorMsg = `Batch ${batchNumber} failed: ${error.message}`;
-                errors.push(errorMsg);
-                console.error(`❌ ${errorMsg}`);
-            } else {
-                successCount += count || 0;
-                console.log(`✅ Batch ${batchNumber}/${totalBatches} upserted successfully (${count} records)`);
-            }
-        } catch (err) {
-            const errorMsg = `Batch ${batchNumber} failed: ${err instanceof Error ? err.message : 'Unknown error'}`;
-            errors.push(errorMsg);
-            console.error(`❌ ${errorMsg}`);
-        }
+    try {
+      const { error, data } = await client
+        .from(tableName)
+        .upsert(batch, { onConflict: conflictColumn, defaultToNull: false })
+        .select()
+
+      if (error) {
+        const errorMsg = `Batch ${batchNumber} failed: ${error.message}`
+        errors.push(errorMsg)
+        console.error(`❌ ${errorMsg}`)
+      } else {
+        const recordCount = data?.length || 0
+        successCount += recordCount
+        console.log(
+          `✅ Batch ${batchNumber}/${totalBatches} upserted successfully (${recordCount} records)`,
+        )
+      }
+    } catch (err) {
+      const errorMsg = `Batch ${batchNumber} failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+      errors.push(errorMsg)
+      console.error(`❌ ${errorMsg}`)
     }
+  }
 
-    return { success: successCount, errors };
+  return { success: successCount, errors }
 }
 
 // Use enum values directly from the generated database types (now always in sync!)
