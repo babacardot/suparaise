@@ -808,86 +808,6 @@ export default function AcceleratorsFilters({
           </div>
         )}
 
-        {/* Requirements Filter */}
-        {columnVisibility.requirements && (
-          <div className="w-full sm:w-40">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
-                >
-                  <div className="flex items-center space-x-2 truncate">
-                    {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
-                      localFilters.requiredDocuments.slice(0, 2).map((doc) => {
-                        const docOption = REQUIRED_DOCUMENTS.find(
-                          (d) => d.value === doc,
-                        )
-                        const docColor = getOptionColors(
-                          'requiredDocuments',
-                          doc,
-                        ).split(' hover:')[0] // Remove hover classes for display
-                        return (
-                          <Badge
-                            key={doc}
-                            className={`mr-1 ${docColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
-                            style={{ pointerEvents: 'none' }}
-                          >
-                            {docOption?.label}
-                          </Badge>
-                        )
-                      })
-                    ) : (
-                      <span className="text-muted-foreground text-sm">
-                        Requirements
-                      </span>
-                    )}
-                    {localFilters.requiredDocuments &&
-                      localFilters.requiredDocuments.length > 2 && (
-                        <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
-                          +{localFilters.requiredDocuments.length - 2}
-                        </Badge>
-                      )}
-                  </div>
-                  {localFilters.requiredDocuments &&
-                  localFilters.requiredDocuments.length > 0 ? (
-                    <div
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        clearFilter('requiredDocuments', true)
-                      }}
-                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
-                    >
-                      <LottieIcon
-                        animationData={animations.cross}
-                        size={16}
-                        className="opacity-50 hover:opacity-100"
-                      />
-                    </div>
-                  ) : (
-                    <LottieIcon
-                      animationData={animations.arrowDown}
-                      size={16}
-                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
-                    />
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
-                align="start"
-              >
-                <FilterSection
-                  filterKey="requiredDocuments"
-                  options={[...REQUIRED_DOCUMENTS]}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        )}
-
         {/* Category Filter */}
         {columnVisibility.programType && (
           <div className="w-full sm:w-40">
@@ -1114,6 +1034,86 @@ export default function AcceleratorsFilters({
                     value: range,
                     label: range,
                   }))}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
+
+        {/* Requirements Filter */}
+        {columnVisibility.requirements && (
+          <div className="w-full sm:w-40">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    {localFilters.requiredDocuments &&
+                    localFilters.requiredDocuments.length > 0 ? (
+                      localFilters.requiredDocuments.slice(0, 2).map((doc) => {
+                        const docOption = REQUIRED_DOCUMENTS.find(
+                          (d) => d.value === doc,
+                        )
+                        const docColor = getOptionColors(
+                          'requiredDocuments',
+                          doc,
+                        ).split(' hover:')[0] // Remove hover classes for display
+                        return (
+                          <Badge
+                            key={doc}
+                            className={`mr-1 ${docColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            {docOption?.label}
+                          </Badge>
+                        )
+                      })
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Requirements
+                      </span>
+                    )}
+                    {localFilters.requiredDocuments &&
+                      localFilters.requiredDocuments.length > 2 && (
+                        <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                          +{localFilters.requiredDocuments.length - 2}
+                        </Badge>
+                      )}
+                  </div>
+                  {localFilters.requiredDocuments &&
+                  localFilters.requiredDocuments.length > 0 ? (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearFilter('requiredDocuments', true)
+                      }}
+                      className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                    >
+                      <LottieIcon
+                        animationData={animations.cross}
+                        size={16}
+                        className="opacity-50 hover:opacity-100"
+                      />
+                    </div>
+                  ) : (
+                    <LottieIcon
+                      animationData={animations.arrowDown}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50 hover:opacity-100"
+                    />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+                align="start"
+              >
+                <FilterSection
+                  filterKey="requiredDocuments"
+                  options={[...REQUIRED_DOCUMENTS]}
                 />
               </PopoverContent>
             </Popover>
