@@ -42,19 +42,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-        title: 'Welcome to suparaise.com',
-        subtitle:
-          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-        image: '/random/onboarding.svg',
-        statusText: 'Onboarding',
-      }
+      title: 'Welcome to suparaise.com',
+      subtitle:
+        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+      image: '/random/onboarding.svg',
+      statusText: 'Onboarding',
+    }
     : {
-        title: 'Ready to launch another venture ?',
-        subtitle:
-          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-        image: '/random/test_your_app.svg',
-        statusText: 'New venture',
-      }
+      title: 'Ready to launch another venture ?',
+      subtitle:
+        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+      image: '/random/test_your_app.svg',
+      statusText: 'New venture',
+    }
 
   return (
     <motion.div
@@ -359,7 +359,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-                founder.email.trim().toLowerCase(),
+              founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -371,7 +371,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-              (user?.email || '').toLowerCase()
+            (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -708,7 +708,7 @@ export function OnboardingDialog({
         ),
       }
 
-      const { data: newStartup, error } = await supabase.rpc(
+      const { data, error } = await supabase.rpc(
         'create_startup_and_founders',
         {
           p_data: submissionData as unknown as Json,
@@ -716,6 +716,8 @@ export function OnboardingDialog({
       )
 
       if (error) throw error
+
+      const newStartup = data as { id: string } | null
 
       // Refresh startups in context and navigate to new startup
       await refreshStartups()
@@ -772,7 +774,7 @@ export function OnboardingDialog({
       const companyName = generateRandomCompanyName()
 
       // Use the dedicated skip function with the generated name
-      const { data: newStartup, error } = await supabase.rpc(
+      const { data, error } = await supabase.rpc(
         'create_minimal_startup_for_skip',
         {
           p_user_id: userId,
@@ -781,6 +783,8 @@ export function OnboardingDialog({
       )
 
       if (error) throw error
+
+      const newStartup = data as { id: string } | null
 
       // Refresh startups in context and navigate to new startup
       await refreshStartups()

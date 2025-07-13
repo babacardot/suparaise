@@ -31,6 +31,42 @@ export type Founder = {
   personal_website_url: Tables<'founders'>['personal_website_url']
 }
 
+// Company settings form data type that aligns with the database schema
+export type CompanySettingsData = {
+  name: Tables<'startups'>['name']
+  website: Tables<'startups'>['website']
+  industry: Tables<'startups'>['industry']
+  location: Tables<'startups'>['location']
+  descriptionShort: Tables<'startups'>['description_short']
+  descriptionMedium: Tables<'startups'>['description_medium']
+  descriptionLong: Tables<'startups'>['description_long']
+  fundingRound: Tables<'startups'>['funding_round']
+  legalStructure: Tables<'startups'>['legal_structure']
+  employeeCount: Tables<'startups'>['employee_count']
+  foundedYear: Tables<'startups'>['founded_year']
+  revenueModel: Tables<'startups'>['revenue_model']
+  currentRunway: Tables<'startups'>['current_runway']
+  keyCustomers: Tables<'startups'>['key_customers']
+  competitors: Tables<'startups'>['competitors']
+  logoUrl: Tables<'startups'>['logo_url']
+  isIncorporated: Tables<'startups'>['is_incorporated']
+  incorporationCountry: Tables<'startups'>['incorporation_country']
+  incorporationCity: Tables<'startups'>['incorporation_city']
+  operatingCountries: Tables<'startups'>['operating_countries']
+  investmentInstrument: Tables<'startups'>['investment_instrument']
+  fundingAmountSought: Tables<'startups'>['funding_amount_sought']
+  preMoneyValuation: Tables<'startups'>['pre_money_valuation']
+  mrr: Tables<'startups'>['mrr']
+  arr: Tables<'startups'>['arr']
+  tractionSummary: Tables<'startups'>['traction_summary']
+  marketSummary: Tables<'startups'>['market_summary']
+  pitchDeckUrl: Tables<'startups'>['pitch_deck_url']
+  introVideoUrl: Tables<'startups'>['intro_video_url']
+  financialProjectionsUrl: Tables<'startups'>['financial_projections_url']
+  businessPlanUrl: Tables<'startups'>['business_plan_url']
+  googleDriveUrl: Tables<'startups'>['google_drive_url']
+}
+
 // We define its shape here so that TypeScript understands the object we get
 // back from Supabase, preventing runtime errors.
 export type Startup = {

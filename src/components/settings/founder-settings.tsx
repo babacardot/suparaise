@@ -37,6 +37,18 @@ import {
   FounderRole,
 } from '@/components/onboarding/onboarding-types'
 
+type RpcError = { error: string }
+type FounderResponse = Founder[] | RpcError
+type UpdateFounderResponse =
+  | { success: boolean; founderId: string; message: string }
+  | RpcError
+type AddFounderResponse =
+  | { success: boolean; founderId: string; message: string }
+  | RpcError
+type RemoveFounderResponse =
+  | { success: boolean; founderId: string; message: string }
+  | RpcError
+
 // Sound utility functions
 const playSound = (soundFile: string) => {
   try {
@@ -220,8 +232,10 @@ export default function ProfileSettings() {
 
         if (error) throw error
 
-        if (data && Array.isArray(data)) {
-          setFounders(data)
+        const foundersData = data as FounderResponse
+
+        if (foundersData && !('error' in foundersData)) {
+          setFounders(foundersData)
         } else {
           // Fallback: create initial founder from user metadata
           const fallbackFounder: Founder = {
@@ -358,9 +372,10 @@ export default function ProfileSettings() {
       })
 
       if (error) throw error
+      const result = data as UpdateFounderResponse
 
-      if (data?.error) {
-        throw new Error(data.error)
+      if (result && 'error' in result) {
+        throw new Error(result.error)
       }
 
       // If this is the main founder (first in list) and we're updating name fields,
@@ -584,9 +599,10 @@ export default function ProfileSettings() {
       })
 
       if (error) throw error
+      const result = data as AddFounderResponse
 
-      if (data?.error) {
-        throw new Error(data.error)
+      if (result && 'error' in result) {
+        throw new Error(result.error)
       }
 
       // Refresh founders list
@@ -599,7 +615,10 @@ export default function ProfileSettings() {
       )
 
       if (!fetchError && foundersData) {
-        setFounders(foundersData)
+        const newFoundersList = foundersData as FounderResponse
+        if (newFoundersList && !('error' in newFoundersList)) {
+          setFounders(newFoundersList)
+        }
       }
 
       // Reset form and hide add section
@@ -653,9 +672,10 @@ export default function ProfileSettings() {
       })
 
       if (error) throw error
+      const result = data as RemoveFounderResponse
 
-      if (data?.error) {
-        throw new Error(data.error)
+      if (result && 'error' in result) {
+        throw new Error(result.error)
       }
 
       // Remove from local state
@@ -888,7 +908,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-firstName` &&
-                          'dark:bg-muted',
+                        'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-firstName`}
                       placeholder="Enter first name"
@@ -928,7 +948,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-lastName` &&
-                          'dark:bg-muted',
+                        'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-lastName`}
                       placeholder="Enter last name"
@@ -967,7 +987,7 @@ export default function ProfileSettings() {
                       className={cn(
                         'rounded-sm pr-8',
                         editingField !== `${founder.id}-email` &&
-                          'dark:bg-muted',
+                        'dark:bg-muted',
                       )}
                       readOnly={editingField !== `${founder.id}-email`}
                       placeholder="Enter email"
@@ -1143,7 +1163,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-linkedin` &&
-                            'dark:bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-linkedin`}
                         placeholder="https://linkedin.com/in/profile"
@@ -1187,7 +1207,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-githubUrl` &&
-                            'dark:bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-githubUrl`}
                         placeholder="https://github.com/username"
@@ -1233,7 +1253,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-personalWebsiteUrl` &&
-                            'dark:bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={
                           editingField !== `${founder.id}-personalWebsiteUrl`
@@ -1279,7 +1299,7 @@ export default function ProfileSettings() {
                         className={cn(
                           'rounded-sm pr-8',
                           editingField !== `${founder.id}-twitterUrl` &&
-                            'dark:bg-muted',
+                          'dark:bg-muted',
                         )}
                         readOnly={editingField !== `${founder.id}-twitterUrl`}
                         placeholder="https://x.com/username"

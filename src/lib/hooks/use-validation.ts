@@ -3,6 +3,15 @@ import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 import type { ValidationRequirements } from '@/components/ui/validation-gate'
 
+// Basic types for validation purposes
+type FounderData = {
+  [key: string]: unknown
+}
+
+type StartupData = {
+  [key: string]: unknown
+}
+
 interface UseValidationOptions {
   requirements: ValidationRequirements
   autoCheck?: boolean
@@ -135,7 +144,10 @@ export function useValidation({
         settingsPage: 'profile' | 'company'
       }> = []
 
-      const founder = founderData?.[0] // Get the first founder (main user)
+      const founders = founderData as FounderData[]
+      const startup = startupData as StartupData
+
+      const founder = founders?.[0] // Get the first founder (main user)
 
       // Check founder requirements
       if (requirements.founder) {
@@ -162,7 +174,7 @@ export function useValidation({
       if (requirements.company) {
         Object.entries(requirements.company).forEach(([field, required]) => {
           if (required) {
-            const value = startupData?.[field]
+            const value = startup?.[field]
 
             if (isFieldEmpty(value)) {
               const fieldInfo = FIELD_LABELS[field]
@@ -183,7 +195,7 @@ export function useValidation({
       if (requirements.financial) {
         Object.entries(requirements.financial).forEach(([field, required]) => {
           if (required) {
-            const value = startupData?.[field]
+            const value = startup?.[field]
 
             if (isFieldEmpty(value)) {
               const fieldInfo = FIELD_LABELS[field]
@@ -204,7 +216,7 @@ export function useValidation({
       if (requirements.documents) {
         Object.entries(requirements.documents).forEach(([field, required]) => {
           if (required) {
-            const value = startupData?.[field]
+            const value = startup?.[field]
 
             if (isFieldEmpty(value)) {
               const fieldInfo = FIELD_LABELS[field]

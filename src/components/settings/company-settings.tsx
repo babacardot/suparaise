@@ -32,6 +32,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import Spinner from '@/components/ui/spinner'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
+import { CompanySettingsData } from '@/lib/types'
 
 // Import industry constants from onboarding types
 import {
@@ -378,9 +379,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -501,6 +501,16 @@ const CompetitorInput: React.FC<{
   )
 }
 
+type RpcError = { error: string }
+type StartupDataResponse = CompanySettingsData | RpcError
+type UpdateStartupResponse =
+  | { success: boolean; startupId: string; message: string }
+  | RpcError
+type SoftDeleteResponse =
+  | { success: boolean; startupId: string; message: string }
+  | RpcError
+type SoftDeleteUserResponse = { success: boolean } | RpcError
+
 export default function CompanySettings() {
   const { user, supabase, currentStartupId, startups, refreshStartups } =
     useUser()
@@ -529,7 +539,7 @@ export default function CompanySettings() {
     currentRunway: 0,
     keyCustomers: '',
     competitors: '',
-    competitorsList: [],
+    competitorsList: [] as string[],
     logoUrl: null as string | null,
     isIncorporated: false,
     incorporationCountry: '',
@@ -575,47 +585,56 @@ export default function CompanySettings() {
 
         if (error) throw error
 
-        if (data && Object.keys(data).length > 0 && !data.error) {
+        const startupData = data as StartupDataResponse
+
+        if (startupData && 'error' in startupData && startupData.error) {
+          throw new Error(startupData.error)
+        }
+
+        if (startupData && !('error' in startupData)) {
           setFormData({
-            name: data.name || '',
-            website: data.website || '',
-            industry: data.industry || null,
-            location: data.location || '',
-            descriptionShort: data.descriptionShort || '',
-            descriptionMedium: data.descriptionMedium || '',
-            descriptionLong: data.descriptionLong || '',
-            fundingRound: data.fundingRound || null,
-            legalStructure: data.legalStructure || null,
-            employeeCount: data.employeeCount || 0,
-            foundedYear: data.foundedYear || new Date().getFullYear(),
-            revenueModel: data.revenueModel || null,
-            currentRunway: data.currentRunway || 0,
-            keyCustomers: data.keyCustomers || '',
-            competitors: data.competitors || '',
-            competitorsList: data.competitors
-              ? data.competitors.split(', ').filter(Boolean)
+            name: startupData.name || '',
+            website: startupData.website || '',
+            industry: startupData.industry || null,
+            location: startupData.location || '',
+            descriptionShort: startupData.descriptionShort || '',
+            descriptionMedium: startupData.descriptionMedium || '',
+            descriptionLong: startupData.descriptionLong || '',
+            fundingRound: startupData.fundingRound || null,
+            legalStructure: startupData.legalStructure || null,
+            employeeCount: startupData.employeeCount || 0,
+            foundedYear: startupData.foundedYear || new Date().getFullYear(),
+            revenueModel: startupData.revenueModel || null,
+            currentRunway: startupData.currentRunway || 0,
+            keyCustomers: startupData.keyCustomers || '',
+            competitors: startupData.competitors || '',
+            competitorsList: startupData.competitors
+              ? startupData.competitors.split(', ').filter(Boolean)
               : [],
-            logoUrl: data.logoUrl || null,
-            isIncorporated: data.isIncorporated || false,
-            incorporationCountry: data.incorporationCountry || '',
-            incorporationCity: data.incorporationCity || '',
-            operatingCountries: Array.isArray(data.operatingCountries)
-              ? data.operatingCountries
-              : typeof data.operatingCountries === 'string'
-                ? data.operatingCountries.split(',').filter(Boolean)
+            logoUrl: startupData.logoUrl || null,
+            isIncorporated: startupData.isIncorporated || false,
+            incorporationCountry: startupData.incorporationCountry || '',
+            incorporationCity: startupData.incorporationCity || '',
+            operatingCountries: Array.isArray(startupData.operatingCountries)
+              ? startupData.operatingCountries
+              : typeof startupData.operatingCountries === 'string'
+                ? (startupData.operatingCountries as string)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
-            investmentInstrument: data.investmentInstrument || null,
-            fundingAmountSought: data.fundingAmountSought || 0,
-            preMoneyValuation: data.preMoneyValuation || 0,
-            mrr: data.mrr || 0,
-            arr: data.arr || 0,
-            tractionSummary: data.tractionSummary || '',
-            marketSummary: data.marketSummary || '',
-            pitchDeckUrl: data.pitchDeckUrl || null,
-            introVideoUrl: data.introVideoUrl || null,
-            financialProjectionsUrl: data.financialProjectionsUrl || null,
-            businessPlanUrl: data.businessPlanUrl || null,
-            googleDriveUrl: data.googleDriveUrl || '',
+            investmentInstrument: startupData.investmentInstrument || null,
+            fundingAmountSought: startupData.fundingAmountSought || 0,
+            preMoneyValuation: startupData.preMoneyValuation || 0,
+            mrr: startupData.mrr || 0,
+            arr: startupData.arr || 0,
+            tractionSummary: startupData.tractionSummary || '',
+            marketSummary: startupData.marketSummary || '',
+            pitchDeckUrl: startupData.pitchDeckUrl || null,
+            introVideoUrl: startupData.introVideoUrl || null,
+            financialProjectionsUrl:
+              startupData.financialProjectionsUrl || null,
+            businessPlanUrl: startupData.businessPlanUrl || null,
+            googleDriveUrl: startupData.googleDriveUrl || '',
           })
         }
       } catch (error) {
@@ -724,9 +743,10 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
+      const result = data as UpdateStartupResponse
 
-      if (data?.error) {
-        throw new Error(data.error)
+      if (result && 'error' in result) {
+        throw new Error(result.error)
       }
 
       // If updating company name, refresh startups data so startup-switcher reflects the change
@@ -822,9 +842,10 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
+      const result = data as UpdateStartupResponse
 
-      if (data?.error) {
-        throw new Error(data.error)
+      if (result && 'error' in result) {
+        throw new Error(result.error)
       }
 
       void data // Used for error checking above
@@ -867,9 +888,10 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
+      const result = data as UpdateStartupResponse
 
-      if (data?.error) {
-        throw new Error(data.error)
+      if (result && 'error' in result) {
+        throw new Error(result.error)
       }
 
       // Clean up the logo file from storage
@@ -924,7 +946,8 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      const result = data as SoftDeleteResponse
+      if (result && 'error' in result) throw new Error(result.error)
 
       playCompletionSound()
       toast({
@@ -973,9 +996,10 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
+      const result = data as SoftDeleteUserResponse
 
-      if (data?.error) {
-        throw new Error(data.error)
+      if (result && 'error' in result) {
+        throw new Error(result.error)
       }
 
       playCompletionSound()
@@ -1057,7 +1081,8 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      const result = data as UpdateStartupResponse
+      if (result && 'error' in result) throw new Error(result.error)
 
       setFormData((prev) => ({ ...prev, pitchDeckUrl: publicUrl }))
 
@@ -1135,7 +1160,8 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      const result = data as UpdateStartupResponse
+      if (result && 'error' in result) throw new Error(result.error)
 
       setFormData((prev) => ({ ...prev, introVideoUrl: publicUrl }))
 
@@ -1217,7 +1243,8 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      const result = data as UpdateStartupResponse
+      if (result && 'error' in result) throw new Error(result.error)
 
       setFormData((prev) => ({ ...prev, financialProjectionsUrl: publicUrl }))
 
@@ -1301,7 +1328,8 @@ export default function CompanySettings() {
       })
 
       if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      const result = data as UpdateStartupResponse
+      if (result && 'error' in result) throw new Error(result.error)
 
       setFormData((prev) => ({ ...prev, businessPlanUrl: publicUrl }))
 
@@ -1882,6 +1910,7 @@ export default function CompanySettings() {
                     // Save both fields
                     await handleFieldSave('legalStructure')
                     if (formData.isIncorporated !== !isNotIncorporated) {
+                      if (!currentStartupId) return
                       try {
                         const { data, error } = await supabase.rpc(
                           'update_user_startup_data',
@@ -1892,7 +1921,9 @@ export default function CompanySettings() {
                           },
                         )
                         if (error) throw error
-                        if (data?.error) throw new Error(data.error)
+                        const result = data as UpdateStartupResponse
+                        if (result && 'error' in result)
+                          throw new Error(result.error)
                       } catch (error) {
                         console.error(
                           'Error saving incorporation status:',
@@ -2028,6 +2059,7 @@ export default function CompanySettings() {
                 <button
                   onClick={async () => {
                     if (formData.isIncorporated) {
+                      if (!currentStartupId) return
                       playClickSound()
                       handleInputChange('isIncorporated', false)
                       handleInputChange(
@@ -2048,7 +2080,9 @@ export default function CompanySettings() {
                           },
                         )
                         if (error) throw error
-                        if (data?.error) throw new Error(data.error)
+                        const result = data as UpdateStartupResponse
+                        if (result && 'error' in result)
+                          throw new Error(result.error)
                       } catch (error) {
                         console.error(
                           'Error saving incorporation status:',
@@ -2076,6 +2110,7 @@ export default function CompanySettings() {
                 <button
                   onClick={async () => {
                     if (!formData.isIncorporated) {
+                      if (!currentStartupId) return
                       playClickSound()
                       handleInputChange('isIncorporated', true)
                       handleInputChange('legalStructure', null)
@@ -2093,7 +2128,9 @@ export default function CompanySettings() {
                           },
                         )
                         if (error) throw error
-                        if (data?.error) throw new Error(data.error)
+                        const result = data as UpdateStartupResponse
+                        if (result && 'error' in result)
+                          throw new Error(result.error)
                       } catch (error) {
                         console.error(
                           'Error saving incorporation status:',
@@ -2957,7 +2994,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {
