@@ -55,6 +55,7 @@
     "dotenv": "^16.6.1",
     "framer-motion": "^12.23.3",
     "lottie-react": "^2.4.1",
+    "lru-cache": "^11.1.0",
     "lucide-react": "^0.522.0",
     "motion": "^12.23.3",
     "next": "15.3.4",

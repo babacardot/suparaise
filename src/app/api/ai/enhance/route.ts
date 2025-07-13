@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { LRUCache } from 'lru-cache'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+})
+
+// In-memory cache for enhancement responses
+const cache = new LRUCache<string, string>({
+  max: 500, // Maximum number of items to store
+  ttl: 1000 * 60 * 60, // Cache items for 1 hour
 })
 
 interface EnhanceRequest {
@@ -172,6 +179,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 })
     }
 
+    // Generate a cache key from the request payload
+    const cacheKey = JSON.stringify({
+      text,
+      fieldType,
+      context,
+      enhancementType,
+    })
+
+    // Return cached response if available
+    if (cache.has(cacheKey)) {
+      return NextResponse.json({
+        enhancedText: cache.get(cacheKey),
+        source: 'cache',
+      })
+    }
+
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
         { error: 'API key not configured' },
@@ -197,6 +220,11 @@ export async function POST(req: NextRequest) {
       response.content[0].type === 'text'
         ? response.content[0].text.trim()
         : text
+
+    // Store the successful response in the cache
+    if (enhancedText) {
+      cache.set(cacheKey, enhancedText)
+    }
 
     return NextResponse.json({ enhancedText })
   } catch (error) {

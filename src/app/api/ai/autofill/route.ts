@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { LRUCache } from 'lru-cache'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+})
+
+// In-memory cache for scraped website content
+const scrapeCache = new LRUCache<string, string>({
+  max: 100, // Maximum number of websites to cache
+  ttl: 1000 * 60 * 60 * 24, // Cache items for 24 hours
 })
 
 interface WebsiteAutofillRequest {
@@ -27,9 +34,14 @@ const scrapeWebsite = async (url: string): Promise<string> => {
     // Normalize URL
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
 
+    // Return cached content if available
+    if (scrapeCache.has(normalizedUrl)) {
+      return scrapeCache.get(normalizedUrl) as string
+    }
+
     // Create AbortController for timeout
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
     const response = await fetch(normalizedUrl, {
       headers: {
@@ -235,8 +247,12 @@ const scrapeWebsite = async (url: string): Promise<string> => {
       throw new Error('Website content too short after processing')
     }
 
-    // Limit content to avoid token limits but keep more content
-    return textContent.substring(0, 15000) // Increased from 12000 to 15000
+    const result = textContent.substring(0, 15000) // Increased from 12000 to 15000
+    // Cache the scraped content on success
+    if (result) {
+      scrapeCache.set(normalizedUrl, result)
+    }
+    return result
   } catch (error) {
     console.error('Website scraping error:', error)
 
