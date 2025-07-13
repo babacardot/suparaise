@@ -1,11 +1,42 @@
 #!/usr/bin/env bun
-import { writeCSV, writeExcel } from './utils/csv-utils'
 import { ENUM_VALUES } from './utils/db-utils'
 import path from 'path'
 import fs from 'fs'
+import ExcelJS from 'exceljs'
+
+// Helper function to write data to an Excel file
+async function writeExcel(
+  data: Array<Record<string, string | number | boolean | null>>,
+  filePath: string,
+): Promise<void> {
+  if (data.length === 0) {
+    console.log('No data to write.')
+    return
+  }
+
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Sheet 1')
+
+  // Define columns from the keys of the first object
+  worksheet.columns = Object.keys(data[0]).map((key) => ({
+    header: key,
+    key: key,
+    width: 20, // Default width
+  }))
+
+  // Add rows
+  worksheet.addRows(data)
+
+  // Write file
+  await workbook.xlsx.writeFile(filePath)
+}
 
 // Default configuration
-const DEFAULT_TABLES = ['targets', 'angels', 'accelerators']
+const DEFAULT_TABLES: ('targets' | 'angels' | 'accelerators')[] = [
+  'targets',
+  'angels',
+  'accelerators',
+]
 const DEFAULT_COUNTS: Record<string, number> = {
   targets: 500,
   angels: 100,
@@ -131,6 +162,20 @@ const ACCELERATOR_NAMES = [
   'Barclays Accelerator',
 ]
 
+const SAMPLE_TAGS = [
+  'Top Tier',
+  'Founder-Friendly',
+  'Ex-Founder',
+  'Niche Focus',
+  'Deep Tech',
+  'SaaS',
+  'AI',
+  'Emerging Manager',
+  'Rolling Fund',
+  'Impact Investing',
+  'Network Access',
+]
+
 // Use enum values from db-utils.ts to ensure perfect alignment
 const TECH_INDUSTRIES = ENUM_VALUES.industry_type.slice(0, 12) // First 12 are tech industries
 const EARLY_STAGES = ENUM_VALUES.investment_stage.slice(0, 5) // First 5 stages
@@ -231,6 +276,7 @@ function generateTargetsData(count: number): Array<Record<string, string>> {
         [...ENUM_VALUES.required_document_type],
         2,
       ).join(','),
+      tags: randomChoices(SAMPLE_TAGS, 3).join(','),
       notes: randomBoolean() ? 'Generated sample data for testing' : '',
       visibility_level: getVisibilityLevel(i),
     })
@@ -288,6 +334,7 @@ function generateAngelsData(count: number): Array<Record<string, string>> {
       application_email: email,
       form_complexity: 'simple',
       required_documents: 'pitch_deck',
+      tags: randomChoices(SAMPLE_TAGS, 2).join(','),
       notable_investments: `BigCorp ${i + 1},TechStart ${i + 2}`,
       is_active: 'true',
       notes: 'Generated sample data for testing',
@@ -355,6 +402,7 @@ function generateAcceleratorsData(
         ? '0'
         : Math.floor(Math.random() * 10000).toString(),
       is_active: 'true',
+      tags: randomChoices(SAMPLE_TAGS, 3).join(','),
       notes: 'Generated sample data for testing',
       visibility_level: i < 30 ? 'FREE' : i < 70 ? 'PRO' : 'MAX', // 30 FREE, 40 PRO, 30 MAX for 100 accelerators
     })
@@ -408,12 +456,19 @@ async function bulkSeed() {
     const filePath = path.join(dataDir, fileName)
 
     if (format === 'excel') {
-      writeExcel(data, filePath)
+      await writeExcel(data, filePath)
     } else {
-      writeCSV(data, filePath)
+      // Basic CSV writer as a fallback
+      const headers = Object.keys(data[0]).join(',')
+      const rows = data.map((row) =>
+        Object.values(row)
+          .map((val) => `"${String(val).replace(/"/g, '""')}"`)
+          .join(','),
+      )
+      fs.writeFileSync(filePath, [headers, ...rows].join('\n'))
     }
 
-    console.log(`✅ Generated ${data.length} ${table} records`)
+    console.log(`✅ Generated ${data.length} ${table} records to ${filePath}`)
   }
 
   console.log('\n🎉 Bulk data generation completed!')
@@ -421,7 +476,7 @@ async function bulkSeed() {
     '\nNext steps:\n' +
       '1. Review the generated files in src/lib/scripts/seed-data/data/\n' +
       '2. Edit any data as needed\n' +
-      `3. Import using: bun run seed:import --table <table_name> --file <path_to_${format}_file>`,
+      `3. Import using: bun run seed:import --table <table_name> --file <path_to_file>`,
   )
 }
 
@@ -482,7 +537,7 @@ function parseArguments() {
 
   // Validate table names
   for (const table of result.tables) {
-    if (!DEFAULT_TABLES.includes(table)) {
+    if (!DEFAULT_TABLES.includes(table as 'targets' | 'angels' | 'accelerators')) {
       console.error(`❌ Invalid table: ${table}`)
       console.error(`Valid tables: ${DEFAULT_TABLES.join(', ')}`)
       return null

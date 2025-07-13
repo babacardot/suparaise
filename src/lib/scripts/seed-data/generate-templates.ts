@@ -1,46 +1,33 @@
 #!/usr/bin/env bun
-import { generateCSVTemplate, generateExcelTemplate } from './utils/csv-utils'
+import { generateExcelTemplate } from './utils/sheet-utils'
 import path from 'path'
 
+type TableName = 'targets' | 'angels' | 'accelerators'
+
 // Main function to generate all templates
-function generateAllTemplates(format: 'csv' | 'excel' = 'csv') {
+function generateAllTemplates() {
   const outputDir = path.join(__dirname, 'templates')
 
-  console.log(
-    `🚀 Generating ${format.toUpperCase()} templates for Suparaise data seeding`,
-  )
+  console.log('🚀 Generating Excel templates for Suparaise data seeding')
   console.log(`📁 Output directory: ${outputDir}`)
   console.log('─'.repeat(50))
 
   // Generate templates for all table types
-  const tables = ['targets', 'angels', 'accelerators']
+  const tables: TableName[] = ['targets', 'angels', 'accelerators']
 
   tables.forEach((table) => {
-    console.log(`📝 Generating ${format} template for ${table}...`)
-    if (format === 'excel') {
-      generateExcelTemplate(table, outputDir)
-    } else {
-      generateCSVTemplate(table, outputDir)
-    }
+    console.log(`📝 Generating Excel template for ${table}...`)
+    generateExcelTemplate(table, outputDir)
   })
 
   console.log('\n✅ All templates generated successfully!')
   console.log('\nNext steps:')
-  if (format === 'excel') {
-    console.log('1. Open the Excel template files and fill in your data')
-    console.log('2. Save as .xlsx or export as CSV')
-    console.log('3. Use csv-import.ts to load the data into Supabase')
-  } else {
-    console.log('1. Open the template files in Excel or Google Sheets')
-    console.log('2. Fill in your data following the column format')
-    console.log('3. Export as CSV and use csv-import.ts to load the data')
-  }
+  console.log('1. Open the Excel template files and fill in your data')
+  console.log('2. Use the `bun run seed` command to load the data into Supabase')
+
   console.log('\nTemplate files created:')
   tables.forEach((table) => {
-    const extension = format === 'excel' ? 'xlsx' : 'csv'
-    console.log(
-      `  📄 ${path.join(outputDir, `${table}-template.${extension}`)}`,
-    )
+    console.log(`  📄 ${path.join(outputDir, `${table}-template.xlsx`)}`)
   })
 }
 
@@ -54,26 +41,9 @@ function parseArguments() {
   }
 
   const result: {
-    table?: string
+    table?: TableName
     all?: boolean
-    format: 'csv' | 'excel'
-  } = {
-    format: 'csv', // Default to CSV
-  }
-
-  // Check for format argument
-  const formatIndex = args.indexOf('--format')
-  if (formatIndex !== -1 && args[formatIndex + 1]) {
-    const formatArg = args[formatIndex + 1].toLowerCase()
-    if (formatArg === 'excel' || formatArg === 'xlsx') {
-      result.format = 'excel'
-    } else if (formatArg === 'csv') {
-      result.format = 'csv'
-    } else {
-      console.error(`❌ Invalid format: ${formatArg}. Use 'csv' or 'excel'`)
-      return null
-    }
-  }
+  } = {}
 
   // If specific table is requested
   const tableIndex = args.indexOf('--table')
@@ -87,7 +57,7 @@ function parseArguments() {
       return null
     }
 
-    result.table = table
+    result.table = table as TableName
   } else {
     result.all = true
   }
@@ -102,15 +72,13 @@ Template Generator for Suparaise
 Usage: bun run generate-templates.ts [options]
 
 Options:
-  --table <name>     Generate template for specific table (targets, angels, accelerators)
-  --format <format>  Output format: csv or excel (default: csv)
-  --help            Show this help message
+  --table <name>     Generate Excel template for a specific table (targets, angels, accelerators).
+                     If not provided, all templates will be generated.
+  --help             Show this help message
 
 Examples:
-  bun run generate-templates.ts                           # Generate all CSV templates
-  bun run generate-templates.ts --format excel            # Generate all Excel templates
-  bun run generate-templates.ts --table targets           # Generate only targets CSV template
-  bun run generate-templates.ts --table targets --format excel  # Generate targets Excel template
+  bun run generate-templates.ts                # Generate all Excel templates
+  bun run generate-templates.ts --table targets  # Generate only the targets Excel template
 
 Generated templates will be placed in the templates/ directory.
 `)
@@ -126,17 +94,11 @@ function main() {
 
   try {
     if (options.all) {
-      generateAllTemplates(options.format)
+      generateAllTemplates()
     } else if (options.table) {
       const outputDir = path.join(__dirname, 'templates')
-      console.log(
-        `📝 Generating ${options.format} template for ${options.table}...`,
-      )
-      if (options.format === 'excel') {
-        generateExcelTemplate(options.table, outputDir)
-      } else {
-        generateCSVTemplate(options.table, outputDir)
-      }
+      console.log(`📝 Generating Excel template for ${options.table}...`)
+      generateExcelTemplate(options.table, outputDir)
       console.log('✅ Template generated successfully!')
     }
   } catch (error) {

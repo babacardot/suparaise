@@ -10,14 +10,13 @@
     "agent:run": "ts-node src/agent/index.ts",
     "format": "prettier --write .",
     "update:types": "bunx supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts",
-    "seed:templates": "bun run src/lib/scripts/seed-data/generate-templates.ts --format excel",
+    "seed:templates": "bun run src/lib/scripts/seed-data/generate-templates.ts",
     "seed:bulk": "bun run src/lib/scripts/seed-data/bulk-seed.ts --format excel",
-    "seed:import": "bun run src/lib/scripts/seed-data/csv-import.ts",
-    "seed:validate": "bun run src/lib/scripts/seed-data/validate-csv.ts",
+    "seed:import": "bun run src/lib/scripts/seed-data/import-data.ts",
     "seed:validate-env": "bun run src/lib/scripts/seed-data/validate-env.ts",
-    "seed:import-targets": "bun run src/lib/scripts/seed-data/csv-import.ts --table targets --file src/lib/scripts/seed-data/data/targets-bulk.xlsx",
-    "seed:import-angels": "bun run src/lib/scripts/seed-data/csv-import.ts --table angels --file src/lib/scripts/seed-data/data/angels-bulk.xlsx",
-    "seed:import-accelerators": "bun run src/lib/scripts/seed-data/csv-import.ts --table accelerators --file src/lib/scripts/seed-data/data/accelerators-bulk.xlsx"
+    "seed:import-targets": "bun run src/lib/scripts/seed-data/import-data.ts --table targets --file src/lib/scripts/seed-data/data/targets-bulk.xlsx",
+    "seed:import-angels": "bun run src/lib/scripts/seed-data/import-data.ts --table angels --file src/lib/scripts/seed-data/data/angels-bulk.xlsx",
+    "seed:import-accelerators": "bun run src/lib/scripts/seed-data/import-data.ts --table accelerators --file src/lib/scripts/seed-data/data/accelerators-bulk.xlsx"
   },
   "keywords": [],
   "author": "",
@@ -53,6 +52,7 @@
     "critters": "^0.0.25",
     "date-fns": "^4.1.0",
     "dotenv": "^16.6.1",
+    "exceljs": "^4.4.0",
     "framer-motion": "^12.23.3",
     "lottie-react": "^2.4.1",
     "lru-cache": "^11.1.0",
@@ -69,6 +69,7 @@
     "ts-node": "^10.9.2",
     "types": "^0.1.1",
     "xlsx": "^0.18.5",
+    "zod": "^4.0.5",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
