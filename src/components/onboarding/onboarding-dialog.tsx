@@ -33,6 +33,7 @@ import {
   FundraisingStep,
   ReviewStep,
 } from './onboarding-steps'
+// import { SmartIngestModal } from './ingest-modal'
 
 // Welcome Step Component
 const WelcomeStep = ({
@@ -42,19 +43,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-        title: 'Welcome to suparaise.com',
-        subtitle:
-          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-        image: '/random/onboarding.svg',
-        statusText: 'Onboarding',
-      }
+      title: 'Welcome to suparaise.com',
+      subtitle:
+        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+      image: '/random/onboarding.svg',
+      statusText: 'Onboarding',
+    }
     : {
-        title: 'Ready to launch another venture ?',
-        subtitle:
-          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-        image: '/random/test_your_app.svg',
-        statusText: 'New venture',
-      }
+      title: 'Ready to launch another venture ?',
+      subtitle:
+        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+      image: '/random/test_your_app.svg',
+      statusText: 'New venture',
+    }
 
   return (
     <motion.div
@@ -110,6 +111,7 @@ export function OnboardingDialog({
   const [validationAttempted, setValidationAttempted] = useState(false)
   const [showExitConfirmation, setShowExitConfirmation] = useState(false)
   const [showSkipConfirmation, setShowSkipConfirmation] = useState(false)
+  // const [showIngestModal, setShowIngestModal] = useState(false)
 
   // Track which fields were actually pre-filled from OAuth
   const [prefilledFields, setPrefilledFields] = useState({
@@ -262,7 +264,7 @@ export function OnboardingDialog({
         () => {
           setCurrentStep(1)
         },
-        isFirstStartup ? 10000 : 8000,
+        isFirstStartup ? 7000 : 5000,
       ) // 10s for first startup, 8s for additional ones
 
       return () => clearTimeout(timer)
@@ -306,12 +308,71 @@ export function OnboardingDialog({
     }
   }
 
-  // URL validation function
-  const isValidUrl = (url: string): boolean => {
+  // Enhanced validation functions
+  const isValidLinkedInUrl = (url: string): boolean => {
     if (!url.trim()) return true // Empty URLs are optional
     try {
       const urlObj = new URL(url)
-      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
+      return (
+        (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') &&
+        (urlObj.hostname === 'linkedin.com' ||
+          urlObj.hostname === 'www.linkedin.com') &&
+        urlObj.pathname.startsWith('/in/')
+      )
+    } catch {
+      return false
+    }
+  }
+
+  const isValidTwitterUrl = (url: string): boolean => {
+    if (!url.trim()) return true // Empty URLs are optional
+    try {
+      const urlObj = new URL(url)
+      return (
+        (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') &&
+        (urlObj.hostname === 'x.com' ||
+          urlObj.hostname === 'www.x.com' ||
+          urlObj.hostname === 'twitter.com' ||
+          urlObj.hostname === 'www.twitter.com') &&
+        urlObj.pathname.length > 1 // Must have a username path
+      )
+    } catch {
+      return false
+    }
+  }
+
+  const isValidGitHubUrl = (url: string): boolean => {
+    if (!url.trim()) return true // Empty URLs are optional
+    try {
+      const urlObj = new URL(url)
+      return (
+        (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') &&
+        (urlObj.hostname === 'github.com' ||
+          urlObj.hostname === 'www.github.com') &&
+        urlObj.pathname.length > 1 // Must have a username path
+      )
+    } catch {
+      return false
+    }
+  }
+
+  const isValidPhoneNumber = (phone: string): boolean => {
+    if (!phone.trim()) return true // Empty phone is optional in some contexts
+    // Remove all non-digit characters to check length
+    const digitsOnly = phone.replace(/\D/g, '')
+    // International phone numbers should have at least 7 digits and at most 15 digits
+    return digitsOnly.length >= 7 && digitsOnly.length <= 15
+  }
+
+  const isValidWebsiteUrl = (url: string): boolean => {
+    if (!url.trim()) return true // Empty URLs are optional
+    try {
+      const urlObj = new URL(url)
+      return (
+        (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') &&
+        urlObj.hostname.includes('.') && // Must have a domain
+        urlObj.hostname.length > 3 // Minimum domain length
+      )
     } catch {
       return false
     }
@@ -340,18 +401,38 @@ export function OnboardingDialog({
           if (!founder.phone.trim())
             errors.push(`Phone for ${founderLabel} is required`)
 
-          // Validate URL formats and email format
+          // Validate URL formats, email format, and phone number
           if (
             founder.email &&
             !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(founder.email)
           ) {
             errors.push(`Email for ${founderLabel} is invalid`)
           }
-          if (founder.linkedin && !isValidUrl(founder.linkedin)) {
-            errors.push(`LinkedIn URL for ${founderLabel} is invalid`)
+          if (founder.phone && !isValidPhoneNumber(founder.phone)) {
+            errors.push(
+              `Phone number for ${founderLabel} must be between 7-15 digits`,
+            )
           }
-          if (founder.twitterUrl && !isValidUrl(founder.twitterUrl)) {
-            errors.push(`X URL for ${founderLabel} is invalid`)
+          if (founder.linkedin && !isValidLinkedInUrl(founder.linkedin)) {
+            errors.push(
+              `LinkedIn URL for ${founderLabel} must be a valid LinkedIn profile (e.g., https://linkedin.com/in/username)`,
+            )
+          }
+          if (founder.twitterUrl && !isValidTwitterUrl(founder.twitterUrl)) {
+            errors.push(
+              `X URL for ${founderLabel} must be a valid X/Twitter profile (e.g., https://x.com/username)`,
+            )
+          }
+          if (founder.githubUrl && !isValidGitHubUrl(founder.githubUrl)) {
+            errors.push(
+              `GitHub URL for ${founderLabel} must be a valid GitHub profile (e.g., https://github.com/username)`,
+            )
+          }
+          if (
+            founder.personalWebsiteUrl &&
+            !isValidWebsiteUrl(founder.personalWebsiteUrl)
+          ) {
+            errors.push(`Personal website URL for ${founderLabel} is invalid`)
           }
 
           // Check for duplicate emails within the current form
@@ -359,7 +440,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-                founder.email.trim().toLowerCase(),
+              founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -371,7 +452,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-              (user?.email || '').toLowerCase()
+            (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -400,10 +481,13 @@ export function OnboardingDialog({
         if (!startup.legalStructure) errors.push('Legal structure is required')
 
         // Validate company website URL
-        if (startup.website && !isValidUrl(startup.website)) {
+        if (startup.website && !isValidWebsiteUrl(startup.website)) {
           errors.push('Company website URL is invalid')
         }
-        if (startup.googleDriveUrl && !isValidUrl(startup.googleDriveUrl)) {
+        if (
+          startup.googleDriveUrl &&
+          !isValidWebsiteUrl(startup.googleDriveUrl)
+        ) {
           errors.push('Cloud storage URL is invalid')
         }
         break
@@ -419,9 +503,8 @@ export function OnboardingDialog({
         if (!startup.currentRunway) errors.push('Runway is required')
         if (!startup.preMoneyValuation)
           errors.push('Pre-money valuation is required')
-        if (!startup.keyCustomers.trim())
-          if (startup.fundingAmountSought <= 0)
-            errors.push('Funding amount is required')
+        if (startup.fundingAmountSought <= 0)
+          errors.push('Funding amount is required')
         if (!startup.employeeCount || startup.employeeCount <= 0)
           errors.push('Team size is required')
         if (!startup.tractionSummary.trim()) errors.push('Traction is required')
@@ -467,18 +550,39 @@ export function OnboardingDialog({
         errors.email = 'Invalid email format'
       }
       if (
+        founder.phone &&
+        founder.phone.trim() &&
+        !isValidPhoneNumber(founder.phone)
+      ) {
+        errors.phone = 'Phone must be 7-15 digits'
+      }
+      if (
         founder.linkedin &&
         founder.linkedin.trim() &&
-        !isValidUrl(founder.linkedin)
+        !isValidLinkedInUrl(founder.linkedin)
       ) {
-        errors.linkedin = 'Invalid LinkedIn URL'
+        errors.linkedin = 'Must be a valid LinkedIn profile URL'
       }
       if (
         founder.twitterUrl &&
         founder.twitterUrl.trim() &&
-        !isValidUrl(founder.twitterUrl)
+        !isValidTwitterUrl(founder.twitterUrl)
       ) {
-        errors.twitterUrl = 'Invalid X URL'
+        errors.twitterUrl = 'Must be a valid X/Twitter profile URL'
+      }
+      if (
+        founder.githubUrl &&
+        founder.githubUrl.trim() &&
+        !isValidGitHubUrl(founder.githubUrl)
+      ) {
+        errors.githubUrl = 'Must be a valid GitHub profile URL'
+      }
+      if (
+        founder.personalWebsiteUrl &&
+        founder.personalWebsiteUrl.trim() &&
+        !isValidWebsiteUrl(founder.personalWebsiteUrl)
+      ) {
+        errors.personalWebsiteUrl = 'Invalid website URL'
       }
 
       return errors
@@ -507,14 +611,14 @@ export function OnboardingDialog({
     if (
       startup.website &&
       startup.website.trim() &&
-      !isValidUrl(startup.website)
+      !isValidWebsiteUrl(startup.website)
     ) {
       errors.website = 'Invalid website URL'
     }
     if (
       startup.googleDriveUrl &&
       startup.googleDriveUrl.trim() &&
-      !isValidUrl(startup.googleDriveUrl)
+      !isValidWebsiteUrl(startup.googleDriveUrl)
     ) {
       errors.googleDriveUrl = 'Invalid Cloud storage URL'
     }
@@ -911,6 +1015,13 @@ export function OnboardingDialog({
     setShowSkipConfirmation(false)
   }
 
+  // // Handle ingest data from modal
+  // const handleIngestData = (ingestedData: Partial<StartupData>) => {
+  //   setStartup({ ...startup, ...ingestedData })
+  //   playNavigationSound()
+  //   setShowIngestModal(false)
+  // }
+
   return (
     <>
       <style jsx>{`
@@ -1009,6 +1120,9 @@ export function OnboardingDialog({
                     logoUploadProps={logoUploadProps}
                     pitchDeckUploadProps={pitchDeckUploadProps}
                     fieldErrors={getStartupFieldErrors()}
+                  // showIngestModal={showIngestModal}
+                  // setShowIngestModal={setShowIngestModal}
+                  // onIngestData={handleIngestData}
                   />
                 </motion.div>
               )}
@@ -1079,26 +1193,43 @@ export function OnboardingDialog({
               </div>
 
               {/* Right side buttons */}
-              {currentStep < 4 ? (
-                <ExpandButton
-                  onClick={nextStep}
-                  disabled={!canProceedFromStep(currentStep) || loading}
-                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
-                  Icon={ArrowRight}
-                  iconPlacement="right"
-                  justify="end"
-                >
-                  Next
-                </ExpandButton>
-              ) : (
-                <ExpandButton
-                  onClick={submitData}
-                  disabled={loading}
-                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
-                >
-                  {loading ? <Spinner className="h-3 w-3" /> : 'Submit'}
-                </ExpandButton>
-              )}
+              <div className="flex gap-3">
+                {/* Smart Ingest button - show on company step (step 2) */}
+                {/* {currentStep === 2 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      playNavigationSound()
+                      setShowIngestModal(true)
+                    }}
+                    disabled={loading}
+                    className="bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800"
+                  >
+                    Ingest
+                  </Button>
+                )} */}
+
+                {currentStep < 4 ? (
+                  <ExpandButton
+                    onClick={nextStep}
+                    disabled={!canProceedFromStep(currentStep) || loading}
+                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                    Icon={ArrowRight}
+                    iconPlacement="right"
+                    justify="end"
+                  >
+                    Next
+                  </ExpandButton>
+                ) : (
+                  <ExpandButton
+                    onClick={submitData}
+                    disabled={loading}
+                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                  >
+                    {loading ? <Spinner className="h-3 w-3" /> : 'Submit'}
+                  </ExpandButton>
+                )}
+              </div>
             </motion.div>
           )}
         </DialogContent>
@@ -1174,6 +1305,16 @@ export function OnboardingDialog({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Smart Ingest Modal */}
+      {/* {showIngestModal && (
+        <SmartIngestModal
+          isOpen={showIngestModal}
+          onClose={() => setShowIngestModal(false)}
+          onIngest={handleIngestData}
+          currentData={startup}
+        />
+      )} */}
     </>
   )
 }
