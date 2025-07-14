@@ -1049,7 +1049,7 @@ export default function AcceleratorsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.requiredDocuments &&
-                      localFilters.requiredDocuments.length > 0 ? (
+                    localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = REQUIRED_DOCUMENTS.find(
                           (d) => d.value === doc,
@@ -1081,7 +1081,7 @@ export default function AcceleratorsFilters({
                       )}
                   </div>
                   {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
+                  localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
@@ -1158,10 +1158,11 @@ export default function AcceleratorsFilters({
                         !columnVisibility[key as keyof ColumnVisibility],
                       )
                     }}
-                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${columnVisibility[key as keyof ColumnVisibility]
-                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                      : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                      }`}
+                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${
+                      columnVisibility[key as keyof ColumnVisibility]
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                    }`}
                   >
                     <span className="text-sm font-medium capitalize">
                       {key === 'programType'
@@ -1194,12 +1195,13 @@ export default function AcceleratorsFilters({
                 setLocalFilters(newFilters)
                 onFiltersChange(newFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
-                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
-                : localFilters.submissionFilter === 'only_submitted'
-                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                  : 'bg-card border-border'
-                }`}
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
+                localFilters.submissionFilter === 'hide_submitted'
+                  ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
+                  : localFilters.submissionFilter === 'only_submitted'
+                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                    : 'bg-card border-border'
+              }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all (click to hide submitted)'
