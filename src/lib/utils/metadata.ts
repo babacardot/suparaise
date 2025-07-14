@@ -28,10 +28,29 @@ export async function generateStartupMetadata({
 
     const metadata = metaData as unknown as StartupMetadata
     const startupName = metadata?.name || 'Company'
+    const title = `${startupName} | ${pageTitle} | Suparaise`
 
     return {
-      title: `${startupName} | ${pageTitle} | Suparaise`,
+      title,
       description,
+      openGraph: {
+        title,
+        description,
+        images: [
+          {
+            url: '/banner.png',
+            width: 1200,
+            height: 600,
+            alt: title,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: ['/banner.png'],
+      },
     }
   } catch (error) {
     console.error('Error fetching startup metadata:', error)

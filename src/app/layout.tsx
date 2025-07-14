@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://suparaise.com'),
   title: {
     default: 'Suparaise',
-    template: '',
+    template: '%s | Suparaise',
   },
   description:
     'Automate your startup fundraising with AI agents that fill out VC and fund applications on autopilot',
@@ -237,6 +237,11 @@ export const metadata: Metadata = {
     images: ['/banner.png'],
     creator: '@suparaise',
   },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   robots: {
     index: true,
     follow: true,
@@ -249,7 +254,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: 'your-google-verification-code', // TODO: Add your Google verification code
     yandex: 'your-yandex-verification-code',
     yahoo: 'your-yahoo-verification-code',
   },
@@ -281,6 +286,7 @@ export default function RootLayout({
     description: 'Agents that apply to funds for you, on autopilot.',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
+    logo: 'https://suparaise.com/apple-touch-icon.png',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -291,25 +297,22 @@ export default function RootLayout({
       '@type': 'Organization',
       name: 'Suparaise',
       url: 'https://suparaise.com',
+      logo: 'https://suparaise.com/apple-touch-icon.png',
     },
     url: 'https://suparaise.com',
     sameAs: [
       'https://x.com/suparaise',
       'https://linkedin.com/company/suparaise',
     ],
+    author: {
+      '@type': 'Organization',
+      name: 'lomi.',
+    },
   }
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="canonical" href="https://suparaise.com" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/favicon.ico" />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/apple-touch-icon.png"
-        />
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="theme-color" content="#000000" />
         <script
