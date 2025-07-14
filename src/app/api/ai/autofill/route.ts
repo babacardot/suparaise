@@ -25,7 +25,6 @@ interface AutofillData {
   descriptionMedium?: string
   descriptionLong?: string
   industry?: string
-  location?: string
   foundedYear?: number
 }
 
@@ -333,7 +332,6 @@ Extract the following information and return it as a JSON object with these exac
   "descriptionMedium": "Elevator pitch under 300 characters (string or null)", 
   "descriptionLong": "Detailed company description (string or null)",
   "industry": "Primary industry/sector (string or null)",
-  "location": "Primary location/headquarters city and country (string or null)",
   "foundedYear": "Year founded (number or null)"
 }
 
@@ -345,10 +343,7 @@ Guidelines:
 - Only reformulate or combine text when the original content is unclear, too long, or unprofessional
 - Be flexible and creative with limited content, but prioritize authentic website language over AI-generated alternatives
 - Industry should be one of these exact values: "B2B SaaS", "Fintech", "Healthtech", "AI/ML", "Deep tech", "Climate tech", "Consumer", "E-commerce", "Marketplace", "Gaming", "Web3", "Developer tools", "Cybersecurity", "Logistics", "AdTech", "PropTech", "InsurTech", "Agriculture", "Automotive", "Biotechnology", "Construction", "Consulting", "Consumer Goods", "Education", "Energy", "Entertainment", "Environmental Services", "Fashion", "Food & Beverage", "Government", "Healthcare Services", "Hospitality", "Human Resources", "Insurance", "Legal", "Manufacturing", "Media", "Non-profit", "Pharmaceuticals", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Other"
-- Location should be in format "City, Country" or just "Country" if city is unclear
 - Look for founded year in various formats: "founded", "established", "since", "started", copyright years, etc.
-- If the website seems to be for a specific region/country, infer location from context
-- For African companies, common locations include "Lagos, Nigeria", "Nairobi, Kenya", "Cape Town, South Africa", "Accra, Ghana", "Cairo, Egypt", etc.
 - Even if content seems minimal, try to extract at least the company name and a basic description
 - Preserve the company's authentic voice and messaging style
 - If website content is very limited, focus on extracting what's clearly available rather than returning all nulls

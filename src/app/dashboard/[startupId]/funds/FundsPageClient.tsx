@@ -118,7 +118,7 @@ export default function FundsPageClient({
         region: true,
         focus: true,
         industry: true,
-        requirements: true,
+        requirements: false,
         type: false,
       }
     },

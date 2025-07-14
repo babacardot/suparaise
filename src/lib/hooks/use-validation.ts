@@ -93,6 +93,19 @@ const isFieldEmpty = (value: unknown): boolean => {
   )
 }
 
+type ErrorWithMessage = {
+  message: string
+}
+
+function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  )
+}
+
 export function useValidation({
   requirements,
   autoCheck = true,
@@ -236,31 +249,25 @@ export function useValidation({
       setMissingFields(missing)
       setIsValid(missing.length === 0)
     } catch (error) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        Object.keys(error).length === 0
-      ) {
+      if (isErrorWithMessage(error) && error.message) {
+        console.error('Error checking validation:', error)
+        toast({
+          title: 'Validation Error',
+          description: `Could not complete validation check: ${error.message}`,
+          variant: 'destructive',
+        })
+      } else {
+        // Otherwise, it's likely one of the empty/non-standard errors.
+        // We can log it for debugging but won't show a toast to the user.
         console.warn(
-          'Caught an empty error object during validation. Suppressing toast.',
+          'Caught a non-standard error during validation, suppressing toast:',
+          error,
         )
-        return
       }
-      console.error('Error checking validation:', error)
-      const errorMessage =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message: string }).message
-          : 'Failed to validate requirements.'
-
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: errorMessage,
-      })
     } finally {
       setLoading(false)
     }
-  }, [toast, requirements, user, currentStartupId, supabase])
+  }, [user, currentStartupId, supabase, requirements, toast])
 
   const executeIfValid = (action: () => void, fallback?: () => void) => {
     if (isValid) {

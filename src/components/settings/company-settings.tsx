@@ -380,9 +380,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -618,8 +617,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                    .split(',')
-                    .filter(Boolean)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -767,6 +766,14 @@ export default function CompanySettings() {
       setIsAutoFilling(false)
     }
   }
+
+  const emptyDescriptionFieldsCount = [
+    formData.descriptionShort,
+    formData.descriptionMedium,
+    formData.descriptionLong,
+  ].filter((desc) => !desc || desc.trim() === '').length
+
+  const showAutofillButton = emptyDescriptionFieldsCount >= 2
 
   if (!user) {
     return <div></div>
@@ -1731,20 +1738,22 @@ export default function CompanySettings() {
                       </button>
                     )}
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleWebsiteAutoFill}
-                    disabled={!formData.website?.trim() || isAutoFilling}
-                    className="shrink-0 px-3 h-9 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                    title="Auto-fill company information from website"
-                  >
-                    {isAutoFilling ? (
-                      <Spinner className="h-3 w-3" />
-                    ) : (
-                      <Wand2 className="h-3 w-3" />
-                    )}
-                  </Button>
+                  {showAutofillButton && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleWebsiteAutoFill}
+                      disabled={!formData.website?.trim() || isAutoFilling}
+                      className="shrink-0 px-3 h-9 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      title="Auto-fill company information from website"
+                    >
+                      {isAutoFilling ? (
+                        <Spinner className="h-3 w-3" />
+                      ) : (
+                        <Wand2 className="h-3 w-3" />
+                      )}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -3128,7 +3137,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {
