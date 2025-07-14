@@ -51,6 +51,8 @@ type Submission = {
   id: string
   status: 'pending' | 'in_progress' | 'completed' | 'failed'
   submission_date: string
+  agent_notes?: string
+  queue_position?: number
 }
 
 type AngelsActionsProps = {
@@ -89,6 +91,21 @@ export default React.memo(function AngelsActions({
         return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
       case 'comprehensive':
         return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+      default:
+        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+      case 'failed':
+        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+      case 'in_progress':
+        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+      case 'pending':
+        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
       default:
         return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
     }
@@ -172,6 +189,20 @@ export default React.memo(function AngelsActions({
     return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
   }
 
+  const getSecondaryBadgeColor = () => {
+    return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
   const capitalizeFirst = (str: string) => {
     if (!str) return ''
     return str.charAt(0).toUpperCase() + str.slice(1)
@@ -196,6 +227,7 @@ export default React.memo(function AngelsActions({
           </CardHeader>
           <CardContent className="p-4 space-y-3 overflow-auto flex-1 text-xs">
             <div className="space-y-3 pl-4 pr-2 sm:px-0">
+              {/* Basic Info */}
               <div
                 className="flex items-center justify-between"
                 style={{ marginTop: '-15px' }}
@@ -219,15 +251,8 @@ export default React.memo(function AngelsActions({
                 </div>
               )}
 
-              {angel.bio && (
-                <div className="space-y-2 pt-2">
-                  <span className="text-muted-foreground">Bio</span>
-                  <p className="text-foreground/80">{angel.bio}</p>
-                </div>
-              )}
-
               {angel.check_size && (
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Check Size</span>
                   <Badge
                     className={`rounded-sm text-[10px] font-normal ${getCheckSizeColor()}`}
@@ -236,19 +261,27 @@ export default React.memo(function AngelsActions({
                   </Badge>
                 </div>
               )}
-            </div>
 
-            <Separator className="my-3" />
-
-            <div className="space-y-3 pl-4 pr-2 sm:px-0">
-              {angel.stage_focus && angel.stage_focus.length > 0 && (
+              {angel.bio && (
                 <div className="space-y-2">
-                  <span className="text-muted-foreground">Stage Focus</span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <span className="text-muted-foreground">Bio</span>
+                  <p className="text-xs text-black dark:text-white pt-2">
+                    {angel.bio}
+                  </p>
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Focus Areas */}
+              {angel.stage_focus && angel.stage_focus.length > 0 && (
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Focus</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.stage_focus.map((stage) => (
                       <Badge
                         key={stage}
-                        className={`rounded-sm text-[10px] font-normal ${getStageColor(stage)}`}
+                        className={`rounded-sm text-[10px] ${getStageColor(stage)}`}
                       >
                         {stage}
                       </Badge>
@@ -258,13 +291,13 @@ export default React.memo(function AngelsActions({
               )}
 
               {angel.industry_focus && angel.industry_focus.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-muted-foreground">Industry Focus</span>
-                  <div className="flex flex-wrap gap-1.5">
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Industry</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.industry_focus.map((industry) => (
                       <Badge
                         key={industry}
-                        className={`rounded-sm text-[10px] font-normal ${getIndustryColor(industry)}`}
+                        className={`rounded-sm text-[10px] ${getIndustryColor(industry)}`}
                       >
                         {industry}
                       </Badge>
@@ -274,13 +307,13 @@ export default React.memo(function AngelsActions({
               )}
 
               {angel.region_focus && angel.region_focus.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-muted-foreground">Region Focus</span>
-                  <div className="flex flex-wrap gap-1.5">
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Region</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.region_focus.map((region) => (
                       <Badge
                         key={region}
-                        className={`rounded-sm text-[10px] font-normal ${getRegionColor(region)}`}
+                        className={`rounded-sm text-[10px] ${getRegionColor(region)}`}
                       >
                         {region}
                       </Badge>
@@ -290,113 +323,124 @@ export default React.memo(function AngelsActions({
               )}
 
               {angel.investment_approach && (
-                <div className="space-y-2">
-                  <span className="text-muted-foreground">Approach</span>
-                  <div className="flex flex-wrap gap-1.5">
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Approach</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     <Badge
-                      className={`rounded-sm text-[10px] font-normal ${getInvestmentApproachColor()}`}
+                      className={`rounded-sm text-[10px] ${getInvestmentApproachColor()}`}
                     >
                       {capitalizeFirst(angel.investment_approach)}
                     </Badge>
                   </div>
                 </div>
               )}
-            </div>
 
-            {(angel.notable_investments?.length || 0) > 0 ||
-            (angel.previous_exits?.length || 0) > 0 ||
-            (angel.domain_expertise?.length || 0) > 0 ? (
-              <>
-                <Separator className="my-3" />
-                <div className="space-y-3 pl-4 pr-2 sm:px-0">
-                  {angel.notable_investments &&
-                    angel.notable_investments.length > 0 && (
-                      <div className="space-y-2">
-                        <span className="text-muted-foreground">
-                          Notable Investments
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {angel.notable_investments.map((inv) => (
-                            <Badge
-                              key={inv}
-                              variant="secondary"
-                              className="rounded-sm text-[10px] font-normal"
-                            >
-                              {inv}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  {angel.previous_exits && angel.previous_exits.length > 0 && (
-                    <div className="space-y-2">
-                      <span className="text-muted-foreground">
-                        Previous Exits
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {angel.previous_exits.map((exit) => (
-                          <Badge
-                            key={exit}
-                            variant="secondary"
-                            className="rounded-sm text-[10px] font-normal"
-                          >
-                            {exit}
-                          </Badge>
-                        ))}
-                      </div>
+              {angel.notable_investments &&
+                angel.notable_investments.length > 0 && (
+                  <div className="flex items-start justify-between">
+                    <span className="text-muted-foreground pt-1">
+                      Investments
+                    </span>
+                    <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
+                      {angel.notable_investments.map((inv) => (
+                        <Badge
+                          key={inv}
+                          className={`rounded-sm text-[10px] ${getSecondaryBadgeColor()}`}
+                        >
+                          {inv}
+                        </Badge>
+                      ))}
                     </div>
-                  )}
-                  {angel.domain_expertise &&
-                    angel.domain_expertise.length > 0 && (
-                      <div className="space-y-2">
-                        <span className="text-muted-foreground">
-                          Domain Expertise
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {angel.domain_expertise.map((domain) => (
-                            <Badge
-                              key={domain}
-                              variant="secondary"
-                              className="rounded-sm text-[10px] font-normal"
-                            >
-                              {domain}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                </div>
-              </>
-            ) : null}
-            <Separator />
-            <div className="space-y-3 pl-4 pr-2 sm:px-0">
-              <div className="text-muted-foreground">History</div>
-              {loading ? (
-                <div className="flex justify-center items-center py-4">
-                  <Spinner className="h-3 w-3" />
-                </div>
-              ) : submissions.length > 0 ? (
-                <ul className="space-y-2">
-                  {submissions.map((submission) => (
-                    <li
-                      key={submission.id}
-                      className="flex justify-between items-center"
-                    >
-                      <span>
-                        {new Date(
-                          submission.submission_date,
-                        ).toLocaleDateString()}
-                      </span>
-                      <Badge className={`rounded-sm text-[10px] font-normal`}>
-                        {submission.status}
+                  </div>
+                )}
+
+              {angel.previous_exits && angel.previous_exits.length > 0 && (
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Exits</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
+                    {angel.previous_exits.map((exit) => (
+                      <Badge
+                        key={exit}
+                        className={`rounded-sm text-[10px] ${getSecondaryBadgeColor()}`}
+                      >
+                        {exit}
                       </Badge>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-foreground/60 text-center py-2">
-                  No submission history
-                </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {angel.domain_expertise && angel.domain_expertise.length > 0 && (
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">
+                    Expertise
+                  </span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
+                    {angel.domain_expertise.map((domain) => (
+                      <Badge
+                        key={domain}
+                        className={`rounded-sm text-[10px] ${getSecondaryBadgeColor()}`}
+                      >
+                        {domain}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Submission History */}
+              {loading && (
+                <>
+                  <Separator />
+                  <div className="flex justify-center items-center py-4">
+                    <Spinner className="h-3 w-3" />
+                  </div>
+                </>
+              )}
+
+              {!loading && submissions.length > 0 && (
+                <>
+                  <Separator />
+                  <section>
+                    <h3 className="text-sm font-medium mb-2">History</h3>
+                    <div className="space-y-2">
+                      {submissions.slice(0, 3).map((submission) => (
+                        <div
+                          key={submission.id}
+                          className="flex items-center justify-between p-2 rounded-sm bg-muted/30"
+                        >
+                          <div className="flex flex-col space-y-1">
+                            <span className="text-xs font-medium">
+                              {formatDate(submission.submission_date)}
+                            </span>
+                            {submission.queue_position && (
+                              <span className="text-[10px] text-muted-foreground">
+                                Queue position: {submission.queue_position}
+                              </span>
+                            )}
+                            {submission.agent_notes && (
+                              <span className="text-[10px] text-muted-foreground">
+                                {submission.agent_notes}
+                              </span>
+                            )}
+                          </div>
+                          <Badge
+                            className={`rounded-sm text-[10px] font-normal ${getStatusColor(submission.status)}`}
+                          >
+                            {capitalizeFirst(
+                              submission.status.replace('_', ' '),
+                            )}
+                          </Badge>
+                        </div>
+                      ))}
+                      {submissions.length > 3 && (
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          +{submissions.length - 3} more submissions
+                        </p>
+                      )}
+                    </div>
+                  </section>
+                </>
               )}
             </div>
           </CardContent>

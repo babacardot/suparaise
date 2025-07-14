@@ -267,6 +267,51 @@ const scrapeWebsite = async (url: string): Promise<string> => {
   }
 }
 
+// Map common industry variations to exact database enum values
+const mapIndustryToEnum = (industry: string): string => {
+  const industryMap: Record<string, string> = {
+    // Common variations that AI might return
+    'FinTech': 'Fintech',
+    'fintech': 'Fintech', 
+    'FINTECH': 'Fintech',
+    'HealthTech': 'Healthtech',
+    'healthtech': 'Healthtech',
+    'HEALTHTECH': 'Healthtech',
+    'SaaS': 'B2B SaaS',
+    'saas': 'B2B SaaS',
+    'SAAS': 'B2B SaaS',
+    'B2B SaaS': 'B2B SaaS', // Keep exact matches
+    'EdTech': 'Education',
+    'edtech': 'Education',
+    'EDTECH': 'Education',
+    'PropTech': 'PropTech', // Keep exact match
+    'proptech': 'PropTech',
+    'PROPTECH': 'PropTech',
+    'InsurTech': 'InsurTech', // Keep exact match
+    'insurtech': 'InsurTech',
+    'INSURTECH': 'InsurTech',
+    'AdTech': 'AdTech', // Keep exact match
+    'adtech': 'AdTech',
+    'ADTECH': 'AdTech',
+    'AI': 'AI/ML',
+    'Machine Learning': 'AI/ML',
+    'Artificial Intelligence': 'AI/ML',
+    'ML': 'AI/ML',
+    'Ecommerce': 'E-commerce',
+    'ecommerce': 'E-commerce',
+    'E-Commerce': 'E-commerce',
+    'Food and Beverage': 'Food & Beverage',
+    'F&B': 'Food & Beverage',
+    'Real estate': 'Real Estate',
+    'realestate': 'Real Estate',
+    'Tech': 'Other',
+    'Technology': 'Other'
+  }
+  
+  // Return mapped value or original value if no mapping exists
+  return industryMap[industry] || industry
+}
+
 const extractCompanyData = async (
   websiteContent: string,
   websiteUrl: string,
@@ -299,7 +344,7 @@ Guidelines:
 - For descriptionLong: Extract comprehensive descriptions from about pages, but preserve the original tone and wording when it's professional
 - Only reformulate or combine text when the original content is unclear, too long, or unprofessional
 - Be flexible and creative with limited content, but prioritize authentic website language over AI-generated alternatives
-- Industry should be a general category (e.g., "SaaS", "FinTech", "HealthTech", "E-commerce", "AI/ML", "EdTech", "Agriculture", "Food & Beverage", "Logistics", "Marketplace", etc.)
+- Industry should be one of these exact values: "B2B SaaS", "Fintech", "Healthtech", "AI/ML", "Deep tech", "Climate tech", "Consumer", "E-commerce", "Marketplace", "Gaming", "Web3", "Developer tools", "Cybersecurity", "Logistics", "AdTech", "PropTech", "InsurTech", "Agriculture", "Automotive", "Biotechnology", "Construction", "Consulting", "Consumer Goods", "Education", "Energy", "Entertainment", "Environmental Services", "Fashion", "Food & Beverage", "Government", "Healthcare Services", "Hospitality", "Human Resources", "Insurance", "Legal", "Manufacturing", "Media", "Non-profit", "Pharmaceuticals", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Other"
 - Location should be in format "City, Country" or just "Country" if city is unclear
 - Look for founded year in various formats: "founded", "established", "since", "started", copyright years, etc.
 - If the website seems to be for a specific region/country, infer location from context
@@ -330,6 +375,28 @@ JSON Response:`
     // Parse JSON response
     try {
       const extractedData = JSON.parse(content) as AutofillData
+      
+      // Map industry values to exact database enum values
+      if (extractedData.industry) {
+        extractedData.industry = mapIndustryToEnum(extractedData.industry)
+      }
+      
+      // Validate and parse foundedYear
+      if (extractedData.foundedYear) {
+        // AI might return a string like "c. 2022" or a number.
+        const yearString = String(extractedData.foundedYear).match(/\d{4}/); // Find a 4-digit number
+        if (yearString) {
+            const year = parseInt(yearString[0], 10);
+            if (year > 1900 && year <= new Date().getFullYear()) {
+                extractedData.foundedYear = year;
+            } else {
+                extractedData.foundedYear = undefined; // Invalid year
+            }
+        } else {
+            extractedData.foundedYear = undefined; // No year found
+        }
+      }
+      
       return extractedData
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', content)

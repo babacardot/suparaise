@@ -68,7 +68,7 @@ export default React.memo(function AcceleratorsActions({
       case 'email':
         return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
       case 'other':
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+        return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
       default:
         return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
     }
@@ -187,8 +187,8 @@ export default React.memo(function AcceleratorsActions({
       return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
     if (equity === '10% +')
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
-    if (equity === 'variable')
-      return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+    if (equity === 'Variable')
+      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
   }
 
@@ -204,7 +204,17 @@ export default React.memo(function AcceleratorsActions({
     if (funding === '250K — 500K')
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
     if (funding === '500K +')
-      return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+      return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+  }
+
+  const getProgramTypeColor = (programType: string) => {
+    if (programType === 'in-person')
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+    if (programType === 'remote')
+      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+    if (programType === 'hybrid')
+      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
   }
 
@@ -244,6 +254,7 @@ export default React.memo(function AcceleratorsActions({
   }
 
   const capitalizeFirst = (str: string) => {
+    if (!str) return ''
     return str.charAt(0).toUpperCase() + str.slice(1)
   }
 
@@ -266,6 +277,7 @@ export default React.memo(function AcceleratorsActions({
           </CardHeader>
           <CardContent className="p-4 space-y-3 overflow-auto flex-1 text-xs">
             <div className="space-y-3 pl-4 pr-2 sm:px-0">
+              {/* Basic Info */}
               <div
                 className="flex items-center justify-between"
                 style={{ marginTop: '-15px' }}
@@ -292,8 +304,12 @@ export default React.memo(function AcceleratorsActions({
               {accelerator.program_type && (
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Category</span>
-                  <Badge className={`rounded-sm text-[10px] font-normal`}>
-                    {capitalizeFirst(accelerator.program_type)}
+                  <Badge
+                    className={`rounded-sm text-[10px] font-normal ${getProgramTypeColor(accelerator.program_type)}`}
+                  >
+                    {accelerator.program_type
+                      .replace(/-/g, ' ')
+                      .replace(/\b\w/g, (l) => l.toUpperCase())}
                   </Badge>
                 </div>
               )}
@@ -309,6 +325,7 @@ export default React.memo(function AcceleratorsActions({
 
               <Separator />
 
+              {/* Focus Areas */}
               {accelerator.stage_focus &&
                 accelerator.stage_focus.length > 0 && (
                   <div className="flex items-start justify-between">
@@ -360,6 +377,32 @@ export default React.memo(function AcceleratorsActions({
                   </div>
                 )}
 
+              {accelerator.funding_provided && (
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Funding</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
+                    <Badge
+                      className={`rounded-sm text-[10px] ${getFundingColor(accelerator.funding_provided)}`}
+                    >
+                      {accelerator.funding_provided}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+
+              {accelerator.equity_taken && (
+                <div className="flex items-start justify-between">
+                  <span className="text-muted-foreground pt-1">Equity</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
+                    <Badge
+                      className={`rounded-sm text-[10px] ${getEquityColor(accelerator.equity_taken)}`}
+                    >
+                      {accelerator.equity_taken}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+
               {accelerator.required_documents &&
                 accelerator.required_documents.length > 0 && (
                   <div className="flex items-start justify-between">
@@ -379,28 +422,6 @@ export default React.memo(function AcceleratorsActions({
                   </div>
                 )}
 
-              {accelerator.equity_taken && (
-                <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Equity</span>
-                  <Badge
-                    className={`rounded-sm text-[10px] ${getEquityColor(accelerator.equity_taken)}`}
-                  >
-                    {accelerator.equity_taken}
-                  </Badge>
-                </div>
-              )}
-
-              {accelerator.funding_provided && (
-                <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Funding</span>
-                  <Badge
-                    className={`rounded-sm text-[10px] ${getFundingColor(accelerator.funding_provided)}`}
-                  >
-                    {accelerator.funding_provided}
-                  </Badge>
-                </div>
-              )}
-
               {accelerator.tags && accelerator.tags.length > 0 && (
                 <div className="flex items-start justify-between">
                   <span className="text-muted-foreground pt-1">Tags</span>
@@ -419,7 +440,8 @@ export default React.memo(function AcceleratorsActions({
 
               <Separator />
 
-              {submissions.length > 0 && (
+              {/* Submission History */}
+              {submissions.length > 0 ? (
                 <section>
                   <h3 className="text-sm font-medium mb-2">History</h3>
                   <div className="space-y-2">
@@ -457,6 +479,13 @@ export default React.memo(function AcceleratorsActions({
                     )}
                   </div>
                 </section>
+              ) : (
+                <div>
+                  <h3 className="text-sm font-medium mb-2">History</h3>
+                  <p className="text-foreground/60 text-center py-2 text-[10px]">
+                    No submission history
+                  </p>
+                </div>
               )}
             </div>
           </CardContent>

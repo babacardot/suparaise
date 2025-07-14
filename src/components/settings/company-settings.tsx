@@ -25,6 +25,7 @@ import {
   X,
   Check,
   ChevronsUpDown,
+  Wand2,
 } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import { useUser } from '@/lib/contexts/user-context'
@@ -379,9 +380,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -520,11 +520,12 @@ export default function CompanySettings() {
   const [editingField, setEditingField] = useState<string | null>(null)
   const [dataLoading, setDataLoading] = useState(true)
   const [logoUploading, setLogoUploading] = useState(false)
+  const [isAutoFilling, setIsAutoFilling] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [startupDeleteConfirmation, setStartupDeleteConfirmation] = useState('')
   const logoInputRef = useRef<HTMLInputElement>(null)
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CompanySettingsData>({
     name: '',
     website: '',
     industry: null as IndustryType | null,
@@ -540,7 +541,6 @@ export default function CompanySettings() {
     currentRunway: 0,
     keyCustomers: '',
     competitors: '',
-    competitorsList: [] as string[],
     logoUrl: null as string | null,
     isIncorporated: false,
     incorporationCountry: '',
@@ -609,9 +609,6 @@ export default function CompanySettings() {
             currentRunway: startupData.currentRunway || 0,
             keyCustomers: startupData.keyCustomers || '',
             competitors: startupData.competitors || '',
-            competitorsList: startupData.competitors
-              ? startupData.competitors.split(', ').filter(Boolean)
-              : [],
             logoUrl: startupData.logoUrl || null,
             isIncorporated: startupData.isIncorporated || false,
             incorporationCountry: startupData.incorporationCountry || '',
@@ -620,8 +617,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                    .split(',')
-                    .filter(Boolean)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -655,6 +652,118 @@ export default function CompanySettings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, currentStartupId]) // Intentionally omitting supabase and toast - they are stable references
 
+  const handleWebsiteAutoFill = async () => {
+    if (!formData.website?.trim()) {
+      return
+    }
+
+    setIsAutoFilling(true)
+    try {
+      const response = await fetch('/api/ai/autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          websiteUrl: formData.website,
+          context: { companyName: formData.name || undefined },
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze website')
+      }
+
+      const { data } = await response.json()
+
+      const fieldsToUpdate: Partial<CompanySettingsData> = {}
+      if (!formData.name && data.name) fieldsToUpdate.name = data.name
+      if (!formData.descriptionShort && data.descriptionShort)
+        fieldsToUpdate.descriptionShort = data.descriptionShort
+      if (!formData.descriptionMedium && data.descriptionMedium)
+        fieldsToUpdate.descriptionMedium = data.descriptionMedium
+      if (!formData.descriptionLong && data.descriptionLong)
+        fieldsToUpdate.descriptionLong = data.descriptionLong
+      if (!formData.industry && data.industry) {
+        // Validate that the industry is a valid enum value
+        if (INDUSTRIES.includes(data.industry as IndustryType)) {
+          fieldsToUpdate.industry = data.industry as IndustryType
+        }
+      }
+      if (!formData.location && data.location)
+        fieldsToUpdate.location = data.location
+      if (!formData.foundedYear && data.foundedYear)
+        fieldsToUpdate.foundedYear = data.foundedYear
+
+      if (Object.keys(fieldsToUpdate).length > 0) {
+        // Update local state first
+        setFormData((prev) => ({ ...prev, ...fieldsToUpdate }))
+
+        // Then save all the autofilled fields to the database
+        if (!currentStartupId || !user?.id) {
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'No startup selected.',
+          })
+          return
+        }
+
+        try {
+          const { data, error } = await supabase.rpc('update_user_startup_data', {
+            p_user_id: user!.id,
+            p_startup_id: currentStartupId,
+            p_data: fieldsToUpdate,
+          })
+
+          if (error) throw error
+          const result = data as UpdateStartupResponse
+
+          if (result && 'error' in result) {
+            throw new Error(result.error)
+          }
+
+          // If updating company name, refresh startups data
+          if (fieldsToUpdate.name) {
+            try {
+              await refreshStartups()
+            } catch (refreshError) {
+              console.error('Error refreshing startups:', refreshError)
+              // Don't show error to user since the main update succeeded
+            }
+          }
+
+          playClickSound()
+          toast({
+            title: 'Autofill complete',
+            variant: 'success',
+            description: `Successfully autofilled and saved ${Object.keys(fieldsToUpdate).length} field${Object.keys(fieldsToUpdate).length > 1 ? 's' : ''}.`,
+          })
+        } catch (error) {
+          console.error('Error saving autofilled data:', error)
+          toast({
+            variant: 'destructive',
+            title: 'Autofill save failed',
+            description: `Data was autofilled but could not be saved. Error: ${error instanceof Error ? error.message : String(error)}`,
+            duration: 9000,
+          })
+        }
+      } else {
+        toast({
+          title: 'Nothing to autofill',
+          description: 'Your company information is already complete.',
+        })
+      }
+    } catch (error) {
+      console.error('Website auto-fill error:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Autofill failed',
+        description: 'Could not fetch information from the website.',
+      })
+    } finally {
+      setIsAutoFilling(false)
+    }
+  }
+
   if (!user) {
     return <div></div>
   }
@@ -662,6 +771,8 @@ export default function CompanySettings() {
   if (dataLoading) {
     return <CompanySettingsSkeleton />
   }
+
+
 
   const handleInputChange = (
     field: string,
@@ -1586,36 +1697,52 @@ export default function CompanySettings() {
 
               <div className="space-y-3">
                 <Label htmlFor="website">Website</Label>
-                <div className="relative">
-                  <Input
-                    id="website"
-                    value={formData.website}
-                    onChange={(e) =>
-                      handleInputChange('website', e.target.value)
-                    }
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'website' && 'dark:bg-muted',
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      id="website"
+                      value={formData.website || ''}
+                      onChange={(e) =>
+                        handleInputChange('website', e.target.value)
+                      }
+                      className={cn(
+                        'rounded-sm pr-8',
+                        editingField !== 'website' && 'dark:bg-muted',
+                      )}
+                      readOnly={editingField !== 'website'}
+                      placeholder="https://yourcompany.com"
+                    />
+                    {editingField !== 'website' ? (
+                      <button
+                        onClick={() => handleFieldEdit('website')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
+                      >
+                        <PencilIcon className="h-3 w-3" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleFieldSave('website')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
+                        disabled={isLoading}
+                      >
+                        <CheckIcon className="h-4 w-4" />
+                      </button>
                     )}
-                    readOnly={editingField !== 'website'}
-                    placeholder="https://yourcompany.com"
-                  />
-                  {editingField !== 'website' ? (
-                    <button
-                      onClick={() => handleFieldEdit('website')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('website')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleWebsiteAutoFill}
+                    disabled={!formData.website?.trim() || isAutoFilling}
+                    className="shrink-0 px-3 h-9 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                    title="Auto-fill company information from website"
+                  >
+                    {isAutoFilling ? (
+                      <Spinner className="h-3 w-3" />
+                    ) : (
+                      <Wand2 className="h-3 w-3" />
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1627,7 +1754,7 @@ export default function CompanySettings() {
                   <Input
                     id="foundedYear"
                     type="number"
-                    value={formData.foundedYear}
+                    value={formData.foundedYear || ''}
                     onChange={(e) =>
                       handleInputChange(
                         'foundedYear',
@@ -1694,7 +1821,7 @@ export default function CompanySettings() {
                 <div className="relative">
                   <Input
                     id="location"
-                    value={formData.location}
+                    value={formData.location || ''}
                     onChange={(e) =>
                       handleInputChange('location', e.target.value)
                     }
@@ -1730,7 +1857,7 @@ export default function CompanySettings() {
                   <select
                     id="employeeCount"
                     className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={formData.employeeCount}
+                    value={formData.employeeCount || ''}
                     onChange={async (e) => {
                       const newValue = parseInt(e.target.value) || 1
                       handleInputChange('employeeCount', newValue)
@@ -1759,7 +1886,7 @@ export default function CompanySettings() {
               <div className="relative">
                 <Textarea
                   id="descriptionShort"
-                  value={formData.descriptionShort}
+                  value={formData.descriptionShort || ''}
                   onChange={(e) =>
                     handleInputChange('descriptionShort', e.target.value)
                   }
@@ -1776,9 +1903,9 @@ export default function CompanySettings() {
                     companyName: formData.name,
                     industry: formData.industry || undefined,
                   }}
-                  onAIEnhance={(enhancedText) =>
+                  onAIEnhance={(enhancedText) => {
                     handleInputChange('descriptionShort', enhancedText)
-                  }
+                  }}
                 />
                 {editingField !== 'descriptionShort' ? (
                   <button
@@ -1804,7 +1931,7 @@ export default function CompanySettings() {
               <div className="relative">
                 <Textarea
                   id="descriptionMedium"
-                  value={formData.descriptionMedium}
+                  value={formData.descriptionMedium || ''}
                   onChange={(e) =>
                     handleInputChange('descriptionMedium', e.target.value)
                   }
@@ -1821,9 +1948,9 @@ export default function CompanySettings() {
                     companyName: formData.name,
                     industry: formData.industry || undefined,
                   }}
-                  onAIEnhance={(enhancedText) =>
+                  onAIEnhance={(enhancedText) => {
                     handleInputChange('descriptionMedium', enhancedText)
-                  }
+                  }}
                 />
                 {editingField !== 'descriptionMedium' ? (
                   <button
@@ -1849,7 +1976,7 @@ export default function CompanySettings() {
               <div className="relative">
                 <Textarea
                   id="descriptionLong"
-                  value={formData.descriptionLong}
+                  value={formData.descriptionLong || ''}
                   onChange={(e) =>
                     handleInputChange('descriptionLong', e.target.value)
                   }
@@ -1866,9 +1993,9 @@ export default function CompanySettings() {
                     companyName: formData.name,
                     industry: formData.industry || undefined,
                   }}
-                  onAIEnhance={(enhancedText) =>
+                  onAIEnhance={(enhancedText) => {
                     handleInputChange('descriptionLong', enhancedText)
-                  }
+                  }}
                 />
                 {editingField !== 'descriptionLong' ? (
                   <button
@@ -2029,7 +2156,7 @@ export default function CompanySettings() {
                   <select
                     id="currentRunway"
                     className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={formData.currentRunway}
+                    value={formData.currentRunway || ''}
                     onChange={async (e) => {
                       const newValue = parseInt(e.target.value) || 0
                       handleInputChange('currentRunway', newValue)
@@ -2168,7 +2295,7 @@ export default function CompanySettings() {
                     <select
                       id="incorporationCountry"
                       className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                      value={formData.incorporationCountry}
+                      value={formData.incorporationCountry || ''}
                       onChange={async (e) => {
                         handleInputChange(
                           'incorporationCountry',
@@ -2193,7 +2320,7 @@ export default function CompanySettings() {
                   <div className="relative">
                     <Input
                       id="incorporationCity"
-                      value={formData.incorporationCity}
+                      value={formData.incorporationCity || ''}
                       onChange={(e) =>
                         handleInputChange('incorporationCity', e.target.value)
                       }
@@ -2230,16 +2357,16 @@ export default function CompanySettings() {
                 Countries where you operate
               </Label>
               <MultiSelectCountries
-                selected={formData.operatingCountries}
+                selected={formData.operatingCountries || []}
                 onChange={async (selected) => {
                   handleInputChange('operatingCountries', selected)
                   await handleFieldSave('operatingCountries')
                 }}
               />
-              {formData.operatingCountries.length > 0 && (
+              {(formData.operatingCountries || []).length > 0 && (
                 <div className="pt-2">
                   <div className="flex flex-wrap gap-1">
-                    {formData.operatingCountries.map((country, index) => (
+                    {(formData.operatingCountries || []).map((country, index) => (
                       <Badge
                         key={country}
                         className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
@@ -2248,7 +2375,7 @@ export default function CompanySettings() {
                         <button
                           onClick={async () => {
                             const newCountries =
-                              formData.operatingCountries.filter(
+                              (formData.operatingCountries || []).filter(
                                 (c) => c !== country,
                               )
                             handleInputChange(
@@ -2279,7 +2406,7 @@ export default function CompanySettings() {
                   id="fundingAmountSought"
                   type="text"
                   inputMode="numeric"
-                  value={formatCurrency(formData.fundingAmountSought)}
+                  value={formatCurrency(formData.fundingAmountSought || 0)}
                   onChange={(e) =>
                     handleNumericChange(
                       (val) => handleInputChange('fundingAmountSought', val),
@@ -2300,7 +2427,7 @@ export default function CompanySettings() {
                   id="preMoneyValuation"
                   type="text"
                   inputMode="numeric"
-                  value={formatCurrency(formData.preMoneyValuation)}
+                  value={formatCurrency(formData.preMoneyValuation || 0)}
                   onChange={(e) =>
                     handleNumericChange(
                       (val) => handleInputChange('preMoneyValuation', val),
@@ -2323,7 +2450,7 @@ export default function CompanySettings() {
                   id="mrr"
                   type="text"
                   inputMode="numeric"
-                  value={formatCurrency(formData.mrr)}
+                  value={formatCurrency(formData.mrr || 0)}
                   onChange={(e) =>
                     handleNumericChange(
                       (val) => handleInputChange('mrr', val),
@@ -2344,7 +2471,7 @@ export default function CompanySettings() {
                   id="arr"
                   type="text"
                   inputMode="numeric"
-                  value={formatCurrency(formData.arr)}
+                  value={formatCurrency(formData.arr || 0)}
                   onChange={(e) =>
                     handleNumericChange(
                       (val) => handleInputChange('arr', val),
@@ -2368,7 +2495,7 @@ export default function CompanySettings() {
               <div className="relative">
                 <Textarea
                   id="tractionSummary"
-                  value={formData.tractionSummary}
+                  value={formData.tractionSummary || ''}
                   onChange={(e) =>
                     handleInputChange('tractionSummary', e.target.value)
                   }
@@ -2385,9 +2512,9 @@ export default function CompanySettings() {
                     companyName: formData.name,
                     industry: formData.industry || undefined,
                   }}
-                  onAIEnhance={(enhancedText) =>
+                  onAIEnhance={(enhancedText) => {
                     handleInputChange('tractionSummary', enhancedText)
-                  }
+                  }}
                 />
                 {editingField !== 'tractionSummary' ? (
                   <button
@@ -2413,7 +2540,7 @@ export default function CompanySettings() {
               <div className="relative">
                 <Textarea
                   id="marketSummary"
-                  value={formData.marketSummary}
+                  value={formData.marketSummary || ''}
                   onChange={(e) =>
                     handleInputChange('marketSummary', e.target.value)
                   }
@@ -2430,9 +2557,9 @@ export default function CompanySettings() {
                     companyName: formData.name,
                     industry: formData.industry || undefined,
                   }}
-                  onAIEnhance={(enhancedText) =>
+                  onAIEnhance={(enhancedText) => {
                     handleInputChange('marketSummary', enhancedText)
-                  }
+                  }}
                 />
                 {editingField !== 'marketSummary' ? (
                   <button
@@ -2458,7 +2585,7 @@ export default function CompanySettings() {
               <div className="relative">
                 <Textarea
                   id="keyCustomers"
-                  value={formData.keyCustomers}
+                  value={formData.keyCustomers || ''}
                   onChange={(e) =>
                     handleInputChange('keyCustomers', e.target.value)
                   }
@@ -2475,9 +2602,9 @@ export default function CompanySettings() {
                     companyName: formData.name,
                     industry: formData.industry || undefined,
                   }}
-                  onAIEnhance={(enhancedText) =>
+                  onAIEnhance={(enhancedText) => {
                     handleInputChange('keyCustomers', enhancedText)
-                  }
+                  }}
                 />
                 {editingField !== 'keyCustomers' ? (
                   <button
@@ -2501,9 +2628,10 @@ export default function CompanySettings() {
             <div className="space-y-3">
               <Label htmlFor="competitors">Competitors</Label>
               <CompetitorInput
-                competitors={formData.competitorsList || []}
+                competitors={formData.competitors
+                  ? formData.competitors.split(', ').filter(Boolean)
+                  : []}
                 onChange={async (competitors) => {
-                  handleInputChange('competitorsList', competitors)
                   handleInputChange('competitors', competitors.join(', '))
                   await handleFieldSave('competitors')
                 }}
@@ -2517,7 +2645,7 @@ export default function CompanySettings() {
             <div className="relative">
               <Input
                 id="googleDriveUrl"
-                value={formData.googleDriveUrl}
+                value={formData.googleDriveUrl || ''}
                 onChange={(e) =>
                   handleInputChange('googleDriveUrl', e.target.value)
                 }
@@ -2995,7 +3123,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

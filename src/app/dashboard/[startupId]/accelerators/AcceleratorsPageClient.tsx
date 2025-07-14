@@ -118,19 +118,7 @@ export default function AcceleratorsPageClient({
 
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(
     () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const savedVisibility = localStorage.getItem(
-            COLUMN_VISIBILITY_STORAGE_KEY,
-          )
-          if (savedVisibility) {
-            return JSON.parse(savedVisibility)
-          }
-        } catch (error) {
-          console.warn('Failed to load saved column visibility:', error)
-        }
-      }
-      return {
+      const defaultVisibility = {
         region: true,
         focus: false,
         industry: true,
@@ -138,8 +126,23 @@ export default function AcceleratorsPageClient({
         type: false,
         programType: false,
         equity: true,
-        funding: true,
+        funding: false,
       }
+
+      if (typeof window !== 'undefined') {
+        try {
+          const savedVisibilityJSON = localStorage.getItem(
+            COLUMN_VISIBILITY_STORAGE_KEY,
+          )
+          if (savedVisibilityJSON) {
+            const savedVisibility = JSON.parse(savedVisibilityJSON)
+            return { ...defaultVisibility, ...savedVisibility }
+          }
+        } catch (error) {
+          console.warn('Failed to load saved column visibility:', error)
+        }
+      }
+      return defaultVisibility
     },
   )
 

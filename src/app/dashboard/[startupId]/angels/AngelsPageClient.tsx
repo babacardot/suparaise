@@ -121,19 +121,7 @@ export default function AngelsPageClient({
 
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(
     () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const savedVisibility = localStorage.getItem(
-            COLUMN_VISIBILITY_STORAGE_KEY,
-          )
-          if (savedVisibility) {
-            return JSON.parse(savedVisibility)
-          }
-        } catch (error) {
-          console.warn('Failed to load saved column visibility:', error)
-        }
-      }
-      return {
+      const defaultVisibility = {
         region: true,
         focus: true,
         industry: true,
@@ -141,6 +129,22 @@ export default function AngelsPageClient({
         investment_approach: false,
         type: false,
       }
+
+      if (typeof window !== 'undefined') {
+        try {
+          const savedVisibilityJSON = localStorage.getItem(
+            COLUMN_VISIBILITY_STORAGE_KEY,
+          )
+          if (savedVisibilityJSON) {
+            const savedVisibility = JSON.parse(savedVisibilityJSON)
+            // Ensure new keys have default values if not in storage
+            return { ...defaultVisibility, ...savedVisibility }
+          }
+        } catch (error) {
+          console.warn('Failed to load saved column visibility:', error)
+        }
+      }
+      return defaultVisibility
     },
   )
 
