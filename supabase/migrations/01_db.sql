@@ -46,11 +46,9 @@ CREATE TYPE founder_role AS ENUM (
 );
 CREATE TYPE investment_stage AS ENUM ('Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'All');
 CREATE TYPE industry_type AS ENUM (
-    -- Tech
     'B2B SaaS', 'Fintech', 'Healthtech', 'AI/ML', 'Deep tech', 'Climate tech', 
     'Consumer', 'E-commerce', 'Marketplace', 'Gaming', 'Web3', 
     'Developer tools', 'Cybersecurity', 'Logistics', 'AdTech', 'PropTech', 'InsurTech',
-    -- Non-Tech / Other
     'Agriculture', 'Automotive', 'Biotechnology', 'Construction', 'Consulting', 
     'Consumer Goods', 'Education', 'Energy', 'Entertainment', 'Environmental Services', 
     'Fashion', 'Food & Beverage', 'Government', 'Healthcare Services', 'Hospitality', 

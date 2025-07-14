@@ -133,6 +133,37 @@ export type TargetRecord = z.infer<typeof TargetSchema>
 export type AngelRecord = z.infer<typeof AngelSchema>
 export type AcceleratorRecord = z.infer<typeof AcceleratorSchema>
 
+const targetArrayKeys = new Set([
+  'stage_focus',
+  'industry_focus',
+  'region_focus',
+  'required_documents',
+  'tags',
+])
+const angelArrayKeys = new Set([
+  'stage_focus',
+  'industry_focus',
+  'region_focus',
+  'previous_exits',
+  'domain_expertise',
+  'required_documents',
+  'tags',
+  'notable_investments',
+])
+const acceleratorArrayKeys = new Set([
+  'stage_focus',
+  'industry_focus',
+  'region_focus',
+  'required_documents',
+  'tags',
+])
+
+const ARRAY_KEYS_MAP = {
+  targets: targetArrayKeys,
+  angels: angelArrayKeys,
+  accelerators: acceleratorArrayKeys,
+}
+
 const TABLE_CONFIGS = {
   targets: {
     schema: TargetSchema,
@@ -322,6 +353,7 @@ export async function generateExcelTemplate(
   const worksheet = workbook.addWorksheet(`${tableName} template`)
   const validationSheet = workbook.addWorksheet('ValidationData')
   validationSheet.state = 'hidden'
+  const arrayKeys = ARRAY_KEYS_MAP[tableName]
 
   // Add headers
   worksheet.columns = config.headers.map((h) => ({
@@ -336,6 +368,8 @@ export async function generateExcelTemplate(
     if (col.type) {
       const enumValues = ENUMS.get(col.type)
       if (enumValues && enumValues.length > 0) {
+        const isArray = arrayKeys.has(col.key)
+
         // Write enum values to a column in the hidden validation sheet
         const validationColumn = colIndex + 1
         enumValues.forEach((value, rowIndex) => {
@@ -351,9 +385,12 @@ export async function generateExcelTemplate(
             type: 'list',
             allowBlank: true,
             formulae: [range],
-            showErrorMessage: true,
+            showErrorMessage: !isArray,
+            errorStyle: isArray ? 'information' : 'stop',
             errorTitle: 'Invalid Value',
-            error: `Please select a value from the dropdown list.`,
+            error: isArray
+              ? 'You can enter multiple values separated by commas. The list is a guide for available options.'
+              : `Please select a value from the dropdown list.`,
           }
         }
       }
