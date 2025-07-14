@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: '%s | Suparaise',
   },
   description:
-    'Automate your startup fundraising with AI agents that fill out VC and fund applications on autopilot',
+    'Automate your startup fundraising with AI agents that reach out to investors for you, on autopilot',
   keywords: [
     // English - Core Fundraising Terms
     'vc funding',
@@ -218,7 +218,7 @@ export const metadata: Metadata = {
     url: 'https://suparaise.com',
     title: 'Suparaise',
     description:
-      'Automate your startup fundraising with AI agents that fill out VC and fund applications on autopilot',
+      'Automate your startup fundraising with AI agents that reach out to investors for you, on autopilot',
     siteName: 'Suparaise',
     images: [
       {
@@ -233,7 +233,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Suparaise | AI-Powered Fundraising Automation',
     description:
-      'Automate your startup fundraising with AI agents that fill out VC and fund applications on autopilot',
+      'Automate your startup fundraising with AI agents that reach out to investors for you, on autopilot',
     images: ['/banner.png'],
     creator: '@suparaise',
   },
