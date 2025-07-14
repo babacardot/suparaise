@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import Spinner from '@/components/ui/spinner'
 
 type Angel = {
   id: string
@@ -189,6 +188,11 @@ export default React.memo(function AngelsActions({
     return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
   }
 
+  const getCheckSizeDisplay = (size: string) => {
+    if (!size) return ''
+    return size.replace('-', ' — ')
+  }
+
   const getSecondaryBadgeColor = () => {
     return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
   }
@@ -257,7 +261,7 @@ export default React.memo(function AngelsActions({
                   <Badge
                     className={`rounded-sm text-[10px] font-normal ${getCheckSizeColor()}`}
                   >
-                    {angel.check_size}
+                    {getCheckSizeDisplay(angel.check_size)}
                   </Badge>
                 </div>
               )}
@@ -372,9 +376,7 @@ export default React.memo(function AngelsActions({
 
               {angel.domain_expertise && angel.domain_expertise.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">
-                    Expertise
-                  </span>
+                  <span className="text-muted-foreground pt-1">Expertise</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.domain_expertise.map((domain) => (
                       <Badge
@@ -388,59 +390,47 @@ export default React.memo(function AngelsActions({
                 </div>
               )}
 
-              {/* Submission History */}
-              {loading && (
-                <>
-                  <Separator />
-                  <div className="flex justify-center items-center py-4">
-                    <Spinner className="h-3 w-3" />
-                  </div>
-                </>
-              )}
+              <Separator />
 
+              {/* Submission History */}
               {!loading && submissions.length > 0 && (
-                <>
-                  <Separator />
-                  <section>
-                    <h3 className="text-sm font-medium mb-2">History</h3>
-                    <div className="space-y-2">
-                      {submissions.slice(0, 3).map((submission) => (
-                        <div
-                          key={submission.id}
-                          className="flex items-center justify-between p-2 rounded-sm bg-muted/30"
-                        >
-                          <div className="flex flex-col space-y-1">
-                            <span className="text-xs font-medium">
-                              {formatDate(submission.submission_date)}
+                <section>
+                  <h3 className="text-sm font-medium mb-2">History</h3>
+                  <div className="space-y-2">
+                    {submissions.slice(0, 3).map((submission) => (
+                      <div
+                        key={submission.id}
+                        className="flex items-center justify-between p-2 rounded-sm bg-muted/30"
+                      >
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs font-medium">
+                            {formatDate(submission.submission_date)}
+                          </span>
+                          {submission.queue_position && (
+                            <span className="text-[10px] text-muted-foreground">
+                              Queue position: {submission.queue_position}
                             </span>
-                            {submission.queue_position && (
-                              <span className="text-[10px] text-muted-foreground">
-                                Queue position: {submission.queue_position}
-                              </span>
-                            )}
-                            {submission.agent_notes && (
-                              <span className="text-[10px] text-muted-foreground">
-                                {submission.agent_notes}
-                              </span>
-                            )}
-                          </div>
-                          <Badge
-                            className={`rounded-sm text-[10px] font-normal ${getStatusColor(submission.status)}`}
-                          >
-                            {capitalizeFirst(
-                              submission.status.replace('_', ' '),
-                            )}
-                          </Badge>
+                          )}
+                          {submission.agent_notes && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {submission.agent_notes}
+                            </span>
+                          )}
                         </div>
-                      ))}
-                      {submissions.length > 3 && (
-                        <p className="text-[10px] text-muted-foreground text-center">
-                          +{submissions.length - 3} more submissions
-                        </p>
-                      )}
-                    </div>
-                  </section>
-                </>
+                        <Badge
+                          className={`rounded-sm text-[10px] font-normal ${getStatusColor(submission.status)}`}
+                        >
+                          {capitalizeFirst(submission.status.replace('_', ' '))}
+                        </Badge>
+                      </div>
+                    ))}
+                    {submissions.length > 3 && (
+                      <p className="text-[10px] text-muted-foreground text-center">
+                        +{submissions.length - 3} more submissions
+                      </p>
+                    )}
+                  </div>
+                </section>
               )}
             </div>
           </CardContent>

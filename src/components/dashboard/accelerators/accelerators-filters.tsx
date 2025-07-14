@@ -355,11 +355,11 @@ export default function AcceleratorsFilters({
         if (value === '0%')
           return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40'
         if (value === '1 — 3%')
-          return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+          return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
         if (value === '4 — 6%')
-          return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
+          return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
         if (value === '7 — 10%')
-          return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+          return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
         if (value === '10% +')
           return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
         if (value === 'Variable')
@@ -367,17 +367,17 @@ export default function AcceleratorsFilters({
       }
       if (filterKey === 'fundingRanges') {
         if (value === '0 — 25K')
-          return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40'
-        if (value === '25K — 50K')
-          return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
-        if (value === '50K — 100K')
-          return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
-        if (value === '100K — 250K')
-          return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
-        if (value === '250K — 500K')
           return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
+        if (value === '25K — 50K')
+          return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
+        if (value === '50K — 100K')
+          return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+        if (value === '100K — 250K')
+          return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+        if (value === '250K — 500K')
+          return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
         if (value === '500K +')
-          return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
+          return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
       }
       return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
     },
@@ -1051,7 +1051,7 @@ export default function AcceleratorsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.requiredDocuments &&
-                      localFilters.requiredDocuments.length > 0 ? (
+                    localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = REQUIRED_DOCUMENTS.find(
                           (d) => d.value === doc,
@@ -1083,7 +1083,7 @@ export default function AcceleratorsFilters({
                       )}
                   </div>
                   {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
+                  localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
@@ -1160,10 +1160,11 @@ export default function AcceleratorsFilters({
                         !columnVisibility[key as keyof ColumnVisibility],
                       )
                     }}
-                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${columnVisibility[key as keyof ColumnVisibility]
-                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                      : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                      }`}
+                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${
+                      columnVisibility[key as keyof ColumnVisibility]
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                    }`}
                   >
                     <span className="text-sm font-medium capitalize">
                       {key === 'programType'
@@ -1196,12 +1197,13 @@ export default function AcceleratorsFilters({
                 setLocalFilters(newFilters)
                 onFiltersChange(newFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
-                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
-                : localFilters.submissionFilter === 'only_submitted'
-                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                  : 'bg-card border-border'
-                }`}
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
+                localFilters.submissionFilter === 'hide_submitted'
+                  ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
+                  : localFilters.submissionFilter === 'only_submitted'
+                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                    : 'bg-card border-border'
+              }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all (click to hide submitted)'

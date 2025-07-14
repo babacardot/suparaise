@@ -380,8 +380,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -617,8 +618,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                  .split(',')
-                  .filter(Boolean)
+                    .split(',')
+                    .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -708,11 +709,14 @@ export default function CompanySettings() {
         }
 
         try {
-          const { data, error } = await supabase.rpc('update_user_startup_data', {
-            p_user_id: user!.id,
-            p_startup_id: currentStartupId,
-            p_data: fieldsToUpdate,
-          })
+          const { data, error } = await supabase.rpc(
+            'update_user_startup_data',
+            {
+              p_user_id: user!.id,
+              p_startup_id: currentStartupId,
+              p_data: fieldsToUpdate,
+            },
+          )
 
           if (error) throw error
           const result = data as UpdateStartupResponse
@@ -771,8 +775,6 @@ export default function CompanySettings() {
   if (dataLoading) {
     return <CompanySettingsSkeleton />
   }
-
-
 
   const handleInputChange = (
     field: string,
@@ -2366,31 +2368,32 @@ export default function CompanySettings() {
               {(formData.operatingCountries || []).length > 0 && (
                 <div className="pt-2">
                   <div className="flex flex-wrap gap-1">
-                    {(formData.operatingCountries || []).map((country, index) => (
-                      <Badge
-                        key={country}
-                        className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
-                      >
-                        {country}
-                        <button
-                          onClick={async () => {
-                            const newCountries =
-                              (formData.operatingCountries || []).filter(
-                                (c) => c !== country,
-                              )
-                            handleInputChange(
-                              'operatingCountries',
-                              newCountries,
-                            )
-                            await handleFieldSave('operatingCountries')
-                          }}
-                          className="ml-1.5"
-                          aria-label={`Remove ${country}`}
+                    {(formData.operatingCountries || []).map(
+                      (country, index) => (
+                        <Badge
+                          key={country}
+                          className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
                         >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
+                          {country}
+                          <button
+                            onClick={async () => {
+                              const newCountries = (
+                                formData.operatingCountries || []
+                              ).filter((c) => c !== country)
+                              handleInputChange(
+                                'operatingCountries',
+                                newCountries,
+                              )
+                              await handleFieldSave('operatingCountries')
+                            }}
+                            className="ml-1.5"
+                            aria-label={`Remove ${country}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ),
+                    )}
                   </div>
                 </div>
               )}
@@ -2628,9 +2631,11 @@ export default function CompanySettings() {
             <div className="space-y-3">
               <Label htmlFor="competitors">Competitors</Label>
               <CompetitorInput
-                competitors={formData.competitors
-                  ? formData.competitors.split(', ').filter(Boolean)
-                  : []}
+                competitors={
+                  formData.competitors
+                    ? formData.competitors.split(', ').filter(Boolean)
+                    : []
+                }
                 onChange={async (competitors) => {
                   handleInputChange('competitors', competitors.join(', '))
                   await handleFieldSave('competitors')
@@ -3123,7 +3128,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                            (formData.name || 'CONFIRM')
+                              (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

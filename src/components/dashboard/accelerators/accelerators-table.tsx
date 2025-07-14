@@ -348,35 +348,46 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     return str.charAt(0).toUpperCase() + str.slice(1)
   }, [])
 
+  const getEquityDisplay = (equity: string) => {
+    if (!equity) return ''
+    if (equity === 'variable') return 'Variable'
+    return equity.replace('-', ' — ')
+  }
+
   const getEquityColor = React.useCallback((equity: string) => {
     if (equity === '0%')
       return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
-    if (equity === '1 — 3%')
+    if (equity === '1-3%')
+      return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
+    if (equity === '4-6%')
       return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-    if (equity === '4 — 6%')
+    if (equity === '7-10%')
       return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-    if (equity === '7 — 10%')
-      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
-    if (equity === '10% +')
+    if (equity === '10%+')
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
     if (equity === 'variable')
-      return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
   }, [])
 
+  const getFundingDisplay = (funding: string) => {
+    if (!funding) return ''
+    return funding.replace('-', ' — ')
+  }
+
   const getFundingColor = React.useCallback((funding: string) => {
-    if (funding === '0 — 25K')
-      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
-    if (funding === '25K — 50K')
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-    if (funding === '50K — 100K')
-      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-    if (funding === '100K — 250K')
-      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
-    if (funding === '250K — 500K')
+    if (funding === '0-25K')
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
-    if (funding === '500K +')
-      return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+    if (funding === '25K-50K')
+      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+    if (funding === '50K-100K')
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
+    if (funding === '100K-250K')
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+    if (funding === '250K-500K')
+      return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
+    if (funding === '500K+')
+      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
   }, [])
 
@@ -790,7 +801,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                               <Badge
                                 className={`rounded-sm ${getEquityColor(accelerator.equity_taken)} text-xs`}
                               >
-                                {accelerator.equity_taken}
+                                {getEquityDisplay(accelerator.equity_taken)}
                               </Badge>
                             </TableCell>
                           )}
@@ -800,7 +811,9 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                               <Badge
                                 className={`rounded-sm ${getFundingColor(accelerator.funding_provided)} text-xs`}
                               >
-                                {accelerator.funding_provided}
+                                {getFundingDisplay(
+                                  accelerator.funding_provided,
+                                )}
                               </Badge>
                             </TableCell>
                           )}

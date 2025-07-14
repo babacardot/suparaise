@@ -884,24 +884,19 @@ export default function FundsFilters({
               align="end"
             >
               <div className="space-y-2">
-                {[
-                  'region',
-                  'focus',
-                  'industry',
-                  'type',
-                  'requirements',
-                ].map((key) => (
-                  <div
-                    key={key}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      onColumnVisibilityChange(
-                        key as keyof ColumnVisibility,
-                        !columnVisibility[key as keyof ColumnVisibility],
-                      )
-                    }}
-                    className={`
+                {['region', 'focus', 'industry', 'type', 'requirements'].map(
+                  (key) => (
+                    <div
+                      key={key}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onColumnVisibilityChange(
+                          key as keyof ColumnVisibility,
+                          !columnVisibility[key as keyof ColumnVisibility],
+                        )
+                      }}
+                      className={`
                                             flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
                                             ${
                                               columnVisibility[
@@ -911,12 +906,13 @@ export default function FundsFilters({
                                                 : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
                                             }
                                         `}
-                  >
-                    <span className="text-sm font-medium capitalize">
-                      {key.replace(/_/g, ' ')}
-                    </span>
-                  </div>
-                ))}
+                    >
+                      <span className="text-sm font-medium capitalize">
+                        {key.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                  ),
+                )}
               </div>
             </PopoverContent>
           </Popover>

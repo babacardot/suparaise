@@ -176,35 +176,46 @@ export default React.memo(function AcceleratorsActions({
     return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
   }
 
+  const getEquityDisplay = (equity: string) => {
+    if (!equity) return ''
+    if (equity === 'variable') return 'Variable'
+    return equity.replace('-', ' — ')
+  }
+
   const getEquityColor = (equity: string) => {
     if (equity === '0%')
       return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-    if (equity === '1 — 3%')
+    if (equity === '1-3%')
+      return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+    if (equity === '4-6%')
       return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-    if (equity === '4 — 6%')
+    if (equity === '7-10%')
       return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-    if (equity === '7 — 10%')
-      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-    if (equity === '10% +')
+    if (equity === '10%+')
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
-    if (equity === 'Variable')
+    if (equity === 'variable')
       return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
   }
 
+  const getFundingDisplay = (funding: string) => {
+    if (!funding) return ''
+    return funding.replace('-', ' — ')
+  }
+
   const getFundingColor = (funding: string) => {
-    if (funding === '0 — 25K')
-      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-    if (funding === '25K — 50K')
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-    if (funding === '50K — 100K')
-      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-    if (funding === '100K — 250K')
-      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-    if (funding === '250K — 500K')
+    if (funding === '0-25K')
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
-    if (funding === '500K +')
-      return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+    if (funding === '25K-50K')
+      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+    if (funding === '50K-100K')
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+    if (funding === '100K-250K')
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+    if (funding === '250K-500K')
+      return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+    if (funding === '500K+')
+      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
   }
 
@@ -384,7 +395,7 @@ export default React.memo(function AcceleratorsActions({
                     <Badge
                       className={`rounded-sm text-[10px] ${getFundingColor(accelerator.funding_provided)}`}
                     >
-                      {accelerator.funding_provided}
+                      {getFundingDisplay(accelerator.funding_provided)}
                     </Badge>
                   </div>
                 </div>
@@ -397,7 +408,7 @@ export default React.memo(function AcceleratorsActions({
                     <Badge
                       className={`rounded-sm text-[10px] ${getEquityColor(accelerator.equity_taken)}`}
                     >
-                      {accelerator.equity_taken}
+                      {getEquityDisplay(accelerator.equity_taken)}
                     </Badge>
                   </div>
                 </div>
@@ -441,7 +452,7 @@ export default React.memo(function AcceleratorsActions({
               <Separator />
 
               {/* Submission History */}
-              {submissions.length > 0 ? (
+              {submissions.length > 0 && (
                 <section>
                   <h3 className="text-sm font-medium mb-2">History</h3>
                   <div className="space-y-2">
@@ -479,13 +490,6 @@ export default React.memo(function AcceleratorsActions({
                     )}
                   </div>
                 </section>
-              ) : (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">History</h3>
-                  <p className="text-foreground/60 text-center py-2 text-[10px]">
-                    No submission history
-                  </p>
-                </div>
               )}
             </div>
           </CardContent>

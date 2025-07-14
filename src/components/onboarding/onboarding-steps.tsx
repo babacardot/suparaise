@@ -54,6 +54,7 @@ import { cn } from '@/lib/actions/utils'
 import Image from 'next/image'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
+import { useToast } from '@/lib/hooks/use-toast'
 // import { SmartIngestModal } from './ingest-modal'
 
 // Sound utility functions
@@ -899,6 +900,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
   // onIngestData,
 }) => {
   const [isAutoFilling, setIsAutoFilling] = useState(false)
+  const { toast } = useToast()
 
   const handleWebsiteAutoFill = async () => {
     if (!startup.website.trim()) {
@@ -921,40 +923,60 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to analyze website')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to analyze website')
       }
 
       const { data } = await response.json()
 
-      // Only update fields that are currently empty
-      setStartup({
-        ...startup,
-        name: startup.name || data.name || startup.name,
-        descriptionShort:
-          startup.descriptionShort ||
-          data.descriptionShort ||
-          startup.descriptionShort,
-        descriptionMedium:
-          startup.descriptionMedium ||
-          data.descriptionMedium ||
-          startup.descriptionMedium,
-        descriptionLong:
-          startup.descriptionLong ||
-          data.descriptionLong ||
-          startup.descriptionLong,
-        industry:
-          startup.industry ||
-          (data.industry as IndustryType) ||
-          startup.industry,
-        location: startup.location || data.location || startup.location,
-        foundedYear:
-          startup.foundedYear || data.foundedYear || startup.foundedYear,
-      })
+      // Build an object with only the fields that need updating
+      const fieldsToUpdate: Partial<StartupData> = {}
+      if (data.name && !startup.name) fieldsToUpdate.name = data.name
+      if (data.descriptionShort && !startup.descriptionShort)
+        fieldsToUpdate.descriptionShort = data.descriptionShort
+      if (data.descriptionMedium && !startup.descriptionMedium)
+        fieldsToUpdate.descriptionMedium = data.descriptionMedium
+      if (data.descriptionLong && !startup.descriptionLong)
+        fieldsToUpdate.descriptionLong = data.descriptionLong
+      if (data.industry && !startup.industry)
+        fieldsToUpdate.industry = data.industry as IndustryType
+      if (data.location && !startup.location)
+        fieldsToUpdate.location = data.location
+      if (data.foundedYear && !startup.foundedYear)
+        fieldsToUpdate.foundedYear = data.foundedYear
+
+      // Only update state if there are changes
+      const numUpdatedFields = Object.keys(fieldsToUpdate).length
+      if (numUpdatedFields > 0) {
+        setStartup({
+          ...startup,
+          ...fieldsToUpdate,
+        })
+        toast({
+          title: 'Autofill complete',
+          variant: 'success',
+          description: `Successfully autofilled ${numUpdatedFields} field${
+            numUpdatedFields > 1 ? 's' : ''
+          }.`,
+        })
+      } else {
+        toast({
+          title: 'Nothing to autofill',
+          description: 'Your company details are already up to date.',
+        })
+      }
 
       playClickSound()
     } catch (error) {
       console.error('Website auto-fill error:', error)
-      // Could add a toast notification here
+      toast({
+        variant: 'destructive',
+        title: 'Autofill failed',
+        description: `Could not fetch company data. ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        duration: 9000,
+      })
     } finally {
       setIsAutoFilling(false)
     }

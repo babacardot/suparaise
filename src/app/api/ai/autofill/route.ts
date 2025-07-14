@@ -271,43 +271,43 @@ const scrapeWebsite = async (url: string): Promise<string> => {
 const mapIndustryToEnum = (industry: string): string => {
   const industryMap: Record<string, string> = {
     // Common variations that AI might return
-    'FinTech': 'Fintech',
-    'fintech': 'Fintech', 
-    'FINTECH': 'Fintech',
-    'HealthTech': 'Healthtech',
-    'healthtech': 'Healthtech',
-    'HEALTHTECH': 'Healthtech',
-    'SaaS': 'B2B SaaS',
-    'saas': 'B2B SaaS',
-    'SAAS': 'B2B SaaS',
+    FinTech: 'Fintech',
+    fintech: 'Fintech',
+    FINTECH: 'Fintech',
+    HealthTech: 'Healthtech',
+    healthtech: 'Healthtech',
+    HEALTHTECH: 'Healthtech',
+    SaaS: 'B2B SaaS',
+    saas: 'B2B SaaS',
+    SAAS: 'B2B SaaS',
     'B2B SaaS': 'B2B SaaS', // Keep exact matches
-    'EdTech': 'Education',
-    'edtech': 'Education',
-    'EDTECH': 'Education',
-    'PropTech': 'PropTech', // Keep exact match
-    'proptech': 'PropTech',
-    'PROPTECH': 'PropTech',
-    'InsurTech': 'InsurTech', // Keep exact match
-    'insurtech': 'InsurTech',
-    'INSURTECH': 'InsurTech',
-    'AdTech': 'AdTech', // Keep exact match
-    'adtech': 'AdTech',
-    'ADTECH': 'AdTech',
-    'AI': 'AI/ML',
+    EdTech: 'Education',
+    edtech: 'Education',
+    EDTECH: 'Education',
+    PropTech: 'PropTech', // Keep exact match
+    proptech: 'PropTech',
+    PROPTECH: 'PropTech',
+    InsurTech: 'InsurTech', // Keep exact match
+    insurtech: 'InsurTech',
+    INSURTECH: 'InsurTech',
+    AdTech: 'AdTech', // Keep exact match
+    adtech: 'AdTech',
+    ADTECH: 'AdTech',
+    AI: 'AI/ML',
     'Machine Learning': 'AI/ML',
     'Artificial Intelligence': 'AI/ML',
-    'ML': 'AI/ML',
-    'Ecommerce': 'E-commerce',
-    'ecommerce': 'E-commerce',
+    ML: 'AI/ML',
+    Ecommerce: 'E-commerce',
+    ecommerce: 'E-commerce',
     'E-Commerce': 'E-commerce',
     'Food and Beverage': 'Food & Beverage',
     'F&B': 'Food & Beverage',
     'Real estate': 'Real Estate',
-    'realestate': 'Real Estate',
-    'Tech': 'Other',
-    'Technology': 'Other'
+    realestate: 'Real Estate',
+    Tech: 'Other',
+    Technology: 'Other',
   }
-  
+
   // Return mapped value or original value if no mapping exists
   return industryMap[industry] || industry
 }
@@ -375,28 +375,28 @@ JSON Response:`
     // Parse JSON response
     try {
       const extractedData = JSON.parse(content) as AutofillData
-      
+
       // Map industry values to exact database enum values
       if (extractedData.industry) {
         extractedData.industry = mapIndustryToEnum(extractedData.industry)
       }
-      
+
       // Validate and parse foundedYear
       if (extractedData.foundedYear) {
         // AI might return a string like "c. 2022" or a number.
-        const yearString = String(extractedData.foundedYear).match(/\d{4}/); // Find a 4-digit number
+        const yearString = String(extractedData.foundedYear).match(/\d{4}/) // Find a 4-digit number
         if (yearString) {
-            const year = parseInt(yearString[0], 10);
-            if (year > 1900 && year <= new Date().getFullYear()) {
-                extractedData.foundedYear = year;
-            } else {
-                extractedData.foundedYear = undefined; // Invalid year
-            }
+          const year = parseInt(yearString[0], 10)
+          if (year > 1900 && year <= new Date().getFullYear()) {
+            extractedData.foundedYear = year
+          } else {
+            extractedData.foundedYear = undefined // Invalid year
+          }
         } else {
-            extractedData.foundedYear = undefined; // No year found
+          extractedData.foundedYear = undefined // No year found
         }
       }
-      
+
       return extractedData
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', content)

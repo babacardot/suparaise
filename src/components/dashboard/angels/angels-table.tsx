@@ -277,6 +277,11 @@ const AngelsTable = React.memo(function AngelsTable({
     return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
   }, [])
 
+  const getCheckSizeDisplay = (size: string) => {
+    if (!size) return ''
+    return size.replace('-', ' — ')
+  }
+
   const capitalizeFirst = React.useCallback((str: string) => {
     if (!str) return ''
     return str.charAt(0).toUpperCase() + str.slice(1)
@@ -599,7 +604,7 @@ const AngelsTable = React.memo(function AngelsTable({
                               <Badge
                                 className={`rounded-sm ${getCheckSizeColor()} text-xs`}
                               >
-                                {angel.check_size}
+                                {getCheckSizeDisplay(angel.check_size)}
                               </Badge>
                             )}
                           </TableCell>

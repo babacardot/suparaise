@@ -112,8 +112,15 @@ export default function AcceleratorsPageClient({
     fetchTotalSubmissions()
   }, [startupId])
 
-  const [filters, setFilters] =
-    useState<AcceleratorsFiltersType>(initialFilters)
+  const [filters, setFilters] = useState<AcceleratorsFiltersType>({
+    ...initialFilters,
+    equityRanges: (initialFilters.equityRanges || []).map((r) =>
+      r.replace('-', ' — '),
+    ),
+    fundingRanges: (initialFilters.fundingRanges || []).map((r) =>
+      r.replace('-', ' — '),
+    ),
+  })
   const [sortConfig, setSortConfig] = useState(initialSortConfig)
 
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(
@@ -177,7 +184,19 @@ export default function AcceleratorsPageClient({
       const params = new URLSearchParams(searchParams.toString())
       params.set('page', '1')
 
-      Object.entries(newFilters).forEach(([key, value]) => {
+      const filtersForUrl = { ...newFilters }
+      if (filtersForUrl.equityRanges) {
+        filtersForUrl.equityRanges = filtersForUrl.equityRanges.map((r) =>
+          r.replace(' — ', '-'),
+        )
+      }
+      if (filtersForUrl.fundingRanges) {
+        filtersForUrl.fundingRanges = filtersForUrl.fundingRanges.map((r) =>
+          r.replace(' — ', '-'),
+        )
+      }
+
+      Object.entries(filtersForUrl).forEach(([key, value]) => {
         params.delete(key)
         if (Array.isArray(value)) {
           if (value.length > 0) {

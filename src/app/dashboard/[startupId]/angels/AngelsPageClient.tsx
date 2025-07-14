@@ -116,7 +116,12 @@ export default function AngelsPageClient({
     fetchTotalSubmissions()
   }, [startupId])
 
-  const [filters, setFilters] = useState<AngelsFiltersType>(initialFilters)
+  const [filters, setFilters] = useState<AngelsFiltersType>({
+    ...initialFilters,
+    checkSizes: (initialFilters.checkSizes || []).map((s) =>
+      s.replace('-', ' — '),
+    ),
+  })
   const [sortConfig, setSortConfig] = useState(initialSortConfig)
 
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(
@@ -178,7 +183,14 @@ export default function AngelsPageClient({
       const params = new URLSearchParams(searchParams.toString())
       params.set('page', '1')
 
-      Object.entries(newFilters).forEach(([key, value]) => {
+      const filtersForUrl = { ...newFilters }
+      if (filtersForUrl.checkSizes) {
+        filtersForUrl.checkSizes = filtersForUrl.checkSizes.map((s) =>
+          s.replace(' — ', '-'),
+        )
+      }
+
+      Object.entries(filtersForUrl).forEach(([key, value]) => {
         params.delete(key)
         if (Array.isArray(value)) {
           if (value.length > 0) {

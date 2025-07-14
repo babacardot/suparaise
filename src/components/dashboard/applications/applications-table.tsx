@@ -153,6 +153,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                     src="/placeholder/no_file.webp"
                     alt="No applications found"
                     fill
+                    sizes="192px"
                     className="object-contain opacity-80"
                     priority
                   />
