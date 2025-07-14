@@ -16,7 +16,8 @@
     "seed:validate-env": "bun run src/lib/scripts/seed-data/validate-env.ts",
     "seed:import-targets": "bun run src/lib/scripts/seed-data/import-data.ts --table targets --file src/lib/scripts/seed-data/data/targets-bulk.xlsx",
     "seed:import-angels": "bun run src/lib/scripts/seed-data/import-data.ts --table angels --file src/lib/scripts/seed-data/data/angels-bulk.xlsx",
-    "seed:import-accelerators": "bun run src/lib/scripts/seed-data/import-data.ts --table accelerators --file src/lib/scripts/seed-data/data/accelerators-bulk.xlsx"
+    "seed:import-accelerators": "bun run src/lib/scripts/seed-data/import-data.ts --table accelerators --file src/lib/scripts/seed-data/data/accelerators-bulk.xlsx",
+    "sitemap": "python src/lib/scripts/other/generate_sitemap.py"
   },
   "keywords": [],
   "author": "",

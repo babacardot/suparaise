@@ -1,10 +1,12 @@
 User-agent: *
 Allow: /
 
-# Block auth-related pages
+# Block sensitive or non-public pages
 Disallow: /api/
 Disallow: /callback
-Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /verify
+Disallow: /reset-password
 
 # Sitemap
 Sitemap: https://suparaise.com/sitemap.xml
