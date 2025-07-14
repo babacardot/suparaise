@@ -235,6 +235,22 @@ export default function FundsFilters({
     clearFilter('search', true) // Immediate update for search clear
   }, [clearFilter])
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current)
+          debounceTimeoutRef.current = null
+        }
+        if (JSON.stringify(localFilters) !== JSON.stringify(filters)) {
+          onFiltersChange(localFilters)
+        }
+      }
+    },
+    [localFilters, filters, onFiltersChange],
+  )
+
   // Color mapping functions memoized
   const getStageColor = useCallback((stage: string) => {
     switch (stage) {
@@ -466,6 +482,7 @@ export default function FundsFilters({
               placeholder="Search funds..."
               value={localFilters.search || ''}
               onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
               className="pl-10 h-10 rounded-sm bg-card border-border text-card-foreground placeholder:text-muted-foreground"
             />
             {localFilters.search && (
@@ -795,7 +812,7 @@ export default function FundsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
+                      localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = REQUIRED_DOCUMENTS.find(
                           (d) => d.value === doc,
@@ -827,7 +844,7 @@ export default function FundsFilters({
                       )}
                   </div>
                   {localFilters.requiredDocuments &&
-                  localFilters.requiredDocuments.length > 0 ? (
+                    localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
@@ -898,13 +915,12 @@ export default function FundsFilters({
                       }}
                       className={`
                                             flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
-                                            ${
-                                              columnVisibility[
-                                                key as keyof ColumnVisibility
-                                              ]
-                                                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                                            }
+                                            ${columnVisibility[
+                          key as keyof ColumnVisibility
+                        ]
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                        }
                                         `}
                     >
                       <span className="text-sm font-medium capitalize">
@@ -939,13 +955,12 @@ export default function FundsFilters({
                 // Update immediately for toggle
                 onFiltersChange(newFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
-                localFilters.submissionFilter === 'hide_submitted'
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
                   ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
                   : localFilters.submissionFilter === 'only_submitted'
                     ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
                     : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
-              }`}
+                }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all funds (click to hide submitted)'

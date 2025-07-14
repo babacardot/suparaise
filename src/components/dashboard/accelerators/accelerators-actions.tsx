@@ -182,20 +182,8 @@ export default React.memo(function AcceleratorsActions({
     return equity.replace('-', ' — ')
   }
 
-  const getEquityColor = (equity: string) => {
-    if (equity === '0%')
-      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-    if (equity === '1-3%')
-      return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
-    if (equity === '4-6%')
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-    if (equity === '7-10%')
-      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-    if (equity === '10%+')
-      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
-    if (equity === 'variable')
-      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
-    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+  const getEquityColor = () => {
+    return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
   }
 
   const getFundingDisplay = (funding: string) => {
@@ -203,20 +191,8 @@ export default React.memo(function AcceleratorsActions({
     return funding.replace('-', ' — ')
   }
 
-  const getFundingColor = (funding: string) => {
-    if (funding === '0-25K')
-      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
-    if (funding === '25K-50K')
-      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-    if (funding === '50K-100K')
-      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-    if (funding === '100K-250K')
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-    if (funding === '250K-500K')
-      return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
-    if (funding === '500K+')
-      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
-    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+  const getFundingColor = () => {
+    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
   }
 
   const getProgramTypeColor = (programType: string) => {
@@ -327,8 +303,7 @@ export default React.memo(function AcceleratorsActions({
 
               {accelerator.notes && (
                 <div className="space-y-2">
-                  <span className="text-muted-foreground">Description</span>
-                  <p className="text-xs text-black dark:text-white pt-2">
+                  <p className="text-xs text-black dark:text-white pt-0">
                     {accelerator.notes}
                   </p>
                 </div>
@@ -393,7 +368,7 @@ export default React.memo(function AcceleratorsActions({
                   <span className="text-muted-foreground pt-1">Funding</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     <Badge
-                      className={`rounded-sm text-[10px] ${getFundingColor(accelerator.funding_provided)}`}
+                      className={`rounded-sm text-[10px] ${getFundingColor()}`}
                     >
                       {getFundingDisplay(accelerator.funding_provided)}
                     </Badge>
@@ -406,7 +381,7 @@ export default React.memo(function AcceleratorsActions({
                   <span className="text-muted-foreground pt-1">Equity</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     <Badge
-                      className={`rounded-sm text-[10px] ${getEquityColor(accelerator.equity_taken)}`}
+                      className={`rounded-sm text-[10px] ${getEquityColor()}`}
                     >
                       {getEquityDisplay(accelerator.equity_taken)}
                     </Badge>

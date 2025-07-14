@@ -725,14 +725,6 @@ const AngelsTable = React.memo(function AngelsTable({
                                     onMouseLeave={() => setHoveredButton(null)}
                                     className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 rounded-sm px-3 text-sm h-8"
                                   >
-                                    <LottieIcon
-                                      animationData={animations.mailopen}
-                                      size={14}
-                                      className="mr-1"
-                                      isHovered={
-                                        hoveredButton === `email-${angel.id}`
-                                      }
-                                    />
                                     Email
                                   </Button>
                                 </ValidationGate>
@@ -750,14 +742,6 @@ const AngelsTable = React.memo(function AngelsTable({
                                   onMouseLeave={() => setHoveredButton(null)}
                                   className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/40 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-800 rounded-sm px-3 text-sm h-8"
                                 >
-                                  <LottieIcon
-                                    animationData={animations.info}
-                                    size={14}
-                                    className="mr-1"
-                                    isHovered={
-                                      hoveredButton === `learn-${angel.id}`
-                                    }
-                                  />
                                   Learn
                                 </Button>
                               )}

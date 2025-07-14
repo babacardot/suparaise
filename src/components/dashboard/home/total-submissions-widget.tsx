@@ -19,7 +19,7 @@ export function TotalApplicationsWidget({
           <div className="text-4xl font-bold">{totalApplications}</div>
         </div>
         <p className="text-xs text-muted-foreground mt-7">
-          Across funds, accelerators, and angels
+          Across all opportunities
         </p>
       </CardContent>
     </Card>

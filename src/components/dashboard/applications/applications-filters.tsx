@@ -479,9 +479,8 @@ export default function ApplicationsFilters({
               <LottieIcon
                 animationData={animations.trash}
                 size={16}
-                className="mr-2 opacity-50 hover:opacity-100"
+                className="mr-0 opacity-50 hover:opacity-100"
               />
-              Clear
             </Button>
           </div>
         )}

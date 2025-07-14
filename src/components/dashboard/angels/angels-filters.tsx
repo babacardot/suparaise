@@ -232,6 +232,22 @@ export default function AngelsFilters({
     clearFilter('search', true)
   }, [clearFilter])
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current)
+          debounceTimeoutRef.current = null
+        }
+        if (JSON.stringify(localFilters) !== JSON.stringify(filters)) {
+          onFiltersChange(localFilters)
+        }
+      }
+    },
+    [localFilters, filters, onFiltersChange],
+  )
+
   const getStageColor = useCallback((stage: string) => {
     switch (stage) {
       case 'All':
@@ -426,6 +442,7 @@ export default function AngelsFilters({
               placeholder="Search angels..."
               value={localFilters.search || ''}
               onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
               className="pl-10 h-10 rounded-sm bg-card border-border text-card-foreground placeholder:text-muted-foreground"
             />
             {localFilters.search && (
@@ -967,13 +984,12 @@ export default function AngelsFilters({
                 setLocalFilters(newFilters as unknown as AngelsFilters)
                 onFiltersChange(newFilters as unknown as AngelsFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
-                localFilters.submissionFilter === 'hide_submitted'
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
                   ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
                   : localFilters.submissionFilter === 'only_submitted'
                     ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
                     : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
-              }`}
+                }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all angels (click to hide submitted)'

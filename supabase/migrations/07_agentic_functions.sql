@@ -115,6 +115,7 @@ BEGIN
         '%' || normalized_search || '%',
         '%' || normalized_search || '%',
         '%' || normalized_search || '%',
+        '%' || normalized_search || '%',
         '%' || normalized_search || '%'));
     END IF;
     

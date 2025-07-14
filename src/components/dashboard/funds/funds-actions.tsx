@@ -259,8 +259,7 @@ export default React.memo(function FundsActions({
 
               {target.notes && (
                 <div className="space-y-2">
-                  <span className="text-muted-foreground">Description</span>
-                  <p className="text-xs text-black dark:text-white pt-2">
+                  <p className="text-xs text-black dark:text-white pt-0">
                     {target.notes}
                   </p>
                 </div>
