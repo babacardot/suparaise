@@ -380,9 +380,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -397,7 +396,7 @@ const MultiSelectCountries: React.FC<{
           e.stopPropagation()
         }}
       >
-        <Command shouldFilter={false}>
+        <Command>
           <CommandInput placeholder="Search country..." />
           <CommandList
             className="max-h-48 [&>div]:overflow-y-auto [&>div]:scroll-smooth"
@@ -421,6 +420,79 @@ const MultiSelectCountries: React.FC<{
                     className={cn(
                       'mr-2 h-4 w-4',
                       selected.includes(country) ? 'opacity-100' : 'opacity-0',
+                    )}
+                  />
+                  {country}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+const SingleSelectCountry: React.FC<{
+  selected: string
+  onChange: (selected: string) => void
+  placeholder?: string
+}> = ({ selected, onChange, placeholder = 'Select country...' }) => {
+  const [open, setOpen] = useState(false)
+
+  const handleSelect = (country: string) => {
+    onChange(country === selected ? '' : country)
+    setOpen(false)
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <span className="truncate">
+            {selected || placeholder}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+        side="bottom"
+        sideOffset={4}
+        onWheel={(e) => {
+          e.stopPropagation()
+        }}
+      >
+        <Command>
+          <CommandInput placeholder="Search country..." />
+          <CommandList
+            className="max-h-48 [&>div]:overflow-y-auto [&>div]:scroll-smooth"
+            onWheel={(e) => {
+              e.stopPropagation()
+              const target = e.currentTarget.querySelector('[cmdk-list-sizer]')
+              if (target) {
+                target.scrollTop += e.deltaY
+              }
+            }}
+          >
+            <CommandEmpty>No country found.</CommandEmpty>
+            <CommandGroup>
+              {COUNTRIES.map((country) => (
+                <CommandItem
+                  key={country}
+                  value={country}
+                  onSelect={() => handleSelect(country)}
+                >
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      selected === country ? 'opacity-100' : 'opacity-0',
                     )}
                   />
                   {country}
@@ -618,8 +690,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                    .split(',')
-                    .filter(Boolean)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -1831,35 +1903,14 @@ export default function CompanySettings() {
               <div className="space-y-3">
                 <Label htmlFor="location">Location</Label>
                 <div className="relative">
-                  <Input
-                    id="location"
-                    value={formData.location || ''}
-                    onChange={(e) =>
-                      handleInputChange('location', e.target.value)
-                    }
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'location' && 'dark:bg-muted',
-                    )}
-                    readOnly={editingField !== 'location'}
-                    placeholder="e.g., San Francisco, CA"
+                  <SingleSelectCountry
+                    selected={formData.location || ''}
+                    onChange={async (country) => {
+                      handleInputChange('location', country)
+                      await handleFieldSave('location')
+                    }}
+                    placeholder="Select country"
                   />
-                  {editingField !== 'location' ? (
-                    <button
-                      onClick={() => handleFieldEdit('location')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('location')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -2240,7 +2291,7 @@ export default function CompanySettings() {
                   className={cn(
                     'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     !formData.isIncorporated
-                      ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-300'
+                      ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
                       : 'border-border bg-background text-muted-foreground hover:bg-muted',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                   )}
@@ -2252,8 +2303,8 @@ export default function CompanySettings() {
                     if (!formData.isIncorporated) {
                       if (!currentStartupId) return
                       playClickSound()
-                      handleInputChange('isIncorporated', true)
-                      handleInputChange('legalStructure', null)
+                      handleInputChange('isIncorporated', true as boolean)
+                      handleInputChange('legalStructure', null as LegalStructure | null)
                       // Save incorporation status, clear legal structure so user can select appropriate one
                       try {
                         const { data, error } = await supabase.rpc(
@@ -2281,13 +2332,12 @@ export default function CompanySettings() {
                   }}
                   disabled={
                     isLoading ||
-                    formData.isIncorporated ||
-                    formData.legalStructure === 'Not yet incorporated'
+                    Boolean(formData.isIncorporated)
                   }
                   className={cn(
                     'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     formData.isIncorporated
-                      ? 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-400'
+                      ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800'
                       : 'border-border bg-background text-muted-foreground hover:bg-muted',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                   )}
@@ -2304,27 +2354,14 @@ export default function CompanySettings() {
                     Incorporation country
                   </Label>
                   <div className="relative">
-                    <select
-                      id="incorporationCountry"
-                      className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                      value={formData.incorporationCountry || ''}
-                      onChange={async (e) => {
-                        handleInputChange(
-                          'incorporationCountry',
-                          e.target.value,
-                        )
+                    <SingleSelectCountry
+                      selected={formData.incorporationCountry || ''}
+                      onChange={async (selected) => {
+                        handleInputChange('incorporationCountry', selected)
                         await handleFieldSave('incorporationCountry')
                       }}
-                      disabled={isLoading}
-                    >
-                      <option value="">Select country</option>
-                      {COUNTRIES.map((country) => (
-                        <option key={country} value={country}>
-                          {country}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      placeholder="Select country"
+                    />
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -3138,7 +3175,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

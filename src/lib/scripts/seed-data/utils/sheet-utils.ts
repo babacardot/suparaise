@@ -51,7 +51,12 @@ const getZodEnum = <T extends string>(typeName: T) => {
 // Validation Schemas using Zod
 const StringArray = z
   .string()
-  .transform((val) => val.split(',').map((s) => s.trim()))
+  .transform((val) =>
+    val
+      .split(/[,;]/)
+      .map((s) => s.trim())
+      .filter(Boolean),
+  )
   .nullable()
 
 const TargetSchema = z.object({
@@ -370,14 +375,27 @@ export async function generateExcelTemplate(
       if (enumValues && enumValues.length > 0) {
         const isArray = arrayKeys.has(col.key)
 
+        // Add a more readable note to the header cell with possible values
+        worksheet.getCell(
+          1,
+          colIndex + 1,
+        ).note = `Possible values:\n\n- ${enumValues.join('\n- ')}`
+
         // Write enum values to a column in the hidden validation sheet
         const validationColumn = colIndex + 1
         enumValues.forEach((value, rowIndex) => {
-          validationSheet.getCell(rowIndex + 1, validationColumn).value = value
+          validationSheet.getCell(
+            rowIndex + 1,
+            validationColumn,
+          ).value = value
         })
 
         // Create a formula that references the cells in the hidden sheet
-        const range = `${validationSheet.name}!$${validationSheet.getColumn(validationColumn).letter}$1:$${validationSheet.getColumn(validationColumn).letter}$${enumValues.length}`
+        const range = `${validationSheet.name}!$${
+          validationSheet.getColumn(validationColumn).letter
+        }$1:$${validationSheet.getColumn(validationColumn).letter}$${
+          enumValues.length
+        }`
 
         // Apply validation to all cells in this column from row 2 downwards
         for (let i = 2; i <= 1000; i++) {
@@ -385,11 +403,11 @@ export async function generateExcelTemplate(
             type: 'list',
             allowBlank: true,
             formulae: [range],
-            showErrorMessage: !isArray,
-            errorStyle: isArray ? 'information' : 'stop',
-            errorTitle: 'Invalid Value',
+            showErrorMessage: true, // Always show a message box
+            errorStyle: isArray ? 'information' : 'stop', // Non-blocking for arrays
+            errorTitle: 'Guidance', // Use a friendlier title
             error: isArray
-              ? 'You can enter multiple values separated by commas. The list is a guide for available options.'
+              ? 'Select a value from the list, or enter multiple values separated by commas or semicolons.'
               : `Please select a value from the dropdown list.`,
           }
         }
