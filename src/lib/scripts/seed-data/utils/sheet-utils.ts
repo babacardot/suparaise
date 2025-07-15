@@ -376,18 +376,13 @@ export async function generateExcelTemplate(
         const isArray = arrayKeys.has(col.key)
 
         // Add a more readable note to the header cell with possible values
-        worksheet.getCell(
-          1,
-          colIndex + 1,
-        ).note = `Possible values:\n\n- ${enumValues.join('\n- ')}`
+        worksheet.getCell(1, colIndex + 1).note =
+          `Possible values:\n\n- ${enumValues.join('\n- ')}`
 
         // Write enum values to a column in the hidden validation sheet
         const validationColumn = colIndex + 1
         enumValues.forEach((value, rowIndex) => {
-          validationSheet.getCell(
-            rowIndex + 1,
-            validationColumn,
-          ).value = value
+          validationSheet.getCell(rowIndex + 1, validationColumn).value = value
         })
 
         // Create a formula that references the cells in the hidden sheet

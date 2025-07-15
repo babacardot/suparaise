@@ -871,3 +871,68 @@ CREATE POLICY "Service role can access archive data" ON accelerator_submissions_
 CREATE POLICY "Archive data not accessible to users" ON agent_settings_archive FOR ALL TO authenticated USING (FALSE);
 CREATE POLICY "Service role can access archive data" ON agent_settings_archive FOR ALL TO service_role USING (TRUE);
 
+
+-- =================================================================
+-- COMMON RESPONSES TABLE & FUNCTIONS
+-- =================================================================
+
+-- Table for storing common Q&A for a startup
+CREATE TABLE common_responses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(startup_id, question)
+);
+
+-- Trigger for auto-updating updated_at timestamp
+CREATE TRIGGER set_common_responses_timestamp
+BEFORE UPDATE ON common_responses
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- Row-level security for common_responses
+ALTER TABLE common_responses ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow users to manage common responses for their own startup"
+ON common_responses
+FOR ALL
+USING ((SELECT auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id));
+
+-- Index for faster lookups
+CREATE INDEX IF NOT EXISTS idx_common_responses_startup_id ON common_responses(startup_id);
+
+-- Function to get common responses for a startup
+CREATE OR REPLACE FUNCTION get_common_responses(p_startup_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    -- Check if the user has access to this startup
+    IF NOT EXISTS (
+        SELECT 1 FROM startups 
+        WHERE id = p_startup_id AND user_id = (SELECT auth.uid())
+    ) THEN
+        RETURN jsonb_build_object('error', 'Access denied or startup not found');
+    END IF;
+
+    -- Get all common responses for this startup
+    SELECT jsonb_agg(
+        jsonb_build_object(
+            'id', cr.id,
+            'question', cr.question,
+            'answer', cr.answer
+        ) ORDER BY cr.created_at ASC
+    )
+    INTO result
+    FROM common_responses cr
+    WHERE cr.startup_id = p_startup_id;
+
+    RETURN COALESCE(result, '[]'::jsonb);
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION get_common_responses(UUID) TO authenticated;
+

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://suparaise.com'),
   title: {
     default: 'Suparaise',
-    template: '%s | Suparaise',
+    template: '',
   },
   description:
     'Automate your startup fundraising with AI agents that reach out to investors for you, on autopilot',

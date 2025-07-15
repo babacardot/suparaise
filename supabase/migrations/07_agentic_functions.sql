@@ -69,6 +69,24 @@ $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 -- Grant permissions
 GRANT EXECUTE ON FUNCTION get_targets_paginated(INTEGER, INTEGER, TEXT, TEXT) TO authenticated;
 
+-- Function to get a single target by ID
+CREATE OR REPLACE FUNCTION public.get_target_by_id(p_target_id UUID)
+RETURNS public.targets AS $$
+DECLARE
+    target_record public.targets;
+BEGIN
+    SELECT *
+    INTO target_record
+    FROM public.targets
+    WHERE id = p_target_id;
+
+    RETURN target_record;
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
+
+-- Grant permissions
+GRANT EXECUTE ON FUNCTION public.get_target_by_id(UUID) TO authenticated;
+
 -- Function to get paginated targets with filtering and sorting
 DROP FUNCTION IF EXISTS get_targets_simple(INTEGER, INTEGER);
 

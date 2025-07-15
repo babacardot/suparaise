@@ -380,8 +380,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -454,9 +455,7 @@ const SingleSelectCountry: React.FC<{
           aria-expanded={open}
           className="w-full justify-between font-normal hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
-          <span className="truncate">
-            {selected || placeholder}
-          </span>
+          <span className="truncate">{selected || placeholder}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -690,8 +689,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                  .split(',')
-                  .filter(Boolean)
+                    .split(',')
+                    .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -2304,7 +2303,10 @@ export default function CompanySettings() {
                       if (!currentStartupId) return
                       playClickSound()
                       handleInputChange('isIncorporated', true as boolean)
-                      handleInputChange('legalStructure', null as LegalStructure | null)
+                      handleInputChange(
+                        'legalStructure',
+                        null as LegalStructure | null,
+                      )
                       // Save incorporation status, clear legal structure so user can select appropriate one
                       try {
                         const { data, error } = await supabase.rpc(
@@ -2330,10 +2332,7 @@ export default function CompanySettings() {
                       }
                     }
                   }}
-                  disabled={
-                    isLoading ||
-                    Boolean(formData.isIncorporated)
-                  }
+                  disabled={isLoading || Boolean(formData.isIncorporated)}
                   className={cn(
                     'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
                     formData.isIncorporated
@@ -3175,7 +3174,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                            (formData.name || 'CONFIRM')
+                              (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

@@ -1245,15 +1245,21 @@ DECLARE
     max_queue INTEGER;
     next_queue_position INTEGER;
     submission_id UUID;
-    existing_submission UUID;
+    existing_submission RECORD;
 BEGIN
     -- Check if submission already exists
-    SELECT id INTO existing_submission
+    SELECT id, status INTO existing_submission
     FROM submissions
     WHERE startup_id = p_startup_id AND target_id = p_target_id;
 
-    IF existing_submission IS NOT NULL THEN
-        RETURN jsonb_build_object('error', 'Submission already exists for this target');
+    IF existing_submission.id IS NOT NULL THEN
+        IF existing_submission.status = 'failed' THEN
+            -- Allow retry for failed submissions by deleting the old one
+            -- and letting the process create a new one. This is simplest.
+            DELETE FROM submissions WHERE id = existing_submission.id;
+        ELSE
+            RETURN jsonb_build_object('error', 'A submission for this target is already ' || existing_submission.status);
+        END IF;
     END IF;
 
     -- Get current queue status
