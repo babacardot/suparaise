@@ -9,7 +9,7 @@
     "lint": "next lint",
     "agent:run": "ts-node src/agent/index.ts",
     "format": "prettier --write .",
-    "update:types": "bunx supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts",
+    "update:types": "bunx supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts && bun run format",
     "seed:templates": "bun run src/lib/scripts/seed-data/generate-templates.ts",
     "seed:bulk": "bun run src/lib/scripts/seed-data/bulk-seed.ts --format excel",
     "seed:import": "bun run src/lib/scripts/seed-data/import-data.ts",

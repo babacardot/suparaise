@@ -123,6 +123,52 @@ CREATE TRIGGER on_submission_status_change
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_submission_completion_trigger();
 
+-- =================================================================
+-- SUBMISSION COMPLETION TRACKING TRIGGERS
+-- =================================================================
+
+-- Function to increment submission count when any submission type is completed
+CREATE OR REPLACE FUNCTION public.handle_submission_count_increment()
+RETURNS TRIGGER AS $$
+DECLARE
+  user_id_to_increment UUID;
+BEGIN
+  -- Only increment when status changes to 'completed'
+  IF (TG_OP = 'UPDATE' AND NEW.status <> OLD.status AND NEW.status = 'completed') THEN
+    
+    -- Get the user_id for this submission
+    SELECT s.user_id INTO user_id_to_increment
+    FROM startups s
+    WHERE s.id = NEW.startup_id;
+    
+    IF user_id_to_increment IS NOT NULL THEN
+      BEGIN
+        -- Increment the user's monthly submission count
+        PERFORM increment_submission_count(user_id_to_increment);
+      EXCEPTION WHEN OTHERS THEN
+        RAISE WARNING 'Failed to increment submission count for user %: %', user_id_to_increment, SQLERRM;
+      END;
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Create triggers for all submission tables
+-- Note: Fund submissions already handle increment in update_submission_status function
+-- So we only need triggers for angel and accelerator submissions
+
+CREATE TRIGGER on_angel_submission_completion
+  AFTER UPDATE ON public.angel_submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_submission_count_increment();
+
+CREATE TRIGGER on_accelerator_submission_completion
+  AFTER UPDATE ON public.accelerator_submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_submission_count_increment();
+
 -- Trigger function to send subscription upgrade email
 CREATE OR REPLACE FUNCTION public.send_subscription_upgrade_email_trigger()
 RETURNS TRIGGER AS $$

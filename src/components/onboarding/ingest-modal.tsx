@@ -301,7 +301,6 @@ export const SmartIngestModal: React.FC<SmartIngestModalProps> = ({
               {isAnalyzing ? (
                 <>
                   <Spinner className="h-3 w-3 mr-2" />
-                  Analyzing...
                 </>
               ) : (
                 <>Autofill</>

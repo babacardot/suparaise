@@ -1812,6 +1812,22 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      update_accelerator_submission_status: {
+        Args: {
+          p_submission_id: string
+          p_new_status: Database['public']['Enums']['submission_status']
+          p_agent_notes: string
+        }
+        Returns: Json
+      }
+      update_angel_submission_status: {
+        Args: {
+          p_submission_id: string
+          p_new_status: Database['public']['Enums']['submission_status']
+          p_agent_notes: string
+        }
+        Returns: Json
+      }
       update_founder_profile: {
         Args: { p_user_id: string; p_founder_id: string; p_data: Json }
         Returns: Json

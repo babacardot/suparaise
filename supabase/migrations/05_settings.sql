@@ -1426,6 +1426,98 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 GRANT EXECUTE ON FUNCTION update_submission_status(UUID, submission_status, TEXT) TO authenticated;
 
+-- New function to update angel submission status
+CREATE OR REPLACE FUNCTION public.update_angel_submission_status(
+    p_submission_id UUID,
+    p_new_status submission_status,
+    p_agent_notes TEXT
+)
+RETURNS JSONB AS $$
+DECLARE
+  current_submission RECORD;
+BEGIN
+    -- Check if the submission exists
+    SELECT * INTO current_submission FROM angel_submissions WHERE id = p_submission_id;
+
+    IF current_submission IS NULL THEN
+        RETURN jsonb_build_object('error', 'Angel submission not found');
+    END IF;
+
+    -- Update the submission record
+    UPDATE angel_submissions
+    SET
+        status = p_new_status,
+        agent_notes = p_agent_notes,
+        updated_at = NOW()
+    WHERE id = p_submission_id;
+
+    -- Increment user's submission count if completed successfully
+    IF p_new_status = 'completed' THEN
+      PERFORM increment_submission_count(
+        (SELECT user_id FROM startups WHERE id = current_submission.startup_id)
+      );
+    END IF;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'submissionId', p_submission_id,
+        'message', 'Angel submission status updated successfully.'
+    );
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in update_angel_submission_status for submission %: %', p_submission_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION update_angel_submission_status(UUID, submission_status, TEXT) TO authenticated;
+
+-- New function to update accelerator submission status
+CREATE OR REPLACE FUNCTION public.update_accelerator_submission_status(
+    p_submission_id UUID,
+    p_new_status submission_status,
+    p_agent_notes TEXT
+)
+RETURNS JSONB AS $$
+DECLARE
+  current_submission RECORD;
+BEGIN
+    -- Check if the submission exists
+    SELECT * INTO current_submission FROM accelerator_submissions WHERE id = p_submission_id;
+
+    IF current_submission IS NULL THEN
+        RETURN jsonb_build_object('error', 'Accelerator submission not found');
+    END IF;
+
+    -- Update the submission record
+    UPDATE accelerator_submissions
+    SET
+        status = p_new_status,
+        agent_notes = p_agent_notes,
+        updated_at = NOW()
+    WHERE id = p_submission_id;
+
+    -- Increment user's submission count if completed successfully
+    IF p_new_status = 'completed' THEN
+      PERFORM increment_submission_count(
+        (SELECT user_id FROM startups WHERE id = current_submission.startup_id)
+      );
+    END IF;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'submissionId', p_submission_id,
+        'message', 'Accelerator submission status updated successfully.'
+    );
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in update_accelerator_submission_status for submission %: %', p_submission_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION update_accelerator_submission_status(UUID, submission_status, TEXT) TO authenticated;
+
 -- New function to get a submission's details, including the job_id
 CREATE OR REPLACE FUNCTION public.get_submission_details(p_submission_id UUID)
 RETURNS JSONB AS $$

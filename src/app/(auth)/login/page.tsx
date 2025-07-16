@@ -23,7 +23,7 @@ function LoginPageContent() {
     return (
       <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-20 pt-20">
         <div className="text-center">
-          <Spinner className="h-3 w-3" />
+          <Spinner className="h-5 w-5" />
         </div>
       </div>
     )
@@ -38,7 +38,7 @@ function LoginPageContent() {
             fallback={
               <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-20 pt-20">
                 <div className="text-center">
-                  <Spinner className="h-3 w-3" />
+                  <Spinner className="h-5 w-5" />
                 </div>
               </div>
             }

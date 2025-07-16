@@ -163,7 +163,7 @@ export default function DashboardLayout({
   if (loading && !user && !signingOut) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner className="h-3 w-3" />
+        <Spinner className="h-5 w-5" />
       </div>
     )
   }
@@ -171,7 +171,7 @@ export default function DashboardLayout({
   if (signingOut) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner className="h-3 w-3" />
+        <Spinner className="h-5 w-5" />
       </div>
     )
   }
@@ -181,7 +181,7 @@ export default function DashboardLayout({
     // Brief delay to allow for quick authentication checks without showing spinner
     return (
       <div className="flex min-h-screen items-center justify-center opacity-0">
-        <Spinner className="h-3 w-3" />
+        <Spinner className="h-5 w-5" />
       </div>
     )
   }
