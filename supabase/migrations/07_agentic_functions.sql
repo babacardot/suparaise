@@ -362,6 +362,87 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
+-- Enhanced function to get recent submissions with detailed information for the dashboard widget
+CREATE OR REPLACE FUNCTION fetch_recent_submissions_detailed(
+    p_startup_id UUID,
+    p_limit INTEGER DEFAULT 3
+)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    WITH all_submissions_detailed AS (
+        -- Fund submissions with detailed information
+        SELECT
+            s.id AS submission_id,
+            t.name AS submitted_to_name,
+            'Fund' AS submitted_to_type,
+            s.submission_date AS submitted_at,
+            s.status,
+            s.queue_position,
+            s.queued_at,
+            s.started_at,
+            t.website as website_url,
+            t.id AS entity_id,
+            t.submission_type,
+            t.form_complexity
+        FROM submissions s
+        JOIN targets t ON s.target_id = t.id
+        WHERE s.startup_id = p_startup_id
+        
+        UNION ALL
+        
+        -- Angel submissions with detailed information
+        SELECT
+            asub.id AS submission_id,
+            a.first_name || ' ' || a.last_name AS submitted_to_name,
+            'Angel' AS submitted_to_type,
+            asub.submission_date AS submitted_at,
+            asub.status,
+            NULL AS queue_position,
+            NULL AS queued_at,
+            NULL AS started_at,
+            a.linkedin as website_url,
+            a.id AS entity_id,
+            a.submission_type,
+            a.form_complexity
+        FROM angel_submissions asub
+        JOIN angels a ON asub.angel_id = a.id
+        WHERE asub.startup_id = p_startup_id
+
+        UNION ALL
+
+        -- Accelerator submissions with detailed information
+        SELECT
+            accs.id AS submission_id,
+            acc.name AS submitted_to_name,
+            'Accelerator' AS submitted_to_type,
+            accs.submission_date AS submitted_at,
+            accs.status,
+            NULL AS queue_position,
+            NULL AS queued_at,
+            NULL AS started_at,
+            acc.website as website_url,
+            acc.id AS entity_id,
+            acc.submission_type,
+            acc.form_complexity
+        FROM accelerator_submissions accs
+        JOIN accelerators acc ON accs.accelerator_id = acc.id
+        WHERE accs.startup_id = p_startup_id
+    )
+    SELECT jsonb_agg(sub.*)
+    INTO result
+    FROM (
+        SELECT *
+        FROM all_submissions_detailed
+        ORDER BY submitted_at DESC
+        LIMIT p_limit
+    ) sub;
+
+    RETURN COALESCE(result, '[]'::jsonb);
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
+
 -- Function to get daily submission counts for the activity grid
 CREATE OR REPLACE FUNCTION fetch_daily_run_grid_data(
     p_startup_id UUID,
@@ -397,4 +478,5 @@ $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
 
 GRANT EXECUTE ON FUNCTION fetch_recent_submissions(UUID, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION fetch_recent_submissions_detailed(UUID, INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION fetch_daily_run_grid_data(UUID, INTEGER) TO authenticated;

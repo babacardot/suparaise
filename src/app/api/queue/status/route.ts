@@ -52,8 +52,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
 
     // 1. Get submission details from our DB
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error: detailsError } = await (supabase.rpc as any)(
+    const { data, error: detailsError } = await supabase.rpc(
       'get_submission_details',
       { p_submission_id: submissionId },
     )
@@ -114,19 +113,19 @@ export async function POST(request: NextRequest) {
       jobStatusResult.error ||
       'Agent finished with no output.'
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: updateResult, error: updateError } = await (
-      supabase.rpc as any
-    )('update_submission_status', {
-      p_submission_id: submissionId,
-      p_new_status: finalStatus,
-      p_agent_notes: finalNotes,
-    })
+    const { error: updateError } = await supabase.rpc(
+      'update_submission_status',
+      {
+        p_submission_id: submissionId,
+        p_new_status: finalStatus,
+        p_agent_notes: finalNotes,
+      },
+    )
 
-    if (updateError || (updateResult && updateResult.error)) {
+    if (updateError) {
       console.error(
         'Error updating final submission status:',
-        updateError || updateResult.error,
+        updateError,
       )
       // Return the status from Hyperbrowser even if DB update fails, so client knows the final state
       return NextResponse.json(

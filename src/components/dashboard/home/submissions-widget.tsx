@@ -16,12 +16,18 @@ export interface SubmissionData {
   status: SubmissionStatus
   website_url?: string
   entity_id: string
-  agent_notes?: string
+  // Additional detailed fields for enhanced display
+  submission_type?: 'form' | 'email' | 'other'
+  form_complexity?: 'simple' | 'standard' | 'comprehensive'
+  queue_position?: number
+  queued_at?: string
+  started_at?: string
 }
 
 interface SubmissionCardProps {
   className?: string
   submission: SubmissionData
+  showDetails?: boolean // New prop to control whether to show additional details
 }
 
 const statusStyles: {
@@ -59,7 +65,7 @@ const typeStyles: {
     'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800',
 }
 
-const SubmissionCard = ({ className, submission }: SubmissionCardProps) => {
+const SubmissionCard = ({ className, submission, showDetails = false }: SubmissionCardProps) => {
   const createdAtDate = new Date(submission.submitted_at)
   const displayDate = createdAtDate.toLocaleDateString('en-US', {
     month: 'long',
@@ -71,6 +77,27 @@ const SubmissionCard = ({ className, submission }: SubmissionCardProps) => {
   })
   const statusStyle = statusStyles[submission.status]
   const typeStyle = typeStyles[submission.submitted_to_type]
+
+
+
+
+
+  const getComplexityColor = (complexity: string) => {
+    switch (complexity) {
+      case 'simple':
+        return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+      case 'standard':
+        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+      case 'comprehensive':
+        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+      default:
+        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+    }
+  }
+
+  const capitalizeFirst = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+  }
 
   return (
     <Card
@@ -93,21 +120,47 @@ const SubmissionCard = ({ className, submission }: SubmissionCardProps) => {
         </div>
       </CardHeader>
       <CardContent className="flex flex-col justify-between gap-y-4 pb-6 flex-1">
-        <div>
+        <div className="space-y-3">
           <h3 className="font-semibold text-lg leading-tight text-foreground">
             {submission.submitted_to_name}
           </h3>
-          {submission.agent_notes && (
-            <p className="text-sm text-muted-foreground mt-2 italic">
-              &quot;{submission.agent_notes}&quot;
-            </p>
+
+          {/* Additional details section - only shown when showDetails is true */}
+          {showDetails && (
+            <div className="space-y-3 text-sm">
+              {/* Show complexity badge without "form" suffix */}
+              {submission.form_complexity && (
+                <div className="flex flex-wrap gap-2">
+                  <Badge
+                    className={`text-xs rounded-sm ${getComplexityColor(submission.form_complexity)}`}
+                  >
+                    {capitalizeFirst(submission.form_complexity)}
+                  </Badge>
+                </div>
+              )}
+
+
+
+
+
+              {/* Queue information */}
+              {submission.queue_position && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    Queue #{submission.queue_position}
+                  </Badge>
+                </div>
+              )}
+            </div>
           )}
+
+
         </div>
         <div className="flex justify-end">
           <Badge
             variant="outline"
             className={twMerge(
-              'text-xs font-medium py-1.5 px-3 translate-y-4',
+              'text-xs font-medium py-1.5 px-3',
               statusStyle.badge,
             )}
           >
@@ -161,6 +214,7 @@ export function SubmissionsWidget({
       <SubmissionCard
         submission={submissions[0]}
         className={twMerge('h-full min-h-[367px]', className)}
+        showDetails={true} // Pass showDetails={true} for single card layout
       />
     )
   }
@@ -168,20 +222,20 @@ export function SubmissionsWidget({
   // For 2 submissions, show them in a grid layout
   if (submissions.length === 2) {
     return (
-      <div
-        className={twMerge(
-          'grid h-full min-h-[367px] grid-rows-2 gap-4',
-          className,
-        )}
-      >
-        {submissions.map((submission: SubmissionData) => (
-          <SubmissionCard
-            key={submission.submission_id}
-            submission={submission}
-            className="h-full w-full"
-          />
-        ))}
-      </div>
+      <Card className={twMerge('h-full min-h-[367px] rounded-sm', className)}>
+        <CardContent className="p-4 h-full">
+          <div className="grid h-full grid-rows-2 gap-4">
+            {submissions.map((submission: SubmissionData) => (
+              <SubmissionCard
+                key={submission.submission_id}
+                submission={submission}
+                className="h-full w-full"
+                showDetails={false} // Don't show details for multi-card layout
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -193,7 +247,7 @@ export function SubmissionsWidget({
   ]
 
   return (
-    <div className={twMerge('relative h-full min-h-[367px] p-4', className)}>
+    <Card className={twMerge('relative h-full min-h-[367px] rounded-sm p-4', className)}>
       {submissions
         .slice(0, 3)
         .map((submission: SubmissionData, index: number) => (
@@ -204,9 +258,12 @@ export function SubmissionsWidget({
               'absolute w-[calc(100%-2rem)]',
             )}
           >
-            <SubmissionCard submission={submission} />
+            <SubmissionCard
+              submission={submission}
+              showDetails={false} // Don't show details for stacked layout
+            />
           </div>
         ))}
-    </div>
+    </Card>
   )
 }

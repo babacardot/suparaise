@@ -183,9 +183,9 @@ BEGIN
         ))
     INTO profile_data, startup_data, submission_counts;
 
-    -- Get recommendations and recent submissions
+    -- Get recommendations and recent submissions with detailed information
     SELECT get_startup_recommendations(p_startup_id) INTO recommendations_data;
-    SELECT fetch_recent_submissions(p_startup_id, 3) INTO recent_submissions_data;
+    SELECT fetch_recent_submissions_detailed(p_startup_id, 3) INTO recent_submissions_data;
 
     -- Build final result
     result := jsonb_build_object(
