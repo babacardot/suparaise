@@ -28,6 +28,7 @@ import {
   VALIDATION_PRESETS,
 } from '@/components/ui/validation-gate'
 import Link from 'next/link'
+import CircularProgressBar from '@/components/design/circular-progress-bar'
 
 type Target = {
   id: string
@@ -46,6 +47,9 @@ type Target = {
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
+  submission_status?: 'pending' | 'in_progress' | 'completed' | 'failed'
+  submission_started_at?: string
+  queue_position?: number
 }
 
 interface FundsTableProps {
@@ -541,7 +545,7 @@ const FundsTable = React.memo(function FundsTable({
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10 border-b">
                     <TableRow>
-                      <TableHead className="w-[280px]">
+                      <TableHead className="w-[280px] pl-4">
                         <button
                           onClick={() => handleSort('name')}
                           className="flex items-center hover:text-foreground transition-colors font-medium"
@@ -611,7 +615,7 @@ const FundsTable = React.memo(function FundsTable({
                         onMouseEnter={() => onTargetHover?.(target)}
                         onMouseLeave={() => onTargetLeave?.()}
                       >
-                        <TableCell className="font-medium p-2">
+                        <TableCell className="font-medium p-2 pl-4">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {target.website ? (
@@ -837,71 +841,127 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex justify-end"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {target.submission_type === 'form' && (
-                              <ValidationGate
-                                requirements={
-                                  VALIDATION_PRESETS.BASIC_APPLICATION
-                                }
-                                onValidationPass={() =>
-                                  handleApplyForm(target.id, target.name)
-                                }
-                              >
-                                <Button
-                                  size="sm"
-                                  disabled={
-                                    submittingTargets.has(target.id) ||
-                                    (queueStatus
-                                      ? !queueStatus.canSubmitMore
-                                      : false)
+                            {target.submission_type === 'form' &&
+                              !target.submission_status && (
+                                <ValidationGate
+                                  requirements={
+                                    VALIDATION_PRESETS.BASIC_APPLICATION
                                   }
-                                  onMouseEnter={() =>
-                                    setHoveredButton(`apply-${target.id}`)
-                                  }
-                                  onMouseLeave={() => setHoveredButton(null)}
-                                  className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    queueStatus && !queueStatus.canSubmitMore
-                                      ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
-                                      : queueStatus &&
-                                          queueStatus.availableSlots === 0
-                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                                  }`}
-                                  title={
-                                    queueStatus && !queueStatus.canSubmitMore
-                                      ? 'Queue is full. Cannot add more applications.'
-                                      : queueStatus &&
-                                          queueStatus.availableSlots === 0
-                                        ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
-                                        : queueStatus
-                                          ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
-                                          : 'Submit application'
+                                  onValidationPass={() =>
+                                    handleApplyForm(target.id, target.name)
                                   }
                                 >
-                                  <LottieIcon
-                                    animationData={
-                                      submittingTargets.has(target.id)
-                                        ? animations.autorenew
+                                  <Button
+                                    size="sm"
+                                    disabled={
+                                      submittingTargets.has(target.id) ||
+                                      (queueStatus
+                                        ? !queueStatus.canSubmitMore
+                                        : false)
+                                    }
+                                    onMouseEnter={() =>
+                                      setHoveredButton(`apply-${target.id}`)
+                                    }
+                                    onMouseLeave={() => setHoveredButton(null)}
+                                    className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                      queueStatus && !queueStatus.canSubmitMore
+                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
                                         : queueStatus &&
-                                            !queueStatus.canSubmitMore
-                                          ? animations.cross
+                                            queueStatus.availableSlots === 0
+                                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                    }`}
+                                    title={
+                                      queueStatus && !queueStatus.canSubmitMore
+                                        ? 'Queue is full. Cannot add more applications.'
+                                        : queueStatus &&
+                                            queueStatus.availableSlots === 0
+                                          ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
+                                          : queueStatus
+                                            ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
+                                            : 'Submit application'
+                                    }
+                                  >
+                                    <LottieIcon
+                                      animationData={
+                                        submittingTargets.has(target.id)
+                                          ? animations.autorenew
                                           : queueStatus &&
-                                              queueStatus.availableSlots === 0
-                                            ? animations.hourglass
-                                            : animations.takeoff
-                                    }
-                                    size={14}
-                                    className=""
-                                    isHovered={
-                                      hoveredButton === `apply-${target.id}` &&
-                                      !submittingTargets.has(target.id) &&
-                                      queueStatus?.canSubmitMore !== false
-                                    }
-                                  />
-                                </Button>
-                              </ValidationGate>
-                            )}
+                                              !queueStatus.canSubmitMore
+                                            ? animations.cross
+                                            : queueStatus &&
+                                                queueStatus.availableSlots === 0
+                                              ? animations.hourglass
+                                              : animations.takeoff
+                                      }
+                                      size={14}
+                                      className=""
+                                      isHovered={
+                                        hoveredButton ===
+                                          `apply-${target.id}` &&
+                                        !submittingTargets.has(target.id) &&
+                                        queueStatus?.canSubmitMore !== false
+                                      }
+                                    />
+                                  </Button>
+                                </ValidationGate>
+                              )}
+                            {target.submission_type === 'form' &&
+                              target.submission_status && (
+                                <div className="flex items-center justify-center w-8 h-8">
+                                  {target.submission_status ===
+                                  'in_progress' ? (
+                                    <CircularProgressBar
+                                      size={16}
+                                      strokeWidth={2}
+                                    />
+                                  ) : target.queue_position ? (
+                                    <span className="text-xs font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-sm px-1.5 py-0.5">
+                                      {target.queue_position}
+                                    </span>
+                                  ) : target.submission_status ===
+                                    'completed' ? (
+                                    <LottieIcon
+                                      animationData={animations.check}
+                                      size={14}
+                                      customColor={
+                                        [0.133, 0.773, 0.369] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // green-600
+                                    />
+                                  ) : target.submission_status === 'failed' ? (
+                                    <LottieIcon
+                                      animationData={animations.cross}
+                                      size={14}
+                                      customColor={
+                                        [0.924, 0.314, 0.604] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // red-600
+                                    />
+                                  ) : target.submission_status === 'pending' ? (
+                                    <LottieIcon
+                                      animationData={animations.hourglass}
+                                      size={14}
+                                      customColor={
+                                        [0.918, 0.435, 0.071] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // orange-600
+                                    />
+                                  ) : null}
+                                </div>
+                              )}
                             {target.submission_type === 'email' &&
-                              target.application_email && (
+                              target.application_email &&
+                              !target.submission_status && (
                                 <ValidationGate
                                   requirements={
                                     VALIDATION_PRESETS.BASIC_APPLICATION
@@ -922,21 +982,110 @@ const FundsTable = React.memo(function FundsTable({
                                   </Button>
                                 </ValidationGate>
                               )}
-                            {target.submission_type === 'other' && (
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleLearnMore(target.application_url)
-                                }
-                                onMouseEnter={() =>
-                                  setHoveredButton(`learn-${target.id}`)
-                                }
-                                onMouseLeave={() => setHoveredButton(null)}
-                                className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/40 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-800 rounded-sm px-3 text-sm h-8 cursor-pointer"
-                              >
-                                Learn
-                              </Button>
-                            )}
+                            {target.submission_type === 'email' &&
+                              target.submission_status && (
+                                <div className="flex items-center justify-center w-8 h-8">
+                                  {target.submission_status === 'completed' ? (
+                                    <LottieIcon
+                                      animationData={animations.check}
+                                      size={14}
+                                      customColor={
+                                        [0.133, 0.773, 0.369] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // green-600
+                                    />
+                                  ) : target.submission_status === 'failed' ? (
+                                    <LottieIcon
+                                      animationData={animations.cross}
+                                      size={14}
+                                      customColor={
+                                        [0.924, 0.314, 0.604] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // red-600
+                                    />
+                                  ) : target.submission_status === 'pending' ||
+                                    target.submission_status ===
+                                      'in_progress' ? (
+                                    <LottieIcon
+                                      animationData={animations.hourglass}
+                                      size={14}
+                                      customColor={
+                                        [0.918, 0.435, 0.071] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // orange-600
+                                    />
+                                  ) : null}
+                                </div>
+                              )}
+                            {target.submission_type === 'other' &&
+                              !target.submission_status && (
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleLearnMore(target.application_url)
+                                  }
+                                  onMouseEnter={() =>
+                                    setHoveredButton(`learn-${target.id}`)
+                                  }
+                                  onMouseLeave={() => setHoveredButton(null)}
+                                  className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/40 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-800 rounded-sm px-3 text-sm h-8 cursor-pointer"
+                                >
+                                  Learn
+                                </Button>
+                              )}
+                            {target.submission_type === 'other' &&
+                              target.submission_status && (
+                                <div className="flex items-center justify-center w-8 h-8">
+                                  {target.submission_status === 'completed' ? (
+                                    <LottieIcon
+                                      animationData={animations.check}
+                                      size={14}
+                                      customColor={
+                                        [0.133, 0.773, 0.369] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // green-600
+                                    />
+                                  ) : target.submission_status === 'failed' ? (
+                                    <LottieIcon
+                                      animationData={animations.cross}
+                                      size={14}
+                                      customColor={
+                                        [0.924, 0.314, 0.604] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // red-600
+                                    />
+                                  ) : target.submission_status === 'pending' ||
+                                    target.submission_status ===
+                                      'in_progress' ? (
+                                    <LottieIcon
+                                      animationData={animations.hourglass}
+                                      size={14}
+                                      customColor={
+                                        [0.918, 0.435, 0.071] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // orange-600
+                                    />
+                                  ) : null}
+                                </div>
+                              )}
                           </div>
                         </TableCell>
                       </TableRow>

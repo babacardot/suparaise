@@ -88,7 +88,6 @@ const AngelsTableWrapper = React.memo(function AngelsTableWrapper({
   const [selectedAngel, setSelectedAngel] = useState<Angel | null>(null)
   const [isActionsOpen, setIsActionsOpen] = useState(false)
   const [submissions, setSubmissions] = useState<Submission[]>([])
-  const [loadingSubmissions, setLoadingSubmissions] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -97,7 +96,6 @@ const AngelsTableWrapper = React.memo(function AngelsTableWrapper({
         return
       }
 
-      setLoadingSubmissions(true)
       try {
         const supabase = createSupabaseBrowserClient()
         const { data, error } = await supabase
@@ -116,8 +114,6 @@ const AngelsTableWrapper = React.memo(function AngelsTableWrapper({
       } catch (error) {
         console.error('Submission fetch error:', error)
         setSubmissions([])
-      } finally {
-        setLoadingSubmissions(false)
       }
     }
 
@@ -186,7 +182,6 @@ const AngelsTableWrapper = React.memo(function AngelsTableWrapper({
         submissions={submissions}
         isOpen={isActionsOpen}
         onOpenChange={handleOpenChange}
-        loading={loadingSubmissions}
       />
     </>
   )

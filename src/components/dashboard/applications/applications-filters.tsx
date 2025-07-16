@@ -21,10 +21,22 @@ export interface ApplicationsFilters {
   dateRange: DateRange | undefined
 }
 
+interface ColumnVisibility {
+  status: boolean
+  type: boolean
+  submitted: boolean
+  notes: boolean
+}
+
 interface ApplicationsFiltersProps {
   filters: ApplicationsFilters
   onFiltersChange: (filters: ApplicationsFilters) => void
   onClearFilters: () => void
+  columnVisibility: ColumnVisibility
+  onColumnVisibilityChange: (
+    column: keyof ColumnVisibility,
+    visible: boolean,
+  ) => void
 }
 
 // Memoized static data
@@ -47,6 +59,8 @@ export default function ApplicationsFilters({
   filters,
   onFiltersChange,
   onClearFilters,
+  columnVisibility,
+  onColumnVisibilityChange,
 }: ApplicationsFiltersProps) {
   const [localFilters, setLocalFilters] = useState(filters)
   const isMounted = useRef(false)
@@ -467,6 +481,56 @@ export default function ApplicationsFilters({
             onClear={handleDateRangeClear}
             className="w-full"
           />
+        </div>
+
+        {/* Column visibility toggle */}
+        <div className="w-full sm:w-auto">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto h-10 px-3 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+              >
+                <LottieIcon
+                  animationData={animations.view2}
+                  size={16}
+                  className="opacity-50 hover:opacity-100"
+                />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-48 p-2 bg-card text-card-foreground rounded-sm"
+              align="end"
+            >
+              <div className="space-y-2">
+                {['status', 'type', 'submitted', 'notes'].map((key) => (
+                  <div
+                    key={key}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      onColumnVisibilityChange(
+                        key as keyof ColumnVisibility,
+                        !columnVisibility[key as keyof ColumnVisibility],
+                      )
+                    }}
+                    className={`
+                      flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
+                      ${
+                        columnVisibility[key as keyof ColumnVisibility]
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                      }
+                    `}
+                  >
+                    <span className="text-sm font-medium capitalize">
+                      {key.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {hasActiveFilters && (

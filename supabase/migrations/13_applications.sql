@@ -198,7 +198,7 @@ BEGIN
     p_offset
     );
     
-    EXECUTE final_query INTO result;
+    EXECUTE base_query INTO result;
     
     RETURN result;
 
@@ -219,6 +219,7 @@ CREATE OR REPLACE FUNCTION get_all_submissions_detailed(
     p_offset INTEGER DEFAULT 0,
     p_sort_by TEXT DEFAULT 'submission_date',
     p_sort_direction TEXT DEFAULT 'desc',
+    p_search TEXT DEFAULT NULL, -- Add search parameter
     p_status_filter TEXT[] DEFAULT NULL,
     p_type_filter TEXT[] DEFAULT NULL,
     p_date_from DATE DEFAULT NULL,
@@ -232,7 +233,7 @@ BEGIN
         p_offset,
         p_sort_by,
         p_sort_direction,
-        NULL, -- p_search
+        p_search, -- Pass search parameter
         p_status_filter,
         p_type_filter,
         p_date_from,
@@ -439,7 +440,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant execute permissions
 GRANT EXECUTE ON FUNCTION get_applications_advanced(UUID, INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT[], TEXT[], DATE, DATE) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_all_submissions_detailed(UUID, INTEGER, INTEGER, TEXT, TEXT, TEXT[], TEXT[], DATE, DATE) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_all_submissions_detailed(UUID, INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT[], TEXT[], DATE, DATE) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_submission_statistics(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION retry_submission(UUID, UUID, UUID, TEXT) TO authenticated;
 

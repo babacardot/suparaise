@@ -51,7 +51,7 @@ type Submission = {
   status: 'pending' | 'in_progress' | 'completed' | 'failed'
   submission_date: string
   agent_notes?: string
-  queue_position?: number
+  updated_at?: string
 }
 
 type AngelsActionsProps = {
@@ -59,7 +59,6 @@ type AngelsActionsProps = {
   submissions: Submission[]
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  loading: boolean
 }
 
 export default React.memo(function AngelsActions({
@@ -67,7 +66,6 @@ export default React.memo(function AngelsActions({
   submissions,
   isOpen,
   onOpenChange,
-  loading,
 }: AngelsActionsProps) {
   const getSubmissionTypeColor = (type: string) => {
     switch (type) {
@@ -90,21 +88,6 @@ export default React.memo(function AngelsActions({
         return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
       case 'comprehensive':
         return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-      default:
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-      case 'failed':
-        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-      case 'in_progress':
-        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-      case 'pending':
-        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
       default:
         return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
     }
@@ -212,7 +195,42 @@ export default React.memo(function AngelsActions({
     return str.charAt(0).toUpperCase() + str.slice(1)
   }
 
+  const formatTimeline = () => {
+    if (!submissions || submissions.length === 0) return []
+
+    const latestSubmission = submissions[0]
+    const timeline = []
+
+    // Submission date
+    timeline.push({
+      date: latestSubmission.submission_date,
+      label: 'Submitted',
+      status: 'completed',
+    })
+
+    // Current status
+    if (latestSubmission.status === 'completed') {
+      timeline.push({
+        date: latestSubmission.updated_at || latestSubmission.submission_date,
+        label: 'Completed',
+        status: 'completed',
+      })
+    } else if (latestSubmission.status === 'failed') {
+      timeline.push({
+        date: latestSubmission.updated_at || latestSubmission.submission_date,
+        label: 'Failed',
+        status: 'failed',
+      })
+    }
+
+    return timeline.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    )
+  }
+
   if (!angel) return null
+
+  const timeline = formatTimeline()
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -391,45 +409,37 @@ export default React.memo(function AngelsActions({
 
               <Separator />
 
-              {/* Submission History */}
-              {!loading && submissions.length > 0 && (
-                <section>
-                  <h3 className="text-sm font-medium mb-2">History</h3>
-                  <div className="space-y-2">
-                    {submissions.slice(0, 3).map((submission) => (
-                      <div
-                        key={submission.id}
-                        className="flex items-center justify-between p-2 rounded-sm bg-muted/30"
-                      >
-                        <div className="flex flex-col space-y-1">
-                          <span className="text-xs font-medium">
-                            {formatDate(submission.submission_date)}
-                          </span>
-                          {submission.queue_position && (
-                            <span className="text-[10px] text-muted-foreground">
-                              Queue position: {submission.queue_position}
-                            </span>
-                          )}
-                          {submission.agent_notes && (
-                            <span className="text-[10px] text-muted-foreground">
-                              {submission.agent_notes}
-                            </span>
-                          )}
-                        </div>
-                        <Badge
-                          className={`rounded-sm text-[10px] font-normal ${getStatusColor(submission.status)}`}
-                        >
-                          {capitalizeFirst(submission.status.replace('_', ' '))}
-                        </Badge>
-                      </div>
-                    ))}
-                    {submissions.length > 3 && (
-                      <p className="text-[10px] text-muted-foreground text-center">
-                        +{submissions.length - 3} more submissions
-                      </p>
-                    )}
+              {/* Timeline */}
+              {timeline.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Timeline</span>
                   </div>
-                </section>
+                  {timeline.map((event, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start justify-between"
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <div
+                          className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                            event.status === 'completed'
+                              ? 'bg-green-500'
+                              : event.status === 'failed'
+                                ? 'bg-red-500'
+                                : 'bg-gray-300'
+                          }`}
+                        />
+                        <span className="text-[10px] font-medium">
+                          {event.label}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">
+                        {formatDate(event.date)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </CardContent>

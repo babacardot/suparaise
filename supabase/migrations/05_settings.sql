@@ -1234,20 +1234,15 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE OR REPLACE FUNCTION queue_submission(
     p_user_id UUID,
     p_startup_id UUID,
-    p_target_id UUID
+    p_target_id UUID,
+    p_hyperbrowser_job_id TEXT
 )
 RETURNS JSONB AS $$
 DECLARE
-    queue_status JSONB;
-    current_in_progress INTEGER;
-    current_queued INTEGER;
-    max_parallel INTEGER;
-    max_queue INTEGER;
-    next_queue_position INTEGER;
     submission_id UUID;
     existing_submission RECORD;
 BEGIN
-    -- Check if submission already exists
+    -- Check if submission already exists and is not failed
     SELECT id, status INTO existing_submission
     FROM submissions
     WHERE startup_id = p_startup_id AND target_id = p_target_id;
@@ -1255,65 +1250,23 @@ BEGIN
     IF existing_submission.id IS NOT NULL THEN
         IF existing_submission.status = 'failed' THEN
             -- Allow retry for failed submissions by deleting the old one
-            -- and letting the process create a new one. This is simplest.
             DELETE FROM submissions WHERE id = existing_submission.id;
         ELSE
             RETURN jsonb_build_object('error', 'A submission for this target is already ' || existing_submission.status);
         END IF;
     END IF;
 
-    -- Get current queue status
-    SELECT get_queue_status(p_user_id, p_startup_id) INTO queue_status;
-    
-    IF queue_status ? 'error' THEN
-        RETURN queue_status;
-    END IF;
+    -- Create submission record with in_progress status and job_id
+    INSERT INTO submissions (startup_id, target_id, status, started_at, hyperbrowser_job_id)
+    VALUES (p_startup_id, p_target_id, 'in_progress', NOW(), p_hyperbrowser_job_id)
+    RETURNING id INTO submission_id;
 
-    current_in_progress := (queue_status->>'currentInProgress')::INTEGER;
-    current_queued := (queue_status->>'currentQueued')::INTEGER;
-    max_parallel := (queue_status->>'maxParallel')::INTEGER;
-    max_queue := (queue_status->>'maxQueue')::INTEGER;
-
-    -- Check if we can submit (either immediately or queue)
-    IF current_in_progress >= max_parallel AND current_queued >= max_queue THEN
-        RETURN jsonb_build_object('error', 'Queue is full. Cannot add more submissions.');
-    END IF;
-
-    -- If we have available parallel slots, submit immediately
-    IF current_in_progress < max_parallel THEN
-        -- Create submission for immediate processing
-        INSERT INTO submissions (startup_id, target_id, status, submission_date, started_at)
-        VALUES (p_startup_id, p_target_id, 'pending', NOW(), NOW())
-        RETURNING id INTO submission_id;
-
-        RETURN jsonb_build_object(
-            'success', true,
-            'submissionId', submission_id,
-            'status', 'immediate',
-            'message', 'Submission created for immediate processing'
-        );
-    ELSE
-        -- Add to queue
-        -- Get next queue position
-        SELECT COALESCE(MAX(queue_position), 0) + 1 INTO next_queue_position
-        FROM submissions
-        WHERE startup_id = p_startup_id 
-          AND status = 'pending'
-          AND queue_position IS NOT NULL;
-
-        -- Create queued submission
-        INSERT INTO submissions (startup_id, target_id, status, queue_position, queued_at, submission_date)
-        VALUES (p_startup_id, p_target_id, 'pending', next_queue_position, NOW(), NOW())
-        RETURNING id INTO submission_id;
-
-        RETURN jsonb_build_object(
-            'success', true,
-            'submissionId', submission_id,
-            'status', 'queued',
-            'queuePosition', next_queue_position,
-            'message', format('Submission added to queue at position %s', next_queue_position)
-        );
-    END IF;
+    RETURN jsonb_build_object(
+        'success', true,
+        'submissionId', submission_id,
+        'status', 'in_progress',
+        'message', 'Submission is now being processed by the agent.'
+    );
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -1423,6 +1376,83 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant execute permissions for queue management functions
 GRANT EXECUTE ON FUNCTION get_queue_status(UUID, UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION queue_submission(UUID, UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION queue_submission(UUID, UUID, UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION process_next_queued_submission(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_submissions_with_queue(UUID, UUID) TO authenticated; 
+
+-- New function to update submission status from Hyperbrowser result
+CREATE OR REPLACE FUNCTION public.update_submission_status(
+    p_submission_id UUID,
+    p_new_status submission_status,
+    p_agent_notes TEXT
+)
+RETURNS JSONB AS $$
+DECLARE
+  current_submission RECORD;
+BEGIN
+    -- Check if the submission exists
+    SELECT * INTO current_submission FROM submissions WHERE id = p_submission_id;
+
+    IF current_submission IS NULL THEN
+        RETURN jsonb_build_object('error', 'Submission not found');
+    END IF;
+
+    -- Update the submission record
+    UPDATE submissions
+    SET
+        status = p_new_status,
+        agent_notes = p_agent_notes,
+        updated_at = NOW()
+    WHERE id = p_submission_id;
+
+    -- Increment user's submission count if completed successfully
+    IF p_new_status = 'completed' THEN
+      PERFORM increment_submission_count(
+        (SELECT user_id FROM startups WHERE id = current_submission.startup_id)
+      );
+    END IF;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'submissionId', p_submission_id,
+        'message', 'Submission status updated successfully.'
+    );
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in update_submission_status for submission %: %', p_submission_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION update_submission_status(UUID, submission_status, TEXT) TO authenticated;
+
+-- New function to get a submission's details, including the job_id
+CREATE OR REPLACE FUNCTION public.get_submission_details(p_submission_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    submission_details JSONB;
+BEGIN
+    SELECT json_build_object(
+        'id', s.id,
+        'status', s.status,
+        'agent_notes', s.agent_notes,
+        'hyperbrowser_job_id', s.hyperbrowser_job_id
+    )
+    INTO submission_details
+    FROM submissions s
+    WHERE s.id = p_submission_id
+    AND (select auth.uid()) = (SELECT user_id FROM startups WHERE id = s.startup_id);
+
+    IF submission_details IS NULL THEN
+        RETURN jsonb_build_object('error', 'Submission not found or access denied');
+    END IF;
+
+    RETURN submission_details;
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in get_submission_details for submission %: %', p_submission_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION get_submission_details(UUID) TO authenticated; 

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import AcceleratorsTable from './accelerators-table'
 import AcceleratorsActions from './accelerators-actions'
 
@@ -32,6 +33,14 @@ type Accelerator = {
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
+}
+
+type Submission = {
+  id: string
+  submission_date: string
+  status: 'pending' | 'in_progress' | 'completed' | 'failed'
+  agent_notes?: string
+  updated_at?: string
 }
 
 interface ColumnVisibility {
@@ -74,6 +83,39 @@ const AcceleratorsTableWrapper = React.memo(function AcceleratorsTableWrapper({
   const [selectedAccelerator, setSelectedAccelerator] =
     useState<Accelerator | null>(null)
   const [isActionsOpen, setIsActionsOpen] = useState(false)
+  const [submissions, setSubmissions] = useState<Submission[]>([])
+
+  // Fetch submissions when accelerator is selected
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      if (!selectedAccelerator) {
+        setSubmissions([])
+        return
+      }
+
+      try {
+        const supabase = createSupabaseBrowserClient()
+        const { data, error } = await supabase
+          .from('accelerator_submissions')
+          .select('id, status, submission_date, agent_notes, updated_at')
+          .eq('startup_id', startupId)
+          .eq('accelerator_id', selectedAccelerator.id)
+          .order('submission_date', { ascending: false })
+
+        if (error) {
+          console.error('Error fetching submissions:', error)
+          setSubmissions([])
+        } else {
+          setSubmissions(data as Submission[])
+        }
+      } catch (error) {
+        console.error('Submission fetch error:', error)
+        setSubmissions([])
+      }
+    }
+
+    fetchSubmissions()
+  }, [selectedAccelerator, startupId])
 
   const handleAcceleratorHover = useCallback(
     (accelerator: Accelerator) => {
@@ -104,9 +146,6 @@ const AcceleratorsTableWrapper = React.memo(function AcceleratorsTableWrapper({
     }
   }, [])
 
-  // Mock submissions data
-  const mockSubmissions = selectedAccelerator ? [] : []
-
   return (
     <>
       <div
@@ -135,7 +174,7 @@ const AcceleratorsTableWrapper = React.memo(function AcceleratorsTableWrapper({
 
       <AcceleratorsActions
         accelerator={selectedAccelerator}
-        submissions={mockSubmissions}
+        submissions={submissions}
         isOpen={isActionsOpen}
         onOpenChange={handleOpenChange}
       />

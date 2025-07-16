@@ -501,7 +501,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10 border-b">
                     <TableRow>
-                      <TableHead className="w-[320px]">
+                      <TableHead className="w-[320px] pl-4">
                         <button
                           onClick={() => handleSort('name')}
                           className="flex items-center hover:text-foreground transition-colors font-medium"
@@ -601,7 +601,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                         onMouseEnter={() => onAcceleratorHover?.(accelerator)}
                         onMouseLeave={() => onAcceleratorLeave?.()}
                       >
-                        <TableCell className="font-medium p-2">
+                        <TableCell className="font-medium p-2 pl-4">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {accelerator.website ? (

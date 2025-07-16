@@ -56,7 +56,7 @@ const getArray = (value: string | string[] | undefined): string[] => {
 }
 
 interface GetSubmissionsDetailedResponse {
-  submissions: ApplicationSubmission[]
+  data: ApplicationSubmission[]
   totalCount: number
   hasMore: boolean
   currentPage: number
@@ -101,6 +101,7 @@ export default async function ApplicationsPage({
     p_offset: offset,
     p_sort_by: sortConfig.key,
     p_sort_direction: sortConfig.direction,
+    p_search: filters.search,
     p_status_filter:
       filters.statusFilter.length > 0 ? filters.statusFilter : undefined,
     p_type_filter:
@@ -129,7 +130,7 @@ export default async function ApplicationsPage({
   return (
     <ApplicationsPageClient
       startupId={startupId}
-      initialSubmissions={responseData?.submissions || []}
+      initialSubmissions={responseData?.data || []}
       initialPaginationData={
         responseData
           ? {

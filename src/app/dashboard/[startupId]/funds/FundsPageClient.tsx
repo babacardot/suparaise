@@ -27,6 +27,9 @@ type Target = {
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
+  submission_status?: 'pending' | 'in_progress' | 'completed' | 'failed'
+  submission_started_at?: string
+  queue_position?: number
 }
 
 interface ColumnVisibility {

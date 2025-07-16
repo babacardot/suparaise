@@ -285,7 +285,18 @@ export default React.memo(function ApplicationsActions({
         <Card className="border-0 shadow-none rounded-sm sm:rounded-sm h-full flex flex-col">
           <CardHeader className="sticky top-0 z-10 bg-background border-b px-4 -py-8 flex flex-row items-center justify-between flex-shrink-0">
             <SheetTitle className="text-base font-medium">
-              {submission.submitted_to_name}
+              {submission.website_url ? (
+                <a
+                  href={submission.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground hover:text-foreground"
+                >
+                  {submission.submitted_to_name}
+                </a>
+              ) : (
+                submission.submitted_to_name
+              )}
             </SheetTitle>
             <button
               onMouseDown={() => onOpenChange(false)}
@@ -360,47 +371,10 @@ export default React.memo(function ApplicationsActions({
 
               <Separator />
 
-              {/* Links */}
-              <div className="space-y-2">
-                <span className="text-muted-foreground">Links</span>
-                <div className="space-y-1">
-                  {submission.website_url && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs">Website</span>
-                      <a
-                        href={submission.website_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:text-blue-800 underline"
-                      >
-                        Visit
-                      </a>
-                    </div>
-                  )}
-                  {submission.application_url && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs">Application</span>
-                      <a
-                        href={submission.application_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:text-blue-800 underline"
-                      >
-                        View Form
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <Separator />
-
               {/* Focus Areas */}
               {submission.stage_focus && submission.stage_focus.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">
-                    Stage Focus
-                  </span>
+                  <span className="text-muted-foreground pt-1">Focus</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {submission.stage_focus.map((stage) => (
                       <Badge
@@ -471,13 +445,18 @@ export default React.memo(function ApplicationsActions({
 
               {/* Timeline */}
               {timeline.length > 0 && (
-                <section>
-                  <h3 className="text-sm font-medium mb-3">Timeline</h3>
-                  <div className="space-y-3">
-                    {timeline.map((event, index) => (
-                      <div key={index} className="flex items-start gap-3">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Timeline</span>
+                  </div>
+                  {timeline.map((event, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start justify-between"
+                    >
+                      <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
+                          className={`w-2 h-2 rounded-full flex-shrink-0 ${
                             event.status === 'completed'
                               ? 'bg-green-500'
                               : event.status === 'failed'
@@ -485,20 +464,16 @@ export default React.memo(function ApplicationsActions({
                                 : 'bg-gray-300'
                           }`}
                         />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium">
-                              {event.label}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {formatDate(event.date)}
-                            </span>
-                          </div>
-                        </div>
+                        <span className="text-[10px] font-medium">
+                          {event.label}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </section>
+                      <span className="text-[10px] text-muted-foreground">
+                        {formatDate(event.date)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
 
               {/* Actions */}

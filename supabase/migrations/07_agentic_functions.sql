@@ -205,7 +205,13 @@ BEGIN
             SELECT COUNT(*) as total_count FROM filtered_targets
         ),
         paginated_data AS (
-            SELECT * FROM filtered_targets
+            SELECT
+                ft.*,
+                s.status as submission_status,
+                s.started_at as submission_started_at,
+                s.queue_position
+            FROM filtered_targets ft
+            LEFT JOIN submissions s ON ft.id = s.target_id AND s.startup_id = %L
             ORDER BY %s %s
             LIMIT %L OFFSET %L
         )
@@ -218,6 +224,7 @@ BEGIN
             ''offset'', %L
         )',
         base_query,
+        p_startup_id,
         sort_clause,
         CASE WHEN upper(p_sort_direction) = 'DESC' THEN 'DESC' ELSE 'ASC' END,
         p_limit,

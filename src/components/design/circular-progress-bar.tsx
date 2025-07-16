@@ -1,108 +1,79 @@
-import { cn } from '@/lib/actions/utils'
+import React, { useEffect, useState } from 'react'
 
-interface AnimatedCircularProgressBarProps {
-  max: number
-  value: number
-  min: number
-  gaugePrimaryColor: string
-  gaugeSecondaryColor: string
-  className?: string
+interface CircularProgressBarProps {
+  size?: number
+  strokeWidth?: number
+  color?: string
+  duration?: number // Duration in seconds
+  onCompletion?: () => void
 }
 
-export function AnimatedCircularProgressBar({
-  max = 100,
-  min = 0,
-  value = 0,
-  gaugePrimaryColor,
-  gaugeSecondaryColor,
-  className,
-}: AnimatedCircularProgressBarProps) {
-  const circumference = 2 * Math.PI * 45
-  const percentPx = circumference / 100
-  const currentPercent = Math.round(((value - min) / (max - min)) * 100)
+const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
+  size = 20,
+  strokeWidth = 2,
+  color = '#22c55e',
+  duration = 600, // 10 minutes
+  onCompletion,
+}) => {
+  const [progress, setProgress] = useState(0)
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - (progress / 100) * circumference
+
+  useEffect(() => {
+    let startTime: number | null = null
+    let animationFrameId: number
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp
+      const elapsedTime = (timestamp - startTime) / 1000 // in seconds
+
+      // Animate to 95% over the specified duration
+      const targetProgress = Math.min((elapsedTime / duration) * 95, 95)
+      setProgress(targetProgress)
+
+      if (elapsedTime < duration) {
+        animationFrameId = requestAnimationFrame(animate)
+      } else if (onCompletion) {
+        // Optional: keep it at 95 until completion is signaled
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(animate)
+
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [duration, onCompletion])
 
   return (
-    <div
-      className={cn('relative size-40 text-2xl font-semibold', className)}
-      style={
-        {
-          '--circle-size': '100px',
-          '--circumference': circumference,
-          '--percent-to-px': `${percentPx}px`,
-          '--gap-percent': '5',
-          '--offset-factor': '0',
-          '--transition-length': '1s',
-          '--transition-step': '200ms',
-          '--delay': '0s',
-          '--percent-to-deg': '3.6deg',
-          transform: 'translateZ(0)',
-        } as React.CSSProperties
-      }
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className="-rotate-90"
     >
-      <svg
-        fill="none"
-        className="size-full"
-        strokeWidth="2"
-        viewBox="0 0 100 100"
-      >
-        {currentPercent <= 90 && currentPercent >= 0 && (
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            strokeWidth="10"
-            strokeDashoffset="0"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className=" opacity-100"
-            style={
-              {
-                stroke: gaugeSecondaryColor,
-                '--stroke-percent': 90 - currentPercent,
-                '--offset-factor-secondary': 'calc(1 - var(--offset-factor))',
-                strokeDasharray:
-                  'calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference)',
-                transform:
-                  'rotate(calc(1turn - 90deg - (var(--gap-percent) * var(--percent-to-deg) * var(--offset-factor-secondary)))) scaleY(-1)',
-                transition: 'all var(--transition-length) ease var(--delay)',
-                transformOrigin:
-                  'calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)',
-              } as React.CSSProperties
-            }
-          />
-        )}
-        <circle
-          cx="50"
-          cy="50"
-          r="45"
-          strokeWidth="10"
-          strokeDashoffset="0"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="opacity-100"
-          style={
-            {
-              stroke: gaugePrimaryColor,
-              '--stroke-percent': currentPercent,
-              strokeDasharray:
-                'calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference)',
-              transition:
-                'var(--transition-length) ease var(--delay),stroke var(--transition-length) ease var(--delay)',
-              transitionProperty: 'stroke-dasharray,transform',
-              transform:
-                'rotate(calc(-90deg + var(--gap-percent) * var(--offset-factor) * var(--percent-to-deg)))',
-              transformOrigin:
-                'calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)',
-            } as React.CSSProperties
-          }
-        />
-      </svg>
-      <span
-        data-current-value={currentPercent}
-        className="duration-[var(--transition-length)] delay-[var(--delay)] absolute inset-0 m-auto size-fit ease-linear animate-in fade-in"
-      >
-        {currentPercent}
-      </span>
-    </div>
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke="#e2e8f0"
+        strokeWidth={strokeWidth}
+        fill="transparent"
+        className="dark:stroke-gray-700"
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={color}
+        strokeWidth={strokeWidth}
+        fill="transparent"
+        strokeDasharray={circumference}
+        strokeDashoffset={strokeDashoffset}
+        strokeLinecap="round"
+        style={{ transition: 'stroke-dashoffset 0.1s linear' }}
+      />
+    </svg>
   )
 }
+
+export default CircularProgressBar

@@ -359,6 +359,7 @@ CREATE TABLE submissions (
     submission_date TIMESTAMPTZ DEFAULT NOW(),
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
+    hyperbrowser_job_id TEXT, -- To store the external agent job ID
     queue_position INTEGER, -- Position in queue (NULL if not queued)
     queued_at TIMESTAMPTZ, -- When it was added to queue
     started_at TIMESTAMPTZ, -- When processing actually started
@@ -457,6 +458,7 @@ CREATE INDEX IF NOT EXISTS idx_founders_startup_id ON founders(startup_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_id ON submissions(startup_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_target_id ON submissions(target_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
+CREATE INDEX IF NOT EXISTS idx_submissions_hyperbrowser_job_id ON submissions(hyperbrowser_job_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_queue_position ON submissions(queue_position) WHERE queue_position IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_submissions_queued_at ON submissions(queued_at) WHERE queued_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_status_queue ON submissions(startup_id, status, queue_position);

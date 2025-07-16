@@ -133,7 +133,17 @@ BEGIN
             SELECT COUNT(*) as total_count FROM filtered_accelerators
         ),
         paginated_data AS (
-            SELECT * FROM filtered_accelerators
+            SELECT 
+                fa.*,
+                s.status as submission_status,
+                s.queue_position,
+                s.submission_date,
+                s.agent_notes,
+                s.queued_at,
+                s.started_at,
+                s.updated_at as submission_updated_at
+            FROM filtered_accelerators fa
+            LEFT JOIN accelerator_submissions s ON fa.id = s.accelerator_id AND s.startup_id = %L
             ORDER BY %s %s
             LIMIT %L OFFSET %L
         )
@@ -146,6 +156,7 @@ BEGIN
             ''offset'', %L
         )',
         base_query,
+        p_startup_id,
         sort_clause,
         CASE WHEN upper(p_sort_direction) = 'DESC' THEN 'DESC' ELSE 'ASC' END,
         p_limit,

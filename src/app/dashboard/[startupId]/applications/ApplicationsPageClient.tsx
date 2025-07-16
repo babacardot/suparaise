@@ -4,12 +4,18 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
-import ApplicationsTable from '@/components/dashboard/applications/applications-table'
-import ApplicationsActions from '@/components/dashboard/applications/applications-actions'
+import ApplicationsTableWrapper from '@/components/dashboard/applications/applications-table-wrapper'
 import ApplicationsFilters, {
   ApplicationsFilters as ApplicationsFiltersType,
 } from '@/components/dashboard/applications/applications-filters'
 import { format } from 'date-fns'
+
+interface ColumnVisibility {
+  status: boolean
+  type: boolean
+  submitted: boolean
+  notes: boolean
+}
 
 type SubmissionStatus = 'pending' | 'in_progress' | 'completed' | 'failed'
 type SubmissionType = 'Fund' | 'Angel' | 'Accelerator'
@@ -72,9 +78,6 @@ export default function ApplicationsPageClient({
   const [submissions, setSubmissions] =
     useState<ApplicationSubmission[]>(initialSubmissions)
   const [paginationData, setPaginationData] = useState(initialPaginationData)
-  const [selectedSubmission, setSelectedSubmission] =
-    useState<ApplicationSubmission | null>(null)
-  const [isActionsOpen, setIsActionsOpen] = useState(false)
   const [retryingSubmissions, setRetryingSubmissions] = useState<Set<string>>(
     new Set(),
   )
@@ -96,6 +99,12 @@ export default function ApplicationsPageClient({
     },
   })
   const [sortConfig, setSortConfig] = useState(initialSortConfig)
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
+    status: true,
+    type: true,
+    submitted: true,
+    notes: false, // Hide notes by default as requested
+  })
 
   const page = useMemo(
     () => Number(initialPaginationData?.currentPage ?? 1),
@@ -215,25 +224,15 @@ export default function ApplicationsPageClient({
     updateUrl(params)
   }, [searchParams, updateUrl])
 
-  const handleSubmissionClick = useCallback(
-    (submission: ApplicationSubmission) => {
-      setSelectedSubmission(submission)
-      setIsActionsOpen(true)
+  const handleColumnVisibilityChange = useCallback(
+    (column: keyof ColumnVisibility, visible: boolean) => {
+      setColumnVisibility((prev) => ({
+        ...prev,
+        [column]: visible,
+      }))
     },
     [],
   )
-
-  const handleSubmissionHover = useCallback(
-    (submission: ApplicationSubmission) => {
-      // TODO: Show submission preview tooltip
-      console.log('Hovered submission:', submission)
-    },
-    [],
-  )
-
-  const handleSubmissionLeave = useCallback(() => {
-    // TODO: Hide submission preview tooltip
-  }, [])
 
   const handleRetrySubmission = useCallback(
     async (submission: ApplicationSubmission) => {
@@ -280,9 +279,7 @@ export default function ApplicationsPageClient({
             description: `Successfully retried application to ${submission.submitted_to_name}`,
             variant: 'success',
           })
-          // Close the actions panel and refresh the page
-          setIsActionsOpen(false)
-          setSelectedSubmission(null)
+          // Refresh the page
           window.location.reload()
         } else {
           toast({
@@ -312,13 +309,6 @@ export default function ApplicationsPageClient({
     [user?.id, startupId, retryingSubmissions, toast],
   )
 
-  const handleActionsOpenChange = useCallback((open: boolean) => {
-    setIsActionsOpen(open)
-    if (!open) {
-      setSelectedSubmission(null)
-    }
-  }, [])
-
   return (
     <div className="h-full flex flex-col overflow-hidden hide-scrollbar">
       <div className="flex-shrink-0 pb-4">
@@ -331,10 +321,12 @@ export default function ApplicationsPageClient({
         filters={filters}
         onFiltersChange={handleFiltersChange}
         onClearFilters={clearFilters}
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={handleColumnVisibilityChange}
       />
 
       <div className="flex-1 overflow-hidden hide-scrollbar">
-        <ApplicationsTable
+        <ApplicationsTableWrapper
           submissions={submissions}
           startupId={startupId}
           paginationData={paginationData}
@@ -342,23 +334,11 @@ export default function ApplicationsPageClient({
           onPreviousPage={handlePreviousPage}
           onNextPage={handleNextPage}
           onSortChange={handleSortChange}
-          onSubmissionClick={handleSubmissionClick}
-          onSubmissionHover={handleSubmissionHover}
-          onSubmissionLeave={handleSubmissionLeave}
+          onRetrySubmission={handleRetrySubmission}
+          isRetrying={false}
+          columnVisibility={columnVisibility}
         />
       </div>
-
-      <ApplicationsActions
-        submission={selectedSubmission}
-        isOpen={isActionsOpen}
-        onOpenChange={handleActionsOpenChange}
-        onRetry={handleRetrySubmission}
-        isRetrying={
-          selectedSubmission
-            ? retryingSubmissions.has(selectedSubmission.submission_id)
-            : false
-        }
-      />
     </div>
   )
 }

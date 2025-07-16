@@ -47,6 +47,13 @@ type ApplicationSubmission = {
   updated_at: string
 }
 
+interface ColumnVisibility {
+  status: boolean
+  type: boolean
+  submitted: boolean
+  notes: boolean
+}
+
 interface ApplicationsTableProps {
   submissions: ApplicationSubmission[]
   startupId: string
@@ -63,6 +70,7 @@ interface ApplicationsTableProps {
   onSubmissionClick?: (submission: ApplicationSubmission) => void
   onSubmissionHover?: (submission: ApplicationSubmission) => void
   onSubmissionLeave?: () => void
+  columnVisibility: ColumnVisibility
 }
 
 const ApplicationsTable = React.memo(function ApplicationsTable({
@@ -75,6 +83,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
   onSubmissionClick,
   onSubmissionHover,
   onSubmissionLeave,
+  columnVisibility,
 }: ApplicationsTableProps) {
   // Memoize color functions
   const getStatusColor = React.useCallback((status: SubmissionStatus) => {
@@ -169,39 +178,47 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10 border-b">
                     <TableRow>
-                      <TableHead className="w-[180px]">
+                      <TableHead className="w-[180px] pl-4">
                         <button
                           onClick={() => handleSort('submitted_to_name')}
                           className="flex items-center hover:text-foreground transition-colors font-medium"
                         >
-                          Applied To
+                          Recipient
                         </button>
                       </TableHead>
-                      <TableHead className="w-[100px]">
-                        <button
-                          onClick={() => handleSort('type')}
-                          className="flex items-center hover:text-foreground transition-colors font-medium"
-                        >
-                          Type
-                        </button>
-                      </TableHead>
-                      <TableHead className="w-[120px]">
-                        <button
-                          onClick={() => handleSort('status')}
-                          className="flex items-center hover:text-foreground transition-colors font-medium"
-                        >
-                          Status
-                        </button>
-                      </TableHead>
-                      <TableHead className="w-[150px]">
-                        <button
-                          onClick={() => handleSort('submission_date')}
-                          className="flex items-center hover:text-foreground transition-colors font-medium"
-                        >
-                          Submitted
-                        </button>
-                      </TableHead>
-                      <TableHead className="w-[200px]">Notes</TableHead>
+                      {columnVisibility.type && (
+                        <TableHead className="w-[100px]">
+                          <button
+                            onClick={() => handleSort('type')}
+                            className="flex items-center hover:text-foreground transition-colors font-medium"
+                          >
+                            Type
+                          </button>
+                        </TableHead>
+                      )}
+                      {columnVisibility.status && (
+                        <TableHead className="w-[120px]">
+                          <button
+                            onClick={() => handleSort('status')}
+                            className="flex items-center hover:text-foreground transition-colors font-medium"
+                          >
+                            Status
+                          </button>
+                        </TableHead>
+                      )}
+                      {columnVisibility.submitted && (
+                        <TableHead className="w-[150px]">
+                          <button
+                            onClick={() => handleSort('submission_date')}
+                            className="flex items-center hover:text-foreground transition-colors font-medium"
+                          >
+                            Submitted
+                          </button>
+                        </TableHead>
+                      )}
+                      {columnVisibility.notes && (
+                        <TableHead className="w-[200px]">Notes</TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -213,7 +230,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                         onMouseEnter={() => onSubmissionHover?.(submission)}
                         onMouseLeave={() => onSubmissionLeave?.()}
                       >
-                        <TableCell className="font-medium p-2">
+                        <TableCell className="font-medium p-2 pl-4">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {submission.website_url ? (
@@ -239,52 +256,60 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="p-2">
-                          <Badge
-                            className={`rounded-sm text-xs ${getTypeColor(submission.submitted_to_type)}`}
-                          >
-                            {submission.submitted_to_type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="p-2">
-                          <Badge
-                            className={`rounded-sm text-xs ${getStatusColor(submission.status)}`}
-                          >
-                            {capitalizeFirst(
-                              submission.status.replace('_', ' '),
-                            )}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="p-2">
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium">
-                              {formatDate(submission.submission_date)}
-                            </div>
-                            {submission.started_at &&
-                              submission.started_at !==
-                                submission.submission_date && (
-                                <div className="text-[11px] text-muted-foreground">
-                                  Started: {formatDate(submission.started_at)}
-                                </div>
+                        {columnVisibility.type && (
+                          <TableCell className="p-2">
+                            <Badge
+                              className={`rounded-sm text-xs ${getTypeColor(submission.submitted_to_type)}`}
+                            >
+                              {submission.submitted_to_type}
+                            </Badge>
+                          </TableCell>
+                        )}
+                        {columnVisibility.status && (
+                          <TableCell className="p-2">
+                            <Badge
+                              className={`rounded-sm text-xs ${getStatusColor(submission.status)}`}
+                            >
+                              {capitalizeFirst(
+                                submission.status.replace('_', ' '),
                               )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="p-2">
-                          {submission.agent_notes && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <div className="text-xs text-muted-foreground truncate max-w-[180px]">
-                                  {submission.agent_notes}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-[300px]">
-                                <div className="text-xs whitespace-pre-wrap">
-                                  {submission.agent_notes}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </TableCell>
+                            </Badge>
+                          </TableCell>
+                        )}
+                        {columnVisibility.submitted && (
+                          <TableCell className="p-2">
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium">
+                                {formatDate(submission.submission_date)}
+                              </div>
+                              {submission.started_at &&
+                                submission.started_at !==
+                                  submission.submission_date && (
+                                  <div className="text-[11px] text-muted-foreground">
+                                    Started: {formatDate(submission.started_at)}
+                                  </div>
+                                )}
+                            </div>
+                          </TableCell>
+                        )}
+                        {columnVisibility.notes && (
+                          <TableCell className="p-2">
+                            {submission.agent_notes && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <div className="text-xs text-muted-foreground truncate max-w-[180px]">
+                                    {submission.agent_notes}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-[300px]">
+                                  <div className="text-xs whitespace-pre-wrap">
+                                    {submission.agent_notes}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>

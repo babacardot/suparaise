@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import FundsTable from './funds-table'
 import FundsActions from './funds-actions'
 
@@ -21,6 +22,20 @@ type Target = {
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
+  submission_status?: 'pending' | 'in_progress' | 'completed' | 'failed'
+  submission_started_at?: string
+  queue_position?: number
+}
+
+type Submission = {
+  id: string
+  submission_date: string
+  status: 'pending' | 'in_progress' | 'completed' | 'failed'
+  agent_notes?: string
+  queue_position?: number
+  queued_at?: string
+  started_at?: string
+  updated_at?: string
 }
 
 interface ColumnVisibility {
@@ -59,6 +74,41 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
 }: FundsTableWrapperProps) {
   const [selectedTarget, setSelectedTarget] = useState<Target | null>(null)
   const [isActionsOpen, setIsActionsOpen] = useState(false)
+  const [submissions, setSubmissions] = useState<Submission[]>([])
+
+  // Fetch submissions when target is selected
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      if (!selectedTarget) {
+        setSubmissions([])
+        return
+      }
+
+      try {
+        const supabase = createSupabaseBrowserClient()
+        const { data, error } = await supabase
+          .from('submissions')
+          .select(
+            'id, status, submission_date, agent_notes, queue_position, queued_at, started_at, updated_at',
+          )
+          .eq('startup_id', startupId)
+          .eq('target_id', selectedTarget.id)
+          .order('submission_date', { ascending: false })
+
+        if (error) {
+          console.error('Error fetching submissions:', error)
+          setSubmissions([])
+        } else {
+          setSubmissions(data as Submission[])
+        }
+      } catch (error) {
+        console.error('Submission fetch error:', error)
+        setSubmissions([])
+      }
+    }
+
+    fetchSubmissions()
+  }, [selectedTarget, startupId])
 
   const handleTargetHover = useCallback(
     (target: Target) => {
@@ -90,7 +140,6 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
   }, [])
 
   // Mock submissions data - this would come from your API in real implementation
-  const mockSubmissions = selectedTarget ? [] : []
 
   return (
     <>
@@ -120,7 +169,7 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
 
       <FundsActions
         target={selectedTarget}
-        submissions={mockSubmissions}
+        submissions={submissions}
         isOpen={isActionsOpen}
         onOpenChange={handleOpenChange}
       />

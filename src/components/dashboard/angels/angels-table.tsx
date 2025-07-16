@@ -23,6 +23,7 @@ import {
   VALIDATION_PRESETS,
 } from '@/components/ui/validation-gate'
 import Link from 'next/link'
+import CircularProgressBar from '@/components/design/circular-progress-bar'
 
 type Angel = {
   id: string
@@ -61,6 +62,8 @@ type Angel = {
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string
+  submission_status?: 'pending' | 'in_progress' | 'completed' | 'failed'
+  queue_position?: number
 }
 
 interface AngelsTableProps {
@@ -460,7 +463,7 @@ const AngelsTable = React.memo(function AngelsTable({
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10 border-b">
                     <TableRow>
-                      <TableHead className="w-[280px]">
+                      <TableHead className="w-[280px] pl-4">
                         <button
                           onClick={() => handleSort('name')}
                           className="flex items-center hover:text-foreground transition-colors font-medium"
@@ -540,7 +543,7 @@ const AngelsTable = React.memo(function AngelsTable({
                         onMouseEnter={() => onAngelHover?.(angel)}
                         onMouseLeave={() => onAngelLeave?.()}
                       >
-                        <TableCell className="font-medium p-2">
+                        <TableCell className="font-medium p-2 pl-4">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <span className="font-medium text-foreground">
@@ -654,7 +657,9 @@ const AngelsTable = React.memo(function AngelsTable({
                                     submittingAngels.has(angel.id) ||
                                     (queueStatus
                                       ? !queueStatus.canSubmitMore
-                                      : false)
+                                      : false) ||
+                                    angel.submission_status === 'completed' ||
+                                    angel.submission_status === 'failed'
                                   }
                                   onMouseEnter={() =>
                                     setHoveredButton(`apply-${angel.id}`)
@@ -679,26 +684,37 @@ const AngelsTable = React.memo(function AngelsTable({
                                           : 'Submit application'
                                   }
                                 >
-                                  <LottieIcon
-                                    animationData={
-                                      submittingAngels.has(angel.id)
-                                        ? animations.autorenew
-                                        : queueStatus &&
-                                            !queueStatus.canSubmitMore
-                                          ? animations.cross
+                                  {angel.submission_status === 'in_progress' ? (
+                                    <CircularProgressBar
+                                      size={16}
+                                      strokeWidth={2}
+                                    />
+                                  ) : angel.queue_position ? (
+                                    <span className="text-xs font-semibold">
+                                      {angel.queue_position}
+                                    </span>
+                                  ) : (
+                                    <LottieIcon
+                                      animationData={
+                                        submittingAngels.has(angel.id)
+                                          ? animations.autorenew
                                           : queueStatus &&
-                                              queueStatus.availableSlots === 0
-                                            ? animations.hourglass
-                                            : animations.takeoff
-                                    }
-                                    size={14}
-                                    className=""
-                                    isHovered={
-                                      hoveredButton === `apply-${angel.id}` &&
-                                      !submittingAngels.has(angel.id) &&
-                                      queueStatus?.canSubmitMore !== false
-                                    }
-                                  />
+                                              !queueStatus.canSubmitMore
+                                            ? animations.cross
+                                            : queueStatus &&
+                                                queueStatus.availableSlots === 0
+                                              ? animations.hourglass
+                                              : animations.takeoff
+                                      }
+                                      size={14}
+                                      className=""
+                                      isHovered={
+                                        hoveredButton === `apply-${angel.id}` &&
+                                        !submittingAngels.has(angel.id) &&
+                                        queueStatus?.canSubmitMore !== false
+                                      }
+                                    />
+                                  )}
                                 </Button>
                               </ValidationGate>
                             )}
