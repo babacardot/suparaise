@@ -18,7 +18,7 @@ async function getJobStatus(jobId: string) {
   }
 
   const response = await fetch(
-    `https://api.hyperbrowser.ai/api/task/claude-computer-use/${jobId}`,
+    `https://api.hyperbrowser.ai/api/task/hyper-agent/${jobId}`,
     {
       headers: {
         'X-API-KEY': apiKey,

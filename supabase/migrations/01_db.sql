@@ -274,6 +274,7 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 CREATE TABLE startups (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    hyperbrowser_session_id TEXT,
     name TEXT NOT NULL,
     website TEXT,
     industry industry_type,
@@ -447,6 +448,7 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- Index for startups.user_id (critical for dashboard queries)
 CREATE INDEX IF NOT EXISTS idx_startups_user_id ON startups(user_id);
+CREATE INDEX IF NOT EXISTS idx_startups_hyperbrowser_session_id ON startups(hyperbrowser_session_id);
 
 -- Index for startups.onboarded (for filtering incomplete onboarding)
 CREATE INDEX IF NOT EXISTS idx_startups_onboarded ON startups(onboarded);

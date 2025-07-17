@@ -204,6 +204,7 @@ BEGIN
         'financialProjectionsUrl', s.financial_projections_url,
         'businessPlanUrl', s.business_plan_url,
         'googleDriveUrl', s.google_drive_url,
+        'hyperbrowserSessionId', s.hyperbrowser_session_id,
         'createdAt', s.created_at,
         'updatedAt', s.updated_at
     )
@@ -301,6 +302,10 @@ BEGIN
         google_drive_url = CASE
             WHEN p_data ? 'googleDriveUrl' THEN p_data->>'googleDriveUrl'
             ELSE google_drive_url
+        END,
+        hyperbrowser_session_id = CASE
+            WHEN p_data ? 'hyperbrowserSessionId' THEN p_data->>'hyperbrowserSessionId'
+            ELSE hyperbrowser_session_id
         END,
         updated_at = NOW()
     WHERE id = p_startup_id AND user_id = p_user_id;
@@ -958,6 +963,7 @@ BEGIN
         revenue_model, current_runway, key_customers, competitors, onboarded,
         is_active, deleted_at, logo_url, pitch_deck_url, intro_video_url,
         financial_projections_url, business_plan_url, google_drive_url,
+        hyperbrowser_session_id,
         created_at, updated_at, original_id, original_user_id
     )
     SELECT 
@@ -969,6 +975,7 @@ BEGIN
         revenue_model, current_runway, key_customers, competitors, onboarded,
         is_active, deleted_at, logo_url, pitch_deck_url, intro_video_url,
         financial_projections_url, business_plan_url, google_drive_url,
+        hyperbrowser_session_id,
         created_at, updated_at, id, user_id
     FROM startups 
     WHERE user_id = p_user_id AND is_active = TRUE;

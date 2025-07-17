@@ -875,6 +875,7 @@ export type Database = {
           funding_amount_sought: number | null
           funding_round: Database['public']['Enums']['investment_stage'] | null
           google_drive_url: string | null
+          hyperbrowser_session_id: string | null
           id: string
           incorporation_city: string | null
           incorporation_country: string | null
@@ -920,6 +921,7 @@ export type Database = {
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
           google_drive_url?: string | null
+          hyperbrowser_session_id?: string | null
           id?: string
           incorporation_city?: string | null
           incorporation_country?: string | null
@@ -967,6 +969,7 @@ export type Database = {
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
           google_drive_url?: string | null
+          hyperbrowser_session_id?: string | null
           id?: string
           incorporation_city?: string | null
           incorporation_country?: string | null
@@ -1454,7 +1457,7 @@ export type Database = {
     }
     Functions: {
       add_startup_founder: {
-        Args: { p_user_id: string; p_data: Json; p_startup_id: string }
+        Args: { p_startup_id: string; p_user_id: string; p_data: Json }
         Returns: Json
       }
       can_email_be_used_for_signup: {
@@ -1489,10 +1492,10 @@ export type Database = {
       }
       create_feedback: {
         Args: {
-          p_startup_id?: string
           p_message: string
-          p_sentiment: string
           p_user_id: string
+          p_sentiment: string
+          p_startup_id?: string
         }
         Returns: string
       }
@@ -1506,17 +1509,17 @@ export type Database = {
       }
       create_support_request: {
         Args: {
+          p_subject: string
+          p_category: string
           p_startup_id: string
           p_user_id: string
-          p_category: string
-          p_subject: string
-          p_message: string
           p_image_url?: string
+          p_message: string
         }
         Returns: string
       }
       dismiss_startup_recommendation: {
-        Args: { p_startup_id: string; p_recommendation_key: string }
+        Args: { p_recommendation_key: string; p_startup_id: string }
         Returns: Json
       }
       fetch_daily_run_grid_data: {
@@ -1527,31 +1530,31 @@ export type Database = {
         }[]
       }
       fetch_recent_submissions: {
-        Args: { p_startup_id: string; p_limit?: number }
+        Args: { p_limit?: number; p_startup_id: string }
         Returns: Json
       }
       fetch_recent_submissions_detailed: {
-        Args: { p_limit?: number; p_startup_id: string }
+        Args: { p_startup_id: string; p_limit?: number }
         Returns: Json
       }
       get_accelerators_simple: {
         Args: {
-          p_funding_ranges?: string[]
-          p_sort_by?: string
-          p_offset?: number
-          p_limit?: number
-          p_equity_ranges?: string[]
-          p_program_types?: string[]
           p_required_documents?: string[]
-          p_region_focus?: string[]
-          p_industry_focus?: string[]
-          p_stage_focus?: string[]
-          p_startup_id?: string
-          p_tags?: string[]
-          p_submission_filter?: string
-          p_search?: string
+          p_limit?: number
+          p_offset?: number
+          p_sort_by?: string
           p_sort_direction?: string
+          p_search?: string
           p_submission_types?: string[]
+          p_stage_focus?: string[]
+          p_industry_focus?: string[]
+          p_region_focus?: string[]
+          p_program_types?: string[]
+          p_equity_ranges?: string[]
+          p_funding_ranges?: string[]
+          p_tags?: string[]
+          p_startup_id?: string
+          p_submission_filter?: string
         }
         Returns: Json
       }
@@ -1560,58 +1563,58 @@ export type Database = {
           | {
               p_date_from?: string
               p_date_to?: string
-              p_sort_by?: string
-              p_offset?: number
-              p_limit?: number
               p_startup_id: string
-              p_type_filter?: string[]
+              p_limit?: number
+              p_offset?: number
+              p_sort_by?: string
               p_sort_direction?: string
-              p_search?: string
               p_status_filter?: string[]
+              p_type_filter?: string[]
             }
           | {
-              p_date_from?: string
-              p_startup_id: string
-              p_date_to?: string
               p_limit?: number
-              p_offset?: number
-              p_sort_by?: string
-              p_sort_direction?: string
-              p_status_filter?: string[]
+              p_date_to?: string
+              p_date_from?: string
               p_type_filter?: string[]
+              p_status_filter?: string[]
+              p_search?: string
+              p_sort_direction?: string
+              p_sort_by?: string
+              p_offset?: number
+              p_startup_id: string
             }
         Returns: Json
       }
       get_angels_simple: {
         Args: {
+          p_industry_focus?: string[]
           p_stage_focus?: string[]
+          p_region_focus?: string[]
+          p_submission_filter?: string
+          p_startup_id?: string
+          p_investment_approaches?: string[]
+          p_check_sizes?: string[]
           p_limit?: number
           p_offset?: number
           p_sort_by?: string
           p_sort_direction?: string
           p_search?: string
           p_submission_types?: string[]
-          p_industry_focus?: string[]
-          p_region_focus?: string[]
-          p_check_sizes?: string[]
-          p_investment_approaches?: string[]
-          p_startup_id?: string
-          p_submission_filter?: string
         }
         Returns: Json
       }
       get_applications_advanced: {
         Args: {
           p_sort_by?: string
-          p_date_to?: string
-          p_date_from?: string
-          p_type_filter?: string[]
-          p_status_filter?: string[]
-          p_search?: string
           p_sort_direction?: string
-          p_startup_id: string
-          p_limit?: number
+          p_search?: string
+          p_status_filter?: string[]
+          p_type_filter?: string[]
+          p_date_from?: string
+          p_date_to?: string
           p_offset?: number
+          p_limit?: number
+          p_startup_id: string
         }
         Returns: Json
       }
@@ -1636,7 +1639,7 @@ export type Database = {
         Returns: Json
       }
       get_or_create_stripe_customer: {
-        Args: { p_user_id: string; p_stripe_customer_id?: string }
+        Args: { p_stripe_customer_id?: string; p_user_id: string }
         Returns: Json
       }
       get_profile_submission_info: {
@@ -1707,19 +1710,16 @@ export type Database = {
       }
       get_targets_paginated: {
         Args: {
+          p_order_by?: string
           p_offset?: number
           p_order_direction?: string
           p_limit?: number
-          p_order_by?: string
         }
         Returns: Json
       }
       get_targets_simple: {
         Args: {
-          p_sort_direction?: string
-          p_limit?: number
-          p_offset?: number
-          p_sort_by?: string
+          p_submission_filter?: string
           p_search?: string
           p_submission_types?: string[]
           p_stage_focus?: string[]
@@ -1728,7 +1728,10 @@ export type Database = {
           p_required_documents?: string[]
           p_tags?: string[]
           p_startup_id?: string
-          p_submission_filter?: string
+          p_sort_by?: string
+          p_offset?: number
+          p_limit?: number
+          p_sort_direction?: string
         }
         Returns: Json
       }
@@ -1741,7 +1744,7 @@ export type Database = {
         Returns: Json
       }
       get_user_agent_settings: {
-        Args: { p_user_id: string; p_startup_id?: string }
+        Args: { p_startup_id?: string; p_user_id: string }
         Returns: Json
       }
       get_user_founder_profile: {
@@ -1753,7 +1756,7 @@ export type Database = {
         Returns: Json
       }
       get_user_startup_data: {
-        Args: { p_startup_id?: string; p_user_id: string }
+        Args: { p_user_id: string; p_startup_id?: string }
         Returns: Json
       }
       get_user_startups: {
@@ -1779,12 +1782,12 @@ export type Database = {
       queue_submission: {
         Args:
           | {
-              p_hyperbrowser_job_id?: string
-              p_target_id: string
               p_startup_id: string
+              p_hyperbrowser_job_id?: string
               p_user_id: string
+              p_target_id: string
             }
-          | { p_startup_id: string; p_user_id: string; p_target_id: string }
+          | { p_user_id: string; p_target_id: string; p_startup_id: string }
         Returns: Json
       }
       reactivate_user_account: {
@@ -1792,15 +1795,15 @@ export type Database = {
         Returns: Json
       }
       remove_startup_founder: {
-        Args: { p_founder_id: string; p_user_id: string }
+        Args: { p_user_id: string; p_founder_id: string }
         Returns: Json
       }
       retry_submission: {
         Args: {
-          p_user_id: string
-          p_submission_type: string
           p_submission_id: string
+          p_user_id: string
           p_startup_id: string
+          p_submission_type: string
         }
         Returns: Json
       }
@@ -1818,53 +1821,53 @@ export type Database = {
       }
       update_accelerator_submission_status: {
         Args: {
+          p_new_status: Database['public']['Enums']['submission_status']
           p_submission_id: string
           p_agent_notes: string
-          p_new_status: Database['public']['Enums']['submission_status']
         }
         Returns: Json
       }
       update_angel_submission_status: {
         Args: {
+          p_submission_id: string
           p_agent_notes: string
           p_new_status: Database['public']['Enums']['submission_status']
-          p_submission_id: string
         }
         Returns: Json
       }
       update_founder_profile: {
-        Args: { p_data: Json; p_user_id: string; p_founder_id: string }
+        Args: { p_founder_id: string; p_user_id: string; p_data: Json }
         Returns: Json
       }
       update_submission_status: {
         Args: {
+          p_new_status: Database['public']['Enums']['submission_status']
           p_submission_id: string
           p_agent_notes: string
-          p_new_status: Database['public']['Enums']['submission_status']
         }
         Returns: Json
       }
       update_subscription_status: {
         Args: {
           p_stripe_customer_id: string
-          p_status: Database['public']['Enums']['subscription_status']
-          p_current_period_end?: string
-          p_is_subscribed?: boolean
           p_plan_name?: string
+          p_status: Database['public']['Enums']['subscription_status']
           p_subscription_id: string
+          p_is_subscribed?: boolean
+          p_current_period_end?: string
         }
         Returns: Json
       }
       update_user_agent_settings: {
-        Args: { p_user_id: string; p_data: Json; p_startup_id: string }
-        Returns: Json
-      }
-      update_user_founder_profile: {
         Args: { p_startup_id: string; p_data: Json; p_user_id: string }
         Returns: Json
       }
+      update_user_founder_profile: {
+        Args: { p_user_id: string; p_data: Json; p_startup_id: string }
+        Returns: Json
+      }
       update_user_startup_data: {
-        Args: { p_data: Json; p_user_id: string; p_startup_id: string }
+        Args: { p_user_id: string; p_startup_id: string; p_data: Json }
         Returns: Json
       }
     }
