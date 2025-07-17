@@ -118,6 +118,11 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     canSubmitMore: boolean
   } | null>(null)
 
+  const isQuotaReached =
+    subscription &&
+    subscription.monthly_submissions_used >=
+      subscription.monthly_submissions_limit
+
   const showUpgradeBanner = React.useMemo(() => {
     const level = subscription?.permission_level
     const page = Number(paginationData?.currentPage)
@@ -378,6 +383,15 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
         return
       }
 
+      if (isQuotaReached) {
+        toast({
+          title: 'Limit reached',
+          description: `You have used ${subscription?.monthly_submissions_used} of your ${subscription?.monthly_submissions_limit} monthly submissions.`,
+          variant: 'default',
+        })
+        return
+      }
+
       if (submittingAccelerators.has(acceleratorId)) return
 
       setSubmittingAccelerators(
@@ -454,7 +468,15 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
         })
       }
     },
-    [user?.id, startupId, submittingAccelerators, toast, queueStatus],
+    [
+      user?.id,
+      startupId,
+      submittingAccelerators,
+      toast,
+      queueStatus,
+      isQuotaReached,
+      subscription,
+    ],
   )
 
   const handleSendEmail = React.useCallback((email: string | undefined) => {
@@ -890,35 +912,43 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                   }
                                   onMouseLeave={() => setHoveredButton(null)}
                                   className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    queueStatus && !queueStatus.canSubmitMore
-                                      ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                    isQuotaReached
+                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
                                       : queueStatus &&
-                                          queueStatus.availableSlots === 0
-                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                          !queueStatus.canSubmitMore
+                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                        : queueStatus &&
+                                            queueStatus.availableSlots === 0
+                                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
                                   }`}
                                   title={
-                                    queueStatus && !queueStatus.canSubmitMore
-                                      ? 'Queue is full. Cannot add more applications.'
+                                    isQuotaReached
+                                      ? `You have reached your monthly submission limit of ${subscription?.monthly_submissions_limit}.`
                                       : queueStatus &&
-                                          queueStatus.availableSlots === 0
-                                        ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
-                                        : queueStatus
-                                          ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
-                                          : 'Submit application'
+                                          !queueStatus.canSubmitMore
+                                        ? 'Queue is full. Cannot add more applications.'
+                                        : queueStatus &&
+                                            queueStatus.availableSlots === 0
+                                          ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
+                                          : queueStatus
+                                            ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
+                                            : 'Submit application'
                                   }
                                 >
                                   <LottieIcon
                                     animationData={
                                       submittingAccelerators.has(accelerator.id)
                                         ? animations.autorenew
-                                        : queueStatus &&
-                                            !queueStatus.canSubmitMore
+                                        : isQuotaReached
                                           ? animations.cross
                                           : queueStatus &&
-                                              queueStatus.availableSlots === 0
-                                            ? animations.hourglass
-                                            : animations.takeoff
+                                              !queueStatus.canSubmitMore
+                                            ? animations.cross
+                                            : queueStatus &&
+                                                queueStatus.availableSlots === 0
+                                              ? animations.hourglass
+                                              : animations.takeoff
                                     }
                                     size={14}
                                     className=""
@@ -928,7 +958,17 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                       !submittingAccelerators.has(
                                         accelerator.id,
                                       ) &&
+                                      !isQuotaReached &&
                                       queueStatus?.canSubmitMore !== false
+                                    }
+                                    customColor={
+                                      isQuotaReached
+                                        ? ([0.918, 0.435, 0.071] as [
+                                            number,
+                                            number,
+                                            number,
+                                          ])
+                                        : undefined
                                     }
                                   />
                                 </Button>

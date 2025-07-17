@@ -28,7 +28,6 @@ import {
   VALIDATION_PRESETS,
 } from '@/components/ui/validation-gate'
 import Link from 'next/link'
-import CircularProgressBar from '@/components/design/circular-progress-bar'
 
 type Target = {
   id: string
@@ -50,6 +49,8 @@ type Target = {
   submission_status?: 'pending' | 'in_progress' | 'completed' | 'failed'
   submission_started_at?: string
   queue_position?: number
+  submission_id?: string
+  agent_notes?: string
 }
 
 interface FundsTableProps {
@@ -69,6 +70,7 @@ interface FundsTableProps {
   onTargetClick?: (target: Target) => void
   onTargetHover?: (target: Target) => void
   onTargetLeave?: () => void
+  onTargetUpdate?: (targetId: string, updates: Partial<Target>) => void
 }
 
 interface ColumnVisibility {
@@ -91,6 +93,7 @@ const FundsTable = React.memo(function FundsTable({
   onTargetClick,
   onTargetHover,
   onTargetLeave,
+  onTargetUpdate,
 }: FundsTableProps) {
   const { user, subscription } = useUser()
   const { toast } = useToast()
@@ -98,6 +101,15 @@ const FundsTable = React.memo(function FundsTable({
   const [submittingTargets, setSubmittingTargets] = React.useState<Set<string>>(
     new Set(),
   )
+  const [pollingSubmissions, setPollingSubmissions] = React.useState<
+    Set<string>
+  >(new Set())
+
+  const isQuotaReached =
+    subscription &&
+    subscription.monthly_submissions_used >=
+      subscription.monthly_submissions_limit
+
   const [queueStatus, setQueueStatus] = React.useState<{
     maxParallel: number
     maxQueue: number
@@ -177,6 +189,63 @@ const FundsTable = React.memo(function FundsTable({
 
     return () => clearInterval(interval)
   }, [user?.id, startupId])
+
+  // Poll for status of in-progress submissions
+  React.useEffect(() => {
+    const submissionsToPoll = filteredTargets.filter(
+      (t) => t.submission_status === 'in_progress' && t.submission_id,
+    )
+
+    if (submissionsToPoll.length === 0) {
+      return
+    }
+
+    const poll = async (submissionId: string) => {
+      try {
+        const response = await fetch('/api/submission/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ submissionId }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (
+            data.status === 'completed' ||
+            data.status === 'failed' ||
+            data.status !== 'in_progress'
+          ) {
+            onTargetUpdate?.(data.id, {
+              submission_status: data.status,
+              agent_notes: data.agent_notes,
+            })
+            // Stop polling for this submission
+            setPollingSubmissions((prev) => {
+              const newSet = new Set(prev)
+              newSet.delete(submissionId)
+              return newSet
+            })
+          }
+        }
+      } catch (error) {
+        console.error(`Polling failed for submission ${submissionId}:`, error)
+      }
+    }
+
+    const intervalIds = submissionsToPoll.map((target) => {
+      if (pollingSubmissions.has(target.submission_id!)) {
+        return null // Already polling this one
+      }
+      setPollingSubmissions((prev) => new Set(prev).add(target.submission_id!))
+      return setInterval(() => poll(target.submission_id!), 5000) // Poll every 5 seconds
+    })
+
+    return () => {
+      intervalIds.forEach((id) => {
+        if (id) clearInterval(id)
+      })
+    }
+  }, [filteredTargets, onTargetUpdate, pollingSubmissions])
 
   // Memoize color functions to prevent recreation on every render
   const getSubmissionTypeColor = React.useCallback((type: string) => {
@@ -382,6 +451,15 @@ const FundsTable = React.memo(function FundsTable({
         return
       }
 
+      if (isQuotaReached) {
+        toast({
+          title: 'Limit reached',
+          description: `You have used ${subscription?.monthly_submissions_used} of your ${subscription?.monthly_submissions_limit} monthly submissions.`,
+          variant: 'default',
+        })
+        return
+      }
+
       if (submittingTargets.has(targetId)) {
         return // Already submitting
       }
@@ -441,6 +519,15 @@ const FundsTable = React.memo(function FundsTable({
             })
           }
 
+          // Update target state to reflect new submission status immediately
+          onTargetUpdate?.(targetId, {
+            submission_status:
+              result.status === 'queued' ? 'pending' : 'in_progress',
+            queue_position: result.queuePosition,
+            submission_started_at:
+              result.status === 'queued' ? undefined : new Date().toISOString(),
+          })
+
           // Refresh queue status
           setTimeout(() => {
             const fetchQueueStatus = async () => {
@@ -491,7 +578,16 @@ const FundsTable = React.memo(function FundsTable({
         })
       }
     },
-    [user?.id, startupId, submittingTargets, toast, queueStatus],
+    [
+      user?.id,
+      startupId,
+      submittingTargets,
+      toast,
+      queueStatus,
+      onTargetUpdate,
+      subscription,
+      isQuotaReached,
+    ],
   )
 
   const handleSendEmail = React.useCallback((email: string | undefined) => {
@@ -864,35 +960,37 @@ const FundsTable = React.memo(function FundsTable({
                                     }
                                     onMouseLeave={() => setHoveredButton(null)}
                                     className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                      queueStatus && !queueStatus.canSubmitMore
-                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                      isQuotaReached
+                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
                                         : queueStatus &&
-                                            queueStatus.availableSlots === 0
-                                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                            !queueStatus.canSubmitMore
+                                          ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
+                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
                                     }`}
                                     title={
-                                      queueStatus && !queueStatus.canSubmitMore
-                                        ? 'Queue is full. Cannot add more applications.'
+                                      isQuotaReached
+                                        ? `You have reached your monthly submission limit of ${subscription?.monthly_submissions_limit}.`
                                         : queueStatus &&
-                                            queueStatus.availableSlots === 0
-                                          ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
-                                          : queueStatus
-                                            ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
-                                            : 'Submit application'
+                                            !queueStatus.canSubmitMore
+                                          ? 'Queue is full. Cannot add more applications.'
+                                          : queueStatus &&
+                                              queueStatus.availableSlots === 0
+                                            ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
+                                            : queueStatus
+                                              ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
+                                              : 'Submit application'
                                     }
                                   >
                                     <LottieIcon
                                       animationData={
                                         submittingTargets.has(target.id)
-                                          ? animations.autorenew
-                                          : queueStatus &&
-                                              !queueStatus.canSubmitMore
+                                          ? animations.autorenew // Show spinner when this specific one is being submitted
+                                          : isQuotaReached
                                             ? animations.cross
                                             : queueStatus &&
-                                                queueStatus.availableSlots === 0
-                                              ? animations.hourglass
-                                              : animations.takeoff
+                                                !queueStatus.canSubmitMore
+                                              ? animations.cross // Show cross if no more submissions are possible at all
+                                              : animations.takeoff // Default "apply" icon if submissions are possible (direct or queued)
                                       }
                                       size={14}
                                       className=""
@@ -900,7 +998,17 @@ const FundsTable = React.memo(function FundsTable({
                                         hoveredButton ===
                                           `apply-${target.id}` &&
                                         !submittingTargets.has(target.id) &&
+                                        !isQuotaReached &&
                                         queueStatus?.canSubmitMore !== false
+                                      }
+                                      customColor={
+                                        isQuotaReached
+                                          ? ([0.918, 0.435, 0.071] as [
+                                              number,
+                                              number,
+                                              number,
+                                            ])
+                                          : undefined
                                       }
                                     />
                                   </Button>
@@ -911,11 +1019,19 @@ const FundsTable = React.memo(function FundsTable({
                                 <div className="flex items-center justify-center w-8 h-8">
                                   {target.submission_status ===
                                   'in_progress' ? (
-                                    <CircularProgressBar
-                                      size={16}
-                                      strokeWidth={2}
+                                    <LottieIcon
+                                      animationData={animations.hourglass}
+                                      size={14}
+                                      customColor={
+                                        [0.918, 0.435, 0.071] as [
+                                          number,
+                                          number,
+                                          number,
+                                        ]
+                                      } // orange-600
                                     />
-                                  ) : target.queue_position ? (
+                                  ) : target.submission_status === 'pending' &&
+                                    target.queue_position ? (
                                     <span className="text-xs font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-sm px-1.5 py-0.5">
                                       {target.queue_position}
                                     </span>

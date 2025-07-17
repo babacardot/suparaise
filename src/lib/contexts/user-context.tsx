@@ -38,6 +38,8 @@ interface SubscriptionData {
   subscription_current_period_end: string | null
   stripe_customer_id: string | null
   permission_level: 'FREE' | 'PRO' | 'MAX'
+  monthly_submissions_used: number
+  monthly_submissions_limit: number
 }
 
 interface UserContextType {
@@ -255,7 +257,7 @@ export function UserProvider({ children }: UserProviderProps) {
       const { data, error } = await supabase
         .from('profiles')
         .select(
-          'is_subscribed, subscription_status, subscription_current_period_end, stripe_customer_id, permission_level',
+          'is_subscribed, subscription_status, subscription_current_period_end, stripe_customer_id, permission_level, monthly_submissions_used, monthly_submissions_limit',
         )
         .eq('id', user.id)
         .single()
@@ -273,6 +275,8 @@ export function UserProvider({ children }: UserProviderProps) {
             subscription_current_period_end: null,
             stripe_customer_id: null,
             permission_level: 'FREE',
+            monthly_submissions_used: 0,
+            monthly_submissions_limit: 0,
           })
         } else {
           console.error('Error fetching subscription:', error)
@@ -283,6 +287,8 @@ export function UserProvider({ children }: UserProviderProps) {
             subscription_current_period_end: null,
             stripe_customer_id: null,
             permission_level: 'FREE',
+            monthly_submissions_used: 0,
+            monthly_submissions_limit: 0,
           })
         }
       } else {
@@ -297,6 +303,8 @@ export function UserProvider({ children }: UserProviderProps) {
         subscription_current_period_end: null,
         stripe_customer_id: null,
         permission_level: 'FREE',
+        monthly_submissions_used: 0,
+        monthly_submissions_limit: 0,
       })
     } finally {
       setSubscriptionLoading(false)

@@ -156,8 +156,10 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Create triggers for all submission tables
--- Note: Fund submissions already handle increment in update_submission_status function
--- So we only need triggers for angel and accelerator submissions
+CREATE TRIGGER on_submission_completion
+  AFTER UPDATE ON public.submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_submission_count_increment();
 
 CREATE TRIGGER on_angel_submission_completion
   AFTER UPDATE ON public.angel_submissions
@@ -217,4 +219,58 @@ SET search_path = public, secrets, net, pg_temp;
 CREATE TRIGGER subscription_upgrade_email_trigger
 AFTER UPDATE OF permission_level ON profiles
 FOR EACH ROW
-EXECUTE FUNCTION public.send_subscription_upgrade_email_trigger(); 
+EXECUTE FUNCTION public.send_subscription_upgrade_email_trigger();
+
+-- =================================================================
+-- SUBMISSION QUOTA ENFORCEMENT TRIGGER
+-- =================================================================
+
+-- Function to check submission quota before inserting a new submission
+CREATE OR REPLACE FUNCTION public.check_submission_quota()
+RETURNS TRIGGER AS $$
+DECLARE
+    monthly_used INTEGER;
+    monthly_limit INTEGER;
+    user_id_of_startup UUID;
+BEGIN
+    -- Get the user_id from the startup_id of the new submission
+    SELECT s.user_id INTO user_id_of_startup
+    FROM public.startups s
+    WHERE s.id = NEW.startup_id;
+
+    -- If user_id is not found, let it pass (or handle as error)
+    -- The foreign key constraint on startup_id should prevent this.
+    IF user_id_of_startup IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    -- Get the user's quota from their profile
+    SELECT p.monthly_submissions_used, p.monthly_submissions_limit
+    INTO monthly_used, monthly_limit
+    FROM public.profiles p
+    WHERE p.id = user_id_of_startup;
+
+    -- Check if the quota is exceeded
+    IF monthly_used >= monthly_limit THEN
+        RAISE EXCEPTION 'You have reached your monthly submission limit of % submissions.', monthly_limit;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Create triggers for all submission tables to check quota before insert
+CREATE TRIGGER check_quota_before_insert_on_submissions
+  BEFORE INSERT ON public.submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.check_submission_quota();
+
+CREATE TRIGGER check_quota_before_insert_on_angel_submissions
+  BEFORE INSERT ON public.angel_submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.check_submission_quota();
+
+CREATE TRIGGER check_quota_before_insert_on_accelerator_submissions
+  BEFORE INSERT ON public.accelerator_submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.check_submission_quota(); 

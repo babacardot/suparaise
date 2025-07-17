@@ -627,10 +627,10 @@ BEGIN
                 ELSE 1
             END,
             'maxQueueSize', CASE 
-                WHEN user_permission = 'FREE' THEN 0
-                WHEN user_permission = 'PRO' THEN 10
-                WHEN user_permission = 'MAX' THEN 25
-                ELSE 0
+                WHEN user_permission = 'FREE' THEN 3
+                WHEN user_permission = 'PRO' THEN 25
+                WHEN user_permission = 'MAX' THEN 50
+                ELSE 3
             END,
             'preferredTone', CASE 
                 WHEN user_permission IN ('PRO', 'MAX') THEN 'professional'
@@ -730,10 +730,10 @@ BEGIN
             max_queue_allowed INTEGER;
         BEGIN
             max_queue_allowed := CASE 
-                WHEN user_permission = 'FREE' THEN 0
-                WHEN user_permission = 'PRO' THEN 10
-                WHEN user_permission = 'MAX' THEN 25
-                ELSE 0
+                WHEN user_permission = 'FREE' THEN 3
+                WHEN user_permission = 'PRO' THEN 25
+                WHEN user_permission = 'MAX' THEN 50
+                ELSE 3
             END;
             
             IF (p_data->>'maxQueueSize')::INTEGER > max_queue_allowed THEN
@@ -826,10 +826,10 @@ BEGIN
             CASE 
                 WHEN p_data ? 'maxQueueSize' THEN (p_data->>'maxQueueSize')::INTEGER
                 ELSE CASE 
-                    WHEN user_permission = 'FREE' THEN 0
-                    WHEN user_permission = 'PRO' THEN 10
-                    WHEN user_permission = 'MAX' THEN 25
-                    ELSE 0
+                    WHEN user_permission = 'FREE' THEN 3
+                    WHEN user_permission = 'PRO' THEN 25
+                    WHEN user_permission = 'MAX' THEN 50
+                    ELSE 3
                 END
             END,
             CASE 
@@ -1235,12 +1235,17 @@ CREATE OR REPLACE FUNCTION queue_submission(
     p_user_id UUID,
     p_startup_id UUID,
     p_target_id UUID,
-    p_hyperbrowser_job_id TEXT
+    p_hyperbrowser_job_id TEXT DEFAULT NULL
 )
 RETURNS JSONB AS $$
 DECLARE
     submission_id UUID;
     existing_submission RECORD;
+    queue_status_data JSONB;
+    current_in_progress INTEGER;
+    max_parallel INTEGER;
+    next_queue_position INTEGER;
+    submission_status submission_status;
 BEGIN
     -- Check if submission already exists and is not failed
     SELECT id, status INTO existing_submission
@@ -1256,17 +1261,46 @@ BEGIN
         END IF;
     END IF;
 
-    -- Create submission record with in_progress status and job_id
-    INSERT INTO submissions (startup_id, target_id, status, started_at, hyperbrowser_job_id)
-    VALUES (p_startup_id, p_target_id, 'in_progress', NOW(), p_hyperbrowser_job_id)
-    RETURNING id INTO submission_id;
+    -- Get queue status to determine if we should queue or process immediately
+    SELECT get_queue_status(p_user_id, p_startup_id) INTO queue_status_data;
+    current_in_progress := (queue_status_data->>'currentInProgress')::INTEGER;
+    max_parallel := (queue_status_data->>'maxParallel')::INTEGER;
 
-    RETURN jsonb_build_object(
-        'success', true,
-        'submissionId', submission_id,
-        'status', 'in_progress',
-        'message', 'Submission is now being processed by the agent.'
-    );
+    -- Determine if we should start processing immediately or queue
+    IF current_in_progress < max_parallel THEN
+        -- Start processing immediately
+        submission_status := 'in_progress';
+        INSERT INTO submissions (startup_id, target_id, status, started_at, hyperbrowser_job_id)
+        VALUES (p_startup_id, p_target_id, submission_status, NOW(), p_hyperbrowser_job_id)
+        RETURNING id INTO submission_id;
+
+        RETURN jsonb_build_object(
+            'success', true,
+            'submissionId', submission_id,
+            'status', 'in_progress',
+            'message', 'Submission is now being processed by the agent.'
+        );
+    ELSE
+        -- Add to queue
+        submission_status := 'pending';
+        
+        -- Get next queue position
+        SELECT COALESCE(MAX(queue_position), 0) + 1 INTO next_queue_position
+        FROM submissions
+        WHERE startup_id = p_startup_id AND queue_position IS NOT NULL;
+
+        INSERT INTO submissions (startup_id, target_id, status, queue_position, queued_at)
+        VALUES (p_startup_id, p_target_id, submission_status, next_queue_position, NOW())
+        RETURNING id INTO submission_id;
+
+        RETURN jsonb_build_object(
+            'success', true,
+            'submissionId', submission_id,
+            'status', 'queued',
+            'queuePosition', next_queue_position,
+            'message', 'Submission added to queue at position ' || next_queue_position
+        );
+    END IF;
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -1406,11 +1440,11 @@ BEGIN
     WHERE id = p_submission_id;
 
     -- Increment user's submission count if completed successfully
-    IF p_new_status = 'completed' THEN
+    /* IF p_new_status = 'completed' THEN
       PERFORM increment_submission_count(
         (SELECT user_id FROM startups WHERE id = current_submission.startup_id)
       );
-    END IF;
+    END IF; */
 
     RETURN jsonb_build_object(
         'success', true,
@@ -1452,11 +1486,11 @@ BEGIN
     WHERE id = p_submission_id;
 
     -- Increment user's submission count if completed successfully
-    IF p_new_status = 'completed' THEN
+    /* IF p_new_status = 'completed' THEN
       PERFORM increment_submission_count(
         (SELECT user_id FROM startups WHERE id = current_submission.startup_id)
       );
-    END IF;
+    END IF; */
 
     RETURN jsonb_build_object(
         'success', true,
@@ -1498,11 +1532,11 @@ BEGIN
     WHERE id = p_submission_id;
 
     -- Increment user's submission count if completed successfully
-    IF p_new_status = 'completed' THEN
+    /* IF p_new_status = 'completed' THEN
       PERFORM increment_submission_count(
         (SELECT user_id FROM startups WHERE id = current_submission.startup_id)
       );
-    END IF;
+    END IF; */
 
     RETURN jsonb_build_object(
         'success', true,

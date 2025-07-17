@@ -234,15 +234,13 @@ export default React.memo(function ApplicationsActions({
     timeline.push({
       date: submission.submission_date,
       label: 'Submitted',
-      status: 'completed',
     })
 
     // Queued date
     if (submission.queued_at) {
       timeline.push({
         date: submission.queued_at,
-        label: 'Queued',
-        status: 'completed',
+        label: `Queued (#${submission.queue_position || ''})`,
       })
     }
 
@@ -251,7 +249,6 @@ export default React.memo(function ApplicationsActions({
       timeline.push({
         date: submission.started_at,
         label: 'Started',
-        status: 'completed',
       })
     }
 
@@ -267,6 +264,18 @@ export default React.memo(function ApplicationsActions({
         date: submission.updated_at,
         label: 'Failed',
         status: 'failed',
+      })
+    } else if (submission.status === 'in_progress') {
+      timeline.push({
+        date: submission.started_at || submission.updated_at,
+        label: 'In Progress',
+        status: 'pending',
+      })
+    } else if (submission.status === 'pending') {
+      timeline.push({
+        date: submission.queued_at || submission.submission_date,
+        label: 'Pending',
+        status: 'pending',
       })
     }
 
@@ -456,13 +465,17 @@ export default React.memo(function ApplicationsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                            event.status === 'completed'
-                              ? 'bg-green-500'
-                              : event.status === 'failed'
-                                ? 'bg-red-500'
-                                : 'bg-gray-300'
-                          }`}
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
+                            index === timeline.length - 1
+                              ? event.status === 'completed'
+                                ? 'bg-green-500'
+                                : event.status === 'failed'
+                                  ? 'bg-red-500'
+                                  : event.status === 'pending'
+                                    ? 'bg-orange-500'
+                                    : 'bg-gray-300'
+                              : 'bg-transparent'
+                          } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}

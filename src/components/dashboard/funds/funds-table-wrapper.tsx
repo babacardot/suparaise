@@ -60,6 +60,7 @@ interface FundsTableWrapperProps {
   onNextPage: () => void
   onSortChange: (key: string) => void
   columnVisibility: ColumnVisibility
+  onTargetUpdate?: (targetId: string, updates: Partial<Target>) => void
 }
 
 const FundsTableWrapper = React.memo(function FundsTableWrapper({
@@ -71,6 +72,7 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
   onNextPage,
   onSortChange,
   columnVisibility,
+  onTargetUpdate,
 }: FundsTableWrapperProps) {
   const [selectedTarget, setSelectedTarget] = useState<Target | null>(null)
   const [isActionsOpen, setIsActionsOpen] = useState(false)
@@ -164,6 +166,7 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
           onTargetClick={handleTargetClick}
           onTargetHover={handleTargetHover}
           onTargetLeave={handleTargetLeave}
+          onTargetUpdate={onTargetUpdate}
         />
       </div>
 

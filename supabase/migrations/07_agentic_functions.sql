@@ -113,7 +113,11 @@ DECLARE
     sort_clause TEXT;
     final_query TEXT;
     normalized_search TEXT;
+    total_applications_count JSONB;
 BEGIN
+    -- Get total applications count first
+    SELECT get_total_applications_count(p_startup_id) INTO total_applications_count;
+
     -- Build WHERE conditions efficiently
     
     -- Optimized search with normalized input
@@ -207,6 +211,7 @@ BEGIN
         paginated_data AS (
             SELECT
                 ft.*,
+                s.id as submission_id,
                 s.status as submission_status,
                 s.started_at as submission_started_at,
                 s.queue_position
@@ -237,6 +242,9 @@ BEGIN
 
     EXECUTE final_query INTO result;
     
+    -- Add total applications count to the final result
+    result := result || jsonb_build_object('totalApplicationsCount', total_applications_count);
+
     RETURN result;
 END;
 $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;

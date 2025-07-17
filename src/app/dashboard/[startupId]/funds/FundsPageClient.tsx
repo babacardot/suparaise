@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import FundsTableWrapper from '@/components/dashboard/funds/funds-table-wrapper'
 import SecureFundsWrapper from '@/components/dashboard/funds/secure-funds-wrapper'
 import FundsFilters, {
@@ -48,6 +47,9 @@ interface FundsPageClientProps {
     hasMore: boolean
     currentPage: number
     limit: number
+    totalApplicationsCount?: {
+      total_applications: number
+    }
   } | null
   initialFilters: FundsFiltersType
   initialSortConfig: { key: string | null; direction: 'asc' | 'desc' }
@@ -73,32 +75,10 @@ export default function FundsPageClient({
   useEffect(() => {
     setTargets(initialTargets)
     setPaginationData(initialPaginationData)
+    const newTotalSubmissions =
+      initialPaginationData?.totalApplicationsCount?.total_applications ?? 0
+    setTotalSubmissions(newTotalSubmissions)
   }, [initialTargets, initialPaginationData])
-
-  // Fetch total submissions count for this startup
-  useEffect(() => {
-    const fetchTotalSubmissions = async () => {
-      try {
-        const supabase = createSupabaseBrowserClient()
-
-        const { data, error } = await supabase.rpc(
-          'get_total_applications_count',
-          {
-            p_startup_id: startupId,
-          },
-        )
-
-        if (!error && data) {
-          const responseData = data as unknown as { total_applications: number }
-          setTotalSubmissions(responseData.total_applications || 0)
-        }
-      } catch (error) {
-        console.error('Failed to fetch total submissions:', error)
-      }
-    }
-
-    fetchTotalSubmissions()
-  }, [startupId])
 
   const [filters, setFilters] = useState<FundsFiltersType>(initialFilters)
   const [sortConfig, setSortConfig] = useState(initialSortConfig)
@@ -125,6 +105,17 @@ export default function FundsPageClient({
         type: false,
       }
     },
+  )
+
+  const handleTargetUpdate = useCallback(
+    (targetId: string, updates: Partial<Target>) => {
+      setTargets((prevTargets) =>
+        prevTargets.map((target) =>
+          target.id === targetId ? { ...target, ...updates } : target,
+        ),
+      )
+    },
+    [],
   )
 
   const page = useMemo(
@@ -253,6 +244,7 @@ export default function FundsPageClient({
         onNextPage={handleNextPage}
         onSortChange={handleSortChange}
         columnVisibility={columnVisibility}
+        onTargetUpdate={handleTargetUpdate}
       />
     ),
     [
@@ -264,6 +256,7 @@ export default function FundsPageClient({
       handleNextPage,
       handleSortChange,
       columnVisibility,
+      handleTargetUpdate,
     ],
   )
 

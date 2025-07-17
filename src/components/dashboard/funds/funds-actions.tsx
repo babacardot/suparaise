@@ -210,15 +210,13 @@ export default React.memo(function FundsActions({
     timeline.push({
       date: latestSubmission.submission_date,
       label: 'Submitted',
-      status: 'completed',
     })
 
     // Queued date
     if (latestSubmission.queued_at) {
       timeline.push({
         date: latestSubmission.queued_at,
-        label: 'Queued',
-        status: 'completed',
+        label: `Queued (#${latestSubmission.queue_position || ''})`,
       })
     }
 
@@ -227,7 +225,6 @@ export default React.memo(function FundsActions({
       timeline.push({
         date: latestSubmission.started_at,
         label: 'Started',
-        status: 'completed',
       })
     }
 
@@ -243,6 +240,25 @@ export default React.memo(function FundsActions({
         date: latestSubmission.updated_at || latestSubmission.submission_date,
         label: 'Failed',
         status: 'failed',
+      })
+    } else if (latestSubmission.status === 'in_progress') {
+      timeline.push({
+        date:
+          latestSubmission.started_at ||
+          (latestSubmission.updated_at
+            ? latestSubmission.updated_at.toString()
+            : new Date().toISOString()),
+        label: 'In Progress',
+        status: 'pending',
+      })
+    } else if (latestSubmission.status === 'pending') {
+      timeline.push({
+        date:
+          latestSubmission.queued_at ||
+          latestSubmission.submission_date.toString() ||
+          new Date().toISOString(),
+        label: 'Pending',
+        status: 'pending',
       })
     }
 
@@ -405,13 +421,17 @@ export default React.memo(function FundsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                            event.status === 'completed'
-                              ? 'bg-green-500'
-                              : event.status === 'failed'
-                                ? 'bg-red-500'
-                                : 'bg-gray-300'
-                          }`}
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
+                            index === timeline.length - 1
+                              ? event.status === 'completed'
+                                ? 'bg-green-500'
+                                : event.status === 'failed'
+                                  ? 'bg-red-500'
+                                  : event.status === 'pending'
+                                    ? 'bg-orange-500'
+                                    : 'bg-gray-300'
+                              : 'bg-transparent'
+                          } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}
