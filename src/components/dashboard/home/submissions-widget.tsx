@@ -35,22 +35,22 @@ const statusStyles: {
 } = {
   pending: {
     badge:
-      'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+      'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
     text: 'text-amber-600 dark:text-amber-400',
   },
   in_progress: {
     badge:
-      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
     text: 'text-blue-600 dark:text-blue-400',
   },
   completed: {
     badge:
-      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
     text: 'text-emerald-600 dark:text-emerald-400',
   },
   failed: {
     badge:
-      'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800',
+      'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800',
     text: 'text-red-600 dark:text-red-400',
   },
 }
@@ -58,14 +58,18 @@ const statusStyles: {
 const typeStyles: {
   [key in SubmittedToType]: string
 } = {
-  Fund: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300 border-violet-200 dark:border-violet-800',
+  Fund: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200 dark:border-violet-800',
   Angel:
-    'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+    'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800',
   Accelerator:
-    'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800',
+    'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800',
 }
 
-const SubmissionCard = ({ className, submission, showDetails = false }: SubmissionCardProps) => {
+const SubmissionCard = ({
+  className,
+  submission,
+  showDetails = false,
+}: SubmissionCardProps) => {
   const createdAtDate = new Date(submission.submitted_at)
   const displayDate = createdAtDate.toLocaleDateString('en-US', {
     month: 'long',
@@ -78,20 +82,16 @@ const SubmissionCard = ({ className, submission, showDetails = false }: Submissi
   const statusStyle = statusStyles[submission.status]
   const typeStyle = typeStyles[submission.submitted_to_type]
 
-
-
-
-
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
       case 'simple':
-        return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+        return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
       case 'standard':
-        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800'
       case 'comprehensive':
-        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800'
       default:
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
     }
   }
 
@@ -139,10 +139,6 @@ const SubmissionCard = ({ className, submission, showDetails = false }: Submissi
                 </div>
               )}
 
-
-
-
-
               {/* Queue information */}
               {submission.queue_position && (
                 <div className="flex items-center gap-2">
@@ -153,8 +149,6 @@ const SubmissionCard = ({ className, submission, showDetails = false }: Submissi
               )}
             </div>
           )}
-
-
         </div>
         <div className="flex justify-end">
           <Badge
@@ -164,7 +158,7 @@ const SubmissionCard = ({ className, submission, showDetails = false }: Submissi
               statusStyle.badge,
             )}
           >
-            {submission.status.replace('_', ' ')}
+            {capitalizeFirst(submission.status.replace('_', ' '))}
           </Badge>
         </div>
       </CardContent>
@@ -194,7 +188,7 @@ export function SubmissionsWidget({
   if (!submissions || submissions.length === 0) {
     return (
       <Card className={twMerge('h-full min-h-[367px] rounded-sm', className)}>
-        <div className="flex h-full flex-col items-center justify-center p-6 space-y-4">
+        <div className="flex h-full flex-col items-center justify-center p-6 translate-y-20 space-y-4">
           <Image
             src="/placeholder/loading_accounts.webp"
             alt="No submissions found"
@@ -202,7 +196,6 @@ export function SubmissionsWidget({
             height={200}
             className="object-contain"
           />
-          <p className="text-muted-foreground text-sm">No submissions yet</p>
         </div>
       </Card>
     )
@@ -247,7 +240,12 @@ export function SubmissionsWidget({
   ]
 
   return (
-    <Card className={twMerge('relative h-full min-h-[367px] rounded-sm p-4', className)}>
+    <Card
+      className={twMerge(
+        'relative h-full min-h-[367px] rounded-sm p-4',
+        className,
+      )}
+    >
       {submissions
         .slice(0, 3)
         .map((submission: SubmissionData, index: number) => (

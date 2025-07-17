@@ -1530,6 +1530,10 @@ export type Database = {
         Args: { p_startup_id: string; p_limit?: number }
         Returns: Json
       }
+      fetch_recent_submissions_detailed: {
+        Args: { p_startup_id: string; p_limit?: number }
+        Returns: Json
+      }
       get_accelerators_simple: {
         Args: {
           p_limit?: number

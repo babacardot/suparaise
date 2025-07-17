@@ -123,10 +123,7 @@ export async function POST(request: NextRequest) {
     )
 
     if (updateError) {
-      console.error(
-        'Error updating final submission status:',
-        updateError,
-      )
+      console.error('Error updating final submission status:', updateError)
       // Return the status from Hyperbrowser even if DB update fails, so client knows the final state
       return NextResponse.json(
         {

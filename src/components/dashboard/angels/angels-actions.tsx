@@ -70,26 +70,26 @@ export default React.memo(function AngelsActions({
   const getSubmissionTypeColor = (type: string) => {
     switch (type) {
       case 'form':
-        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
       case 'email':
-        return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+        return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
       case 'other':
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
       default:
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
     }
   }
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
       case 'simple':
-        return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+        return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
       case 'standard':
-        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800'
       case 'comprehensive':
-        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800'
       default:
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
     }
   }
 
@@ -131,10 +131,10 @@ export default React.memo(function AngelsActions({
 
   const getRegionColor = (region: string) => {
     if (['Global', 'Emerging Markets'].includes(region)) {
-      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
+      return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
     }
     if (region === 'North America') {
-      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+      return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
     }
     if (
       [
@@ -144,31 +144,31 @@ export default React.memo(function AngelsActions({
         'Continental Europe',
       ].includes(region)
     ) {
-      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+      return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
     }
     if (
       ['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)
     ) {
-      return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+      return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 border border-orange-200 dark:border-orange-800'
     }
     if (['LATAM', 'South America'].includes(region)) {
-      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
+      return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
     }
     if (['Africa', 'Middle East', 'EMEA'].includes(region)) {
-      return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+      return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
     }
     if (region === 'Oceania') {
-      return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
+      return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
     }
-    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+    return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
   }
 
   const getCheckSizeColor = () => {
-    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
   }
 
   const getInvestmentApproachColor = () => {
-    return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
+    return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
   }
 
   const getCheckSizeDisplay = (size: string) => {
