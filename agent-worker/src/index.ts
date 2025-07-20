@@ -17,6 +17,10 @@ const apiKeyAuth = (req: express.Request, res: express.Response, next: express.N
     }
 };
 
+app.get('/', (req, res) => {
+    res.status(200).json({ status: 'ok', message: 'Suparaise Agent Worker is running.' });
+});
+
 app.post('/execute-job', apiKeyAuth, async (req, res) => {
     try {
         const { submissionId } = req.body;
