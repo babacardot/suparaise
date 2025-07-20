@@ -5,10 +5,10 @@ FROM oven/bun:1.1
 WORKDIR /usr/src/app
 
 # Copy package management files
-COPY package.json bun.lock .
+COPY package.json .
 
-# Install dependencies. --frozen-lockfile ensures it uses the exact versions from the lockfile.
-RUN bun install --frozen-lockfile
+# Install dependencies.
+RUN bun install
 
 # Copy the rest of the application source code
 COPY . .

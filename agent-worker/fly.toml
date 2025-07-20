@@ -1,20 +1,23 @@
-# fly.toml file generated for suparaise-agent-worker
+# fly.toml app configuration file generated for suparaise-agent-worker on 2025-07-20T18:16:36Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "suparaise-agent-worker" # Replace with your actual Fly.io app name
-primary_region = "lhr" # London. Choose a region close to your users or database.
+app = 'suparaise-agent-worker'
+primary_region = 'lhr'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 0 # Set to 1 for production to avoid cold starts
-  processes = ["app"]
+  min_machines_running = 0
+  processes = ['app']
 
 [[vm]]
-  memory = "1gb"
-  cpu_kind = "shared"
-  cpus = 1 
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
