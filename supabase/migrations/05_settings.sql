@@ -1238,6 +1238,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Function to add a submission to the queue
+DROP FUNCTION IF EXISTS public.queue_submission(UUID, UUID, UUID);
 CREATE OR REPLACE FUNCTION queue_submission(
     p_user_id UUID,
     p_startup_id UUID,
@@ -1417,6 +1418,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant execute permissions for queue management functions
 GRANT EXECUTE ON FUNCTION get_queue_status(UUID, UUID) TO authenticated;
+DROP FUNCTION IF EXISTS public.queue_submission(UUID, UUID, UUID);
 GRANT EXECUTE ON FUNCTION queue_submission(UUID, UUID, UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION process_next_queued_submission(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_submissions_with_queue(UUID, UUID) TO authenticated; 
