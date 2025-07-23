@@ -1589,4 +1589,152 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-GRANT EXECUTE ON FUNCTION get_submission_details(UUID) TO authenticated; 
+GRANT EXECUTE ON FUNCTION get_submission_details(UUID) TO authenticated;
+
+-- =================================================================
+-- ENHANCED SUBMISSION UPDATE FUNCTIONS
+-- =================================================================
+
+-- Enhanced function to update submission with session and form data
+CREATE OR REPLACE FUNCTION update_submission_with_session_data(
+    p_submission_id UUID,
+    p_submission_type TEXT,
+    p_new_status submission_status,
+    p_agent_notes TEXT,
+    p_session_id TEXT DEFAULT NULL,
+    p_session_replay_url TEXT DEFAULT NULL,
+    p_screenshots_taken INTEGER DEFAULT 0,
+    p_debug_data JSONB DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+  current_submission RECORD;
+BEGIN
+    -- Update based on submission type
+    IF p_submission_type = 'fund' THEN
+        -- Check if the submission exists
+        SELECT * INTO current_submission FROM submissions WHERE id = p_submission_id;
+        
+        IF current_submission IS NULL THEN
+            RETURN jsonb_build_object('error', 'Fund submission not found');
+        END IF;
+
+        -- Update the submission record
+        UPDATE submissions
+        SET
+            status = p_new_status,
+            agent_notes = p_agent_notes,
+            browserbase_session_id = COALESCE(p_session_id, browserbase_session_id),
+            session_replay_url = COALESCE(p_session_replay_url, session_replay_url),
+            screenshots_taken = p_screenshots_taken,
+            debug_data = COALESCE(p_debug_data, debug_data),
+            updated_at = NOW()
+        WHERE id = p_submission_id;
+
+    ELSIF p_submission_type = 'angel' THEN
+        -- Check if the submission exists
+        SELECT * INTO current_submission FROM angel_submissions WHERE id = p_submission_id;
+        
+        IF current_submission IS NULL THEN
+            RETURN jsonb_build_object('error', 'Angel submission not found');
+        END IF;
+
+        -- Update the submission record
+        UPDATE angel_submissions
+        SET
+            status = p_new_status,
+            agent_notes = p_agent_notes,
+            browserbase_session_id = COALESCE(p_session_id, browserbase_session_id),
+            session_replay_url = COALESCE(p_session_replay_url, session_replay_url),
+            screenshots_taken = p_screenshots_taken,
+            debug_data = COALESCE(p_debug_data, debug_data),
+            updated_at = NOW()
+        WHERE id = p_submission_id;
+
+    ELSIF p_submission_type = 'accelerator' THEN
+        -- Check if the submission exists
+        SELECT * INTO current_submission FROM accelerator_submissions WHERE id = p_submission_id;
+        
+        IF current_submission IS NULL THEN
+            RETURN jsonb_build_object('error', 'Accelerator submission not found');
+        END IF;
+
+        -- Update the submission record
+        UPDATE accelerator_submissions
+        SET
+            status = p_new_status,
+            agent_notes = p_agent_notes,
+            browserbase_session_id = COALESCE(p_session_id, browserbase_session_id),
+            session_replay_url = COALESCE(p_session_replay_url, session_replay_url),
+            screenshots_taken = p_screenshots_taken,
+            debug_data = COALESCE(p_debug_data, debug_data),
+            updated_at = NOW()
+        WHERE id = p_submission_id;
+    ELSE
+        RETURN jsonb_build_object('error', 'Invalid submission type');
+    END IF;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'submissionId', p_submission_id,
+        'message', 'Submission updated successfully.'
+    );
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in update_submission_with_session_data for submission %: %', p_submission_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION update_submission_with_session_data(UUID, TEXT, submission_status, TEXT, TEXT, TEXT, INTEGER, JSONB) TO authenticated; 
+
+
+
+-- =================================================================
+-- FORM SUCCESS RATE CALCULATIONS
+-- =================================================================
+
+-- Function to calculate form success rate for a specific target
+CREATE OR REPLACE FUNCTION calculate_target_success_rate(p_target_id UUID, p_target_type TEXT DEFAULT 'fund')
+RETURNS NUMERIC AS $$
+DECLARE
+    total_submissions INTEGER;
+    successful_submissions INTEGER;
+    success_rate NUMERIC;
+BEGIN
+    IF p_target_type = 'fund' THEN
+        SELECT 
+            COUNT(*),
+            COUNT(*) FILTER (WHERE status = 'completed')
+        INTO total_submissions, successful_submissions
+        FROM submissions
+        WHERE target_id = p_target_id;
+    ELSIF p_target_type = 'angel' THEN
+        SELECT 
+            COUNT(*),
+            COUNT(*) FILTER (WHERE status = 'completed')
+        INTO total_submissions, successful_submissions
+        FROM angel_submissions
+        WHERE angel_id = p_target_id;
+    ELSIF p_target_type = 'accelerator' THEN
+        SELECT 
+            COUNT(*),
+            COUNT(*) FILTER (WHERE status = 'completed')
+        INTO total_submissions, successful_submissions
+        FROM accelerator_submissions
+        WHERE accelerator_id = p_target_id;
+    ELSE
+        RETURN 0;
+    END IF;
+
+    IF total_submissions = 0 THEN
+        RETURN 0;
+    END IF;
+
+    success_rate := (successful_submissions::NUMERIC / total_submissions::NUMERIC) * 100;
+    RETURN ROUND(success_rate, 2);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION calculate_target_success_rate(UUID, TEXT) TO authenticated;
+

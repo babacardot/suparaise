@@ -4,7 +4,7 @@ node_modules/
 .next/
 .mypy_cache/
 .claude/
-playbook/
+x/
 
 # Environment
 .env

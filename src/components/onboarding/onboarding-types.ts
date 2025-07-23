@@ -127,13 +127,117 @@ export type FileUploadProps = {
   inputRef: React.RefObject<HTMLInputElement | null>
 }
 
-// Constants
-export const FOUNDER_ROLES = Constants.public.Enums.founder_role
-export const INDUSTRIES = Constants.public.Enums.industry_type
-export const LEGAL_STRUCTURES = Constants.public.Enums.legal_structure
-export const FUNDING_ROUNDS = Constants.public.Enums.investment_stage.filter(
-  (r) => r !== 'All',
-)
-export const INVESTMENT_INSTRUMENTS =
-  Constants.public.Enums.investment_instrument
-export const REVENUE_MODELS = Constants.public.Enums.revenue_model_type
+// Safe constants with fallbacks to prevent runtime errors
+export const FOUNDER_ROLES = Constants?.public?.Enums?.founder_role || [
+  'Founder',
+  'Co-founder',
+  'CEO',
+  'CTO',
+  'COO',
+  'CPO',
+  'CMO',
+  'Engineer',
+  'Product',
+  'Designer',
+  'Advisor',
+  'Legal Counsel',
+  'Other',
+]
+
+export const INDUSTRIES = Constants?.public?.Enums?.industry_type || [
+  'B2B SaaS',
+  'Fintech',
+  'Healthtech',
+  'AI/ML',
+  'Deep tech',
+  'Climate tech',
+  'Consumer',
+  'E-commerce',
+  'Marketplace',
+  'Gaming',
+  'Web3',
+  'Developer tools',
+  'Cybersecurity',
+  'Logistics',
+  'AdTech',
+  'PropTech',
+  'InsurTech',
+  'Agriculture',
+  'Automotive',
+  'Biotechnology',
+  'Construction',
+  'Consulting',
+  'Consumer Goods',
+  'Education',
+  'Energy',
+  'Entertainment',
+  'Environmental Services',
+  'Fashion',
+  'Food & Beverage',
+  'Government',
+  'Healthcare Services',
+  'Hospitality',
+  'Human Resources',
+  'Insurance',
+  'Legal',
+  'Manufacturing',
+  'Media',
+  'Non-profit',
+  'Pharmaceuticals',
+  'Real Estate',
+  'Retail',
+  'Telecommunications',
+  'Transportation',
+  'Utilities',
+  'Other',
+]
+
+export const LEGAL_STRUCTURES = Constants?.public?.Enums?.legal_structure || [
+  'Not yet incorporated',
+  'Delaware C-Corp',
+  'Canadian company',
+  'B-Corp',
+  'Public Benefit Corporation (PBC)',
+  'LLC',
+  'S-Corp',
+  'Non-profit',
+  'Other',
+]
+
+export const FUNDING_ROUNDS = (
+  Constants?.public?.Enums?.investment_stage || [
+    'Pre-seed',
+    'Seed',
+    'Series A',
+    'Series B',
+    'Series C',
+    'Growth',
+    'All',
+  ]
+).filter((r) => r !== 'All')
+
+export const INVESTMENT_INSTRUMENTS = Constants?.public?.Enums
+  ?.investment_instrument || [
+  'Equity',
+  'Debt',
+  'Convertible Note',
+  'SAFE',
+  'Other',
+]
+
+export const REVENUE_MODELS = Constants?.public?.Enums?.revenue_model_type || [
+  'Subscription',
+  'One-time purchase',
+  'Commission/Transaction fees',
+  'Advertising',
+  'Freemium',
+  'Usage-based',
+  'Licensing',
+  'Consulting',
+  'Affiliate',
+  'Marketplace fees',
+  'Data monetization',
+  'Hardware sales',
+  'Hybrid',
+  'Other',
+]

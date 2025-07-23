@@ -114,7 +114,8 @@ export async function upsertBatch(
 }
 
 // Use enum values directly from the generated database types (now always in sync!)
-export const ENUM_VALUES = Constants.public.Enums
+// Safe access with fallback to prevent runtime errors
+export const ENUM_VALUES = Constants?.public?.Enums || {}
 
 export function validateEnumValue(
   enumType: keyof typeof ENUM_VALUES,

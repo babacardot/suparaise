@@ -487,3 +487,199 @@ $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 GRANT EXECUTE ON FUNCTION fetch_recent_submissions(UUID, INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION fetch_recent_submissions_detailed(UUID, INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION fetch_daily_run_grid_data(UUID, INTEGER) TO authenticated;
+
+-- =================================================================
+-- ENHANCED ANALYTICS FUNCTIONS
+-- =================================================================
+
+-- Function to get submission analytics with form complexity insights
+CREATE OR REPLACE FUNCTION get_submission_analytics(
+    p_user_id UUID,
+    p_startup_id UUID DEFAULT NULL,
+    p_days INTEGER DEFAULT 30
+)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+    target_startup_id UUID;
+BEGIN
+    -- If no startup_id provided, get the user's first startup
+    IF p_startup_id IS NULL THEN
+        SELECT id INTO target_startup_id
+        FROM startups 
+        WHERE user_id = p_user_id AND is_active = TRUE
+        ORDER BY created_at DESC 
+        LIMIT 1;
+    ELSE
+        target_startup_id := p_startup_id;
+    END IF;
+
+    -- Verify user has access to this startup
+    IF NOT EXISTS (
+        SELECT 1 FROM startups 
+        WHERE id = target_startup_id AND user_id = p_user_id
+    ) THEN
+        RETURN jsonb_build_object('error', 'Access denied or startup not found');
+    END IF;
+
+    WITH all_submissions AS (
+        -- Fund submissions
+        SELECT
+            'fund' as submission_type,
+            status,
+            screenshots_taken,
+            created_at
+        FROM submissions
+        WHERE startup_id = target_startup_id
+        AND created_at >= NOW() - (p_days || ' days')::INTERVAL
+        
+        UNION ALL
+        
+        -- Angel submissions
+        SELECT
+            'angel' as submission_type,
+            status,
+            screenshots_taken,
+            created_at
+        FROM angel_submissions
+        WHERE startup_id = target_startup_id
+        AND created_at >= NOW() - (p_days || ' days')::INTERVAL
+        
+        UNION ALL
+        
+        -- Accelerator submissions
+        SELECT
+            'accelerator' as submission_type,
+            status,
+            screenshots_taken,
+            created_at
+        FROM accelerator_submissions
+        WHERE startup_id = target_startup_id
+        AND created_at >= NOW() - (p_days || ' days')::INTERVAL
+    )
+    SELECT jsonb_build_object(
+        'total_submissions', COUNT(*),
+        'success_rate', ROUND(
+            (COUNT(*) FILTER (WHERE status = 'completed')::NUMERIC / NULLIF(COUNT(*), 0)) * 100, 2
+        ),
+        'avg_screenshots', ROUND(AVG(screenshots_taken), 1),
+        'status_breakdown', jsonb_object_agg(
+            status,
+            COUNT(*)
+        ),
+        'submission_type_breakdown', jsonb_object_agg(
+            submission_type,
+            COUNT(*)
+        ),
+        'daily_submissions', (
+            SELECT jsonb_agg(
+                jsonb_build_object(
+                    'date', date_trunc('day', created_at)::date,
+                    'count', COUNT(*)
+                ) ORDER BY date_trunc('day', created_at)
+            )
+            FROM all_submissions
+            GROUP BY date_trunc('day', created_at)
+        )
+    )
+    INTO result
+    FROM all_submissions;
+
+    RETURN COALESCE(result, jsonb_build_object(
+        'total_submissions', 0,
+        'success_rate', 0,
+        'avg_screenshots', 0,
+        'status_breakdown', '{}',
+        'submission_type_breakdown', '{}',
+        'daily_submissions', '[]'
+    ));
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in get_submission_analytics for user %: %', p_user_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to get detailed session information
+CREATE OR REPLACE FUNCTION get_session_details(
+    p_user_id UUID,
+    p_session_id TEXT
+)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    -- Get session details from all submission types
+    WITH session_info AS (
+        SELECT
+            'fund' as submission_type,
+            s.id as submission_id,
+            s.status,
+            s.agent_notes,
+            s.session_replay_url,
+            s.screenshots_taken,
+            s.debug_data,
+            s.created_at,
+            t.name as target_name,
+            t.application_url,
+            calculate_target_success_rate(t.id, 'fund') as target_success_rate
+        FROM submissions s
+        JOIN targets t ON s.target_id = t.id
+        JOIN startups st ON s.startup_id = st.id
+        WHERE s.browserbase_session_id = p_session_id
+        AND st.user_id = p_user_id
+        
+        UNION ALL
+        
+        SELECT
+            'angel' as submission_type,
+            asub.id as submission_id,
+            asub.status,
+            asub.agent_notes,
+            asub.session_replay_url,
+            asub.screenshots_taken,
+            asub.debug_data,
+            asub.created_at,
+            (a.first_name || ' ' || a.last_name) as target_name,
+            a.application_url,
+            calculate_target_success_rate(a.id, 'angel') as target_success_rate
+        FROM angel_submissions asub
+        JOIN angels a ON asub.angel_id = a.id
+        JOIN startups st ON asub.startup_id = st.id
+        WHERE asub.browserbase_session_id = p_session_id
+        AND st.user_id = p_user_id
+        
+        UNION ALL
+        
+        SELECT
+            'accelerator' as submission_type,
+            accs.id as submission_id,
+            accs.status,
+            accs.agent_notes,
+            accs.session_replay_url,
+            accs.screenshots_taken,
+            accs.debug_data,
+            accs.created_at,
+            acc.name as target_name,
+            acc.application_url,
+            calculate_target_success_rate(acc.id, 'accelerator') as target_success_rate
+        FROM accelerator_submissions accs
+        JOIN accelerators acc ON accs.accelerator_id = acc.id
+        JOIN startups st ON accs.startup_id = st.id
+        WHERE accs.browserbase_session_id = p_session_id
+        AND st.user_id = p_user_id
+    )
+    SELECT jsonb_agg(to_jsonb(si.*)) INTO result FROM session_info si;
+
+    RETURN COALESCE(result, '[]'::jsonb);
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Error in get_session_details for session %: %', p_session_id, SQLERRM;
+        RETURN jsonb_build_object('error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION get_submission_analytics(UUID, UUID, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_session_details(UUID, TEXT) TO authenticated;

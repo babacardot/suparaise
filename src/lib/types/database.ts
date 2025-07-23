@@ -1493,6 +1493,10 @@ export type Database = {
         Args: { p_user_id: string; p_startup_id: string; p_data: Json }
         Returns: Json
       }
+      calculate_target_success_rate: {
+        Args: { p_target_id: string; p_target_type?: string }
+        Returns: number
+      }
       can_email_be_used_for_signup: {
         Args: { p_email: string }
         Returns: Json
@@ -1671,6 +1675,10 @@ export type Database = {
         Args: { p_user_id: string; p_startup_id?: string }
         Returns: Json
       }
+      get_session_details: {
+        Args: { p_user_id: string; p_session_id: string }
+        Returns: Json
+      }
       get_startup_by_id: {
         Args: { p_startup_id: string; p_user_id: string }
         Returns: Json
@@ -1685,6 +1693,10 @@ export type Database = {
       }
       get_startup_recommendations: {
         Args: { p_startup_id: string }
+        Returns: Json
+      }
+      get_submission_analytics: {
+        Args: { p_user_id: string; p_startup_id?: string; p_days?: number }
         Returns: Json
       }
       get_submission_details: {
@@ -1852,6 +1864,19 @@ export type Database = {
           p_submission_id: string
           p_new_status: Database['public']['Enums']['submission_status']
           p_agent_notes: string
+        }
+        Returns: Json
+      }
+      update_submission_with_session_data: {
+        Args: {
+          p_submission_id: string
+          p_submission_type: string
+          p_new_status: Database['public']['Enums']['submission_status']
+          p_agent_notes: string
+          p_session_id?: string
+          p_session_replay_url?: string
+          p_screenshots_taken?: number
+          p_debug_data?: Json
         }
         Returns: Json
       }
