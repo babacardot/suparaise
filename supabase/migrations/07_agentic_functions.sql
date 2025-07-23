@@ -2,6 +2,23 @@
 -- TARGET FUNCTIONS
 -- ==========================================
 
+-- Function to get a single target by its ID
+CREATE OR REPLACE FUNCTION get_target_by_id(p_target_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    SELECT to_jsonb(t)
+    INTO result
+    FROM targets t
+    WHERE t.id = p_target_id;
+    
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION get_target_by_id(UUID) TO authenticated;
+
 -- Function to get targets with pagination and filtering
 CREATE OR REPLACE FUNCTION get_targets_paginated(
     p_limit INTEGER DEFAULT 250,
@@ -68,24 +85,6 @@ $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
 -- Grant permissions
 GRANT EXECUTE ON FUNCTION get_targets_paginated(INTEGER, INTEGER, TEXT, TEXT) TO authenticated;
-
--- Function to get a single target by ID
-CREATE OR REPLACE FUNCTION public.get_target_by_id(p_target_id UUID)
-RETURNS public.targets AS $$
-DECLARE
-    target_record public.targets;
-BEGIN
-    SELECT *
-    INTO target_record
-    FROM public.targets
-    WHERE id = p_target_id;
-
-    RETURN target_record;
-END;
-$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
-
--- Grant permissions
-GRANT EXECUTE ON FUNCTION public.get_target_by_id(UUID) TO authenticated;
 
 -- Function to get paginated targets with filtering and sorting
 DROP FUNCTION IF EXISTS get_targets_simple(INTEGER, INTEGER);

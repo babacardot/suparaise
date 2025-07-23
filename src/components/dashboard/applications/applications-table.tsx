@@ -45,6 +45,11 @@ type ApplicationSubmission = {
   required_documents?: string[]
   created_at: string
   updated_at: string
+  // Session recording fields
+  browserbase_session_id?: string
+  session_replay_url?: string
+  screenshots_taken?: number
+  debug_data?: Record<string, unknown>
 }
 
 interface ColumnVisibility {

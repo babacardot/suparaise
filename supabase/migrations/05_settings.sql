@@ -204,7 +204,6 @@ BEGIN
         'financialProjectionsUrl', s.financial_projections_url,
         'businessPlanUrl', s.business_plan_url,
         'googleDriveUrl', s.google_drive_url,
-        'hyperbrowserSessionId', s.hyperbrowser_session_id,
         'createdAt', s.created_at,
         'updatedAt', s.updated_at
     )
@@ -256,7 +255,13 @@ BEGIN
         operating_countries = COALESCE(
             CASE 
                 WHEN p_data ? 'operatingCountries' THEN 
-                    ARRAY(SELECT jsonb_array_elements_text(p_data->'operatingCountries'))
+                    CASE 
+                        WHEN jsonb_typeof(p_data->'operatingCountries') = 'array' THEN
+                            ARRAY(SELECT jsonb_array_elements_text(p_data->'operatingCountries'))
+                        WHEN jsonb_typeof(p_data->'operatingCountries') = 'string' THEN
+                            string_to_array(p_data->>'operatingCountries', ',')
+                        ELSE operating_countries
+                    END
                 ELSE operating_countries
             END, 
             operating_countries
@@ -302,10 +307,6 @@ BEGIN
         google_drive_url = CASE
             WHEN p_data ? 'googleDriveUrl' THEN p_data->>'googleDriveUrl'
             ELSE google_drive_url
-        END,
-        hyperbrowser_session_id = CASE
-            WHEN p_data ? 'hyperbrowserSessionId' THEN p_data->>'hyperbrowserSessionId'
-            ELSE hyperbrowser_session_id
         END,
         updated_at = NOW()
     WHERE id = p_startup_id AND user_id = p_user_id;
@@ -963,7 +964,6 @@ BEGIN
         revenue_model, current_runway, key_customers, competitors, onboarded,
         is_active, deleted_at, logo_url, pitch_deck_url, intro_video_url,
         financial_projections_url, business_plan_url, google_drive_url,
-        hyperbrowser_session_id,
         created_at, updated_at, original_id, original_user_id
     )
     SELECT 
@@ -975,7 +975,6 @@ BEGIN
         revenue_model, current_runway, key_customers, competitors, onboarded,
         is_active, deleted_at, logo_url, pitch_deck_url, intro_video_url,
         financial_projections_url, business_plan_url, google_drive_url,
-        hyperbrowser_session_id,
         created_at, updated_at, id, user_id
     FROM startups 
     WHERE user_id = p_user_id AND is_active = TRUE;
@@ -1243,7 +1242,7 @@ CREATE OR REPLACE FUNCTION queue_submission(
     p_user_id UUID,
     p_startup_id UUID,
     p_target_id UUID,
-    p_hyperbrowser_job_id TEXT DEFAULT NULL
+    p_browserbase_job_id TEXT DEFAULT NULL
 )
 RETURNS JSONB AS $$
 DECLARE
@@ -1278,8 +1277,8 @@ BEGIN
     IF current_in_progress < max_parallel THEN
         -- Start processing immediately
         submission_status := 'in_progress';
-        INSERT INTO submissions (startup_id, target_id, status, started_at, hyperbrowser_job_id)
-        VALUES (p_startup_id, p_target_id, submission_status, NOW(), p_hyperbrowser_job_id)
+        INSERT INTO submissions (startup_id, target_id, status, started_at, browserbase_job_id)
+        VALUES (p_startup_id, p_target_id, submission_status, NOW(), p_browserbase_job_id)
         RETURNING id INTO submission_id;
 
         RETURN jsonb_build_object(
@@ -1423,7 +1422,7 @@ GRANT EXECUTE ON FUNCTION queue_submission(UUID, UUID, UUID, TEXT) TO authentica
 GRANT EXECUTE ON FUNCTION process_next_queued_submission(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_submissions_with_queue(UUID, UUID) TO authenticated; 
 
--- New function to update submission status from Hyperbrowser result
+-- New function to update submission status from Browserbase result
 CREATE OR REPLACE FUNCTION public.update_submission_status(
     p_submission_id UUID,
     p_new_status submission_status,
@@ -1571,7 +1570,7 @@ BEGIN
         'id', s.id,
         'status', s.status,
         'agent_notes', s.agent_notes,
-        'hyperbrowser_job_id', s.hyperbrowser_job_id
+        'browserbase_job_id', s.browserbase_job_id
     )
     INTO submission_details
     FROM submissions s

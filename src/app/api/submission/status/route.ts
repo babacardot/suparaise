@@ -7,32 +7,29 @@ type SubmissionDetails = {
   id: string
   status: 'pending' | 'in_progress' | 'completed' | 'failed'
   agent_notes: string | null
-  hyperbrowser_job_id: string | null
+  browserbase_job_id: string | null
   error?: string
 }
 
 async function getJobStatus(jobId: string) {
-  const apiKey = process.env.HYPERBROWSER_API_KEY
+  const apiKey = process.env.BROWSERBASE_API_KEY
   if (!apiKey) {
-    throw new Error('HYPERBROWSER_API_KEY is not set')
+    throw new Error('BROWSERBASE_API_KEY is not set')
   }
 
-  const response = await fetch(
-    `https://api.hyperbrowser.ai/api/task/hyper-agent/${jobId}`,
-    {
-      headers: {
-        'X-API-KEY': apiKey,
-      },
+  const response = await fetch(`https://api.browserbase.com/v1/jobs/${jobId}`, {
+    headers: {
+      'X-BB-API-Key': apiKey,
     },
-  )
+  })
 
   if (!response.ok) {
     const errorText = await response.text()
     console.error(
-      `Hyperbrowser status check failed for job ${jobId}:`,
+      `Browserbase status check failed for job ${jobId}:`,
       errorText,
     )
-    throw new Error(`Hyperbrowser API error: ${response.statusText}`)
+    throw new Error(`Browserbase API error: ${response.statusText}`)
   }
 
   return response.json()
@@ -84,7 +81,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(submissionDetails)
     }
 
-    const jobId = submissionDetails.hyperbrowser_job_id
+    const jobId = submissionDetails.browserbase_job_id
     if (!jobId) {
       return NextResponse.json(
         { error: 'Submission is missing a job ID' },
@@ -92,12 +89,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 2. Get the latest job status from Hyperbrowser API
+    // 2. Get the latest job status from Browserbase API
     const jobStatusResult = await getJobStatus(jobId)
-    const hyperbrowserStatus = jobStatusResult.status.toLowerCase()
+    const browserbaseStatus = jobStatusResult.status.toLowerCase()
 
-    // If the job is still running on Hyperbrowser, return our current DB status
-    if (['pending', 'in_progress', 'running'].includes(hyperbrowserStatus)) {
+    // If the job is still running on Browserbase, return our current DB status
+    if (['pending', 'in_progress', 'running'].includes(browserbaseStatus)) {
       return NextResponse.json({
         id: submissionDetails.id,
         status: 'in_progress',
@@ -107,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     // 3. If the job is finished, update our database
     const finalStatus =
-      hyperbrowserStatus === 'completed' ? 'completed' : 'failed'
+      browserbaseStatus === 'completed' ? 'completed' : 'failed'
     const finalNotes =
       jobStatusResult.output ||
       jobStatusResult.error ||
@@ -124,7 +121,7 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error('Error updating final submission status:', updateError)
-      // Return the status from Hyperbrowser even if DB update fails, so client knows the final state
+      // Return the status from Browserbase even if DB update fails, so client knows the final state
       return NextResponse.json(
         {
           id: submissionId,

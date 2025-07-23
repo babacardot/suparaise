@@ -4,9 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
-
 import { Skeleton } from '@/components/ui/skeleton'
-import { PencilIcon, CheckIcon, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -123,7 +122,7 @@ export default function AgentSettings() {
   const { user, supabase, currentStartupId } = useUser()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  const [editingField, setEditingField] = useState<string | null>(null)
+
   const [dataLoading, setDataLoading] = useState(true)
 
   const [formData, setFormData] = useState({
@@ -225,13 +224,6 @@ export default function AgentSettings() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleFieldEdit = (field: string) => {
-    setEditingField(field)
-    setTimeout(() => {
-      document.getElementById(field)?.focus()
-    }, 0)
-  }
-
   const handleFieldSave = async (
     field: string,
     value?: string | boolean | number,
@@ -263,7 +255,6 @@ export default function AgentSettings() {
         throw new Error(data.error)
       }
 
-      setEditingField(null)
       toast({
         title: 'Agents settings updated',
         variant: 'success',
@@ -651,18 +642,12 @@ export default function AgentSettings() {
                   onChange={(e) =>
                     handleInputChange('customInstructions', e.target.value)
                   }
+                  onBlur={() => handleFieldSave('customInstructions')}
                   className={cn(
                     'rounded-sm pr-8 min-h-[100px] select-auto',
-                    (editingField !== 'customInstructions' ||
-                      !isProPlusFeatureAvailable()) &&
-                      'dark:bg-muted',
                     !isProPlusFeatureAvailable() &&
-                      'cursor-not-allowed text-muted-foreground',
+                      'dark:bg-muted cursor-not-allowed text-muted-foreground',
                   )}
-                  readOnly={
-                    editingField !== 'customInstructions' ||
-                    !isProPlusFeatureAvailable()
-                  }
                   placeholder={
                     isProPlusFeatureAvailable()
                       ? "Any specific instructions for how the agent should fill out forms or communicate. For example: 'Always mention our flagship product when describing the solution' or 'Emphasize our B2B SaaS experience'..."
@@ -670,10 +655,7 @@ export default function AgentSettings() {
                   }
                   rows={4}
                   disabled={!isProPlusFeatureAvailable()}
-                  enableAI={
-                    editingField === 'customInstructions' &&
-                    isProPlusFeatureAvailable()
-                  }
+                  enableAI={isProPlusFeatureAvailable()}
                   aiFieldType="instructions"
                   aiContext={{
                     companyName: user?.user_metadata?.companyName || '',
@@ -682,24 +664,6 @@ export default function AgentSettings() {
                     handleInputChange('customInstructions', enhancedText)
                   }
                 />
-                {editingField !== 'customInstructions' &&
-                isProPlusFeatureAvailable() ? (
-                  <button
-                    onClick={() => handleFieldEdit('customInstructions')}
-                    className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
-                  >
-                    <PencilIcon className="h-3 w-3" />
-                  </button>
-                ) : isProPlusFeatureAvailable() &&
-                  editingField === 'customInstructions' ? (
-                  <button
-                    onClick={() => handleFieldSave('customInstructions')}
-                    className="absolute right-2 top-2 text-green-500 hover:text-green-600"
-                    disabled={isLoading}
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                  </button>
-                ) : null}
               </div>
             </div>
           </div>

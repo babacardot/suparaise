@@ -18,8 +18,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import {
-  PencilIcon,
-  CheckIcon,
   ChevronDown,
   Plus,
   X,
@@ -589,13 +587,13 @@ export default function CompanySettings() {
     useUser()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  const [editingField, setEditingField] = useState<string | null>(null)
   const [dataLoading, setDataLoading] = useState(true)
   const [logoUploading, setLogoUploading] = useState(false)
   const [isAutoFilling, setIsAutoFilling] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [startupDeleteConfirmation, setStartupDeleteConfirmation] = useState('')
   const logoInputRef = useRef<HTMLInputElement>(null)
+  const operatingCountriesSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const [formData, setFormData] = useState<CompanySettingsData>({
     name: '',
@@ -872,14 +870,6 @@ export default function CompanySettings() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleFieldEdit = (field: string) => {
-    playClickSound()
-    setEditingField(field)
-    setTimeout(() => {
-      document.getElementById(field)?.focus()
-    }, 0)
-  }
-
   const validateUrl = (url: string, field: string): boolean => {
     if (!url.trim()) return true // Empty URLs are allowed
 
@@ -907,7 +897,10 @@ export default function CompanySettings() {
     }
   }
 
-  const handleFieldSave = async (field: string) => {
+  const handleFieldSave = async (
+    field: string,
+    value?: CompanySettingsData[keyof CompanySettingsData],
+  ) => {
     if (!currentStartupId) {
       toast({
         variant: 'destructive',
@@ -917,17 +910,19 @@ export default function CompanySettings() {
       return
     }
 
+    const valueToSave =
+      value !== undefined ? value : formData[field as keyof typeof formData]
+
     // Validate URLs for website and google drive fields
     if (field === 'website' || field === 'googleDriveUrl') {
-      const fieldValue = formData[field as keyof typeof formData] as string
-      if (!validateUrl(fieldValue, field)) {
+      if (!validateUrl(valueToSave as string, field)) {
         return // Don't save if validation fails
       }
     }
 
     setIsLoading(true)
     try {
-      const updateData = { [field]: formData[field as keyof typeof formData] }
+      const updateData = { [field]: valueToSave }
 
       const { data, error } = await supabase.rpc('update_user_startup_data', {
         p_user_id: user.id,
@@ -952,7 +947,6 @@ export default function CompanySettings() {
         }
       }
 
-      setEditingField(null)
       playCompletionSound()
       toast({
         title: 'Company updated',
@@ -964,7 +958,9 @@ export default function CompanySettings() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Failed to update ${formatFieldName(field)}. Please try again.`,
+        description: `Failed to update ${formatFieldName(
+          field,
+        )}. Please try again.`,
       })
     } finally {
       setIsLoading(false)
@@ -1665,6 +1661,21 @@ export default function CompanySettings() {
     }
   }
 
+  const handleOperatingCountriesChange = (selected: string[]) => {
+    // Update local state immediately (no race conditions)
+    handleInputChange('operatingCountries', selected)
+
+    // Clear any pending save
+    if (operatingCountriesSaveTimeoutRef.current) {
+      clearTimeout(operatingCountriesSaveTimeoutRef.current)
+    }
+
+    // Debounce the database save to prevent race conditions on rapid clicks
+    operatingCountriesSaveTimeoutRef.current = setTimeout(async () => {
+      await handleFieldSave('operatingCountries', selected)
+    }, 500) // 500ms delay
+  }
+
   return (
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
@@ -1745,35 +1756,14 @@ export default function CompanySettings() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="name">Company name</Label>
-                <div className="relative">
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'name' && 'dark:bg-muted',
-                    )}
-                    readOnly={editingField !== 'name'}
-                    placeholder="Enter your company name"
-                  />
-                  {editingField !== 'name' ? (
-                    <button
-                      onClick={() => handleFieldEdit('name')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('name')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  onBlur={() => handleFieldSave('name')}
+                  className="rounded-sm"
+                  placeholder="Enter your company name"
+                />
               </div>
 
               <div className="space-y-3">
@@ -1786,29 +1776,10 @@ export default function CompanySettings() {
                       onChange={(e) =>
                         handleInputChange('website', e.target.value)
                       }
-                      className={cn(
-                        'rounded-sm pr-8',
-                        editingField !== 'website' && 'dark:bg-muted',
-                      )}
-                      readOnly={editingField !== 'website'}
+                      onBlur={() => handleFieldSave('website')}
+                      className="rounded-sm"
                       placeholder="https://yourcompany.com"
                     />
-                    {editingField !== 'website' ? (
-                      <button
-                        onClick={() => handleFieldEdit('website')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                      >
-                        <PencilIcon className="h-3 w-3" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleFieldSave('website')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                        disabled={isLoading}
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </button>
-                    )}
                   </div>
                   {showAutofillButton && (
                     <Button
@@ -1833,43 +1804,22 @@ export default function CompanySettings() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="foundedYear">Founded year</Label>
-                <div className="relative">
-                  <Input
-                    id="foundedYear"
-                    type="number"
-                    value={formData.foundedYear || ''}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'foundedYear',
-                        parseInt(e.target.value) || new Date().getFullYear(),
-                      )
-                    }
-                    className={cn(
-                      'rounded-sm pr-8',
-                      editingField !== 'foundedYear' && 'dark:bg-muted',
-                    )}
-                    readOnly={editingField !== 'foundedYear'}
-                    min="1900"
-                    max={new Date().getFullYear()}
-                    placeholder="2023"
-                  />
-                  {editingField !== 'foundedYear' ? (
-                    <button
-                      onClick={() => handleFieldEdit('foundedYear')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave('foundedYear')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
+                <Input
+                  id="foundedYear"
+                  type="number"
+                  value={formData.foundedYear || ''}
+                  onChange={(e) =>
+                    handleInputChange(
+                      'foundedYear',
+                      parseInt(e.target.value) || new Date().getFullYear(),
+                    )
+                  }
+                  onBlur={() => handleFieldSave('foundedYear')}
+                  className="rounded-sm"
+                  min="1900"
+                  max={new Date().getFullYear()}
+                  placeholder="2023"
+                />
               </div>
 
               <div className="space-y-3">
@@ -1882,7 +1832,7 @@ export default function CompanySettings() {
                     onChange={async (e) => {
                       const newValue = e.target.value as IndustryType
                       handleInputChange('industry', newValue)
-                      await handleFieldSave('industry')
+                      await handleFieldSave('industry', newValue)
                     }}
                     disabled={isLoading}
                   >
@@ -1906,7 +1856,7 @@ export default function CompanySettings() {
                     selected={formData.location || ''}
                     onChange={async (country) => {
                       handleInputChange('location', country)
-                      await handleFieldSave('location')
+                      await handleFieldSave('location', country)
                     }}
                     placeholder="Select country"
                   />
@@ -1923,7 +1873,7 @@ export default function CompanySettings() {
                     onChange={async (e) => {
                       const newValue = parseInt(e.target.value) || 1
                       handleInputChange('employeeCount', newValue)
-                      await handleFieldSave('employeeCount')
+                      await handleFieldSave('employeeCount', newValue)
                     }}
                     disabled={isLoading}
                   >
@@ -1952,14 +1902,11 @@ export default function CompanySettings() {
                   onChange={(e) =>
                     handleInputChange('descriptionShort', e.target.value)
                   }
-                  className={cn(
-                    'rounded-sm pr-8 min-h-[60px]',
-                    editingField !== 'descriptionShort' && 'dark:bg-muted',
-                  )}
-                  readOnly={editingField !== 'descriptionShort'}
+                  onBlur={() => handleFieldSave('descriptionShort')}
+                  className="rounded-sm min-h-[60px]"
                   placeholder="Brief description of what your company does"
                   rows={2}
-                  enableAI={editingField === 'descriptionShort'}
+                  enableAI
                   aiFieldType="description-short"
                   aiContext={{
                     companyName: formData.name,
@@ -1969,22 +1916,6 @@ export default function CompanySettings() {
                     handleInputChange('descriptionShort', enhancedText)
                   }}
                 />
-                {editingField !== 'descriptionShort' ? (
-                  <button
-                    onClick={() => handleFieldEdit('descriptionShort')}
-                    className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
-                  >
-                    <PencilIcon className="h-3 w-3" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleFieldSave('descriptionShort')}
-                    className="absolute right-2 top-2 text-green-500 hover:text-green-600"
-                    disabled={isLoading}
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -1997,14 +1928,11 @@ export default function CompanySettings() {
                   onChange={(e) =>
                     handleInputChange('descriptionMedium', e.target.value)
                   }
-                  className={cn(
-                    'rounded-sm pr-8 min-h-[80px]',
-                    editingField !== 'descriptionMedium' && 'dark:bg-muted',
-                  )}
-                  readOnly={editingField !== 'descriptionMedium'}
+                  onBlur={() => handleFieldSave('descriptionMedium')}
+                  className="rounded-sm min-h-[80px]"
                   placeholder="Describe what your company does, the problem you solve, and your solution..."
                   rows={3}
-                  enableAI={editingField === 'descriptionMedium'}
+                  enableAI
                   aiFieldType="description-medium"
                   aiContext={{
                     companyName: formData.name,
@@ -2014,22 +1942,6 @@ export default function CompanySettings() {
                     handleInputChange('descriptionMedium', enhancedText)
                   }}
                 />
-                {editingField !== 'descriptionMedium' ? (
-                  <button
-                    onClick={() => handleFieldEdit('descriptionMedium')}
-                    className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
-                  >
-                    <PencilIcon className="h-3 w-3" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleFieldSave('descriptionMedium')}
-                    className="absolute right-2 top-2 text-green-500 hover:text-green-600"
-                    disabled={isLoading}
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -2042,14 +1954,11 @@ export default function CompanySettings() {
                   onChange={(e) =>
                     handleInputChange('descriptionLong', e.target.value)
                   }
-                  className={cn(
-                    'rounded-sm pr-8 min-h-[120px]',
-                    editingField !== 'descriptionLong' && 'dark:bg-muted',
-                  )}
-                  readOnly={editingField !== 'descriptionLong'}
+                  onBlur={() => handleFieldSave('descriptionLong')}
+                  className="rounded-sm min-h-[120px]"
                   placeholder="Detailed description of your company, market opportunity, solution, and business model..."
                   rows={5}
-                  enableAI={editingField === 'descriptionLong'}
+                  enableAI
                   aiFieldType="description-long"
                   aiContext={{
                     companyName: formData.name,
@@ -2059,22 +1968,6 @@ export default function CompanySettings() {
                     handleInputChange('descriptionLong', enhancedText)
                   }}
                 />
-                {editingField !== 'descriptionLong' ? (
-                  <button
-                    onClick={() => handleFieldEdit('descriptionLong')}
-                    className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
-                  >
-                    <PencilIcon className="h-3 w-3" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleFieldSave('descriptionLong')}
-                    className="absolute right-2 top-2 text-green-500 hover:text-green-600"
-                    disabled={isLoading}
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
           </div>
@@ -2089,37 +1982,48 @@ export default function CompanySettings() {
                   className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                   value={formData.legalStructure || ''}
                   onChange={async (e) => {
-                    const newValue = e.target.value as LegalStructure
-                    handleInputChange('legalStructure', newValue)
+                    const newLegalStructure = e.target.value as LegalStructure
+                    const newIsIncorporated =
+                      newLegalStructure !== 'Not yet incorporated'
 
-                    // Auto-update incorporation status based on legal structure
-                    const isNotIncorporated =
-                      newValue === 'Not yet incorporated'
-                    handleInputChange('isIncorporated', !isNotIncorporated)
+                    handleInputChange('legalStructure', newLegalStructure)
+                    handleInputChange('isIncorporated', newIsIncorporated)
 
-                    // Save both fields
-                    await handleFieldSave('legalStructure')
-                    if (formData.isIncorporated !== !isNotIncorporated) {
-                      if (!currentStartupId) return
-                      try {
-                        const { data, error } = await supabase.rpc(
-                          'update_user_startup_data',
-                          {
-                            p_user_id: user.id,
-                            p_startup_id: currentStartupId,
-                            p_data: { isIncorporated: !isNotIncorporated },
+                    if (!currentStartupId || !user?.id) return
+
+                    try {
+                      setIsLoading(true)
+                      const { data, error } = await supabase.rpc(
+                        'update_user_startup_data',
+                        {
+                          p_user_id: user.id,
+                          p_startup_id: currentStartupId,
+                          p_data: {
+                            legalStructure: newLegalStructure,
+                            isIncorporated: newIsIncorporated,
                           },
-                        )
-                        if (error) throw error
-                        const result = data as UpdateStartupResponse
-                        if (result && 'error' in result)
-                          throw new Error(result.error)
-                      } catch (error) {
-                        console.error(
-                          'Error saving incorporation status:',
-                          error,
-                        )
+                        },
+                      )
+                      if (error) throw error
+                      const result = data as UpdateStartupResponse
+                      if (result && 'error' in result) {
+                        throw new Error(result.error)
                       }
+                      playCompletionSound()
+                      toast({
+                        title: 'Company updated',
+                        variant: 'success',
+                        description: `Legal structure has been updated successfully.`,
+                      })
+                    } catch (error) {
+                      console.error('Error saving legal structure:', error)
+                      toast({
+                        variant: 'destructive',
+                        title: 'Error',
+                        description: `Failed to update legal structure. Please try again.`,
+                      })
+                    } finally {
+                      setIsLoading(false)
                     }
                   }}
                   disabled={isLoading}
@@ -2146,7 +2050,7 @@ export default function CompanySettings() {
                     onChange={async (e) => {
                       const newValue = e.target.value as InvestmentStage
                       handleInputChange('fundingRound', newValue)
-                      await handleFieldSave('fundingRound')
+                      await handleFieldSave('fundingRound', newValue)
                     }}
                     disabled={isLoading}
                   >
@@ -2171,7 +2075,7 @@ export default function CompanySettings() {
                     onChange={async (e) => {
                       const newValue = e.target.value as InvestmentInstrument
                       handleInputChange('investmentInstrument', newValue)
-                      await handleFieldSave('investmentInstrument')
+                      await handleFieldSave('investmentInstrument', newValue)
                     }}
                     disabled={isLoading}
                   >
@@ -2198,7 +2102,7 @@ export default function CompanySettings() {
                     onChange={async (e) => {
                       const newValue = e.target.value as RevenueModelType
                       handleInputChange('revenueModel', newValue)
-                      await handleFieldSave('revenueModel')
+                      await handleFieldSave('revenueModel', newValue)
                     }}
                     disabled={isLoading}
                   >
@@ -2222,7 +2126,7 @@ export default function CompanySettings() {
                     onChange={async (e) => {
                       const newValue = parseInt(e.target.value) || 0
                       handleInputChange('currentRunway', newValue)
-                      await handleFieldSave('currentRunway')
+                      await handleFieldSave('currentRunway', newValue)
                     }}
                     disabled={isLoading}
                   >
@@ -2357,7 +2261,7 @@ export default function CompanySettings() {
                       selected={formData.incorporationCountry || ''}
                       onChange={async (selected) => {
                         handleInputChange('incorporationCountry', selected)
-                        await handleFieldSave('incorporationCountry')
+                        await handleFieldSave('incorporationCountry', selected)
                       }}
                       placeholder="Select country"
                     />
@@ -2372,29 +2276,10 @@ export default function CompanySettings() {
                       onChange={(e) =>
                         handleInputChange('incorporationCity', e.target.value)
                       }
-                      className={cn(
-                        'rounded-sm pr-8',
-                        editingField !== 'incorporationCity' && 'dark:bg-muted',
-                      )}
-                      readOnly={editingField !== 'incorporationCity'}
+                      onBlur={() => handleFieldSave('incorporationCity')}
+                      className="rounded-sm"
                       placeholder="Paris"
                     />
-                    {editingField !== 'incorporationCity' ? (
-                      <button
-                        onClick={() => handleFieldEdit('incorporationCity')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                      >
-                        <PencilIcon className="h-3 w-3" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleFieldSave('incorporationCity')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                        disabled={isLoading}
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -2404,45 +2289,42 @@ export default function CompanySettings() {
               <Label htmlFor="operating-countries">
                 Countries where you operate
               </Label>
-              <MultiSelectCountries
-                selected={formData.operatingCountries || []}
-                onChange={async (selected) => {
-                  handleInputChange('operatingCountries', selected)
-                  await handleFieldSave('operatingCountries')
-                }}
-              />
-              {(formData.operatingCountries || []).length > 0 && (
-                <div className="pt-2">
-                  <div className="flex flex-wrap gap-1">
-                    {(formData.operatingCountries || []).map(
-                      (country, index) => (
-                        <Badge
-                          key={country}
-                          className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
-                        >
-                          {country}
-                          <button
-                            onClick={async () => {
-                              const newCountries = (
-                                formData.operatingCountries || []
-                              ).filter((c) => c !== country)
-                              handleInputChange(
-                                'operatingCountries',
-                                newCountries,
-                              )
-                              await handleFieldSave('operatingCountries')
-                            }}
-                            className="ml-1.5"
-                            aria-label={`Remove ${country}`}
+              <>
+                <MultiSelectCountries
+                  selected={formData.operatingCountries || []}
+                  onChange={handleOperatingCountriesChange}
+                />
+                {(formData.operatingCountries || []).length > 0 && (
+                  <div className="pt-2">
+                    <div className="flex flex-wrap gap-1">
+                      {(formData.operatingCountries || []).map(
+                        (country, index) => (
+                          <Badge
+                            key={country}
+                            className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(
+                              index,
+                            )}`}
                           >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ),
-                    )}
+                            {country}
+                            <button
+                              onClick={() => {
+                                const newCountries = (
+                                  formData.operatingCountries || []
+                                ).filter((c) => c !== country)
+                                handleOperatingCountriesChange(newCountries)
+                              }}
+                              className="ml-1.5"
+                              aria-label={`Remove ${country}`}
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ),
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </>
             </div>
           </div>
 
@@ -2548,14 +2430,11 @@ export default function CompanySettings() {
                   onChange={(e) =>
                     handleInputChange('tractionSummary', e.target.value)
                   }
-                  className={cn(
-                    'rounded-sm pr-8 min-h-[80px]',
-                    editingField !== 'tractionSummary' && 'dark:bg-muted',
-                  )}
-                  readOnly={editingField !== 'tractionSummary'}
+                  onBlur={() => handleFieldSave('tractionSummary')}
+                  className="rounded-sm min-h-[80px]"
                   placeholder="Key metrics, growth numbers, user adoption, partnerships, etc."
                   rows={3}
-                  enableAI={editingField === 'tractionSummary'}
+                  enableAI
                   aiFieldType="traction"
                   aiContext={{
                     companyName: formData.name,
@@ -2565,22 +2444,6 @@ export default function CompanySettings() {
                     handleInputChange('tractionSummary', enhancedText)
                   }}
                 />
-                {editingField !== 'tractionSummary' ? (
-                  <button
-                    onClick={() => handleFieldEdit('tractionSummary')}
-                    className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
-                  >
-                    <PencilIcon className="h-3 w-3" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleFieldSave('tractionSummary')}
-                    className="absolute right-2 top-2 text-green-500 hover:text-green-600"
-                    disabled={isLoading}
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -2593,14 +2456,11 @@ export default function CompanySettings() {
                   onChange={(e) =>
                     handleInputChange('marketSummary', e.target.value)
                   }
-                  className={cn(
-                    'rounded-sm pr-8 min-h-[80px]',
-                    editingField !== 'marketSummary' && 'dark:bg-muted',
-                  )}
-                  readOnly={editingField !== 'marketSummary'}
+                  onBlur={() => handleFieldSave('marketSummary')}
+                  className="rounded-sm min-h-[80px]"
                   placeholder="Market size, target customers, competitive landscape, etc."
                   rows={3}
-                  enableAI={editingField === 'marketSummary'}
+                  enableAI
                   aiFieldType="market"
                   aiContext={{
                     companyName: formData.name,
@@ -2610,22 +2470,6 @@ export default function CompanySettings() {
                     handleInputChange('marketSummary', enhancedText)
                   }}
                 />
-                {editingField !== 'marketSummary' ? (
-                  <button
-                    onClick={() => handleFieldEdit('marketSummary')}
-                    className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
-                  >
-                    <PencilIcon className="h-3 w-3" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleFieldSave('marketSummary')}
-                    className="absolute right-2 top-2 text-green-500 hover:text-green-600"
-                    disabled={isLoading}
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -2638,14 +2482,11 @@ export default function CompanySettings() {
                   onChange={(e) =>
                     handleInputChange('keyCustomers', e.target.value)
                   }
-                  className={cn(
-                    'rounded-sm pr-8 min-h-[80px]',
-                    editingField !== 'keyCustomers' && 'dark:bg-muted',
-                  )}
-                  readOnly={editingField !== 'keyCustomers'}
+                  onBlur={() => handleFieldSave('keyCustomers')}
+                  className="rounded-sm min-h-[80px]"
                   placeholder="Notable customers, enterprise clients, early adopters..."
                   rows={3}
-                  enableAI={editingField === 'keyCustomers'}
+                  enableAI
                   aiFieldType="customers"
                   aiContext={{
                     companyName: formData.name,
@@ -2655,22 +2496,6 @@ export default function CompanySettings() {
                     handleInputChange('keyCustomers', enhancedText)
                   }}
                 />
-                {editingField !== 'keyCustomers' ? (
-                  <button
-                    onClick={() => handleFieldEdit('keyCustomers')}
-                    className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
-                  >
-                    <PencilIcon className="h-3 w-3" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleFieldSave('keyCustomers')}
-                    className="absolute right-2 top-2 text-green-500 hover:text-green-600"
-                    disabled={isLoading}
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -2683,8 +2508,9 @@ export default function CompanySettings() {
                     : []
                 }
                 onChange={async (competitors) => {
-                  handleInputChange('competitors', competitors.join(', '))
-                  await handleFieldSave('competitors')
+                  const newCompetitors = competitors.join(', ')
+                  handleInputChange('competitors', newCompetitors)
+                  await handleFieldSave('competitors', newCompetitors)
                 }}
               />
             </div>
@@ -2700,37 +2526,18 @@ export default function CompanySettings() {
                 onChange={(e) =>
                   handleInputChange('googleDriveUrl', e.target.value)
                 }
-                className={cn(
-                  'rounded-sm pr-8',
-                  editingField !== 'googleDriveUrl' && 'dark:bg-muted',
-                )}
-                readOnly={editingField !== 'googleDriveUrl'}
+                onBlur={() => handleFieldSave('googleDriveUrl')}
+                className="rounded-sm"
                 placeholder="https://drive.google.com/drive/folders/..."
               />
-              {editingField !== 'googleDriveUrl' ? (
-                <button
-                  onClick={() => handleFieldEdit('googleDriveUrl')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                >
-                  <PencilIcon className="h-3 w-3" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleFieldSave('googleDriveUrl')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                  disabled={isLoading}
-                >
-                  <CheckIcon className="h-4 w-4" />
-                </button>
-              )}
+              <p className="text-xs text-muted-foreground">
+                Link to a shared folder with your pitch deck, financials, and
+                other materials. While the agent can use this instead of
+                individual uploads, we recommend uploading your deck and demo
+                separately for better security and because most funds require
+                these files to be submitted individually.
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Link to a shared folder with your pitch deck, financials, and
-              other materials. While the agent can use this instead of
-              individual uploads, we recommend uploading your deck and demo
-              separately for better security and because most funds require
-              these files to be submitted individually.
-            </p>
           </div>
 
           {/* File Uploads */}

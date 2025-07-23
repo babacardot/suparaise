@@ -274,7 +274,6 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 CREATE TABLE startups (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-    hyperbrowser_session_id TEXT,
     name TEXT NOT NULL,
     website TEXT,
     industry industry_type,
@@ -360,10 +359,14 @@ CREATE TABLE submissions (
     submission_date TIMESTAMPTZ DEFAULT NOW(),
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
-    hyperbrowser_job_id TEXT, -- To store the external agent job ID
+    browserbase_job_id TEXT, -- To store the external agent job ID
     queue_position INTEGER, -- Position in queue (NULL if not queued)
     queued_at TIMESTAMPTZ, -- When it was added to queue
     started_at TIMESTAMPTZ, -- When processing actually started
+    browserbase_session_id TEXT,
+    session_replay_url TEXT,
+    screenshots_taken INTEGER DEFAULT 0,
+    debug_data JSONB,
     UNIQUE(startup_id, target_id),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -385,6 +388,10 @@ CREATE TABLE angel_submissions (
     submission_date TIMESTAMPTZ DEFAULT NOW(),
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
+    browserbase_session_id TEXT,
+    session_replay_url TEXT,
+    screenshots_taken INTEGER DEFAULT 0,
+    debug_data JSONB,
     UNIQUE(startup_id, angel_id),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -406,6 +413,10 @@ CREATE TABLE accelerator_submissions (
     submission_date TIMESTAMPTZ DEFAULT NOW(),
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
+    browserbase_session_id TEXT,
+    session_replay_url TEXT,
+    screenshots_taken INTEGER DEFAULT 0,
+    debug_data JSONB,
     UNIQUE(startup_id, accelerator_id),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -448,7 +459,6 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- Index for startups.user_id (critical for dashboard queries)
 CREATE INDEX IF NOT EXISTS idx_startups_user_id ON startups(user_id);
-CREATE INDEX IF NOT EXISTS idx_startups_hyperbrowser_session_id ON startups(hyperbrowser_session_id);
 
 -- Index for startups.onboarded (for filtering incomplete onboarding)
 CREATE INDEX IF NOT EXISTS idx_startups_onboarded ON startups(onboarded);
@@ -460,7 +470,7 @@ CREATE INDEX IF NOT EXISTS idx_founders_startup_id ON founders(startup_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_id ON submissions(startup_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_target_id ON submissions(target_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
-CREATE INDEX IF NOT EXISTS idx_submissions_hyperbrowser_job_id ON submissions(hyperbrowser_job_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_browserbase_job_id ON submissions(browserbase_job_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_queue_position ON submissions(queue_position) WHERE queue_position IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_submissions_queued_at ON submissions(queued_at) WHERE queued_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_status_queue ON submissions(startup_id, status, queue_position);
@@ -479,6 +489,11 @@ CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_startup_id ON accelerator
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_accelerator_id ON accelerator_submissions(accelerator_id);
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_status ON accelerator_submissions(status);
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_startup_accelerator ON accelerator_submissions(startup_id, accelerator_id);
+
+-- Indexes for session replay data lookups
+CREATE INDEX IF NOT EXISTS idx_submissions_session_id ON submissions(browserbase_session_id) WHERE browserbase_session_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_angel_submissions_session_id ON angel_submissions(browserbase_session_id) WHERE browserbase_session_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_session_id ON accelerator_submissions(browserbase_session_id) WHERE browserbase_session_id IS NOT NULL;
 
 -- Index for email lookups in founders (if used)
 CREATE INDEX IF NOT EXISTS idx_founders_email ON founders(email) WHERE email IS NOT NULL;
@@ -909,7 +924,7 @@ USING ((SELECT auth.uid()) = (SELECT user_id FROM startups WHERE id = startup_id
 CREATE INDEX IF NOT EXISTS idx_common_responses_startup_id ON common_responses(startup_id);
 
 -- Function to get common responses for a startup
-CREATE OR REPLACE FUNCTION get_common_responses(p_startup_id UUID)
+CREATE OR REPLACE FUNCTION get_common_responses(p_startup_id UUID, p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
     result JSONB;
@@ -917,9 +932,9 @@ BEGIN
     -- Check if the user has access to this startup
     IF NOT EXISTS (
         SELECT 1 FROM startups 
-        WHERE id = p_startup_id AND user_id = (SELECT auth.uid())
+        WHERE id = p_startup_id AND user_id = p_user_id
     ) THEN
-        RETURN jsonb_build_object('error', 'Access denied or startup not found');
+        RAISE EXCEPTION 'User % does not have access to startup %', p_user_id, p_startup_id;
     END IF;
 
     -- Get all common responses for this startup
@@ -936,7 +951,7 @@ BEGIN
 
     RETURN COALESCE(result, '[]'::jsonb);
 END;
-$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-GRANT EXECUTE ON FUNCTION get_common_responses(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_common_responses(UUID, UUID) TO authenticated;
 

@@ -20,13 +20,7 @@ import {
 } from '@/components/ui/dialog'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
-import {
-  PencilIcon,
-  CheckIcon,
-  CopyIcon,
-  ChevronDown,
-  Plus,
-} from 'lucide-react'
+import { CopyIcon, ChevronDown, Plus } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import Spinner from '@/components/ui/spinner'
 import PhoneNumberInput from '@/components/design/phone-number-input-settings'
@@ -195,7 +189,6 @@ export default function ProfileSettings() {
   const { user, supabase, currentStartupId, refreshUser } = useUser()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  const [editingField, setEditingField] = useState<string | null>(null)
   const [isCopied, setIsCopied] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
   const [founders, setFounders] = useState<Founder[]>([])
@@ -299,16 +292,6 @@ export default function ProfileSettings() {
     setNewFounderData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleFieldEdit = (field: string, founderId?: string) => {
-    playClickSound()
-    setEditingField(founderId ? `${founderId}-${field}` : field)
-    setTimeout(() => {
-      document
-        .getElementById(founderId ? `${founderId}-${field}` : field)
-        ?.focus()
-    }, 0)
-  }
-
   const validateUrl = (url: string, field: string): boolean => {
     if (!url.trim()) return true // Empty URLs are allowed
 
@@ -407,8 +390,6 @@ export default function ProfileSettings() {
         }
       }
 
-      setEditingField(null)
-      playCompletionSound()
       toast({
         title: 'Profile updated',
         variant: 'success',
@@ -894,121 +875,47 @@ export default function ProfileSettings() {
               <div className="grid gap-4 md:grid-cols-2 mb-6">
                 <div className="space-y-3">
                   <Label htmlFor={`${founder.id}-firstName`}>First name</Label>
-                  <div className="relative">
-                    <Input
-                      id={`${founder.id}-firstName`}
-                      value={founder.firstName}
-                      onChange={(e) =>
-                        handleInputChange(
-                          founder.id,
-                          'firstName',
-                          e.target.value,
-                        )
-                      }
-                      className={cn(
-                        'rounded-sm pr-8',
-                        editingField !== `${founder.id}-firstName` &&
-                          'dark:bg-muted',
-                      )}
-                      readOnly={editingField !== `${founder.id}-firstName`}
-                      placeholder="Enter first name"
-                    />
-                    {editingField !== `${founder.id}-firstName` ? (
-                      <button
-                        onClick={() => handleFieldEdit('firstName', founder.id)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                      >
-                        <PencilIcon className="h-3 w-3" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleFieldSave(founder.id, 'firstName')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                        disabled={isLoading}
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+                  <Input
+                    id={`${founder.id}-firstName`}
+                    value={founder.firstName}
+                    onChange={(e) =>
+                      handleInputChange(founder.id, 'firstName', e.target.value)
+                    }
+                    onBlur={() => handleFieldSave(founder.id, 'firstName')}
+                    className="rounded-sm"
+                    placeholder="Enter first name"
+                  />
                 </div>
 
                 <div className="space-y-3">
                   <Label htmlFor={`${founder.id}-lastName`}>Last name</Label>
-                  <div className="relative">
-                    <Input
-                      id={`${founder.id}-lastName`}
-                      value={founder.lastName}
-                      onChange={(e) =>
-                        handleInputChange(
-                          founder.id,
-                          'lastName',
-                          e.target.value,
-                        )
-                      }
-                      className={cn(
-                        'rounded-sm pr-8',
-                        editingField !== `${founder.id}-lastName` &&
-                          'dark:bg-muted',
-                      )}
-                      readOnly={editingField !== `${founder.id}-lastName`}
-                      placeholder="Enter last name"
-                    />
-                    {editingField !== `${founder.id}-lastName` ? (
-                      <button
-                        onClick={() => handleFieldEdit('lastName', founder.id)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                      >
-                        <PencilIcon className="h-3 w-3" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleFieldSave(founder.id, 'lastName')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                        disabled={isLoading}
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+                  <Input
+                    id={`${founder.id}-lastName`}
+                    value={founder.lastName}
+                    onChange={(e) =>
+                      handleInputChange(founder.id, 'lastName', e.target.value)
+                    }
+                    onBlur={() => handleFieldSave(founder.id, 'lastName')}
+                    className="rounded-sm"
+                    placeholder="Enter last name"
+                  />
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 mb-6">
                 <div className="space-y-3">
                   <Label htmlFor={`${founder.id}-email`}>Email</Label>
-                  <div className="relative">
-                    <Input
-                      id={`${founder.id}-email`}
-                      type="email"
-                      value={founder.email}
-                      onChange={(e) =>
-                        handleInputChange(founder.id, 'email', e.target.value)
-                      }
-                      className={cn(
-                        'rounded-sm pr-8',
-                        editingField !== `${founder.id}-email` &&
-                          'dark:bg-muted',
-                      )}
-                      readOnly={editingField !== `${founder.id}-email`}
-                      placeholder="Enter email"
-                    />
-                    {editingField !== `${founder.id}-email` ? (
-                      <button
-                        onClick={() => handleFieldEdit('email', founder.id)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                      >
-                        <PencilIcon className="h-3 w-3" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleFieldSave(founder.id, 'email')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                        disabled={isLoading}
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+                  <Input
+                    id={`${founder.id}-email`}
+                    type="email"
+                    value={founder.email}
+                    onChange={(e) =>
+                      handleInputChange(founder.id, 'email', e.target.value)
+                    }
+                    onBlur={() => handleFieldSave(founder.id, 'email')}
+                    className="rounded-sm"
+                    placeholder="Enter email"
+                  />
                 </div>
 
                 <div className="space-y-3">
@@ -1107,14 +1014,11 @@ export default function ProfileSettings() {
                     onChange={(e) =>
                       handleInputChange(founder.id, 'bio', e.target.value)
                     }
-                    className={cn(
-                      'rounded-sm pr-8 min-h-[80px]',
-                      editingField !== `${founder.id}-bio` && 'dark:bg-muted',
-                    )}
-                    readOnly={editingField !== `${founder.id}-bio`}
+                    onBlur={() => handleFieldSave(founder.id, 'bio')}
+                    className="rounded-sm min-h-[80px]"
                     placeholder="Tell agents a little bit more about yourself..."
                     rows={3}
-                    enableAI={editingField === `${founder.id}-bio`}
+                    enableAI
                     aiFieldType="bio"
                     aiContext={{
                       founderName:
@@ -1125,22 +1029,6 @@ export default function ProfileSettings() {
                       handleInputChange(founder.id, 'bio', enhancedText)
                     }
                   />
-                  {editingField !== `${founder.id}-bio` ? (
-                    <button
-                      onClick={() => handleFieldEdit('bio', founder.id)}
-                      className="absolute right-2 top-2 text-blue-500 hover:text-blue-600"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleFieldSave(founder.id, 'bio')}
-                      className="absolute right-2 top-2 text-green-500 hover:text-green-600"
-                      disabled={isLoading}
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -1149,182 +1037,78 @@ export default function ProfileSettings() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-linkedin`}>LinkedIn</Label>
-                    <div className="relative">
-                      <Input
-                        id={`${founder.id}-linkedin`}
-                        value={founder.linkedin}
-                        onChange={(e) =>
-                          handleInputChange(
-                            founder.id,
-                            'linkedin',
-                            e.target.value,
-                          )
-                        }
-                        className={cn(
-                          'rounded-sm pr-8',
-                          editingField !== `${founder.id}-linkedin` &&
-                            'dark:bg-muted',
-                        )}
-                        readOnly={editingField !== `${founder.id}-linkedin`}
-                        placeholder="https://linkedin.com/in/profile"
-                      />
-                      {editingField !== `${founder.id}-linkedin` ? (
-                        <button
-                          onClick={() =>
-                            handleFieldEdit('linkedin', founder.id)
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                        >
-                          <PencilIcon className="h-3 w-3" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() =>
-                            handleFieldSave(founder.id, 'linkedin')
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                          disabled={isLoading}
-                        >
-                          <CheckIcon className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
+                    <Input
+                      id={`${founder.id}-linkedin`}
+                      value={founder.linkedin}
+                      onChange={(e) =>
+                        handleInputChange(
+                          founder.id,
+                          'linkedin',
+                          e.target.value,
+                        )
+                      }
+                      onBlur={() => handleFieldSave(founder.id, 'linkedin')}
+                      className="rounded-sm"
+                      placeholder="https://linkedin.com/in/profile"
+                    />
                   </div>
 
                   <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-githubUrl`}>Github</Label>
-                    <div className="relative">
-                      <Input
-                        id={`${founder.id}-githubUrl`}
-                        value={founder.githubUrl}
-                        onChange={(e) =>
-                          handleInputChange(
-                            founder.id,
-                            'githubUrl',
-                            e.target.value,
-                          )
-                        }
-                        className={cn(
-                          'rounded-sm pr-8',
-                          editingField !== `${founder.id}-githubUrl` &&
-                            'dark:bg-muted',
-                        )}
-                        readOnly={editingField !== `${founder.id}-githubUrl`}
-                        placeholder="https://github.com/username"
-                      />
-                      {editingField !== `${founder.id}-githubUrl` ? (
-                        <button
-                          onClick={() =>
-                            handleFieldEdit('githubUrl', founder.id)
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                        >
-                          <PencilIcon className="h-3 w-3" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() =>
-                            handleFieldSave(founder.id, 'githubUrl')
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                          disabled={isLoading}
-                        >
-                          <CheckIcon className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
+                    <Input
+                      id={`${founder.id}-githubUrl`}
+                      value={founder.githubUrl}
+                      onChange={(e) =>
+                        handleInputChange(
+                          founder.id,
+                          'githubUrl',
+                          e.target.value,
+                        )
+                      }
+                      onBlur={() => handleFieldSave(founder.id, 'githubUrl')}
+                      className="rounded-sm"
+                      placeholder="https://github.com/username"
+                    />
                   </div>
 
                   <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-personalWebsiteUrl`}>
                       Personal website
                     </Label>
-                    <div className="relative">
-                      <Input
-                        id={`${founder.id}-personalWebsiteUrl`}
-                        value={founder.personalWebsiteUrl}
-                        onChange={(e) =>
-                          handleInputChange(
-                            founder.id,
-                            'personalWebsiteUrl',
-                            e.target.value,
-                          )
-                        }
-                        className={cn(
-                          'rounded-sm pr-8',
-                          editingField !== `${founder.id}-personalWebsiteUrl` &&
-                            'dark:bg-muted',
-                        )}
-                        readOnly={
-                          editingField !== `${founder.id}-personalWebsiteUrl`
-                        }
-                        placeholder="https://website.com"
-                      />
-                      {editingField !== `${founder.id}-personalWebsiteUrl` ? (
-                        <button
-                          onClick={() =>
-                            handleFieldEdit('personalWebsiteUrl', founder.id)
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                        >
-                          <PencilIcon className="h-3 w-3" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() =>
-                            handleFieldSave(founder.id, 'personalWebsiteUrl')
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                          disabled={isLoading}
-                        >
-                          <CheckIcon className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
+                    <Input
+                      id={`${founder.id}-personalWebsiteUrl`}
+                      value={founder.personalWebsiteUrl}
+                      onChange={(e) =>
+                        handleInputChange(
+                          founder.id,
+                          'personalWebsiteUrl',
+                          e.target.value,
+                        )
+                      }
+                      onBlur={() =>
+                        handleFieldSave(founder.id, 'personalWebsiteUrl')
+                      }
+                      className="rounded-sm"
+                      placeholder="https://website.com"
+                    />
                   </div>
 
                   <div className="space-y-3">
                     <Label htmlFor={`${founder.id}-twitterUrl`}>X</Label>
-                    <div className="relative">
-                      <Input
-                        id={`${founder.id}-twitterUrl`}
-                        value={founder.twitterUrl}
-                        onChange={(e) =>
-                          handleInputChange(
-                            founder.id,
-                            'twitterUrl',
-                            e.target.value,
-                          )
-                        }
-                        className={cn(
-                          'rounded-sm pr-8',
-                          editingField !== `${founder.id}-twitterUrl` &&
-                            'dark:bg-muted',
-                        )}
-                        readOnly={editingField !== `${founder.id}-twitterUrl`}
-                        placeholder="https://x.com/username"
-                      />
-                      {editingField !== `${founder.id}-twitterUrl` ? (
-                        <button
-                          onClick={() =>
-                            handleFieldEdit('twitterUrl', founder.id)
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                        >
-                          <PencilIcon className="h-3 w-3" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() =>
-                            handleFieldSave(founder.id, 'twitterUrl')
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600"
-                          disabled={isLoading}
-                        >
-                          <CheckIcon className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
+                    <Input
+                      id={`${founder.id}-twitterUrl`}
+                      value={founder.twitterUrl}
+                      onChange={(e) =>
+                        handleInputChange(
+                          founder.id,
+                          'twitterUrl',
+                          e.target.value,
+                        )
+                      }
+                      onBlur={() => handleFieldSave(founder.id, 'twitterUrl')}
+                      className="rounded-sm"
+                      placeholder="https://x.com/username"
+                    />
                   </div>
                 </div>
               </div>
@@ -1431,7 +1215,7 @@ export default function ProfileSettings() {
                     }
                     placeholder="Tell agents about your co-founder..."
                     rows={3}
-                    enableAI={true}
+                    enableAI
                     aiFieldType="bio"
                     aiContext={{
                       founderName:

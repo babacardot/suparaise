@@ -3,6 +3,7 @@ node_modules/
 .cursor/
 .next/
 .mypy_cache/
+.claude/
 
 # Environment
 .env

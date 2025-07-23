@@ -132,7 +132,7 @@ BEGIN
     VALUES (
         p_user_id,
         p_company_name,
-        'Complete your profile to get started with fundraising automation',
+        '',
         1,
         EXTRACT(YEAR FROM NOW())::INTEGER,
         TRUE -- Mark as onboarded since user explicitly skipped

@@ -83,20 +83,47 @@ export function ValidationGate({
 }: ValidationGateProps) {
   const { currentStartupId } = useUser()
   const [showDetails, setShowDetails] = React.useState(false)
+  const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
 
   const { isValid, missingFields, loading } = useValidation({
     requirements,
     autoCheck: true,
   })
 
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current)
+      }
+    }
+  }, [])
+
   const handleClick = () => {
     if (disabled) return
 
     if (isValid) {
       onValidationPass?.()
-    } else {
+    }
+  }
+
+  const handleMouseEnter = () => {
+    if (!isValid) {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current)
+        hideTimeoutRef.current = null
+      }
       setShowDetails(true)
     }
+  }
+
+  const handleMouseLeave = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowDetails(false)
+    }, 150) // Small delay to prevent flickering
   }
 
   // Group missing fields by settings page
@@ -137,7 +164,12 @@ export function ValidationGate({
     return (
       <Popover open={showDetails} onOpenChange={setShowDetails}>
         <PopoverTrigger asChild>
-          <div onClick={handleClick} className={className}>
+          <div
+            onClick={handleClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            className={className}
+          >
             {React.cloneElement(
               children as React.ReactElement<{
                 disabled?: boolean
@@ -153,16 +185,18 @@ export function ValidationGate({
 
         {!isValid && (
           <PopoverContent
-            className="w-80 p-0 rounded-sm border shadow-lg"
+            className="w-80 p-0 bg-sidebar border-sidebar-border rounded-sm shadow-lg"
             align="end"
             side="bottom"
             sideOffset={8}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <LottieIcon animationData={animations.info} size={18} />
-                <h4 className="font-semibold text-sm text-foreground">
-                  Complete your onboarding
+            <div className="px-3 py-3">
+              <div className="flex items-center gap-2 mb-3">
+                <LottieIcon animationData={animations.info} size={16} />
+                <h4 className="font-medium text-sm text-sidebar-foreground">
+                  Complete your profile
                 </h4>
               </div>
 
@@ -171,8 +205,9 @@ export function ValidationGate({
                   {hasProfileMissing && (
                     <Link
                       href={`/dashboard/${currentStartupId}/settings/profile`}
+                      className="group"
                     >
-                      <Badge className="rounded-sm px-3 py-1.5 text-xs bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 border border-yellow-200 dark:border-yellow-800 cursor-pointer transition-colors">
+                      <Badge className="rounded-sm px-2.5 py-1 text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800 cursor-pointer transition-all duration-200 flex items-center gap-1.5">
                         Profile
                       </Badge>
                     </Link>
@@ -180,53 +215,53 @@ export function ValidationGate({
                   {hasCompanyMissing && (
                     <Link
                       href={`/dashboard/${currentStartupId}/settings/company`}
+                      className="group"
                     >
-                      <Badge className="rounded-sm px-3 py-1.5 text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 cursor-pointer transition-colors">
+                      <Badge className="rounded-sm px-2.5 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 cursor-pointer transition-all duration-200 flex items-center gap-1.5">
                         Company
                       </Badge>
                     </Link>
                   )}
                 </div>
 
-                {/* Show detailed missing fields for debugging */}
+                {/* Show most critical missing fields */}
                 {missingFields.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-border/50">
-                    <p className="text-xs text-muted-foreground mb-2 font-semibold">
-                      Missing fields
-                    </p>
+                  <div className="space-y-2">
                     <div className="space-y-1">
                       {missingFields
-                        .filter((field) => field.category !== 'documents') // Remove documents from display
+                        .filter((field) => field.category !== 'documents')
+                        .slice(0, 4) // Show only first 4 most critical
                         .map((field, index) => (
                           <div
                             key={index}
-                            className="text-xs text-muted-foreground"
+                            className="text-xs text-sidebar-foreground/70 flex items-center gap-1.5"
                           >
-                            • {field.label} ({formatCategory(field.category)})
+                            <div className="w-1 h-1 rounded-full bg-sidebar-foreground/30" />
+                            {field.label}
+                            <span className="text-sidebar-foreground/50">
+                              ({formatCategory(field.category)})
+                            </span>
                           </div>
                         ))}
-                    </div>
-
-                    {/* Show recommended fields */}
-                    <div className="mt-3 pt-2 border-t border-border/30">
-                      <p className="text-xs text-muted-foreground mb-2 font-semibold">
-                        Recommended
-                      </p>
-                      <div className="space-y-1">
-                        <div className="text-xs text-muted-foreground/70">
-                          · Bio (Founder)
+                      {missingFields.filter(
+                        (field) => field.category !== 'documents',
+                      ).length > 4 && (
+                        <div className="text-xs text-sidebar-foreground/50 italic">
+                          +
+                          {missingFields.filter(
+                            (field) => field.category !== 'documents',
+                          ).length - 4}{' '}
+                          more fields...
                         </div>
-                        <div className="text-xs text-muted-foreground/70">
-                          · LinkedIn (Founder)
-                        </div>
-                        <div className="text-xs text-muted-foreground/70">
-                          · Github (Founder)
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="text-xs text-sidebar-foreground/60 px-3 py-2 border-t border-sidebar-border bg-sidebar/30">
+              Complete your profile to unlock all features.
             </div>
           </PopoverContent>
         )}

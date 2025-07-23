@@ -53,6 +53,13 @@ const nextConfig: NextConfig = {
   generateEtags: false,
   // Optimize bundling for better performance
   webpack: (config, { dev, isServer }) => {
+    // Add a rule to handle .node files, which are used by some native modules
+    config.module.rules.push({
+      test: /\.node$/,
+      use: 'node-loader',
+    })
+
+    // Keep existing optimizations for client-side builds
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         ...config.optimization.splitChunks,
@@ -66,6 +73,35 @@ const nextConfig: NextConfig = {
         },
       }
     }
+
+    // This is required to make Stagehand work in Next.js
+    config.externals = [...config.externals, 'canvas']
+
+    // Fix for Stagehand worker.js module issues
+    if (isServer) {
+      // Externalize Stagehand and related modules to prevent bundling issues
+      config.externals.push('@browserbasehq/stagehand')
+
+      // Handle worker thread modules that shouldn't be bundled
+      config.externals.push({
+        worker_threads: 'commonjs worker_threads',
+        child_process: 'commonjs child_process',
+        fs: 'commonjs fs',
+        path: 'commonjs path',
+      })
+
+      // Resolve fallbacks for Node.js modules in server-side context
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+        stream: false,
+        util: false,
+        os: false,
+      }
+    }
+
     return config
   },
 }

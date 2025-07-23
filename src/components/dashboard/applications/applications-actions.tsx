@@ -35,6 +35,11 @@ type ApplicationSubmission = {
   required_documents?: string[]
   created_at: string
   updated_at: string
+  // Session recording fields
+  browserbase_session_id?: string
+  session_replay_url?: string
+  screenshots_taken?: number
+  debug_data?: Record<string, unknown>
 }
 
 type ApplicationsActionsProps = {
@@ -375,6 +380,36 @@ export default React.memo(function ApplicationsActions({
                   <p className="text-xs text-black dark:text-white pt-2 p-2 bg-muted/30 rounded-sm">
                     {submission.agent_notes}
                   </p>
+                </div>
+              )}
+
+              {/* Session Recording Info */}
+              {submission.session_replay_url && (
+                <div className="space-y-2">
+                  <span className="text-muted-foreground">
+                    Session Recording
+                  </span>
+                  <div className="space-y-2">
+                    <Button
+                      onClick={() =>
+                        window.open(submission.session_replay_url, '_blank')
+                      }
+                      className="w-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 rounded-sm h-8"
+                    >
+                      <LottieIcon
+                        animationData={animations.view}
+                        size={14}
+                        className="mr-2"
+                      />
+                      🎥 View Session Replay
+                    </Button>
+                    {submission.screenshots_taken &&
+                      submission.screenshots_taken > 0 && (
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          {submission.screenshots_taken} screenshots captured
+                        </p>
+                      )}
+                  </div>
                 </div>
               )}
 
