@@ -885,7 +885,6 @@ export type Database = {
       startups: {
         Row: {
           arr: number | null
-          browserbase_session_id: string | null
           business_plan_url: string | null
           competitors: string | null
           created_at: string | null
@@ -931,7 +930,6 @@ export type Database = {
         }
         Insert: {
           arr?: number | null
-          browserbase_session_id?: string | null
           business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
@@ -979,7 +977,6 @@ export type Database = {
         }
         Update: {
           arr?: number | null
-          browserbase_session_id?: string | null
           business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
@@ -1032,7 +1029,6 @@ export type Database = {
           archived_at: string
           archived_reason: string
           arr: number | null
-          browserbase_session_id: string | null
           business_plan_url: string | null
           competitors: string | null
           created_at: string | null
@@ -1082,7 +1078,6 @@ export type Database = {
           archived_at?: string
           archived_reason?: string
           arr?: number | null
-          browserbase_session_id?: string | null
           business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
@@ -1134,7 +1129,6 @@ export type Database = {
           archived_at?: string
           archived_reason?: string
           arr?: number | null
-          browserbase_session_id?: string | null
           business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
