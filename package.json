@@ -9,14 +9,14 @@
     "lint": "next lint",
     "agent:run": "ts-node src/agent/index.ts",
     "format": "prettier --write .",
-    "update:types": "bunx supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts && bun run format",
-    "seed:templates": "bun run src/lib/scripts/seed-data/generate-templates.ts",
-    "seed:bulk": "bun run src/lib/scripts/seed-data/bulk-seed.ts --format excel",
-    "seed:import": "bun run src/lib/scripts/seed-data/import-data.ts",
-    "seed:validate-env": "bun run src/lib/scripts/seed-data/validate-env.ts",
-    "seed:import-targets": "bun run src/lib/scripts/seed-data/import-data.ts --table targets --file src/lib/scripts/seed-data/production/targets.xlsx",
-    "seed:import-angels": "bun run src/lib/scripts/seed-data/import-data.ts --table angels --file src/lib/scripts/seed-data/production/angels.xlsx",
-    "seed:import-accelerators": "bun run src/lib/scripts/seed-data/import-data.ts --table accelerators --file src/lib/scripts/seed-data/production/accelerators.xlsx",
+    "update:types": "pnpm exec supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts && pnpm run format",
+    "seed:templates": "pnpm exec tsx src/lib/scripts/seed-data/generate-templates.ts",
+    "seed:bulk": "pnpm exec tsx src/lib/scripts/seed-data/bulk-seed.ts --format excel",
+    "seed:import": "pnpm exec tsx src/lib/scripts/seed-data/import-data.ts",
+    "seed:validate-env": "pnpm exec tsx src/lib/scripts/seed-data/validate-env.ts",
+    "seed:import-targets": "pnpm exec tsx src/lib/scripts/seed-data/import-data.ts --table targets --file src/lib/scripts/seed-data/production/targets.xlsx",
+    "seed:import-angels": "pnpm exec tsx src/lib/scripts/seed-data/import-data.ts --table angels --file src/lib/scripts/seed-data/production/angels.xlsx",
+    "seed:import-accelerators": "pnpm exec tsx src/lib/scripts/seed-data/import-data.ts --table accelerators --file src/lib/scripts/seed-data/production/accelerators.xlsx",
     "sitemap": "python src/lib/scripts/other/generate_sitemap.py"
   },
   "keywords": [],
@@ -76,7 +76,7 @@
     "ts-node": "^10.9.2",
     "types": "^0.1.1",
     "xlsx": "^0.18.5",
-    "zod": "3.22.4",
+    "zod": "3.25.76",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
@@ -92,6 +92,7 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "supabase": "^1.226.4",
     "tailwindcss": "^4.1.11",
+    "tsx": "^4.20.3",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5.8.3"
   }
