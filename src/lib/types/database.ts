@@ -1610,6 +1610,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_all_submissions_for_startup: {
+        Args: { p_startup_id: string; p_user_id: string }
+        Returns: Json
+      }
       get_angels_simple: {
         Args: {
           p_limit?: number
@@ -1665,6 +1669,10 @@ export type Database = {
       }
       get_or_create_stripe_customer: {
         Args: { p_user_id: string; p_stripe_customer_id?: string }
+        Returns: Json
+      }
+      get_profile_for_submission_check: {
+        Args: { p_user_id: string }
         Returns: Json
       }
       get_profile_submission_info: {
@@ -1902,6 +1910,14 @@ export type Database = {
       update_user_startup_data: {
         Args: { p_user_id: string; p_startup_id: string; p_data: Json }
         Returns: Json
+      }
+      verify_target_access: {
+        Args: {
+          p_target_id: string
+          p_submission_type: string
+          p_user_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
