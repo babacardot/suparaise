@@ -18,11 +18,11 @@ export type Database = {
         Row: {
           accelerator_id: string
           agent_notes: string | null
-          browserbase_session_id: string | null
           created_at: string | null
           debug_data: Json | null
           id: string
           screenshots_taken: number | null
+          session_id: string | null
           session_replay_url: string | null
           startup_id: string
           status: Database['public']['Enums']['submission_status'] | null
@@ -32,11 +32,11 @@ export type Database = {
         Insert: {
           accelerator_id: string
           agent_notes?: string | null
-          browserbase_session_id?: string | null
           created_at?: string | null
           debug_data?: Json | null
           id?: string
           screenshots_taken?: number | null
+          session_id?: string | null
           session_replay_url?: string | null
           startup_id: string
           status?: Database['public']['Enums']['submission_status'] | null
@@ -46,11 +46,11 @@ export type Database = {
         Update: {
           accelerator_id?: string
           agent_notes?: string | null
-          browserbase_session_id?: string | null
           created_at?: string | null
           debug_data?: Json | null
           id?: string
           screenshots_taken?: number | null
+          session_id?: string | null
           session_replay_url?: string | null
           startup_id?: string
           status?: Database['public']['Enums']['submission_status'] | null
@@ -347,11 +347,11 @@ export type Database = {
         Row: {
           agent_notes: string | null
           angel_id: string
-          browserbase_session_id: string | null
           created_at: string | null
           debug_data: Json | null
           id: string
           screenshots_taken: number | null
+          session_id: string | null
           session_replay_url: string | null
           startup_id: string
           status: Database['public']['Enums']['submission_status'] | null
@@ -361,11 +361,11 @@ export type Database = {
         Insert: {
           agent_notes?: string | null
           angel_id: string
-          browserbase_session_id?: string | null
           created_at?: string | null
           debug_data?: Json | null
           id?: string
           screenshots_taken?: number | null
+          session_id?: string | null
           session_replay_url?: string | null
           startup_id: string
           status?: Database['public']['Enums']['submission_status'] | null
@@ -375,11 +375,11 @@ export type Database = {
         Update: {
           agent_notes?: string | null
           angel_id?: string
-          browserbase_session_id?: string | null
           created_at?: string | null
           debug_data?: Json | null
           id?: string
           screenshots_taken?: number | null
+          session_id?: string | null
           session_replay_url?: string | null
           startup_id?: string
           status?: Database['public']['Enums']['submission_status'] | null
@@ -1181,14 +1181,13 @@ export type Database = {
       submissions: {
         Row: {
           agent_notes: string | null
-          browserbase_job_id: string | null
-          browserbase_session_id: string | null
           created_at: string | null
           debug_data: Json | null
           id: string
           queue_position: number | null
           queued_at: string | null
           screenshots_taken: number | null
+          session_id: string | null
           session_replay_url: string | null
           started_at: string | null
           startup_id: string
@@ -1199,14 +1198,13 @@ export type Database = {
         }
         Insert: {
           agent_notes?: string | null
-          browserbase_job_id?: string | null
-          browserbase_session_id?: string | null
           created_at?: string | null
           debug_data?: Json | null
           id?: string
           queue_position?: number | null
           queued_at?: string | null
           screenshots_taken?: number | null
+          session_id?: string | null
           session_replay_url?: string | null
           started_at?: string | null
           startup_id: string
@@ -1217,14 +1215,13 @@ export type Database = {
         }
         Update: {
           agent_notes?: string | null
-          browserbase_job_id?: string | null
-          browserbase_session_id?: string | null
           created_at?: string | null
           debug_data?: Json | null
           id?: string
           queue_position?: number | null
           queued_at?: string | null
           screenshots_taken?: number | null
+          session_id?: string | null
           session_replay_url?: string | null
           started_at?: string | null
           startup_id?: string
@@ -1610,10 +1607,6 @@ export type Database = {
         }
         Returns: Json
       }
-      get_all_submissions_for_startup: {
-        Args: { p_startup_id: string; p_user_id: string }
-        Returns: Json
-      }
       get_angels_simple: {
         Args: {
           p_limit?: number
@@ -1669,10 +1662,6 @@ export type Database = {
       }
       get_or_create_stripe_customer: {
         Args: { p_user_id: string; p_stripe_customer_id?: string }
-        Returns: Json
-      }
-      get_profile_for_submission_check: {
-        Args: { p_user_id: string }
         Returns: Json
       }
       get_profile_submission_info: {
@@ -1799,12 +1788,7 @@ export type Database = {
         Returns: Json
       }
       queue_submission: {
-        Args: {
-          p_user_id: string
-          p_startup_id: string
-          p_target_id: string
-          p_browserbase_job_id?: string
-        }
+        Args: { p_user_id: string; p_startup_id: string; p_target_id: string }
         Returns: Json
       }
       reactivate_user_account: {
@@ -1910,14 +1894,6 @@ export type Database = {
       update_user_startup_data: {
         Args: { p_user_id: string; p_startup_id: string; p_data: Json }
         Returns: Json
-      }
-      verify_target_access: {
-        Args: {
-          p_target_id: string
-          p_submission_type: string
-          p_user_id: string
-        }
-        Returns: boolean
       }
     }
     Enums: {

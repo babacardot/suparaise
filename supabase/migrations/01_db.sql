@@ -88,6 +88,8 @@ CREATE TYPE equity_range AS ENUM ('0%', '1-3%', '4-6%', '7-10%', '10%+', 'variab
 CREATE TYPE funding_range AS ENUM ('0-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K+');
 CREATE TYPE batch_size AS ENUM ('1-10', '11-20', '21-50', '51-100', '100+');
 CREATE TYPE acceptance_rate AS ENUM ('<1%', '1-5%', '6-10%', '11-20%', '20%+');
+CREATE TYPE form_type AS ENUM ('contact', 'typeform', 'google', 'generic');
+CREATE TYPE browser_system AS ENUM ('browser_use', 'browser_base', 'computer_use', 'hyperbrowser');
 
 -- --------------------------------------------------
 -- Auto-update `updated_at` column
@@ -140,6 +142,8 @@ CREATE TABLE targets (
     required_documents required_document_type[],
     tags TEXT[],
     notes TEXT, -- For special instructions
+    form_type form_type DEFAULT 'generic',
+    browser_system browser_system DEFAULT 'browser_use',
     visibility_level permission_level DEFAULT 'FREE' NOT NULL, -- Controls who can see this target
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -181,6 +185,8 @@ CREATE TABLE angels (
     notable_investments TEXT[], -- Notable companies in their portfolio
     is_active BOOLEAN DEFAULT TRUE,
     notes TEXT, -- For special instructions or additional info
+    form_type form_type DEFAULT 'generic',
+    browser_system browser_system DEFAULT 'browser_use',
     visibility_level permission_level DEFAULT 'FREE' NOT NULL, -- Controls who can see this angel
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -221,6 +227,8 @@ CREATE TABLE accelerators (
     is_active BOOLEAN DEFAULT TRUE,
     tags TEXT[],
     notes TEXT, -- For special instructions
+    form_type form_type DEFAULT 'generic',
+    browser_system browser_system DEFAULT 'browser_use',
     visibility_level permission_level DEFAULT 'FREE' NOT NULL, -- Controls who can see this accelerator
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -359,11 +367,10 @@ CREATE TABLE submissions (
     submission_date TIMESTAMPTZ DEFAULT NOW(),
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
-    browserbase_job_id TEXT, -- To store the external agent job ID
     queue_position INTEGER, -- Position in queue (NULL if not queued)
     queued_at TIMESTAMPTZ, -- When it was added to queue
     started_at TIMESTAMPTZ, -- When processing actually started
-    browserbase_session_id TEXT,
+    session_id TEXT,
     session_replay_url TEXT,
     screenshots_taken INTEGER DEFAULT 0,
     debug_data JSONB,
@@ -388,7 +395,7 @@ CREATE TABLE angel_submissions (
     submission_date TIMESTAMPTZ DEFAULT NOW(),
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
-    browserbase_session_id TEXT,
+    session_id TEXT,
     session_replay_url TEXT,
     screenshots_taken INTEGER DEFAULT 0,
     debug_data JSONB,
@@ -413,7 +420,7 @@ CREATE TABLE accelerator_submissions (
     submission_date TIMESTAMPTZ DEFAULT NOW(),
     status submission_status DEFAULT 'pending',
     agent_notes TEXT, -- To store the agent's final report
-    browserbase_session_id TEXT,
+    session_id TEXT,
     session_replay_url TEXT,
     screenshots_taken INTEGER DEFAULT 0,
     debug_data JSONB,
@@ -470,7 +477,6 @@ CREATE INDEX IF NOT EXISTS idx_founders_startup_id ON founders(startup_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_id ON submissions(startup_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_target_id ON submissions(target_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
-CREATE INDEX IF NOT EXISTS idx_submissions_browserbase_job_id ON submissions(browserbase_job_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_queue_position ON submissions(queue_position) WHERE queue_position IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_submissions_queued_at ON submissions(queued_at) WHERE queued_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_submissions_startup_status_queue ON submissions(startup_id, status, queue_position);
@@ -491,12 +497,20 @@ CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_status ON accelerator_sub
 CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_startup_accelerator ON accelerator_submissions(startup_id, accelerator_id);
 
 -- Indexes for session replay data lookups
-CREATE INDEX IF NOT EXISTS idx_submissions_session_id ON submissions(browserbase_session_id) WHERE browserbase_session_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_angel_submissions_session_id ON angel_submissions(browserbase_session_id) WHERE browserbase_session_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_session_id ON accelerator_submissions(browserbase_session_id) WHERE browserbase_session_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_submissions_session_id ON submissions(session_id) WHERE session_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_angel_submissions_session_id ON angel_submissions(session_id) WHERE session_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_accelerator_submissions_session_id ON accelerator_submissions(session_id) WHERE session_id IS NOT NULL;
 
 -- Index for email lookups in founders (if used)
 CREATE INDEX IF NOT EXISTS idx_founders_email ON founders(email) WHERE email IS NOT NULL;
+
+-- Indexes for form_type and browser_system
+CREATE INDEX IF NOT EXISTS idx_targets_form_type ON targets(form_type);
+CREATE INDEX IF NOT EXISTS idx_targets_browser_system ON targets(browser_system);
+CREATE INDEX IF NOT EXISTS idx_angels_form_type ON angels(form_type);
+CREATE INDEX IF NOT EXISTS idx_angels_browser_system ON angels(browser_system);
+CREATE INDEX IF NOT EXISTS idx_accelerators_form_type ON accelerators(form_type);
+CREATE INDEX IF NOT EXISTS idx_accelerators_browser_system ON accelerators(browser_system);
 
 -- Index for founded_year for filtering
 CREATE INDEX IF NOT EXISTS idx_startups_founded_year ON startups(founded_year) WHERE founded_year IS NOT NULL;

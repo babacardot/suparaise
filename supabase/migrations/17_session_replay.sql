@@ -17,7 +17,7 @@ BEGIN
     IF p_submission_type = 'fund' THEN
         UPDATE submissions 
         SET 
-            browserbase_session_id = p_session_id,
+            session_id = p_session_id,
             session_replay_url = p_session_replay_url,
             screenshots_taken = p_screenshots_taken,
             debug_data = p_debug_data,
@@ -27,7 +27,7 @@ BEGIN
     ELSIF p_submission_type = 'angel' THEN
         UPDATE angel_submissions 
         SET 
-            browserbase_session_id = p_session_id,
+            session_id = p_session_id,
             session_replay_url = p_session_replay_url,
             screenshots_taken = p_screenshots_taken,
             debug_data = p_debug_data,
@@ -37,7 +37,7 @@ BEGIN
     ELSIF p_submission_type = 'accelerator' THEN
         UPDATE accelerator_submissions 
         SET 
-            browserbase_session_id = p_session_id,
+            session_id = p_session_id,
             session_replay_url = p_session_replay_url,
             screenshots_taken = p_screenshots_taken,
             debug_data = p_debug_data,
@@ -161,7 +161,7 @@ BEGIN
             t.industry_focus,
             t.region_focus,
             t.required_documents,
-            s.browserbase_session_id,
+            s.session_id,
             s.session_replay_url,
             s.screenshots_taken,
             s.debug_data,
@@ -193,7 +193,7 @@ BEGIN
             a.industry_focus,
             a.region_focus,
             a.required_documents,
-            asub.browserbase_session_id,
+            asub.session_id,
             asub.session_replay_url,
             asub.screenshots_taken,
             asub.debug_data,
@@ -225,7 +225,7 @@ BEGIN
             acc.industry_focus,
             acc.region_focus,
             acc.required_documents,
-            accs.browserbase_session_id,
+            accs.session_id,
             accs.session_replay_url,
             accs.screenshots_taken,
             accs.debug_data,

@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import 'dotenv/config'
 import { ENUM_VALUES } from './utils/db-utils'
 import path from 'path'
 import fs from 'fs'

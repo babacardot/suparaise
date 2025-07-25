@@ -74,21 +74,18 @@ const nextConfig: NextConfig = {
       }
     }
 
-    // This is required to make Stagehand work in Next.js
-    config.externals = [...config.externals, 'canvas']
-
-    // Fix for Stagehand worker.js module issues
+    // Handle Node.js modules for server-side builds
     if (isServer) {
       // Externalize Stagehand and related modules to prevent bundling issues
-      config.externals.push('@browserbasehq/stagehand')
+      // config.externals.push('@browserbasehq/stagehand')
 
-      // Handle worker thread modules that shouldn't be bundled
-      config.externals.push({
-        worker_threads: 'commonjs worker_threads',
-        child_process: 'commonjs child_process',
-        fs: 'commonjs fs',
-        path: 'commonjs path',
-      })
+      // // Handle worker thread modules that shouldn't be bundled
+      // config.externals.push({
+      //   worker_threads: 'commonjs worker_threads',
+      //   child_process: 'commonjs child_process',
+      //   fs: 'commonjs fs',
+      //   path: 'commonjs path',
+      // })
 
       // Resolve fallbacks for Node.js modules in server-side context
       config.resolve.fallback = {

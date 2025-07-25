@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import 'dotenv/config'
 import { parseExcel } from './utils/sheet-utils'
 import { upsertBatch, testConnection } from './utils/db-utils'
 import {

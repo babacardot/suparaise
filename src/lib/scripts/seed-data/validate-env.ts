@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import 'dotenv/config'
 import { testConnection } from './utils/db-utils'
 
 // Environment validation script for Suparaise seed data tools

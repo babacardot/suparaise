@@ -7,29 +7,32 @@ type SubmissionDetails = {
   id: string
   status: 'pending' | 'in_progress' | 'completed' | 'failed'
   agent_notes: string | null
-  browserbase_job_id: string | null
+  session_id: string | null
   error?: string
 }
 
-async function getJobStatus(jobId: string) {
-  const apiKey = process.env.BROWSERBASE_API_KEY
+async function getBrowserUseTaskStatus(taskId: string) {
+  const apiKey = process.env.BROWSERUSE_API_KEY
   if (!apiKey) {
-    throw new Error('BROWSERBASE_API_KEY is not set')
+    throw new Error('BROWSERUSE_API_KEY is not set')
   }
 
-  const response = await fetch(`https://api.browserbase.com/v1/jobs/${jobId}`, {
-    headers: {
-      'X-BB-API-Key': apiKey,
+  const response = await fetch(
+    `https://api.browser-use.com/api/v1/task/${taskId}/status`,
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
     },
-  })
+  )
 
   if (!response.ok) {
     const errorText = await response.text()
     console.error(
-      `Browserbase status check failed for job ${jobId}:`,
+      `Browser Use status check failed for task ${taskId}:`,
       errorText,
     )
-    throw new Error(`Browserbase API error: ${response.statusText}`)
+    throw new Error(`Browser Use API error: ${response.statusText}`)
   }
 
   return response.json()
@@ -48,101 +51,108 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // 1. Get submission details from our DB
-    const { data, error: detailsError } = await supabase.rpc(
-      'get_submission_details',
-      { p_submission_id: submissionId },
-    )
-    const submissionDetails = data as SubmissionDetails
+    // 1. Get the submission details from our database
+    const { data: submissionDetails, error: submissionError } =
+      await supabase.rpc('get_submission_details', {
+        p_submission_id: submissionId,
+      })
 
-    if (detailsError || (submissionDetails && submissionDetails.error)) {
-      console.error(
-        'Error fetching submission details:',
-        detailsError || submissionDetails.error,
-      )
+    if (submissionError || !submissionDetails) {
       return NextResponse.json(
         { error: 'Failed to fetch submission details' },
         { status: 500 },
       )
     }
 
-    if (!submissionDetails) {
-      return NextResponse.json(
-        { error: 'Submission not found or access denied' },
-        { status: 404 },
-      )
-    }
+    const submission = submissionDetails as SubmissionDetails
 
-    // If status is already final, return it right away
-    if (
-      submissionDetails.status === 'completed' ||
-      submissionDetails.status === 'failed'
-    ) {
-      return NextResponse.json(submissionDetails)
-    }
-
-    const jobId = submissionDetails.browserbase_job_id
-    if (!jobId) {
-      return NextResponse.json(
-        { error: 'Submission is missing a job ID' },
-        { status: 400 },
-      )
-    }
-
-    // 2. Get the latest job status from Browserbase API
-    const jobStatusResult = await getJobStatus(jobId)
-    const browserbaseStatus = jobStatusResult.status.toLowerCase()
-
-    // If the job is still running on Browserbase, return our current DB status
-    if (['pending', 'in_progress', 'running'].includes(browserbaseStatus)) {
+    // If there's no session_id, return our current DB status
+    if (!submission.session_id) {
       return NextResponse.json({
-        id: submissionDetails.id,
-        status: 'in_progress',
-        agent_notes: 'Agent is currently processing the application.',
+        submissionId,
+        status: submission.status,
+        agentNotes: submission.agent_notes,
+        lastChecked: new Date().toISOString(),
       })
     }
 
-    // 3. If the job is finished, update our database
-    const finalStatus =
-      browserbaseStatus === 'completed' ? 'completed' : 'failed'
-    const finalNotes =
-      jobStatusResult.output ||
-      jobStatusResult.error ||
-      'Agent finished with no output.'
+    const taskId = submission.session_id
 
-    const { error: updateError } = await supabase.rpc(
-      'update_submission_status',
-      {
-        p_submission_id: submissionId,
-        p_new_status: finalStatus,
-        p_agent_notes: finalNotes,
-      },
-    )
+    try {
+      // 2. Get the latest task status from Browser Use API
+      const browserUseStatus = await getBrowserUseTaskStatus(taskId)
+      const taskStatus = browserUseStatus.toLowerCase()
 
-    if (updateError) {
-      console.error('Error updating final submission status:', updateError)
-      // Return the status from Browserbase even if DB update fails, so client knows the final state
-      return NextResponse.json(
+      // If the task is still running on Browser Use, return our current DB status
+      if (
+        [
+          'pending',
+          'in_progress',
+          'running',
+          'initializing',
+          'started',
+        ].includes(taskStatus)
+      ) {
+        return NextResponse.json({
+          submissionId,
+          status: submission.status,
+          agentNotes: submission.agent_notes,
+          lastChecked: new Date().toISOString(),
+          browserUseStatus: taskStatus,
+        })
+      }
+
+      // If the task is finished or failed, update our database
+      const finalStatus: 'completed' | 'failed' =
+        taskStatus === 'finished' ? 'completed' : 'failed'
+
+      // Update the submission status in our database
+      const { error: updateError } = await supabase.rpc(
+        'update_submission_status',
         {
-          id: submissionId,
-          status: finalStatus,
-          agent_notes: finalNotes,
-          error: 'Failed to save final status to database.',
+          p_submission_id: submissionId,
+          p_new_status: finalStatus,
+          p_agent_notes:
+            submission.agent_notes || `Task ${finalStatus} via Browser Use`,
         },
-        { status: 500 },
       )
-    }
 
-    // Return the final, updated status
-    return NextResponse.json({
-      id: submissionId,
-      status: finalStatus,
-      agent_notes: finalNotes,
-    })
+      if (updateError) {
+        console.error('Failed to update submission status:', updateError)
+        // Continue anyway - we'll return the status from Browser Use
+      }
+
+      // Return the status from Browser Use even if DB update fails, so client knows the final state
+      return NextResponse.json({
+        submissionId,
+        status: finalStatus,
+        agentNotes:
+          submission.agent_notes || `Task ${finalStatus} via Browser Use`,
+        lastChecked: new Date().toISOString(),
+        browserUseStatus: taskStatus,
+        sessionUrl: `https://cloud.browser-use.com/task/${taskId}`,
+      })
+    } catch (browserUseError) {
+      console.error('Browser Use API error:', browserUseError)
+
+      // If Browser Use API fails, return our current DB status
+      return NextResponse.json({
+        submissionId,
+        status: submission.status,
+        agentNotes: submission.agent_notes,
+        lastChecked: new Date().toISOString(),
+        error: 'Failed to check Browser Use status',
+      })
+    }
   } catch (error) {
-    console.error('Submission status API error:', error)
+    console.error('Submission status check error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Failed to check submission status',
+        submissionId: request.body
+          ? JSON.parse(await request.text()).submissionId
+          : undefined,
+      },
       { status: 500 },
     )
   }

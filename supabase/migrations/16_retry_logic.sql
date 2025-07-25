@@ -38,7 +38,7 @@ BEGIN
         DELETE FROM submissions WHERE id = p_submission_id;
 
         -- Call the queue function again
-        SELECT queue_submission(p_user_id, p_startup_id, target_id, submission_record.browserbase_job_id) INTO queue_function_result;
+        SELECT queue_submission(p_user_id, p_startup_id, target_id) INTO queue_function_result;
         RETURN queue_function_result;
 
     ELSIF p_submission_type = 'angel' THEN

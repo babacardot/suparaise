@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "agent:test": "tsx src/agent/test.ts",
+    "agent:test": "tsx src/tests/bu-typeform.ts",
     "format": "prettier --write .",
     "update:types": "pnpm exec supabase gen types typescript --project-id swhlekigmfdbwulrncot > src/lib/types/database.ts && pnpm run format",
     "seed:templates": "pnpm exec tsx src/lib/scripts/seed-data/generate-templates.ts",

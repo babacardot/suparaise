@@ -627,7 +627,7 @@ BEGIN
         FROM submissions s
         JOIN targets t ON s.target_id = t.id
         JOIN startups st ON s.startup_id = st.id
-        WHERE s.browserbase_session_id = p_session_id
+        WHERE s.session_id = p_session_id
         AND st.user_id = p_user_id
         
         UNION ALL
@@ -647,7 +647,7 @@ BEGIN
         FROM angel_submissions asub
         JOIN angels a ON asub.angel_id = a.id
         JOIN startups st ON asub.startup_id = st.id
-        WHERE asub.browserbase_session_id = p_session_id
+        WHERE asub.session_id = p_session_id
         AND st.user_id = p_user_id
         
         UNION ALL
@@ -667,7 +667,7 @@ BEGIN
         FROM accelerator_submissions accs
         JOIN accelerators acc ON accs.accelerator_id = acc.id
         JOIN startups st ON accs.startup_id = st.id
-        WHERE accs.browserbase_session_id = p_session_id
+        WHERE accs.session_id = p_session_id
         AND st.user_id = p_user_id
     )
     SELECT jsonb_agg(to_jsonb(si.*)) INTO result FROM session_info si;

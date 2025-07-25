@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import 'dotenv/config'
 import { generateExcelTemplate } from './utils/sheet-utils'
 import path from 'path'
 

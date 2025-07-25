@@ -1241,8 +1241,7 @@ DROP FUNCTION IF EXISTS public.queue_submission(UUID, UUID, UUID);
 CREATE OR REPLACE FUNCTION queue_submission(
     p_user_id UUID,
     p_startup_id UUID,
-    p_target_id UUID,
-    p_browserbase_job_id TEXT DEFAULT NULL
+    p_target_id UUID
 )
 RETURNS JSONB AS $$
 DECLARE
@@ -1277,8 +1276,8 @@ BEGIN
     IF current_in_progress < max_parallel THEN
         -- Start processing immediately
         submission_status := 'in_progress';
-        INSERT INTO submissions (startup_id, target_id, status, started_at, browserbase_job_id)
-        VALUES (p_startup_id, p_target_id, submission_status, NOW(), p_browserbase_job_id)
+        INSERT INTO submissions (startup_id, target_id, status, started_at)
+        VALUES (p_startup_id, p_target_id, submission_status, NOW())
         RETURNING id INTO submission_id;
 
         RETURN jsonb_build_object(
@@ -1315,6 +1314,8 @@ EXCEPTION
         RETURN jsonb_build_object('error', SQLERRM);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION queue_submission(UUID, UUID, UUID) TO authenticated;
 
 -- Function to process the next item in queue (moves from queued to processing)
 CREATE OR REPLACE FUNCTION process_next_queued_submission(p_startup_id UUID)
@@ -1417,12 +1418,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant execute permissions for queue management functions
 GRANT EXECUTE ON FUNCTION get_queue_status(UUID, UUID) TO authenticated;
-DROP FUNCTION IF EXISTS public.queue_submission(UUID, UUID, UUID);
-GRANT EXECUTE ON FUNCTION queue_submission(UUID, UUID, UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION process_next_queued_submission(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_submissions_with_queue(UUID, UUID) TO authenticated; 
 
--- New function to update submission status from Browserbase result
+-- New function to update submission status from Browser Use result
 CREATE OR REPLACE FUNCTION public.update_submission_status(
     p_submission_id UUID,
     p_new_status submission_status,
@@ -1570,7 +1569,7 @@ BEGIN
         'id', s.id,
         'status', s.status,
         'agent_notes', s.agent_notes,
-        'browserbase_job_id', s.browserbase_job_id
+        'session_id', s.session_id
     )
     INTO submission_details
     FROM submissions s
@@ -1624,7 +1623,7 @@ BEGIN
         SET
             status = p_new_status,
             agent_notes = p_agent_notes,
-            browserbase_session_id = COALESCE(p_session_id, browserbase_session_id),
+            session_id = COALESCE(p_session_id, session_id),
             session_replay_url = COALESCE(p_session_replay_url, session_replay_url),
             screenshots_taken = p_screenshots_taken,
             debug_data = COALESCE(p_debug_data, debug_data),
@@ -1644,7 +1643,7 @@ BEGIN
         SET
             status = p_new_status,
             agent_notes = p_agent_notes,
-            browserbase_session_id = COALESCE(p_session_id, browserbase_session_id),
+            session_id = COALESCE(p_session_id, session_id),
             session_replay_url = COALESCE(p_session_replay_url, session_replay_url),
             screenshots_taken = p_screenshots_taken,
             debug_data = COALESCE(p_debug_data, debug_data),
@@ -1664,7 +1663,7 @@ BEGIN
         SET
             status = p_new_status,
             agent_notes = p_agent_notes,
-            browserbase_session_id = COALESCE(p_session_id, browserbase_session_id),
+            session_id = COALESCE(p_session_id, session_id),
             session_replay_url = COALESCE(p_session_replay_url, session_replay_url),
             screenshots_taken = p_screenshots_taken,
             debug_data = COALESCE(p_debug_data, debug_data),
