@@ -75,7 +75,7 @@ CREATE TYPE revenue_model_type AS ENUM (
     'Hybrid', 'Other'
 );
 CREATE TYPE subscription_status AS ENUM ('active', 'inactive', 'past_due', 'canceled', 'unpaid', 'paused');
-CREATE TYPE permission_level AS ENUM ('FREE', 'PRO', 'MAX');
+CREATE TYPE permission_level AS ENUM ('FREE', 'PRO', 'MAX', 'ENTERPRISE');
 CREATE TYPE agent_tone AS ENUM ('professional', 'enthusiastic', 'concise', 'detailed');
 CREATE TYPE agent_submission_delay AS ENUM ('0', '15', '30');
 CREATE TYPE agent_parallel_submissions AS ENUM ('1', '3', '5', '15', '25', '35');

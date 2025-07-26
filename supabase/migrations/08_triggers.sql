@@ -124,6 +124,80 @@ CREATE TRIGGER on_submission_status_change
   EXECUTE FUNCTION public.handle_submission_completion_trigger();
 
 -- =================================================================
+-- SUBMISSION START ADMIN NOTIFICATION TRIGGER
+-- =================================================================
+CREATE OR REPLACE FUNCTION public.handle_submission_start_admin_notification()
+RETURNS TRIGGER AS $$
+DECLARE
+  request_id bigint;
+  function_url text;
+  supabase_url text;
+  service_role_key text;
+BEGIN
+  -- If the submission status changes to 'in_progress' (task starts)
+  IF (TG_OP = 'UPDATE' AND NEW.status <> OLD.status AND NEW.status = 'in_progress') THEN
+    
+    -- Get configuration values
+    supabase_url := secrets.get_config('supabase_url');
+    service_role_key := secrets.get_config('service_role_key');
+    function_url := supabase_url || '/functions/v1/send-email';
+    
+    BEGIN
+      -- Invoke edge function to send admin notification when task starts
+      SELECT INTO request_id net.http_post(
+        url := function_url,
+        body := jsonb_build_object(
+          'emailType', 'agent_submission_start_admin',
+          'submissionId', NEW.id
+        ),
+        headers := jsonb_build_object(
+          'Content-Type', 'application/json',
+          'Authorization', 'Bearer ' || service_role_key
+        )
+      );
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'Failed to send admin start notification for submission %: %', NEW.id, SQLERRM;
+    END;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, secrets, net, pg_temp;
+
+-- Create a trigger on the submissions table for start notifications
+CREATE TRIGGER on_submission_start_admin_notification
+  AFTER UPDATE ON public.submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_submission_start_admin_notification();
+
+-- =================================================================
+-- EMAIL TRIGGERS FOR ANGEL AND ACCELERATOR SUBMISSIONS
+-- =================================================================
+
+-- Create completion triggers for angel submissions
+CREATE TRIGGER on_angel_submission_status_change
+  AFTER UPDATE ON public.angel_submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_submission_completion_trigger();
+
+CREATE TRIGGER on_angel_submission_start_admin_notification
+  AFTER UPDATE ON public.angel_submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_submission_start_admin_notification();
+
+-- Create completion triggers for accelerator submissions  
+CREATE TRIGGER on_accelerator_submission_status_change
+  AFTER UPDATE ON public.accelerator_submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_submission_completion_trigger();
+
+CREATE TRIGGER on_accelerator_submission_start_admin_notification
+  AFTER UPDATE ON public.accelerator_submissions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_submission_start_admin_notification();
+
+-- =================================================================
 -- SUBMISSION COMPLETION TRACKING TRIGGERS
 -- =================================================================
 

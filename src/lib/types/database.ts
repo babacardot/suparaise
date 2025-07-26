@@ -862,6 +862,7 @@ export type Database = {
       startups: {
         Row: {
           arr: number | null
+          browser_profile_id: string | null
           business_plan_url: string | null
           competitors: string | null
           created_at: string | null
@@ -911,6 +912,7 @@ export type Database = {
         }
         Insert: {
           arr?: number | null
+          browser_profile_id?: string | null
           business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
@@ -962,6 +964,7 @@ export type Database = {
         }
         Update: {
           arr?: number | null
+          browser_profile_id?: string | null
           business_plan_url?: string | null
           competitors?: string | null
           created_at?: string | null
@@ -1703,6 +1706,10 @@ export type Database = {
         Args: { p_submission_id: string }
         Returns: Json
       }
+      get_submission_start_data: {
+        Args: { p_submission_id: string }
+        Returns: Json
+      }
       get_submission_statistics: {
         Args: { p_startup_id: string }
         Returns: Json
@@ -2018,7 +2025,7 @@ export type Database = {
         | 'S-Corp'
         | 'Non-profit'
         | 'Other'
-      permission_level: 'FREE' | 'PRO' | 'MAX'
+      permission_level: 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'
       program_duration:
         | '3 months'
         | '6 months'
@@ -2330,7 +2337,7 @@ export const Constants = {
         'Non-profit',
         'Other',
       ],
-      permission_level: ['FREE', 'PRO', 'MAX'],
+      permission_level: ['FREE', 'PRO', 'MAX', 'ENTERPRISE'],
       program_duration: [
         '3 months',
         '6 months',

@@ -1,0 +1,42 @@
+name: Process Submission Queue
+
+on:
+  schedule:
+    # Runs every minute to ensure prompt queue processing
+    - cron: '* * * * *'
+  workflow_dispatch:
+    # Allows manual triggering for testing
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no actual processing)'
+        required: false
+        default: 'false'
+
+jobs:
+  process-queue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Queue Processing
+        run: |
+          echo "🔄 Triggering submission queue processing..."
+
+          RESPONSE=$(curl -s -X POST "https://swhlekigmfdbwulrncot.supabase.co/functions/v1/process-queue" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json")
+
+          echo "📊 Queue Processor Response: $RESPONSE"
+
+          if echo "$RESPONSE" | grep -q '"success":true'; then
+            echo "✅ Queue processing cycle completed successfully."
+            PROCESSED_COUNT=$(echo "$RESPONSE" | grep -o '"processedCount":[0-9]*' | cut -d':' -f2)
+            echo "   - Processed items in this run: ${PROCESSED_COUNT:-0}"
+          else
+            echo "❌ Queue processing cycle failed."
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "🚨 Queue processing job failed! Check the logs for details."

@@ -52,7 +52,7 @@ ${description_by_length.medium || description_by_length.short}
 
 We are operating in the ${primary_data.company_industry || industry_variations[0]} space, focusing on ${primary_data.market_summary || 'addressing key market needs'}.
 
-We would be delighted to discuss how we can create value together. Our pitch deck is available here for your convenience: ${primary_data.asset_pitch_deck || ''}.
+We would be delighted to discuss how we can create value together. Our deck is available here for your convenience: ${primary_data.asset_cloud_drive || ''}.
 
 Thank you for your time and consideration.
 

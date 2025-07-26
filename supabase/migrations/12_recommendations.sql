@@ -97,11 +97,11 @@ BEGIN
             mr.priority,
             CASE
                 WHEN (mr.key = 'complete_onboarding' AND NOT startup_info.onboarded) THEN TRUE
-                WHEN (mr.key = 'upload_pitch_deck' AND startup_info.pitch_deck_url IS NULL) THEN TRUE
+                WHEN (mr.key = 'upload_pitch_deck' AND startup_info.google_drive_url IS NULL AND startup_info.pitch_deck_url IS NULL) THEN TRUE
                 WHEN (mr.key = 'add_logo' AND startup_info.logo_url IS NULL) THEN TRUE
                 WHEN (mr.key = 'add_website' AND startup_info.website IS NULL) THEN TRUE
                 WHEN (mr.key = 'add_short_desc' AND (startup_info.description_short IS NULL OR length(trim(startup_info.description_short)) < 50)) THEN TRUE
-                WHEN (mr.key = 'update_pitch_deck' AND startup_info.pitch_deck_url IS NOT NULL AND startup_info.updated_at < (NOW() - INTERVAL '45 days')) THEN TRUE
+                WHEN (mr.key = 'update_pitch_deck' AND (startup_info.google_drive_url IS NOT NULL OR startup_info.pitch_deck_url IS NOT NULL) AND startup_info.updated_at < (NOW() - INTERVAL '45 days')) THEN TRUE
                 WHEN (mr.key = 'add_competitors' AND startup_info.competitors IS NULL) THEN TRUE
                 WHEN (mr.key = 'start_applying' AND NOT EXISTS (SELECT 1 FROM submissions WHERE startup_id = p_startup_id)) THEN TRUE
                 WHEN (mr.key = 'add_founder_bio' AND EXISTS (SELECT 1 FROM founders WHERE startup_id = p_startup_id AND (bio IS NULL OR length(trim(bio)) < 50))) THEN TRUE
@@ -173,6 +173,7 @@ BEGIN
         (SELECT jsonb_build_object(
             'name', s.name,
             'pitch_deck_url', s.pitch_deck_url,
+            'google_drive_url', s.google_drive_url,
             'updated_at', s.updated_at
         ) FROM startups s WHERE s.id = p_startup_id),
         (SELECT jsonb_build_object(

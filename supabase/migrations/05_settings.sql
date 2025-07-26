@@ -614,11 +614,11 @@ BEGIN
         'maxParallelSubmissions', ags.max_parallel_submissions::text::integer,
         'maxQueueSize', ags.max_queue_size,
         'preferredTone', CASE 
-            WHEN user_permission IN ('PRO', 'MAX') THEN ags.preferred_tone
+            WHEN user_permission IN ('PRO', 'MAX', 'ENTERPRISE') THEN ags.preferred_tone
             ELSE 'professional'
         END,
         'enableDebugMode', CASE 
-            WHEN user_permission = 'MAX' THEN ags.debug_mode
+            WHEN user_permission IN ('MAX', 'ENTERPRISE') THEN ags.debug_mode
             ELSE false
         END,
         'enableStealth', ags.stealth,
@@ -637,23 +637,19 @@ BEGIN
             'maxParallelSubmissions', CASE 
                 WHEN user_permission = 'FREE' THEN 1
                 WHEN user_permission = 'PRO' THEN 3
-                WHEN user_permission = 'MAX' THEN 5
+                WHEN user_permission = 'MAX' THEN 5       -- Corrected to 5
+                WHEN user_permission = 'ENTERPRISE' THEN 25 -- New Enterprise tier
                 ELSE 1
             END,
             'maxQueueSize', CASE 
                 WHEN user_permission = 'FREE' THEN 3
                 WHEN user_permission = 'PRO' THEN 25
                 WHEN user_permission = 'MAX' THEN 50
+                WHEN user_permission = 'ENTERPRISE' THEN 75 -- New Enterprise tier
                 ELSE 3
             END,
-            'preferredTone', CASE 
-                WHEN user_permission IN ('PRO', 'MAX') THEN 'professional'
-                ELSE 'professional'
-            END,
-            'enableDebugMode', CASE 
-                WHEN user_permission = 'MAX' THEN false
-                ELSE false
-            END,
+            'preferredTone', 'professional',
+            'enableDebugMode', user_permission IN ('MAX', 'ENTERPRISE'),
             'enableStealth', true,
             'customInstructions', '',
             'permissionLevel', user_permission
@@ -701,41 +697,21 @@ BEGIN
     FROM profiles
     WHERE id = p_user_id AND is_active = TRUE;
 
-    -- Set max parallel submissions and queue size based on permission level
+    -- Set max parallel submissions based on permission level
     max_parallel_allowed := CASE 
         WHEN user_permission = 'FREE' THEN 1
         WHEN user_permission = 'PRO' THEN 3
-        WHEN user_permission = 'MAX' THEN 35 -- Allow enterprise-level for MAX users
+        WHEN user_permission = 'MAX' THEN 5
+        WHEN user_permission = 'ENTERPRISE' THEN 25
         ELSE 1
     END;
-
-    -- Validate max parallel submissions doesn't exceed permission limit
-    -- For MAX users, allow enterprise values (15, 25, 35) but validate they're valid enum values
-    IF p_data ? 'maxParallelSubmissions' THEN
-        DECLARE
-            requested_parallel INTEGER;
-            valid_enterprise_values INTEGER[] := ARRAY[1, 3, 5, 15, 25, 35];
-        BEGIN
-            requested_parallel := (p_data->>'maxParallelSubmissions')::INTEGER;
-            
-            -- For non-MAX users, enforce strict limits
-            IF user_permission != 'MAX' AND requested_parallel > max_parallel_allowed THEN
-                RETURN jsonb_build_object(
-                    'error', 
-                    format('Maximum parallel submissions exceeded. Your plan allows up to %s.', max_parallel_allowed)
-                );
-            END IF;
-            
-            -- For MAX users, ensure the value is in our allowed list
-            IF user_permission = 'MAX' AND requested_parallel > 5 THEN
-                IF NOT (requested_parallel = ANY(valid_enterprise_values)) THEN
-                    RETURN jsonb_build_object(
-                        'error', 
-                        'Invalid parallel submissions value. Enterprise values must be 15, 25, or 35.'
-                    );
-                END IF;
-            END IF;
-        END;
+    
+    -- Validate parallel submissions against plan limits
+    IF p_data ? 'maxParallelSubmissions' AND (p_data->>'maxParallelSubmissions')::INTEGER > max_parallel_allowed THEN
+         RETURN jsonb_build_object(
+            'error', 
+            format('Maximum parallel submissions exceeded. Your plan allows up to %s.', max_parallel_allowed)
+        );
     END IF;
 
     -- Validate max queue size based on permission level
@@ -747,6 +723,7 @@ BEGIN
                 WHEN user_permission = 'FREE' THEN 3
                 WHEN user_permission = 'PRO' THEN 25
                 WHEN user_permission = 'MAX' THEN 50
+                WHEN user_permission = 'ENTERPRISE' THEN 75
                 ELSE 3
             END;
             
@@ -760,17 +737,17 @@ BEGIN
     END IF;
 
     -- Validate premium features based on permission level
-    IF p_data ? 'preferredTone' AND user_permission NOT IN ('PRO', 'MAX') THEN
+    IF p_data ? 'preferredTone' AND user_permission NOT IN ('PRO', 'MAX', 'ENTERPRISE') THEN
         RETURN jsonb_build_object(
             'error', 
-            'Tone selection is only available for PRO and MAX users. Please upgrade your plan.'
+            'Tone selection is only available for PRO, MAX, and ENTERPRISE users. Please upgrade your plan.'
         );
     END IF;
 
-    IF p_data ? 'enableDebugMode' AND user_permission != 'MAX' THEN
+    IF p_data ? 'enableDebugMode' AND user_permission NOT IN ('MAX', 'ENTERPRISE') THEN
         RETURN jsonb_build_object(
             'error', 
-            'Debug mode is only available for MAX users. Please upgrade your plan.'
+            'Debug mode is only available for MAX and ENTERPRISE users. Please upgrade your plan.'
         );
     END IF;
 
@@ -781,39 +758,16 @@ BEGIN
     ) INTO settings_exist;
 
     IF settings_exist THEN
-        -- Update existing settings (only update fields that are present in p_data)
+        -- Update existing settings
         UPDATE agent_settings
         SET 
-            submission_delay = CASE 
-                WHEN p_data ? 'submissionDelay' THEN (p_data->>'submissionDelay')::agent_submission_delay
-                ELSE submission_delay
-            END,
-            max_parallel_submissions = CASE 
-                WHEN p_data ? 'maxParallelSubmissions' THEN (p_data->>'maxParallelSubmissions')::agent_parallel_submissions
-                ELSE max_parallel_submissions
-            END,
-            max_queue_size = CASE 
-                WHEN p_data ? 'maxQueueSize' THEN (p_data->>'maxQueueSize')::INTEGER
-                ELSE max_queue_size
-            END,
-            preferred_tone = CASE 
-                WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
-                THEN (p_data->>'preferredTone')::agent_tone
-                ELSE preferred_tone
-            END,
-            debug_mode = CASE 
-                WHEN user_permission = 'MAX' AND p_data ? 'enableDebugMode' 
-                THEN (p_data->>'enableDebugMode')::BOOLEAN
-                ELSE debug_mode
-            END,
-            stealth = CASE 
-                WHEN p_data ? 'enableStealth' THEN (p_data->>'enableStealth')::BOOLEAN
-                ELSE stealth
-            END,
-            custom_instructions = CASE 
-                WHEN p_data ? 'customInstructions' THEN p_data->>'customInstructions'
-                ELSE custom_instructions
-            END,
+            submission_delay = COALESCE((p_data->>'submissionDelay')::agent_submission_delay, submission_delay),
+            max_parallel_submissions = COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, max_parallel_submissions),
+            max_queue_size = COALESCE((p_data->>'maxQueueSize')::INTEGER, max_queue_size),
+            preferred_tone = CASE WHEN user_permission IN ('PRO', 'MAX', 'ENTERPRISE') THEN COALESCE((p_data->>'preferredTone')::agent_tone, preferred_tone) ELSE preferred_tone END,
+            debug_mode = CASE WHEN user_permission IN ('MAX', 'ENTERPRISE') THEN COALESCE((p_data->>'enableDebugMode')::BOOLEAN, debug_mode) ELSE debug_mode END,
+            stealth = COALESCE((p_data->>'enableStealth')::BOOLEAN, stealth),
+            custom_instructions = COALESCE(p_data->>'customInstructions', custom_instructions),
             updated_at = NOW()
         WHERE startup_id = p_startup_id AND user_id = p_user_id;
     ELSE
@@ -824,46 +778,21 @@ BEGIN
             debug_mode, stealth, custom_instructions
         ) VALUES (
             p_startup_id, p_user_id,
-            CASE 
-                WHEN p_data ? 'submissionDelay' THEN (p_data->>'submissionDelay')::agent_submission_delay
-                ELSE '30'::agent_submission_delay
-            END,
-            CASE 
-                WHEN p_data ? 'maxParallelSubmissions' THEN (p_data->>'maxParallelSubmissions')::agent_parallel_submissions
-                ELSE CASE 
-                    WHEN user_permission = 'FREE' THEN '1'::agent_parallel_submissions
-                    WHEN user_permission = 'PRO' THEN '3'::agent_parallel_submissions
-                    WHEN user_permission = 'MAX' THEN '5'::agent_parallel_submissions
-                    ELSE '1'::agent_parallel_submissions
-                END
-            END,
-            CASE 
-                WHEN p_data ? 'maxQueueSize' THEN (p_data->>'maxQueueSize')::INTEGER
-                ELSE CASE 
+            COALESCE((p_data->>'submissionDelay')::agent_submission_delay, '30'::agent_submission_delay),
+            COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, max_parallel_allowed::text::agent_parallel_submissions),
+            COALESCE((p_data->>'maxQueueSize')::INTEGER, (
+                CASE 
                     WHEN user_permission = 'FREE' THEN 3
                     WHEN user_permission = 'PRO' THEN 25
                     WHEN user_permission = 'MAX' THEN 50
+                    WHEN user_permission = 'ENTERPRISE' THEN 75
                     ELSE 3
                 END
-            END,
-            CASE 
-                WHEN user_permission IN ('PRO', 'MAX') AND p_data ? 'preferredTone' 
-                THEN (p_data->>'preferredTone')::agent_tone
-                ELSE 'professional'
-            END,
-            CASE 
-                WHEN user_permission = 'MAX' AND p_data ? 'enableDebugMode' 
-                THEN (p_data->>'enableDebugMode')::BOOLEAN
-                ELSE false
-            END,
-            CASE 
-                WHEN p_data ? 'enableStealth' THEN (p_data->>'enableStealth')::BOOLEAN
-                ELSE true
-            END,
-            CASE 
-                WHEN p_data ? 'customInstructions' THEN p_data->>'customInstructions'
-                ELSE ''
-            END
+            )),
+            COALESCE((p_data->>'preferredTone')::agent_tone, 'professional'),
+            COALESCE((p_data->>'enableDebugMode')::BOOLEAN, false),
+            COALESCE((p_data->>'enableStealth')::BOOLEAN, true),
+            COALESCE(p_data->>'customInstructions', '')
         );
     END IF;
     
@@ -871,9 +800,7 @@ BEGIN
     RETURN jsonb_build_object(
         'success', true,
         'startupId', p_startup_id,
-        'message', 'Agent settings updated successfully',
-        'permissionLevel', user_permission,
-        'maxParallelAllowed', max_parallel_allowed
+        'message', 'Agent settings updated successfully'
     );
 
 EXCEPTION
@@ -1380,7 +1307,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant execute permissions for queue management functions
 GRANT EXECUTE ON FUNCTION get_queue_status(UUID, UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION process_next_queued_submission(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_submissions_with_queue(UUID, UUID) TO authenticated; 
 
 -- New function to update submission status from Browser Use result
