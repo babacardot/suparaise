@@ -4,6 +4,7 @@ import {
   getFormSpecialistByType,
   type SmartDataMapping,
 } from '@/lib/specialists'
+import { getOrCreateBrowserProfileForStartup } from '@/lib/browser-profiles'
 
 // Initialize Supabase Admin Client
 const supabaseAdmin = createClient(
@@ -37,23 +38,7 @@ type DataPayload = {
   [key: string]: DataPayloadField
 }
 
-type BrowserUseResult = {
-  success: boolean
-  summary?: string
-  fields_completed?: string[]
-  errors?: string[]
-  task_id?: string
-  session_id?: string
-  screenshots_taken: number
-  error_reason?: string
-  failed_field_label?: string
-  failed_field_value?: string
-  output?: string
-  live_url?: string
-  screenshot_urls?: string[]
-}
-
-// Enhanced Browser Use API Client with screenshot and media support
+// Minimal Browser Use API Client for task creation
 class BrowserUseClient {
   private apiKey: string
   private baseUrl: string
@@ -99,6 +84,8 @@ class BrowserUseClient {
       browser_viewport_height?: number
       highlight_elements?: boolean
       enable_public_share?: boolean
+      webhook_url?: string
+      profile_id?: string
     } = {},
   ) {
     const payload = {
@@ -114,112 +101,15 @@ class BrowserUseClient {
       browser_viewport_width: options.browser_viewport_width || 1920,
       browser_viewport_height: options.browser_viewport_height || 1080,
       highlight_elements: options.highlight_elements ?? true,
-      enable_public_share: options.enable_public_share ?? true, // Enable for live monitoring
+      enable_public_share: options.enable_public_share ?? true,
+      webhook_url: options.webhook_url,
+      profile_id: options.profile_id,
     }
 
     return this.makeRequest('/run-task', {
       method: 'POST',
       body: JSON.stringify(payload),
     })
-  }
-
-  async getTaskStatus(taskId: string) {
-    return this.makeRequest(`/task/${taskId}/status`)
-  }
-
-  async getTaskDetails(taskId: string) {
-    return this.makeRequest(`/task/${taskId}`)
-  }
-
-  async getTaskScreenshots(taskId: string) {
-    return this.makeRequest(`/task/${taskId}/screenshots`)
-  }
-
-  async getTaskMedia(taskId: string) {
-    return this.makeRequest(`/task/${taskId}/media`)
-  }
-
-  async stopTask(taskId: string) {
-    return this.makeRequest(`/stop-task?task_id=${taskId}`, {
-      method: 'PUT',
-    })
-  }
-
-  async pauseTask(taskId: string) {
-    return this.makeRequest(`/pause-task?task_id=${taskId}`, {
-      method: 'PUT',
-    })
-  }
-
-  async resumeTask(taskId: string) {
-    return this.makeRequest(`/resume-task?task_id=${taskId}`, {
-      method: 'PUT',
-    })
-  }
-
-  async waitForCompletion(
-    taskId: string,
-    pollInterval: number = 3000,
-    maxWaitTime: number = 600000,
-  ): Promise<{
-    status: string
-    output: string
-    session_id?: string
-    steps?: unknown[]
-    live_url?: string
-  }> {
-    const startTime = Date.now()
-
-    while (Date.now() - startTime < maxWaitTime) {
-      const details = await this.getTaskDetails(taskId)
-      const status = details.status
-
-      if (status === 'finished') {
-        return details
-      } else if (status === 'failed' || status === 'stopped') {
-        throw new Error(`Task ${taskId} ended with status: ${status}`)
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, pollInterval))
-    }
-
-    throw new Error(`Task ${taskId} timed out after ${maxWaitTime}ms`)
-  }
-
-  // Enhanced monitoring with step-by-step progress
-  async monitorTaskWithProgress(
-    taskId: string,
-    onProgress?: (step: unknown) => void,
-    pollInterval: number = 2000,
-  ): Promise<{
-    status: string
-    output: string
-    session_id?: string
-    steps?: unknown[]
-  }> {
-    let lastStepCount = 0
-
-    while (true) {
-      const details = await this.getTaskDetails(taskId)
-      const status = details.status
-      const steps = details.steps || []
-
-      // Report new steps if callback provided
-      if (onProgress && steps.length > lastStepCount) {
-        for (let i = lastStepCount; i < steps.length; i++) {
-          onProgress(steps[i])
-        }
-        lastStepCount = steps.length
-      }
-
-      if (status === 'finished') {
-        return details
-      } else if (status === 'failed' || status === 'stopped') {
-        throw new Error(`Task ${taskId} ended with status: ${status}`)
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, pollInterval))
-    }
   }
 }
 
@@ -346,9 +236,6 @@ ${knowledge_base_items
 // This keeps the route.ts file clean and focused on request handling
 
 export async function POST(request: NextRequest) {
-  let browserUseClient: BrowserUseClient | null = null
-  let taskId: string | null = null
-
   try {
     const { startupId, targetId, userId } = await request.json()
 
@@ -368,7 +255,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Fetch all necessary data from Supabase in parallel
-    console.log('📊 Fetching startup data from Supabase...')
     const [
       { data: startup, error: startupError },
       { data: target, error: targetError },
@@ -390,7 +276,12 @@ export async function POST(request: NextRequest) {
       }),
     ])
 
-    if (startupError || targetError || foundersError || agentSettingsError) {
+    if (
+      startupError ||
+      targetError ||
+      foundersError ||
+      agentSettingsError
+    ) {
       console.error('❌ Failed to fetch Supabase data:', {
         startupError,
         targetError,
@@ -402,12 +293,6 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       )
     }
-
-    console.log('✅ Successfully fetched startup data:', {
-      startupName: startup?.name,
-      targetName: target?.name,
-      foundersCount: founders?.length || 0,
-    })
 
     // Process founder data to get the lead founder
     const leadFounder: Founder | undefined = (founders as Founder[])?.[0]
@@ -529,12 +414,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: queueError.message }, { status: 500 })
     }
 
-    console.log('✅ Queue submission result:', queueData)
     const { submission_id: submissionId, status, queue_position } = queueData
 
     // If the submission was queued, return immediately
     if (status === 'queued') {
-      console.log('📋 Submission queued at position:', queue_position)
       return NextResponse.json({
         success: true,
         status: 'queued',
@@ -544,301 +427,82 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 4. Initialize Browser Use client and create task
-    console.log(
-      '🚀 Starting Enhanced Browser Use form filling for:',
-      startup.name,
-      'using form_type:',
-      target.form_type || 'URL-detected',
+    // 4. Get or create a browser profile for the user
+    const browserProfile = await getOrCreateBrowserProfileForStartup(
+      startupId,
+      startup.name || 'startup',
     )
-    browserUseClient = new BrowserUseClient(BROWSER_USE_API_KEY)
 
-    // Build smart data mapping to reduce agent context complexity
+    // 5. Initialize Browser Use client and create task
+    const browserUseClient = new BrowserUseClient(BROWSER_USE_API_KEY)
     const smartData = buildSmartDataMapping(
       dataPayload,
       startup as StartupData,
       agentSettings,
     )
-
-    // Get appropriate Browser Use specialist using database form_type or URL fallback
     const specialist = getFormSpecialistByType(
       target.form_type,
       target.application_url,
     )
-
-    // Build specialized Browser Use instruction using the selected specialist
     const taskInstruction = specialist.buildInstruction(
       target.application_url,
       target.name,
       smartData,
     )
+    const specialistBrowserConfig = specialist.getBrowserConfig?.() || {}
+    const webhookUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/browser-use/webhook`
 
-    console.log(
-      '📝 Specialized Browser Use task instruction built for:',
-      target.name,
-      `(${specialist.name})`,
-    )
+    const taskResponse = await browserUseClient.createTask(taskInstruction, {
+      llm_model: 'claude-sonnet-4-20250514',
+      max_agent_steps: 50,
+      profile_id: browserProfile.profile_id, // Use the user-specific profile
+      ...specialistBrowserConfig,
+      allowed_domains: target.application_url
+        ? [new URL(target.application_url).hostname]
+        : undefined,
+      webhook_url: webhookUrl,
+    })
 
-    // Optimized structured output schema with thinking field for better decisions
-    const outputSchema = {
-      type: 'object',
-      properties: {
-        thinking: {
-          type: 'string',
-          description:
-            'Step-by-step reasoning about form structure, field mappings, and strategy decisions. This improves decision quality.',
-        },
-        success: {
-          type: 'boolean',
-          description: 'Whether the form submission was successful',
-        },
-        summary: {
-          type: 'string',
-          description: 'Concise summary of actions and results',
-        },
-        fields_completed: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Form fields filled: field_name = value_used',
-        },
-        errors: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Specific errors encountered',
-        },
-        screenshots_taken: {
-          type: 'number',
-          description: 'Number of screenshots captured',
-        },
-      },
-      required: ['thinking', 'success', 'summary', 'fields_completed'],
-    }
+    const taskId = taskResponse.id
+    const liveUrl =
+      taskResponse.live_url || `https://cloud.browser-use.com/task/${taskId}`
 
-    let result: BrowserUseResult
-    let sessionId: string = 'unknown'
-
-    try {
-      // Get specialist-specific Browser Use configuration
-      const specialistBrowserConfig = specialist.getBrowserConfig?.() || {}
-
-      // Create optimized Browser Use task with specialist configuration
-      const taskResponse = await browserUseClient.createTask(taskInstruction, {
-        llm_model: 'claude-sonnet-4-20250514',
-        max_agent_steps: 50,
-        use_adblock: true,
-        use_proxy: true,
-        proxy_country_code: 'us',
-        allowed_domains: target.application_url
-          ? [new URL(target.application_url).hostname]
-          : undefined,
-        save_browser_data: false,
-        structured_output_json: JSON.stringify(outputSchema),
-        browser_viewport_width: 1920,
-        browser_viewport_height: 1080,
-        highlight_elements: false,
-        enable_public_share: true,
-        // Override with specialist-specific configuration
-        ...specialistBrowserConfig,
-      })
-
-      taskId = taskResponse.id
-
-      // Debug log the entire task response to understand what fields are available
-      console.log(
-        '🔍 Full Browser Use task response:',
-        JSON.stringify(taskResponse, null, 2),
-      )
-
-      // Extract live URL with better error handling - check multiple possible field names
-      const liveUrl =
-        taskResponse.live_url ||
-        taskResponse.liveUrl ||
-        taskResponse.public_url ||
-        taskResponse.publicUrl ||
-        taskResponse.share_url ||
-        taskResponse.shareUrl ||
-        (taskId ? `https://cloud.browser-use.com/task/${taskId}` : null)
-
-      console.log(`🎯 Enhanced Browser Use task created with ID: ${taskId}`)
-      if (liveUrl) {
-        console.log(`📺 Live monitoring available at: ${liveUrl}`)
-      } else {
-        console.log(`⚠️ Live monitoring URL not available in task response`)
-        console.log(
-          `🔍 Available response fields: ${Object.keys(taskResponse).join(', ')}`,
-        )
-      }
-
-      // Efficient monitoring with minimal logging
-      let stepCount = 0
-      const taskResult = await browserUseClient.monitorTaskWithProgress(
-        taskId!,
-        () => {
-          stepCount++
-          // Only log every 5th step to reduce noise
-          if (stepCount % 5 === 0) {
-            console.log(`⚡ Step ${stepCount}: Processing...`)
-          }
-        },
-        3000, // 3 second polling for cost efficiency
-      )
-
-      // Extract session ID if available
-      sessionId = taskResult.session_id || taskId || 'unknown'
-
-      // Fetch screenshots and media after completion
-      let screenshotUrls: string[] = []
-      try {
-        const screenshots = await browserUseClient.getTaskScreenshots(taskId!)
-        screenshotUrls = screenshots.screenshots || []
-        console.log(`📸 Retrieved ${screenshotUrls.length} screenshots`)
-      } catch (e) {
-        console.warn('Could not retrieve screenshots:', e)
-      }
-
-      // Parse the optimized structured output
-      let parsedOutput
-      try {
-        parsedOutput = JSON.parse(taskResult.output || '{}')
-        console.log(
-          `🧠 Agent thinking: ${parsedOutput.thinking?.substring(0, 100)}...`,
-        )
-      } catch {
-        console.warn('Failed to parse structured output, using fallback')
-        parsedOutput = {
-          thinking: 'Task executed without structured output',
-          success: taskResult.status === 'finished',
-          summary: taskResult.output || 'Task completed efficiently',
-          fields_completed: [],
-          errors:
-            taskResult.status === 'failed' ? ['Task failed to complete'] : [],
-          screenshots_taken: stepCount,
-        }
-      }
-
-      console.log(`📊 Task completed efficiently with ${stepCount} steps`)
-
-      result = {
-        success: parsedOutput.success && taskResult.status === 'finished',
-        summary: parsedOutput.summary || taskResult.output,
-        fields_completed: parsedOutput.fields_completed || [],
-        errors: parsedOutput.errors || [],
-        task_id: taskId || undefined,
-        session_id: sessionId,
-        screenshots_taken: parsedOutput.screenshots_taken || stepCount,
-        output: taskResult.output,
+    // 6. Update submission with task ID for webhook tracking
+    await supabaseAdmin.rpc('update_submission_session_data', {
+      p_submission_id: submissionId,
+      p_submission_type: 'fund',
+      p_session_id: taskId,
+      p_session_replay_url: liveUrl,
+      p_screenshots_taken: 0,
+      p_debug_data: {
+        task_id: taskId,
         live_url: liveUrl,
-        screenshot_urls: screenshotUrls,
-      }
-    } catch (error: unknown) {
-      console.error('Enhanced Browser Use error:', error)
-      let errorMessage =
-        'An unknown error occurred during enhanced form filling.'
-      if (error instanceof Error) {
-        errorMessage = `Enhanced form filling failed: ${error.message}`
-      }
-
-      result = {
-        success: false,
-        error_reason: errorMessage,
-        failed_field_label: 'Unknown',
-        failed_field_value: 'Unknown',
-        screenshots_taken: 0,
-        task_id: taskId || undefined,
-        session_id: sessionId,
-      }
-    }
-
-    // 5. Update submission record with enhanced session data and final status
-    if (taskId) {
-      console.log('💾 Updating submission with session data...')
-      try {
-        await supabaseAdmin.rpc('update_submission_session_data', {
-          p_submission_id: submissionId,
-          p_submission_type: 'fund',
-          p_session_id: taskId,
-          p_session_replay_url: `https://cloud.browser-use.com/task/${taskId}`,
-          p_screenshots_taken: result.screenshots_taken || 0,
-          p_debug_data: {
-            browser_use_result: result,
-            task_id: taskId,
-            session_id: sessionId,
-            live_url: result.live_url,
-            screenshot_urls: result.screenshot_urls,
-            enhanced_monitoring: true,
-            verbose_logging: true,
-          },
-        })
-        console.log('✅ Session data updated successfully')
-      } catch (sessionError) {
-        console.error('❌ Failed to update session data:', sessionError)
-        // Don't fail the entire request if session update fails
-      }
-    }
-
-    console.log('📝 Updating submission status...')
-    try {
-      await supabaseAdmin
-        .from('submissions')
-        .update({
-          status: result.success ? 'completed' : 'failed',
-          agent_notes: result.success ? result.summary : result.error_reason,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', submissionId)
-      console.log('✅ Submission status updated successfully')
-    } catch (statusUpdateError) {
-      console.error('❌ Failed to update submission status:', statusUpdateError)
-    }
-
-    // 6. Asynchronously trigger the queue processor to start the next job
-    console.log(`Triggering queue processor for startup ${startupId}...`)
-    fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-queue`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        },
+        webhook_configured: true,
+        browser_profile_id: browserProfile.profile_id,
       },
-    ).catch((e) => console.error('Failed to trigger queue processor:', e))
+    })
+    
+    // Update status to 'in_progress' right away
+    await supabaseAdmin
+      .from('submissions')
+      .update({ status: 'in_progress' })
+      .eq('id', submissionId)
 
+    // 7. Return immediate success response
     return NextResponse.json({
       success: true,
-      status: result.success ? 'completed' : 'failed',
+      status: 'in_progress',
       targetName: target.name,
       submissionId,
-      result,
       task_id: taskId,
-      session_id: sessionId,
-      session_replay_url: taskId
-        ? `https://cloud.browser-use.com/task/${taskId}`
-        : null,
-      live_url: result.live_url,
-      screenshots_taken: result.screenshots_taken,
+      session_replay_url: liveUrl,
     })
   } catch (error: unknown) {
-    // Clean up task if it was created
-    if (browserUseClient && taskId) {
-      try {
-        await browserUseClient.stopTask(taskId)
-      } catch (e) {
-        console.warn('Failed to stop Browser Use task during cleanup:', e)
-      }
-    }
-
-    let errorMessage =
-      'An unknown error occurred in the Enhanced Browser Use API.'
-    if (error instanceof Error) {
-      errorMessage = error.message
-    }
-    console.error('Enhanced Browser Use submission API error:', error)
-    return NextResponse.json(
-      {
-        error: errorMessage,
-        success: false,
-      },
-      { status: 500 },
-    )
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'An unknown error occurred during submission.'
+    console.error('Submission API error:', error)
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }

@@ -323,6 +323,7 @@ CREATE TABLE startups (
     risks TEXT, -- Challenges and Risks
     unfair_advantage TEXT, -- Team's Unfair Advantage
     use_of_funds TEXT, -- How the funds will be used
+    browser_profile_id TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     -- Constraints
@@ -334,6 +335,8 @@ CREATE TRIGGER set_startups_timestamp
 BEFORE UPDATE ON startups
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE INDEX IF NOT EXISTS idx_startups_browser_profile_id ON startups(browser_profile_id) WHERE browser_profile_id IS NOT NULL;
 
 -- --------------------------------------------------
 -- Table: founders
@@ -912,5 +915,4 @@ CREATE POLICY "Service role can access archive data" ON accelerator_submissions_
 
 -- Agent Settings Archive - No direct access
 CREATE POLICY "Archive data not accessible to users" ON agent_settings_archive FOR ALL TO authenticated USING (FALSE);
-CREATE POLICY "Service role can access archive data" ON agent_settings_archive FOR ALL TO service_role USING (TRUE);
-
+CREATE POLICY "Service role can access archive data" ON agent_settings_archive FOR ALL TO service_role USING (TRUE); 

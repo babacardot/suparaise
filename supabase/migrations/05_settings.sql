@@ -1325,52 +1325,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 GRANT EXECUTE ON FUNCTION queue_submission(UUID, UUID, UUID) TO authenticated;
 
--- Function to process the next item in queue (moves from queued to processing)
-CREATE OR REPLACE FUNCTION process_next_queued_submission(p_startup_id UUID)
-RETURNS JSONB AS $$
-DECLARE
-    next_submission UUID;
-    queue_pos INTEGER;
-BEGIN
-    -- Find the next queued submission (lowest queue_position)
-    SELECT id, queue_position INTO next_submission, queue_pos
-    FROM submissions
-    WHERE startup_id = p_startup_id 
-      AND status = 'pending'
-      AND queue_position IS NOT NULL
-    ORDER BY queue_position ASC
-    LIMIT 1;
-
-    IF next_submission IS NULL THEN
-        RETURN jsonb_build_object(
-            'success', true,
-            'message', 'No queued submissions to process'
-        );
-    END IF;
-
-    -- Move submission from queued to processing
-    UPDATE submissions
-    SET 
-        status = 'pending',
-        queue_position = NULL,
-        queued_at = NULL,
-        started_at = NOW()
-    WHERE id = next_submission;
-
-    RETURN jsonb_build_object(
-        'success', true,
-        'submissionId', next_submission,
-        'previousQueuePosition', queue_pos,
-        'message', 'Submission moved from queue to processing'
-    );
-
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE WARNING 'Error in process_next_queued_submission for startup %: %', p_startup_id, SQLERRM;
-        RETURN jsonb_build_object('error', SQLERRM);
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
 -- Function to get all submissions with queue info for a startup
 CREATE OR REPLACE FUNCTION get_submissions_with_queue(p_user_id UUID, p_startup_id UUID DEFAULT NULL)
 RETURNS JSONB AS $$
