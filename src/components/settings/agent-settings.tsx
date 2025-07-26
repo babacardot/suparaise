@@ -137,6 +137,11 @@ export default function AgentSettings() {
       | 'detailed',
     enableStealth: true, // avoid detection
     permissionLevel: 'FREE' as 'FREE' | 'PRO' | 'MAX', // user's subscription level
+    // Knowledge base fields
+    kpis: '',
+    risks: '',
+    unfairAdvantage: '',
+    useOfFunds: '',
   })
 
   // Fetch agent settings when component mounts or startup changes
@@ -663,6 +668,76 @@ export default function AgentSettings() {
                   onAIEnhance={(enhancedText) =>
                     handleInputChange('customInstructions', enhancedText)
                   }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Agent Knowledge Base */}
+          <div className="space-y-3">
+            <Label>Agent Knowledge Base</Label>
+            <p className="text-xs text-muted-foreground -mt-2">
+              Provide detailed answers to these key questions to give your agent
+              a deep, contextual understanding of your startup.
+            </p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="kpis" className="text-sm font-medium">
+                  Key Performance Indicators (KPIs)
+                </Label>
+                <Textarea
+                  id="kpis"
+                  value={formData.kpis}
+                  onChange={(e) => handleInputChange('kpis', e.target.value)}
+                  onBlur={() => handleFieldSave('kpis')}
+                  className="rounded-sm min-h-[80px]"
+                  placeholder="e.g., Monthly Recurring Revenue (MRR), Customer Acquisition Cost (CAC), Lifetime Value (LTV), Churn Rate..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="risks" className="text-sm font-medium">
+                  Challenges & Risks
+                </Label>
+                <Textarea
+                  id="risks"
+                  value={formData.risks}
+                  onChange={(e) => handleInputChange('risks', e.target.value)}
+                  onBlur={() => handleFieldSave('risks')}
+                  className="rounded-sm min-h-[80px]"
+                  placeholder="e.g., Market competition, regulatory hurdles, technological challenges, key dependencies..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="unfairAdvantage"
+                  className="text-sm font-medium"
+                >
+                  Unfair Advantage
+                </Label>
+                <Textarea
+                  id="unfairAdvantage"
+                  value={formData.unfairAdvantage}
+                  onChange={(e) =>
+                    handleInputChange('unfairAdvantage', e.target.value)
+                  }
+                  onBlur={() => handleFieldSave('unfairAdvantage')}
+                  className="rounded-sm min-h-[80px]"
+                  placeholder="e.g., Proprietary technology, exclusive partnerships, unique data access, world-class team expertise..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="useOfFunds" className="text-sm font-medium">
+                  Use of Funds
+                </Label>
+                <Textarea
+                  id="useOfFunds"
+                  value={formData.useOfFunds}
+                  onChange={(e) =>
+                    handleInputChange('useOfFunds', e.target.value)
+                  }
+                  onBlur={() => handleFieldSave('useOfFunds')}
+                  className="rounded-sm min-h-[80px]"
+                  placeholder="e.g., 40% for product development, 30% for sales & marketing, 20% for hiring key personnel, 10% for operational expenses..."
                 />
               </div>
             </div>

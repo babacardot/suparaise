@@ -282,6 +282,8 @@ function generateTargetsData(
       ).join(','),
       tags: randomChoices(SAMPLE_TAGS, 3).join(','),
       notes: randomBoolean() ? 'Generated sample data for testing' : null,
+      form_type: randomChoice([...ENUM_VALUES.form_type]),
+      browser_system: randomChoice([...ENUM_VALUES.browser_system]),
       visibility_level: getVisibilityLevel(i),
     })
   }
@@ -347,6 +349,8 @@ function generateAngelsData(
       notable_investments: `BigCorp ${i + 1},TechStart ${i + 2}`,
       is_active: true,
       notes: 'Generated sample data for testing',
+      form_type: randomChoice([...ENUM_VALUES.form_type]),
+      browser_system: randomChoice([...ENUM_VALUES.browser_system]),
       visibility_level: i < 30 ? 'FREE' : i < 70 ? 'PRO' : 'MAX', // 30 FREE, 40 PRO, 30 MAX for 100 angels
     })
   }
@@ -412,6 +416,8 @@ function generateAcceleratorsData(
       is_active: true,
       tags: randomChoices(SAMPLE_TAGS, 3).join(','),
       notes: 'Generated sample data for testing',
+      form_type: randomChoice([...ENUM_VALUES.form_type]),
+      browser_system: randomChoice([...ENUM_VALUES.browser_system]),
       visibility_level: i < 30 ? 'FREE' : i < 70 ? 'PRO' : 'MAX', // 30 FREE, 40 PRO, 30 MAX for 100 accelerators
     })
   }

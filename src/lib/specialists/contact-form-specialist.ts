@@ -32,131 +32,57 @@ export class ContactFormSpecialist extends BaseFormSpecialist {
     targetName: string,
     smartData: SmartDataMapping,
   ): string {
-    const companyName = smartData.primary_data.company_name || 'TestStartup Inc'
-    const founderName = smartData.primary_data.lead_founder_name || 'John Doe'
-    const founderEmail =
-      smartData.primary_data.lead_founder_email || 'founder@startup.com'
-    const founderPhone = smartData.primary_data.lead_founder_phone || ''
-    const companyDescription =
-      smartData.description_by_length.medium ||
-      smartData.description_by_length.short
+    const { primary_data, description_by_length, industry_variations } =
+      smartData
 
-    const instruction = `You are a Contact Form specialist agent. Navigate to ${targetUrl} and complete the contact form for ${targetName}.
+    const founderName = primary_data.lead_founder_name || 'the founder'
+    const companyName = primary_data.company_name || 'our company'
+    const teamInfo =
+      primary_data.team_founders &&
+      primary_data.team_founders.split(',').length > 1
+        ? `Our founding team is led by ${founderName}.`
+        : `My name is ${founderName}, founder of ${companyName}.`
 
-**CORE INFORMATION:**
-- Name: "${founderName}"
-- Company: "${companyName}"
-- Email: "${founderEmail}"
-- Phone: "${founderPhone}"
-- Message: "${companyDescription}"
+    const message = `
+Hello,
 
-**CONTACT FORM STRATEGY:**
+${teamInfo}
 
-**1. Page Navigation**
-- Navigate to the target URL
-- Scroll down to locate the contact form
-- Take screenshot of the form area
-- Identify all form fields (usually: Name, Email, Company, Message)
+${description_by_length.medium || description_by_length.short}
 
-**2. Form Field Filling**
-- **Name field**: Enter founder name exactly: "${founderName}"
-- **Email field**: Enter founder email exactly: "${founderEmail}"
-- **Company field**: Enter company name exactly: "${companyName}"
-- **Message/Description field**: Enter the pre-written description
-- **Phone field** (if present): Enter "${founderPhone}" if available
+We are operating in the ${primary_data.company_industry || industry_variations[0]} space, focusing on ${primary_data.market_summary || 'addressing key market needs'}.
 
-**3. Message Field Strategy**
-- Use the medium-length company description for message field
-- DO NOT modify or improvise - use exact text provided
-- If character limit, use short description instead
-- Professional, compelling message from provided data
+We would be delighted to discuss how we can create value together. Our pitch deck is available here for your convenience: ${primary_data.asset_pitch_deck || ''}.
 
-**4. Additional Fields Handling**
-- **Subject field**: Use format "Partnership Inquiry - ${companyName}"
-- **Industry dropdown**: Select from these options: ${smartData.industry_variations.slice(0, 3).join(', ')}
-- **Budget/Investment dropdowns**: Select appropriate funding stage option
-- **How did you hear**: Select "Website" or "Online" if required
-- **Company size**: Select appropriate team size if available
+Thank you for your time and consideration.
 
-**5. Form Submission**
-- Verify all fields are completed
-- Look for checkbox agreements (terms/privacy) and check if required
-- Click Submit/Send button
-- Wait for confirmation message or page redirect
-- Take screenshot of success confirmation
+Best regards,
+${founderName}
+    `.trim()
+
+    const instruction = `You are a contact form specialist agent. Your task is to navigate to ${targetUrl} and complete the contact form for ${targetName} with the goal of initiating a conversation.
+
+${this.buildCoreDataSection(smartData)}
+
+**EXECUTION STRATEGY:**
+1.  **Analyze & Plan**: Navigate to the URL, find the contact form, and plan your approach in the 'thinking' field.
+2.  **Fill Core Fields**: Use the exact data provided for fields like Name, Email, and Company.
+3.  **Craft the Message**: For the main "Message" or "Description" field, use the following text. Do not modify it unless there is a character limit, in which case you should intelligently shorten it while preserving the key points.
+    
+    ---
+    **MESSAGE TO USE:**
+    ${message}
+    ---
+
+4.  **Handle Other Fields**: For fields like "Industry," "Budget," or "How did you hear about us?", use your judgment to select the most appropriate option based on the startup data.
+5.  **Submit**: Complete the form and verify successful submission.
 
 **SUCCESS CRITERIA:**
-- Clean, professional contact form submission
-- Accurate contact information
-- Compelling message using provided description
-- Successful submission with confirmation
+- The form is successfully submitted with a confirmation.
+- The message is submitted exactly as crafted above, or thoughtfully shortened if necessary.
 
-Complete the contact form efficiently and submit.`
-
-    // Validate instruction quality
-    const validation = this.validateInstruction(instruction)
-    if (!validation.isValid) {
-      console.warn(
-        'Contact Form instruction validation issues:',
-        validation.issues,
-      )
-    }
-
+Use the 'thinking' field to document your plan and any decisions made.
+`
     return instruction
-  }
-
-  // Contact Form-specific helper methods
-  getCommonFieldMappings(): Record<string, string> {
-    return {
-      Name: 'lead_founder_name',
-      'First Name': 'lead_founder_name (first part)',
-      'Last Name': 'lead_founder_name (last part)',
-      Email: 'lead_founder_email',
-      Company: 'company_name',
-      Organization: 'company_name',
-      Phone: 'lead_founder_phone',
-      Message: 'description_by_length.medium',
-      Comments: 'description_by_length.medium',
-      Description: 'description_by_length.long',
-      Subject: 'Partnership Inquiry - [Company Name]',
-      Industry: 'company_industry',
-      Website: 'company_website',
-    }
-  }
-
-  // Method to generate subject line variations
-  getSubjectLineOptions(companyName: string): string[] {
-    return [
-      `Partnership Inquiry - ${companyName}`,
-      `Investment Opportunity - ${companyName}`,
-      `Business Inquiry from ${companyName}`,
-      `Collaboration Request - ${companyName}`,
-      `${companyName} - Partnership Discussion`,
-    ]
-  }
-
-  // Contact form success indicators
-  getSuccessIndicators(): string[] {
-    return [
-      'Success message "Thank you for contacting us"',
-      'Confirmation message "Your message has been sent"',
-      '"We will get back to you" message',
-      'Page redirect to thank you/success page',
-      'Email confirmation message appears',
-      'Form fields clear after submission',
-      'Success icon or checkmark appears',
-    ]
-  }
-
-  // Common contact form field variations
-  getFieldVariations(): Record<string, string[]> {
-    return {
-      name: ['Name', 'Full Name', 'Your Name', 'Contact Name'],
-      email: ['Email', 'Email Address', 'Your Email', 'Contact Email'],
-      company: ['Company', 'Company Name', 'Organization', 'Business Name'],
-      phone: ['Phone', 'Phone Number', 'Contact Number', 'Mobile'],
-      message: ['Message', 'Comments', 'Description', 'Inquiry', 'Details'],
-      subject: ['Subject', 'Topic', 'Regarding', 'About'],
-    }
   }
 }

@@ -4,7 +4,14 @@ export type SmartDataMapping = {
   primary_data: Record<string, string>
   industry_variations: string[]
   location_variations: string[]
-  description_by_length: { short: string; medium: string; long: string }
+  description_by_length: {
+    short: string
+    medium: string
+    long: string
+  }
+  knowledge_base_section: string
+  customInstructions?: string
+  preferredTone?: string
 }
 
 export type FormType = 'typeform' | 'google' | 'contact' | 'generic'

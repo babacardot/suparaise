@@ -43,6 +43,7 @@ type Target = {
   question_count_range?: '1-5' | '6-10' | '11-20' | '21+'
   required_documents?: string[]
   notes?: string
+  form_type?: 'contact' | 'typeform' | 'google' | 'generic'
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string

@@ -204,6 +204,10 @@ BEGIN
         'financialProjectionsUrl', s.financial_projections_url,
         'businessPlanUrl', s.business_plan_url,
         'googleDriveUrl', s.google_drive_url,
+        'kpis', s.kpis,
+        'risks', s.risks,
+        'unfairAdvantage', s.unfair_advantage,
+        'useOfFunds', s.use_of_funds,
         'createdAt', s.created_at,
         'updatedAt', s.updated_at
     )
@@ -308,6 +312,10 @@ BEGIN
             WHEN p_data ? 'googleDriveUrl' THEN p_data->>'googleDriveUrl'
             ELSE google_drive_url
         END,
+        kpis = COALESCE(p_data->>'kpis', kpis),
+        risks = COALESCE(p_data->>'risks', risks),
+        unfair_advantage = COALESCE(p_data->>'unfairAdvantage', unfair_advantage),
+        use_of_funds = COALESCE(p_data->>'useOfFunds', use_of_funds),
         updated_at = NOW()
     WHERE id = p_startup_id AND user_id = p_user_id;
 

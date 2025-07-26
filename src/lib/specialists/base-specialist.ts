@@ -33,17 +33,14 @@ export abstract class BaseFormSpecialist implements FormSpecialist {
   }
 
   // Helper method to format data lines for instructions
-  protected formatDataLines(
-    smartData: SmartDataMapping,
-    limit: number = 15,
-  ): string[] {
+  protected formatDataLines(smartData: SmartDataMapping): string[] {
     const dataLines: string[] = []
     Object.entries(smartData.primary_data).forEach(([key, value]) => {
       if (value && value.trim()) {
         dataLines.push(`${key}: "${value}"`)
       }
     })
-    return dataLines.slice(0, limit)
+    return dataLines
   }
 
   // Helper method to get industry options
@@ -64,8 +61,17 @@ export abstract class BaseFormSpecialist implements FormSpecialist {
 
   // Helper method to build core data section
   protected buildCoreDataSection(smartData: SmartDataMapping): string {
+    const toneInstruction = smartData.preferredTone
+      ? `\n**TONE OF VOICE:** Maintain a "${smartData.preferredTone}" tone.`
+      : ''
+    const customInstructions = smartData.customInstructions
+      ? `\n**ADDITIONAL INSTRUCTIONS:** ${smartData.customInstructions}`
+      : ''
+
     return `**STARTUP DATA:**
 ${this.formatDataLines(smartData).join('\n')}
+${toneInstruction}
+${customInstructions}
 
 **INDUSTRY OPTIONS:** ${this.getIndustryOptions(smartData)}
 **LOCATION OPTIONS:** ${this.getLocationOptions(smartData)}
@@ -73,7 +79,8 @@ ${this.formatDataLines(smartData).join('\n')}
 **DESCRIPTIONS:**
 - Short: "${smartData.description_by_length.short}"
 - Medium: "${smartData.description_by_length.medium}"
-- Long: "${smartData.description_by_length.long}"`
+- Long: "${smartData.description_by_length.long}"
+${smartData.knowledge_base_section}`
   }
 
   // Validation helper

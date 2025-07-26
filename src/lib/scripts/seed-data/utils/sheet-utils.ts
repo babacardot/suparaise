@@ -73,6 +73,8 @@ const TargetSchema = z.object({
   required_documents: StringArray,
   tags: StringArray,
   notes: z.string().nullable(),
+  form_type: getZodEnum('form_type').default('generic'),
+  browser_system: getZodEnum('browser_system').default('browser_use'),
   visibility_level: getZodEnum('permission_level').default('FREE'),
 })
 
@@ -102,6 +104,8 @@ const AngelSchema = z.object({
   notable_investments: StringArray,
   is_active: z.boolean().default(true),
   notes: z.string().nullable(),
+  form_type: getZodEnum('form_type').default('generic'),
+  browser_system: getZodEnum('browser_system').default('browser_use'),
   visibility_level: getZodEnum('permission_level').default('FREE'),
 })
 
@@ -130,6 +134,8 @@ const AcceleratorSchema = z.object({
   is_active: z.boolean().default(true),
   tags: StringArray,
   notes: z.string().nullable(),
+  form_type: getZodEnum('form_type').default('generic'),
+  browser_system: getZodEnum('browser_system').default('browser_use'),
   visibility_level: getZodEnum('permission_level').default('FREE'),
 })
 
@@ -207,6 +213,16 @@ const TABLE_CONFIGS = {
       { header: 'tags', key: 'tags', type: null }, // Free text
       { header: 'notes', key: 'notes', type: null },
       {
+        header: 'form_type',
+        key: 'form_type',
+        type: 'form_type',
+      },
+      {
+        header: 'browser_system',
+        key: 'browser_system',
+        type: 'browser_system',
+      },
+      {
         header: 'visibility_level',
         key: 'visibility_level',
         type: 'permission_level',
@@ -261,6 +277,16 @@ const TABLE_CONFIGS = {
       { header: 'notable_investments', key: 'notable_investments', type: null },
       { header: 'is_active', key: 'is_active', type: null },
       { header: 'notes', key: 'notes', type: null },
+      {
+        header: 'form_type',
+        key: 'form_type',
+        type: 'form_type',
+      },
+      {
+        header: 'browser_system',
+        key: 'browser_system',
+        type: 'browser_system',
+      },
       {
         header: 'visibility_level',
         key: 'visibility_level',
@@ -327,6 +353,16 @@ const TABLE_CONFIGS = {
       { header: 'is_active', key: 'is_active', type: null },
       { header: 'tags', key: 'tags', type: null },
       { header: 'notes', key: 'notes', type: null },
+      {
+        header: 'form_type',
+        key: 'form_type',
+        type: 'form_type',
+      },
+      {
+        header: 'browser_system',
+        key: 'browser_system',
+        type: 'browser_system',
+      },
       {
         header: 'visibility_level',
         key: 'visibility_level',

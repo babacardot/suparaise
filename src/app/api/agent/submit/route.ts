@@ -31,7 +31,6 @@ type Founder = {
 
 type DataPayloadField = {
   value: string | number | boolean | readonly string[] | undefined
-  label_hints: string[]
 }
 
 type DataPayload = {
@@ -224,8 +223,25 @@ class BrowserUseClient {
   }
 }
 
+// Define types for better readability and type safety
+type AgentSettings = {
+  customInstructions?: string
+  preferredTone?: string
+}
+
+type StartupData = {
+  kpis?: string
+  risks?: string
+  unfairAdvantage?: string
+  useOfFunds?: string
+}
+
 // Smart data processing - build intelligence outside the agent context
-function buildSmartDataMapping(dataPayload: DataPayload): SmartDataMapping {
+function buildSmartDataMapping(
+  dataPayload: DataPayload,
+  startupData: StartupData | null,
+  agentSettings: AgentSettings | null,
+): SmartDataMapping {
   // Extract and clean core data
   const primary_data: Record<string, string> = {}
 
@@ -291,11 +307,38 @@ function buildSmartDataMapping(dataPayload: DataPayload): SmartDataMapping {
       '',
   }
 
+  // Build the new knowledge base section
+  const knowledge_base_items = [
+    {
+      title: 'Key Performance Indicators (KPIs)',
+      content: startupData?.kpis,
+    },
+    { title: 'Challenges & Risks', content: startupData?.risks },
+    {
+      title: 'Our Unfair Advantage',
+      content: startupData?.unfairAdvantage,
+    },
+    { title: 'How We Plan to Use Funds', content: startupData?.useOfFunds },
+  ]
+
+  const knowledge_base_section =
+    knowledge_base_items.filter((item) => item.content).length > 0
+      ? `
+**AGENT KNOWLEDGE BASE:**
+${knowledge_base_items
+  .filter((item) => item.content)
+  .map((item) => `**${item.title}:**\n${item.content}`)
+  .join('\n\n')}`
+      : ''
+
   return {
     primary_data,
     industry_variations,
     location_variations,
     description_by_length,
+    knowledge_base_section,
+    customInstructions: agentSettings?.customInstructions,
+    preferredTone: agentSettings?.preferredTone,
   }
 }
 
@@ -330,7 +373,7 @@ export async function POST(request: NextRequest) {
       { data: startup, error: startupError },
       { data: target, error: targetError },
       { data: founders, error: foundersError },
-      { data: commonResponses, error: commonResponsesError },
+      { data: agentSettings, error: agentSettingsError },
     ] = await Promise.all([
       supabaseAdmin.rpc('get_user_startup_data', {
         p_user_id: userId,
@@ -341,25 +384,18 @@ export async function POST(request: NextRequest) {
         p_user_id: userId,
         p_startup_id: startupId,
       }),
-      supabaseAdmin.rpc('get_common_responses', {
-        p_startup_id: startupId,
+      supabaseAdmin.rpc('get_user_agent_settings', {
         p_user_id: userId,
+        p_startup_id: startupId,
       }),
     ])
 
-    if (
-      startupError ||
-      targetError ||
-      foundersError ||
-      commonResponsesError ||
-      !Array.isArray(commonResponses)
-    ) {
+    if (startupError || targetError || foundersError || agentSettingsError) {
       console.error('❌ Failed to fetch Supabase data:', {
         startupError,
         targetError,
         foundersError,
-        commonResponsesError,
-        commonResponses,
+        agentSettingsError,
       })
       return NextResponse.json(
         { error: 'Failed to fetch required data from Supabase.' },
@@ -371,7 +407,6 @@ export async function POST(request: NextRequest) {
       startupName: startup?.name,
       targetName: target?.name,
       foundersCount: founders?.length || 0,
-      commonResponsesCount: commonResponses?.length || 0,
     })
 
     // Process founder data to get the lead founder
@@ -381,204 +416,100 @@ export async function POST(request: NextRequest) {
     const dataPayload: DataPayload = {
       company_name: {
         value: startup.name,
-        label_hints: ['Company Name', 'Startup Name', 'Name', 'Business Name'],
       },
       company_website: {
         value: startup.website,
-        label_hints: ['Website', 'URL', 'Company Website', 'Homepage'],
       },
       company_description_short: {
         value: startup.description_short,
-        label_hints: [
-          'Short Description',
-          'Tell us about your company',
-          'One-liner',
-          'Tagline',
-          'Brief Summary',
-          'Company in one sentence',
-        ],
       },
       company_description_medium: {
         value: startup.description_medium,
-        label_hints: [
-          'Elevator Pitch',
-          'Summary',
-          'Brief Description',
-          'Company Overview',
-          'Company Summary',
-          'What does your company do?',
-        ],
       },
       company_description_long: {
         value: startup.description_long,
-        label_hints: [
-          'Detailed Description',
-          'Full Description',
-          'Company Description',
-          'Business Description',
-        ],
       },
       company_industry: {
         value: startup.industry,
-        label_hints: [
-          'Industry',
-          'Sector',
-          'Market',
-          'Category',
-          'Vertical',
-          'Business Type',
-          'Field',
-          'Domain',
-          'Area of Focus',
-          'Industry Focus',
-          'Business Category',
-          'Technology Focus',
-          'Market Sector',
-          'Business Vertical',
-          'Industry Type',
-        ],
       },
       company_location: {
         value: startup.location,
-        label_hints: ['Location', 'Headquarters', 'City', 'Country', 'Address'],
       },
       company_founded_year: {
         value: startup.founded_year || undefined,
-        label_hints: [
-          'Founded Year',
-          'Year Founded',
-          'Founding Date',
-          'Founded',
-          'Year',
-          'Established',
-        ],
       },
       company_incorporation_status: {
         value: startup.is_incorporated,
-        label_hints: ['Incorporation Status', 'Incorporated?', 'Legal Status'],
       },
       company_legal_structure: {
         value: startup.legal_structure,
-        label_hints: ['Legal Structure', 'Entity Type', 'Business Structure'],
       },
       company_team_size: {
         value: startup.employee_count,
-        label_hints: [
-          'Team Size',
-          'Employee Count',
-          'Number of Employees',
-          'Staff Size',
-        ],
       },
       company_revenue_model: {
         value: startup.revenue_model,
-        label_hints: ['Revenue Model', 'Business Model', 'Monetization'],
       },
       company_funding_stage: {
         value: startup.funding_round,
-        label_hints: [
-          'Funding Stage',
-          'Funding Round',
-          'Stage',
-          'Investment Stage',
-        ],
       },
       company_funding_amount_sought: {
         value: startup.funding_amount_sought,
-        label_hints: [
-          'Funding Amount Sought',
-          'Raising',
-          'Ask Amount',
-          'Investment Amount',
-        ],
       },
       company_pre_money_valuation: {
         value: startup.pre_money_valuation,
-        label_hints: ['Pre-money Valuation', 'Valuation', 'Company Valuation'],
       },
       company_investment_instrument: {
         value: startup.investment_instrument,
-        label_hints: ['Investment Instrument', 'Instrument', 'Investment Type'],
       },
       company_competitors: {
         value: startup.competitors,
-        label_hints: ['Competitors', 'Competitive Landscape', 'Competition'],
       },
       company_traction: {
         value: startup.traction_summary,
-        label_hints: ['Traction', 'Key Metrics', 'Progress', 'Milestones'],
       },
       company_market: {
         value: startup.market_summary,
-        label_hints: ['Market', 'Market Size', 'TAM/SAM/SOM', 'Target Market'],
       },
       lead_founder_name: {
         value: leadFounder
           ? `${leadFounder.firstName} ${leadFounder.lastName}`
           : undefined,
-        label_hints: ['Founder Name', 'Your Name', "Founder's Name", 'Name'],
       },
       lead_founder_email: {
         value: leadFounder?.email,
-        label_hints: [
-          'Contact Email',
-          'Your Email',
-          "Founder's Email",
-          'Email Address',
-        ],
       },
       lead_founder_phone: {
         value: leadFounder?.phone,
-        label_hints: ['Phone Number', 'Contact Number', 'Mobile Number'],
       },
       lead_founder_linkedin: {
         value: leadFounder?.linkedin,
-        label_hints: ['LinkedIn Profile', 'LinkedIn URL', 'LinkedIn'],
       },
       founder_background: {
         value: leadFounder?.bio,
-        label_hints: ['Founder Background', 'Experience', 'Bio', 'Background'],
       },
       lead_founder_github: {
         value: leadFounder?.githubUrl,
-        label_hints: ['GitHub Profile', 'GitHub URL', 'GitHub'],
       },
       lead_founder_twitter: {
         value: leadFounder?.twitterUrl,
-        label_hints: [
-          'Twitter Profile',
-          'X Profile',
-          'Twitter URL',
-          'Social Media',
-        ],
       },
       metrics_mrr: {
         value: startup.mrr,
-        label_hints: ['MRR', 'Monthly Recurring Revenue', 'Monthly Revenue'],
       },
       metrics_arr: {
         value: startup.arr,
-        label_hints: ['ARR', 'Annual Recurring Revenue', 'Annual Revenue'],
       },
       team_founders: {
         value: (founders as Founder[])
           .map((f: Founder) => `${f.firstName} ${f.lastName} (${f.role})`)
           .join(', '),
-        label_hints: [
-          'Founders',
-          'Co-founder',
-          'Team',
-          'Who are the founders?',
-          'Founding Team',
-        ],
       },
       asset_pitch_deck: {
         value: startup.pitch_deck_url,
-        label_hints: ['Pitch Deck', 'Deck', 'Presentation', 'Pitch Deck URL'],
       },
       asset_demo_video: {
         value: startup.intro_video_url,
-        label_hints: ['Demo Video', 'Product Demo', 'Intro Video', 'Video URL'],
       },
     }
 
@@ -623,7 +554,11 @@ export async function POST(request: NextRequest) {
     browserUseClient = new BrowserUseClient(BROWSER_USE_API_KEY)
 
     // Build smart data mapping to reduce agent context complexity
-    const smartData = buildSmartDataMapping(dataPayload)
+    const smartData = buildSmartDataMapping(
+      dataPayload,
+      startup as StartupData,
+      agentSettings,
+    )
 
     // Get appropriate Browser Use specialist using database form_type or URL fallback
     const specialist = getFormSpecialistByType(

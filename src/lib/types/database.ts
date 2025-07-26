@@ -123,9 +123,11 @@ export type Database = {
           application_url: string | null
           batch_size: Database['public']['Enums']['batch_size'] | null
           batches_per_year: number | null
+          browser_system: Database['public']['Enums']['browser_system'] | null
           created_at: string | null
           equity_taken: Database['public']['Enums']['equity_range'] | null
           form_complexity: Database['public']['Enums']['form_complexity'] | null
+          form_type: Database['public']['Enums']['form_type'] | null
           funding_provided: Database['public']['Enums']['funding_range'] | null
           id: string
           industry_focus: Database['public']['Enums']['industry_type'][] | null
@@ -159,11 +161,13 @@ export type Database = {
           application_url?: string | null
           batch_size?: Database['public']['Enums']['batch_size'] | null
           batches_per_year?: number | null
+          browser_system?: Database['public']['Enums']['browser_system'] | null
           created_at?: string | null
           equity_taken?: Database['public']['Enums']['equity_range'] | null
           form_complexity?:
             | Database['public']['Enums']['form_complexity']
             | null
+          form_type?: Database['public']['Enums']['form_type'] | null
           funding_provided?: Database['public']['Enums']['funding_range'] | null
           id?: string
           industry_focus?: Database['public']['Enums']['industry_type'][] | null
@@ -199,11 +203,13 @@ export type Database = {
           application_url?: string | null
           batch_size?: Database['public']['Enums']['batch_size'] | null
           batches_per_year?: number | null
+          browser_system?: Database['public']['Enums']['browser_system'] | null
           created_at?: string | null
           equity_taken?: Database['public']['Enums']['equity_range'] | null
           form_complexity?:
             | Database['public']['Enums']['form_complexity']
             | null
+          form_type?: Database['public']['Enums']['form_type'] | null
           funding_provided?: Database['public']['Enums']['funding_range'] | null
           id?: string
           industry_focus?: Database['public']['Enums']['industry_type'][] | null
@@ -450,12 +456,14 @@ export type Database = {
           application_email: string | null
           application_url: string | null
           bio: string | null
+          browser_system: Database['public']['Enums']['browser_system'] | null
           check_size: Database['public']['Enums']['check_size_range'] | null
           created_at: string | null
           domain_expertise: string[] | null
           email: string | null
           first_name: string
           form_complexity: Database['public']['Enums']['form_complexity'] | null
+          form_type: Database['public']['Enums']['form_type'] | null
           id: string
           industry_focus: Database['public']['Enums']['industry_type'][] | null
           investment_approach:
@@ -485,6 +493,7 @@ export type Database = {
           application_email?: string | null
           application_url?: string | null
           bio?: string | null
+          browser_system?: Database['public']['Enums']['browser_system'] | null
           check_size?: Database['public']['Enums']['check_size_range'] | null
           created_at?: string | null
           domain_expertise?: string[] | null
@@ -493,6 +502,7 @@ export type Database = {
           form_complexity?:
             | Database['public']['Enums']['form_complexity']
             | null
+          form_type?: Database['public']['Enums']['form_type'] | null
           id?: string
           industry_focus?: Database['public']['Enums']['industry_type'][] | null
           investment_approach?:
@@ -524,6 +534,7 @@ export type Database = {
           application_email?: string | null
           application_url?: string | null
           bio?: string | null
+          browser_system?: Database['public']['Enums']['browser_system'] | null
           check_size?: Database['public']['Enums']['check_size_range'] | null
           created_at?: string | null
           domain_expertise?: string[] | null
@@ -532,6 +543,7 @@ export type Database = {
           form_complexity?:
             | Database['public']['Enums']['form_complexity']
             | null
+          form_type?: Database['public']['Enums']['form_type'] | null
           id?: string
           industry_focus?: Database['public']['Enums']['industry_type'][] | null
           investment_approach?:
@@ -560,41 +572,6 @@ export type Database = {
           visibility_level?: Database['public']['Enums']['permission_level']
         }
         Relationships: []
-      }
-      common_responses: {
-        Row: {
-          answer: string
-          created_at: string | null
-          id: string
-          question: string
-          startup_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          answer: string
-          created_at?: string | null
-          id?: string
-          question: string
-          startup_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          answer?: string
-          created_at?: string | null
-          id?: string
-          question?: string
-          startup_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'common_responses_startup_id_fkey'
-            columns: ['startup_id']
-            isOneToOne: false
-            referencedRelation: 'startups'
-            referencedColumns: ['id']
-          },
-        ]
       }
       feedback: {
         Row: {
@@ -910,6 +887,7 @@ export type Database = {
           is_active: boolean
           is_incorporated: boolean | null
           key_customers: string | null
+          kpis: string | null
           legal_structure: Database['public']['Enums']['legal_structure'] | null
           location: string | null
           logo_url: string | null
@@ -923,8 +901,11 @@ export type Database = {
           revenue_model:
             | Database['public']['Enums']['revenue_model_type']
             | null
+          risks: string | null
           traction_summary: string | null
+          unfair_advantage: string | null
           updated_at: string | null
+          use_of_funds: string | null
           user_id: string
           website: string | null
         }
@@ -955,6 +936,7 @@ export type Database = {
           is_active?: boolean
           is_incorporated?: boolean | null
           key_customers?: string | null
+          kpis?: string | null
           legal_structure?:
             | Database['public']['Enums']['legal_structure']
             | null
@@ -970,8 +952,11 @@ export type Database = {
           revenue_model?:
             | Database['public']['Enums']['revenue_model_type']
             | null
+          risks?: string | null
           traction_summary?: string | null
+          unfair_advantage?: string | null
           updated_at?: string | null
+          use_of_funds?: string | null
           user_id: string
           website?: string | null
         }
@@ -1002,6 +987,7 @@ export type Database = {
           is_active?: boolean
           is_incorporated?: boolean | null
           key_customers?: string | null
+          kpis?: string | null
           legal_structure?:
             | Database['public']['Enums']['legal_structure']
             | null
@@ -1017,8 +1003,11 @@ export type Database = {
           revenue_model?:
             | Database['public']['Enums']['revenue_model_type']
             | null
+          risks?: string | null
           traction_summary?: string | null
+          unfair_advantage?: string | null
           updated_at?: string | null
+          use_of_funds?: string | null
           user_id?: string
           website?: string | null
         }
@@ -1054,6 +1043,7 @@ export type Database = {
           is_active: boolean
           is_incorporated: boolean | null
           key_customers: string | null
+          kpis: string | null
           legal_structure: Database['public']['Enums']['legal_structure'] | null
           location: string | null
           logo_url: string | null
@@ -1069,8 +1059,11 @@ export type Database = {
           revenue_model:
             | Database['public']['Enums']['revenue_model_type']
             | null
+          risks: string | null
           traction_summary: string | null
+          unfair_advantage: string | null
           updated_at: string | null
+          use_of_funds: string | null
           user_id: string
           website: string | null
         }
@@ -1103,6 +1096,7 @@ export type Database = {
           is_active?: boolean
           is_incorporated?: boolean | null
           key_customers?: string | null
+          kpis?: string | null
           legal_structure?:
             | Database['public']['Enums']['legal_structure']
             | null
@@ -1120,8 +1114,11 @@ export type Database = {
           revenue_model?:
             | Database['public']['Enums']['revenue_model_type']
             | null
+          risks?: string | null
           traction_summary?: string | null
+          unfair_advantage?: string | null
           updated_at?: string | null
+          use_of_funds?: string | null
           user_id: string
           website?: string | null
         }
@@ -1154,6 +1151,7 @@ export type Database = {
           is_active?: boolean
           is_incorporated?: boolean | null
           key_customers?: string | null
+          kpis?: string | null
           legal_structure?:
             | Database['public']['Enums']['legal_structure']
             | null
@@ -1171,8 +1169,11 @@ export type Database = {
           revenue_model?:
             | Database['public']['Enums']['revenue_model_type']
             | null
+          risks?: string | null
           traction_summary?: string | null
+          unfair_advantage?: string | null
           updated_at?: string | null
+          use_of_funds?: string | null
           user_id?: string
           website?: string | null
         }
@@ -1343,8 +1344,10 @@ export type Database = {
         Row: {
           application_email: string | null
           application_url: string
+          browser_system: Database['public']['Enums']['browser_system'] | null
           created_at: string | null
           form_complexity: Database['public']['Enums']['form_complexity'] | null
+          form_type: Database['public']['Enums']['form_type'] | null
           id: string
           industry_focus: Database['public']['Enums']['industry_type'][] | null
           name: string
@@ -1366,10 +1369,12 @@ export type Database = {
         Insert: {
           application_email?: string | null
           application_url: string
+          browser_system?: Database['public']['Enums']['browser_system'] | null
           created_at?: string | null
           form_complexity?:
             | Database['public']['Enums']['form_complexity']
             | null
+          form_type?: Database['public']['Enums']['form_type'] | null
           id?: string
           industry_focus?: Database['public']['Enums']['industry_type'][] | null
           name: string
@@ -1393,10 +1398,12 @@ export type Database = {
         Update: {
           application_email?: string | null
           application_url?: string
+          browser_system?: Database['public']['Enums']['browser_system'] | null
           created_at?: string | null
           form_complexity?:
             | Database['public']['Enums']['form_complexity']
             | null
+          form_type?: Database['public']['Enums']['form_type'] | null
           id?: string
           industry_focus?: Database['public']['Enums']['industry_type'][] | null
           name?: string
@@ -1646,10 +1653,6 @@ export type Database = {
       }
       get_cached_user_session_data: {
         Args: { p_user_id: string }
-        Returns: Json
-      }
-      get_common_responses: {
-        Args: { p_startup_id: string; p_user_id: string }
         Returns: Json
       }
       get_dashboard_data: {
@@ -1902,6 +1905,11 @@ export type Database = {
       agent_submission_delay: '0' | '15' | '30'
       agent_tone: 'professional' | 'enthusiastic' | 'concise' | 'detailed'
       batch_size: '1-10' | '11-20' | '21-50' | '51-100' | '100+'
+      browser_system:
+        | 'browser_use'
+        | 'browser_base'
+        | 'computer_use'
+        | 'hyperbrowser'
       check_size_range:
         | '1K-10K'
         | '10K-25K'
@@ -1913,6 +1921,7 @@ export type Database = {
         | '1M+'
       equity_range: '0%' | '1-3%' | '4-6%' | '7-10%' | '10%+' | 'variable'
       form_complexity: 'simple' | 'standard' | 'comprehensive'
+      form_type: 'contact' | 'typeform' | 'google' | 'generic'
       founder_role:
         | 'Founder'
         | 'Co-founder'
@@ -2199,6 +2208,12 @@ export const Constants = {
       agent_submission_delay: ['0', '15', '30'],
       agent_tone: ['professional', 'enthusiastic', 'concise', 'detailed'],
       batch_size: ['1-10', '11-20', '21-50', '51-100', '100+'],
+      browser_system: [
+        'browser_use',
+        'browser_base',
+        'computer_use',
+        'hyperbrowser',
+      ],
       check_size_range: [
         '1K-10K',
         '10K-25K',
@@ -2211,6 +2226,7 @@ export const Constants = {
       ],
       equity_range: ['0%', '1-3%', '4-6%', '7-10%', '10%+', 'variable'],
       form_complexity: ['simple', 'standard', 'comprehensive'],
+      form_type: ['contact', 'typeform', 'google', 'generic'],
       founder_role: [
         'Founder',
         'Co-founder',
