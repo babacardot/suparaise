@@ -141,10 +141,10 @@ BEGIN
     
     RETURN json_build_object(
         'success', true,
-        'total_affected_rows', v_total_affected,
-        'free_users_result', v_free_result,
-        'paid_users_result', v_paid_result,
-        'usage_billing_result', v_usage_result,
+        'total_affected', v_total_affected,
+        'free_users_affected', COALESCE((v_free_result->>'affected_rows')::INTEGER, 0),
+        'paid_users_affected', COALESCE((v_paid_result->>'affected_rows')::INTEGER, 0),
+        'usage_billing_reset_count', COALESCE((v_usage_result->>'affected_rows')::INTEGER, 0),
         'executed_at', NOW()
     );
 END;

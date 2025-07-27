@@ -547,7 +547,7 @@ export default function AgentSettings() {
                     className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                     value={formData.maxParallelSubmissions}
                     onChange={async (e) => {
-                      const newValue = parseInt(e.target.value) || 3
+                      const newValue = parseInt(e.target.value) || 2
                       const selectedOption = getMaxParallelOptions().find(
                         (opt) => opt.value === newValue,
                       )

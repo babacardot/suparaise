@@ -23,7 +23,7 @@ const pricingTiers: PricingTier[] = [
     priceSuffix: '',
     description: 'Get started with agentic fundraising',
     features: [
-      '3 fund applications per month',
+      '2 fund applications per month',
       'Access to 150 pre-screened funds',
       'Claude 4 sonnet',
     ],
@@ -33,11 +33,11 @@ const pricingTiers: PricingTier[] = [
   },
   {
     name: 'Pro',
-    price: 30,
+    price: 15,
     priceSuffix: '/mo',
     description: 'For startups actively raising their first round',
     features: [
-      '50 runs per month',
+      '20 runs per month',
       'Access to 1,200 global funds',
       '3 parallel submissions',
       'Background runs',

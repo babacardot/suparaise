@@ -143,7 +143,7 @@ BEGIN
         subscription_status = 'canceled',
         stripe_subscription_id = NULL,
         permission_level = 'FREE',
-        monthly_submissions_limit = 3,
+        monthly_submissions_limit = 2,
         updated_at = NOW()
     WHERE stripe_customer_id = p_stripe_customer_id;
     
@@ -215,7 +215,7 @@ BEGIN
         is_subscribed = false,
         subscription_status = 'past_due',
         permission_level = 'FREE',
-        monthly_submissions_limit = 3,
+        monthly_submissions_limit = 2,
         updated_at = NOW()
     WHERE stripe_customer_id = p_stripe_customer_id;
     

@@ -61,14 +61,14 @@ export const SUBSCRIPTION_PLANS = {
   pro_monthly: {
     name: 'Pro',
     description: 'For startups actively raising their first round',
-    price: 30,
+    price: 15,
     interval: 'month' as const,
     tier: 'pro' as const,
   },
   pro_yearly: {
     name: 'Pro Yearly',
     description: 'For startups actively raising their first round',
-    price: 305,
+    price: 150,
     interval: 'year' as const,
     tier: 'pro' as const,
   },

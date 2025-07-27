@@ -212,7 +212,7 @@ export default function BillingSettings() {
   // Plan features for display
   const planFeatures = {
     pro_monthly: [
-      '50 runs per month',
+      '20 runs per month',
       'Access to 1,200 global funds',
       '3 parallel submissions',
       'Smart queuing system',
@@ -833,7 +833,7 @@ export default function BillingSettings() {
                   <>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      50 runs per month
+                      20 runs per month
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />

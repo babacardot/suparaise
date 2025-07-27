@@ -257,7 +257,7 @@ CREATE TABLE profiles (
     permission_level permission_level DEFAULT 'FREE' NOT NULL,
     -- Plan-based submissions (included in subscription)
     monthly_submissions_used INTEGER DEFAULT 0 NOT NULL,
-    monthly_submissions_limit INTEGER DEFAULT 3 NOT NULL,
+    monthly_submissions_limit INTEGER DEFAULT 2 NOT NULL,
     -- Usage billing fields
     usage_billing_enabled BOOLEAN DEFAULT FALSE NOT NULL,
     usage_billing_meter_id TEXT, -- Stripe meter ID for tracking usage
@@ -709,7 +709,7 @@ CREATE TABLE profiles_archive (
     permission_level permission_level DEFAULT 'FREE' NOT NULL,
     -- Plan-based submissions (included in subscription)
     monthly_submissions_used INTEGER DEFAULT 0 NOT NULL,
-    monthly_submissions_limit INTEGER DEFAULT 3 NOT NULL,
+    monthly_submissions_limit INTEGER DEFAULT 2 NOT NULL,
     -- Usage billing fields
     usage_billing_enabled BOOLEAN DEFAULT FALSE NOT NULL,
     usage_billing_meter_id TEXT,

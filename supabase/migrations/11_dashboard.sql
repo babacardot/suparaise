@@ -52,7 +52,7 @@ BEGIN
     IF result IS NULL THEN
         result := jsonb_build_object(
             'monthly_submissions_used', 0,
-            'monthly_submissions_limit', 3,
+            'monthly_submissions_limit', 2,
             'permission_level', 'FREE',
             'is_subscribed', false,
             'subscription_status', null
