@@ -13,6 +13,10 @@ const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET!
 if (!WEBHOOK_SECRET || !INTERNAL_API_SECRET) {
   console.error(
     'BROWSERUSE_WEBHOOK_SECRET or INTERNAL_API_SECRET is not set. Webhook verification will fail.',
+    {
+      hasWebhookSecret: !!WEBHOOK_SECRET,
+      hasInternalSecret: !!INTERNAL_API_SECRET,
+    }
   )
 }
 
@@ -23,7 +27,15 @@ const verifySignature = (
   timestamp: string,
   receivedSignature: string,
 ): boolean => {
+  console.log('Verifying signature:', {
+    hasWebhookSecret: !!WEBHOOK_SECRET,
+    timestampLength: timestamp?.length,
+    signatureLength: receivedSignature?.length,
+    payloadLength: payload?.length,
+  })
+
   if (!WEBHOOK_SECRET) {
+    console.error('No WEBHOOK_SECRET available for signature verification')
     return false
   }
   const message = `${timestamp}.${payload}`
@@ -32,12 +44,20 @@ const verifySignature = (
     .update(message)
     .digest('hex')
 
+  console.log('Signature verification details:', {
+    expectedSignatureLength: expectedSignature.length,
+    receivedSignatureLength: receivedSignature.length,
+    expectedPrefix: expectedSignature.substring(0, 10),
+    receivedPrefix: receivedSignature.substring(0, 10),
+  })
+
   try {
     return crypto.timingSafeEqual(
       Buffer.from(expectedSignature),
       Buffer.from(receivedSignature),
     )
-  } catch {
+  } catch (error) {
+    console.error('Error in signature verification:', error)
     return false
   }
 }
@@ -119,7 +139,40 @@ export async function POST(request: NextRequest) {
   const timestamp = request.headers.get('X-Browser-Use-Timestamp')
   const signature = request.headers.get('X-Browser-Use-Signature')
 
+  console.log('Webhook received:', {
+    hasBody: !!rawBody,
+    bodyLength: rawBody?.length,
+    hasTimestamp: !!timestamp,
+    hasSignature: !!signature,
+    timestamp,
+    signature,
+    headers: Object.fromEntries(request.headers.entries()),
+  })
+
+  // Check if this is a test event first (before header validation)
+  let event
+  try {
+    event = JSON.parse(rawBody)
+  } catch (error) {
+    console.error('Failed to parse webhook body:', error)
+    return NextResponse.json(
+      { error: 'Invalid JSON payload' },
+      { status: 400 },
+    )
+  }
+
+  // Allow test events to pass without headers or signature verification for setup
+  if (event.type === 'test') {
+    console.log('✅ Received Browser Use test webhook (bypassing all verification for setup).')
+    return NextResponse.json({
+      status: 'success',
+      message: 'Test webhook received',
+    })
+  }
+
+  // For non-test events, require headers and signature
   if (!timestamp || !signature) {
+    console.error('Missing required headers for non-test event:', { timestamp, signature })
     return NextResponse.json(
       { error: 'Missing timestamp or signature headers' },
       { status: 400 },
@@ -127,18 +180,11 @@ export async function POST(request: NextRequest) {
   }
 
   if (!verifySignature(rawBody, timestamp, signature)) {
+    console.error('Signature verification failed')
     return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
   }
 
-  const event = JSON.parse(rawBody)
-
-  if (event.type === 'test') {
-    console.log('✅ Received Browser Use test webhook successfully.')
-    return NextResponse.json({
-      status: 'success',
-      message: 'Test webhook received',
-    })
-  }
+  // Event was already parsed above and test events were handled
 
   if (event.type !== 'agent.task.status_update') {
     return NextResponse.json({
