@@ -43,19 +43,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-        title: 'Welcome to suparaise.com',
-        subtitle:
-          "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-        image: '/random/onboarding.svg',
-        statusText: 'Onboarding',
-      }
+      title: 'Welcome to suparaise.com',
+      subtitle:
+        "We're about to automate your entire VC outreach process, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+      image: '/random/onboarding.svg',
+      statusText: 'Onboarding',
+    }
     : {
-        title: 'Ready to launch another venture ?',
-        subtitle:
-          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-        image: '/random/test_your_app.svg',
-        statusText: 'New venture',
-      }
+      title: 'Ready to launch another venture ?',
+      subtitle:
+        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+      image: '/random/test_your_app.svg',
+      statusText: 'New venture',
+    }
 
   return (
     <motion.div
@@ -357,7 +357,7 @@ export function OnboardingDialog({
   }
 
   const isValidPhoneNumber = (phone: string): boolean => {
-    if (!phone.trim()) return true // Empty phone is optional in some contexts
+    if (!phone.trim()) return true // Phone is now optional
     // Remove all non-digit characters to check length
     const digitsOnly = phone.replace(/\D/g, '')
     // International phone numbers should have at least 7 digits and at most 15 digits
@@ -378,7 +378,7 @@ export function OnboardingDialog({
     }
   }
 
-  // Enhanced field validation with proper required field checking
+  // Enhanced field validation with much more relaxed required field checking
   const validateStep = (step: number): ValidationResult => {
     const errors: string[] = []
 
@@ -387,21 +387,19 @@ export function OnboardingDialog({
         // Welcome step has no validation
         break
       case 1:
-        // Validate all founders - all fields except bio are required
+        // Only validate essential founder info - much more relaxed
         founders.forEach((founder, index) => {
           const founderLabel = index === 0 ? 'You' : `Co-founder ${index}`
 
-          // Required fields for all founders
+          // Only first name, last name, and email are required
           if (!founder.firstName.trim())
             errors.push(`First name for ${founderLabel} is required`)
           if (!founder.lastName.trim())
             errors.push(`Last name for ${founderLabel} is required`)
           if (!founder.email.trim())
             errors.push(`Email for ${founderLabel} is required`)
-          if (!founder.phone.trim())
-            errors.push(`Phone for ${founderLabel} is required`)
 
-          // Validate URL formats, email format, and phone number
+          // Validate format only if provided - much more lenient
           if (
             founder.email &&
             !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(founder.email)
@@ -410,22 +408,22 @@ export function OnboardingDialog({
           }
           if (founder.phone && !isValidPhoneNumber(founder.phone)) {
             errors.push(
-              `Phone number for ${founderLabel} must be between 7-15 digits`,
+              `Phone number for ${founderLabel} format is invalid`,
             )
           }
           if (founder.linkedin && !isValidLinkedInUrl(founder.linkedin)) {
             errors.push(
-              `LinkedIn URL for ${founderLabel} must be a valid LinkedIn profile (e.g., https://linkedin.com/in/username)`,
+              `LinkedIn URL for ${founderLabel} format is invalid`,
             )
           }
           if (founder.twitterUrl && !isValidTwitterUrl(founder.twitterUrl)) {
             errors.push(
-              `X URL for ${founderLabel} must be a valid X/Twitter profile (e.g., https://x.com/username)`,
+              `X URL for ${founderLabel} format is invalid`,
             )
           }
           if (founder.githubUrl && !isValidGitHubUrl(founder.githubUrl)) {
             errors.push(
-              `GitHub URL for ${founderLabel} must be a valid GitHub profile (e.g., https://github.com/username)`,
+              `GitHub URL for ${founderLabel} format is invalid`,
             )
           }
           if (
@@ -440,7 +438,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-                founder.email.trim().toLowerCase(),
+              founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -452,7 +450,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-              (user?.email || '').toLowerCase()
+            (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -462,25 +460,14 @@ export function OnboardingDialog({
         break
 
       case 2:
+        // Much more relaxed company validation - only essential fields
         if (!startup.name.trim()) errors.push('Company name is required')
         if (!startup.website.trim()) errors.push('Company website is required')
         if (!startup.descriptionShort.trim())
           errors.push('One-liner is required')
-        if (!startup.descriptionMedium.trim())
-          errors.push('Elevator pitch is required')
-        if (!startup.descriptionLong.trim())
-          errors.push('Full description is required')
-        if (!startup.industry) errors.push('Industry is required')
-        if (!startup.location.trim()) errors.push('Country is required')
-        if (
-          !startup.foundedYear ||
-          startup.foundedYear < 1900 ||
-          startup.foundedYear > new Date().getFullYear()
-        )
-          errors.push('Founded year is required and must be valid')
-        if (!startup.legalStructure) errors.push('Legal structure is required')
+        // Removed: elevator pitch, full description, industry, location, founded year, legal structure
 
-        // Validate company website URL
+        // Validate website URL format
         if (startup.website && !isValidWebsiteUrl(startup.website)) {
           errors.push('Company website URL is invalid')
         }
@@ -493,22 +480,10 @@ export function OnboardingDialog({
         break
 
       case 3:
-        // Step 3 validation - mandatory fields
+        // Much more relaxed fundraising validation - only critical fields
         if (!startup.fundingRound) errors.push('Funding round is required')
-        if (!startup.investmentInstrument)
-          errors.push('Investment instrument is required')
-        if (!startup.operatingCountries.length)
-          errors.push('Operating countries are required')
-        if (!startup.revenueModel) errors.push('Revenue model is required')
-        if (!startup.currentRunway) errors.push('Runway is required')
-        if (!startup.preMoneyValuation)
-          errors.push('Pre-money valuation is required')
-        if (startup.fundingAmountSought <= 0)
-          errors.push('Funding amount is required')
-        if (!startup.employeeCount || startup.employeeCount <= 0)
-          errors.push('Team size is required')
-        if (!startup.tractionSummary.trim()) errors.push('Traction is required')
-        if (!startup.marketSummary.trim()) errors.push('Market is required')
+        // Removed: investment instrument, operating countries, revenue model, runway,
+        // pre-money valuation, funding amount, team size, traction, market
         break
 
       case 4:
@@ -538,7 +513,7 @@ export function OnboardingDialog({
           errors.firstName = 'First name is required'
         if (!founder.lastName.trim()) errors.lastName = 'Last name is required'
         if (!founder.email.trim()) errors.email = 'Email is required'
-        if (!founder.phone.trim()) errors.phone = 'Phone is required'
+        // Removed: phone is no longer required
       }
 
       // Format validation - show immediately when user types invalid data
@@ -554,28 +529,28 @@ export function OnboardingDialog({
         founder.phone.trim() &&
         !isValidPhoneNumber(founder.phone)
       ) {
-        errors.phone = 'Phone must be 7-15 digits'
+        errors.phone = 'Invalid phone format'
       }
       if (
         founder.linkedin &&
         founder.linkedin.trim() &&
         !isValidLinkedInUrl(founder.linkedin)
       ) {
-        errors.linkedin = 'Must be a valid LinkedIn profile URL'
+        errors.linkedin = 'Invalid LinkedIn URL format'
       }
       if (
         founder.twitterUrl &&
         founder.twitterUrl.trim() &&
         !isValidTwitterUrl(founder.twitterUrl)
       ) {
-        errors.twitterUrl = 'Must be a valid X/Twitter profile URL'
+        errors.twitterUrl = 'Invalid X/Twitter URL format'
       }
       if (
         founder.githubUrl &&
         founder.githubUrl.trim() &&
         !isValidGitHubUrl(founder.githubUrl)
       ) {
-        errors.githubUrl = 'Must be a valid GitHub profile URL'
+        errors.githubUrl = 'Invalid GitHub URL format'
       }
       if (
         founder.personalWebsiteUrl &&
@@ -599,12 +574,7 @@ export function OnboardingDialog({
         errors.website = 'Company website is required'
       if (!startup.descriptionShort.trim())
         errors.descriptionShort = 'One-liner is required'
-      if (!startup.descriptionMedium.trim())
-        errors.descriptionMedium = 'Elevator pitch is required'
-      if (!startup.descriptionLong.trim())
-        errors.descriptionLong = 'Full description is required'
-      if (!startup.industry) errors.industry = 'Industry is required'
-      if (!startup.location.trim()) errors.location = 'Country is required'
+      // Removed: elevator pitch, full description, industry, location requirements
     }
 
     // Format validation - show immediately when user types invalid data
@@ -1120,9 +1090,9 @@ export function OnboardingDialog({
                     logoUploadProps={logoUploadProps}
                     pitchDeckUploadProps={pitchDeckUploadProps}
                     fieldErrors={getStartupFieldErrors()}
-                    // showIngestModal={showIngestModal}
-                    // setShowIngestModal={setShowIngestModal}
-                    // onIngestData={handleIngestData}
+                  // showIngestModal={showIngestModal}
+                  // setShowIngestModal={setShowIngestModal}
+                  // onIngestData={handleIngestData}
                   />
                 </motion.div>
               )}

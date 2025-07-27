@@ -27,50 +27,50 @@ export interface AIContext {
 }
 
 export interface FounderData {
-  firstName: string
-  lastName: string
+  firstName: string // Required
+  lastName: string // Required
   role: FounderRole
-  bio: string
-  email: string
-  phone: string
-  linkedin: string
-  githubUrl: string
-  personalWebsiteUrl: string
-  twitterUrl: string
+  bio: string // Optional
+  email: string // Required
+  phone: string // Optional - no longer required
+  linkedin: string // Optional
+  githubUrl: string // Optional
+  personalWebsiteUrl: string // Optional
+  twitterUrl: string // Optional
 }
 
 export interface StartupData {
-  name: string
-  website: string
-  industry: IndustryType | null
-  location: string
+  name: string // Required
+  website: string // Required
+  industry: IndustryType | null // Optional
+  location: string // Optional
   isIncorporated: boolean
   incorporationCity: string
   incorporationCountry: string
-  operatingCountries: string[]
-  legalStructure: LegalStructure | null
-  investmentInstrument: InvestmentInstrument | null
-  fundingRound: InvestmentStage | null
-  fundingAmountSought: number
-  preMoneyValuation: number
-  descriptionShort: string
-  descriptionMedium: string
-  descriptionLong: string
-  tractionSummary: string
-  marketSummary: string
-  mrr: number
-  arr: number
-  employeeCount: number
-  foundedYear: number
-  revenueModel: RevenueModelType | null
-  currentRunway: number
-  keyCustomers: string
-  competitors: string
-  competitorsList: string[]
-  googleDriveUrl: string
-  logoFile: File | null
-  pitchDeckFile: File | null
-  introVideoFile: File | null
+  operatingCountries: string[] // Optional
+  legalStructure: LegalStructure | null // Optional
+  investmentInstrument: InvestmentInstrument | null // Optional
+  fundingRound: InvestmentStage | null // Required - only essential fundraising field
+  fundingAmountSought: number // Optional
+  preMoneyValuation: number // Optional
+  descriptionShort: string // Required - one-liner only
+  descriptionMedium: string // Optional
+  descriptionLong: string // Optional
+  tractionSummary: string // Optional
+  marketSummary: string // Optional
+  mrr: number // Optional
+  arr: number // Optional
+  employeeCount: number // Optional
+  foundedYear: number // Optional
+  revenueModel: RevenueModelType | null // Optional
+  currentRunway: number // Optional
+  keyCustomers: string // Optional
+  competitors: string // Optional
+  competitorsList: string[] // Optional
+  googleDriveUrl: string // Optional
+  logoFile: File | null // Optional
+  pitchDeckFile: File | null // Optional
+  introVideoFile: File | null // Optional
 }
 
 export interface OnboardingDialogProps {

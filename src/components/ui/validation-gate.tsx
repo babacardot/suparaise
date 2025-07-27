@@ -246,14 +246,14 @@ export function ValidationGate({
                       {missingFields.filter(
                         (field) => field.category !== 'documents',
                       ).length > 4 && (
-                        <div className="text-xs text-sidebar-foreground/50 italic">
-                          +
-                          {missingFields.filter(
-                            (field) => field.category !== 'documents',
-                          ).length - 4}{' '}
-                          more fields...
-                        </div>
-                      )}
+                          <div className="text-xs text-sidebar-foreground/50 italic">
+                            +
+                            {missingFields.filter(
+                              (field) => field.category !== 'documents',
+                            ).length - 4}{' '}
+                            more fields...
+                          </div>
+                        )}
                     </div>
                   </div>
                 )}
@@ -280,9 +280,12 @@ export const VALIDATION_PRESETS = {
       firstName: true,
       lastName: true,
       email: true,
-      phone: true,
-      role: true,
-      // Removed bio, linkedin, githubUrl from mandatory - they will be recommended
+      // phone: true,
+      // role: true,
+      // bio: true,
+      // linkedin: true,
+      // githubUrl: true,
+      // personalWebsiteUrl: true,
     },
     company: {
       name: true,
@@ -291,18 +294,18 @@ export const VALIDATION_PRESETS = {
       descriptionShort: true,
       descriptionMedium: true,
       fundingRound: true,
-      revenueModel: true,
-      legalStructure: true,
+      // revenueModel: true,
+      // legalStructure: true,
     },
     financial: {
-      fundingAmountSought: true,
-      investmentInstrument: true,
-      preMoneyValuation: true,
-      mrr: true,
-      arr: true,
+      // fundingAmountSought: true,
+      // investmentInstrument: true,
+      // preMoneyValuation: true,
+      // mrr: true,
+      // arr: true,
     },
     documents: {
-      pitchDeckUrl: true,
+      // pitchDeckUrl: true,
     },
   } as ValidationRequirements,
 
@@ -312,16 +315,20 @@ export const VALIDATION_PRESETS = {
       firstName: true,
       lastName: true,
       email: true,
-      phone: true,
-      role: true,
-      // bio, linkedin, githubUrl are recommended, not mandatory
+      // phone: true,
+      // role: true,
+      // bio: true,
+      // linkedin: true,
+      // githubUrl: true,
+      // personalWebsiteUrl: true,
     },
     company: {
       name: true,
+      website: true,
       industry: true,
       location: true,
       descriptionShort: true,
-      descriptionMedium: true,
+      descriptionMedium: true, // More detailed pitch
       fundingRound: true,
       legalStructure: true,
       employeeCount: true,
@@ -330,23 +337,27 @@ export const VALIDATION_PRESETS = {
     },
     financial: {
       fundingAmountSought: true,
-      investmentInstrument: true,
-      preMoneyValuation: true,
+      // investmentInstrument: true,
+      // preMoneyValuation: true,
+      // mrr: true,
+      // arr: true,
     },
     documents: {
-      pitchDeckUrl: true,
+      // pitchDeckUrl: true,
     },
   } as ValidationRequirements,
 
-  // Agent requirements (essential fields for AI agent to work)
+  // Agent requirements (truly essential fields for AI agent to work effectively)
   AGENT_READY: {
     founder: {
       firstName: true,
       lastName: true,
       email: true,
-      phone: true,
-      role: true,
-      // linkedin, githubUrl are recommended for better agent performance
+      // phone: true,
+      // role: true,
+      // linkedin: true,
+      // githubUrl: true,
+      // personalWebsiteUrl: true,
     },
     company: {
       name: true,
@@ -354,18 +365,18 @@ export const VALIDATION_PRESETS = {
       location: true,
       descriptionShort: true,
       descriptionMedium: true,
-      fundingRound: true,
-      revenueModel: true,
-      legalStructure: true,
+      // fundingRound: true,
+      // revenueModel: true,
+      // legalStructure: true,
     },
     financial: {
-      fundingAmountSought: true,
-      preMoneyValuation: true,
-      mrr: true,
-      arr: true,
+      // fundingAmountSought: true,
+      // preMoneyValuation: true,
+      // mrr: true,
+      // arr: true,
     },
     documents: {
-      pitchDeckUrl: true,
+      // pitchDeckUrl: true,
     },
   } as ValidationRequirements,
 } as const
