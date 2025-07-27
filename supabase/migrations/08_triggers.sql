@@ -206,19 +206,75 @@ CREATE OR REPLACE FUNCTION public.handle_submission_count_increment()
 RETURNS TRIGGER AS $$
 DECLARE
   user_id_to_increment UUID;
+  user_permission permission_level;
+  user_usage_billing_enabled BOOLEAN;
+  user_monthly_used INTEGER;
+  user_monthly_limit INTEGER;
+  user_stripe_customer_id TEXT;
+  request_id bigint;
+  supabase_url text;
+  service_role_key text;
 BEGIN
   -- Only increment when status changes to 'completed'
   IF (TG_OP = 'UPDATE' AND NEW.status <> OLD.status AND NEW.status = 'completed') THEN
     
-    -- Get the user_id for this submission
-    SELECT s.user_id INTO user_id_to_increment
+    -- Get the user_id and their current submission data
+    SELECT s.user_id, p.permission_level, p.usage_billing_enabled, 
+           p.monthly_submissions_used, p.monthly_submissions_limit, p.stripe_customer_id
+    INTO user_id_to_increment, user_permission, user_usage_billing_enabled,
+         user_monthly_used, user_monthly_limit, user_stripe_customer_id
     FROM startups s
+    JOIN profiles p ON s.user_id = p.id
     WHERE s.id = NEW.startup_id;
     
     IF user_id_to_increment IS NOT NULL THEN
       BEGIN
-        -- Increment the user's monthly submission count
-        PERFORM increment_submission_count(user_id_to_increment);
+        -- Determine if this should be counted as usage billing or plan-based
+        IF user_usage_billing_enabled = TRUE AND user_monthly_used >= user_monthly_limit THEN
+          -- This is a usage-based submission (beyond plan quota)
+          UPDATE profiles
+          SET 
+            monthly_usage_submissions_count = monthly_usage_submissions_count + 1,
+            total_usage_submissions = total_usage_submissions + 1,
+            -- Update ESTIMATED cost (actual cost comes from Stripe invoices)
+            monthly_estimated_usage_cost = monthly_estimated_usage_cost + 0.85,
+            updated_at = NOW()
+          WHERE id = user_id_to_increment;
+          
+          -- Record usage event in Stripe via API call
+          IF user_stripe_customer_id IS NOT NULL THEN
+            BEGIN
+              -- Get configuration values
+              supabase_url := secrets.get_config('supabase_url');
+              service_role_key := secrets.get_config('service_role_key');
+              
+              -- Call internal API to record Stripe usage event
+              SELECT INTO request_id net.http_post(
+                url := supabase_url || '/functions/v1/record-stripe-usage',
+                body := jsonb_build_object(
+                  'customerId', user_stripe_customer_id,
+                  'eventName', 'submission',
+                  'value', 1
+                ),
+                headers := jsonb_build_object(
+                  'Content-Type', 'application/json',
+                  'Authorization', 'Bearer ' || service_role_key
+                )
+              );
+            EXCEPTION WHEN OTHERS THEN
+              RAISE WARNING 'Failed to record Stripe usage event for customer %: %', user_stripe_customer_id, SQLERRM;
+            END;
+          END IF;
+          
+        ELSE
+          -- This is a plan-based submission (within quota)
+          UPDATE profiles
+          SET 
+            monthly_submissions_used = monthly_submissions_used + 1,
+            updated_at = NOW()
+          WHERE id = user_id_to_increment;
+        END IF;
+        
       EXCEPTION WHEN OTHERS THEN
         RAISE WARNING 'Failed to increment submission count for user %: %', user_id_to_increment, SQLERRM;
       END;
@@ -227,7 +283,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, secrets, net;
 
 -- Create triggers for all submission tables
 CREATE TRIGGER on_submission_completion
@@ -306,6 +362,7 @@ DECLARE
     monthly_used INTEGER;
     monthly_limit INTEGER;
     user_id_of_startup UUID;
+    user_usage_billing_enabled BOOLEAN;
 BEGIN
     -- Get the user_id from the startup_id of the new submission
     SELECT s.user_id INTO user_id_of_startup
@@ -318,16 +375,19 @@ BEGIN
         RETURN NEW;
     END IF;
 
-    -- Get the user's quota from their profile
-    SELECT p.monthly_submissions_used, p.monthly_submissions_limit
-    INTO monthly_used, monthly_limit
+    -- Get the user's quota and usage billing status from their profile
+    SELECT p.monthly_submissions_used, p.monthly_submissions_limit, p.usage_billing_enabled
+    INTO monthly_used, monthly_limit, user_usage_billing_enabled
     FROM public.profiles p
     WHERE p.id = user_id_of_startup;
 
-    -- Check if the quota is exceeded
-    IF monthly_used >= monthly_limit THEN
-        RAISE EXCEPTION 'You have reached your monthly submission limit of % submissions.', monthly_limit;
+    -- Check if the quota is exceeded AND usage billing is not enabled
+    IF monthly_used >= monthly_limit AND user_usage_billing_enabled = FALSE THEN
+        RAISE EXCEPTION 'You have reached your monthly submission limit of % submissions. Enable usage billing in your settings to continue with pay-per-submission.', monthly_limit;
     END IF;
+
+    -- If usage billing is enabled, allow submissions beyond quota (they will be charged)
+    -- The cost will be handled in the completion trigger
 
     RETURN NEW;
 END;

@@ -255,12 +255,26 @@ CREATE TABLE profiles (
     subscription_status subscription_status,
     subscription_current_period_end TIMESTAMPTZ,
     permission_level permission_level DEFAULT 'FREE' NOT NULL,
+    -- Plan-based submissions (included in subscription)
     monthly_submissions_used INTEGER DEFAULT 0 NOT NULL,
     monthly_submissions_limit INTEGER DEFAULT 3 NOT NULL,
+    -- Usage billing fields
+    usage_billing_enabled BOOLEAN DEFAULT FALSE NOT NULL,
+    usage_billing_meter_id TEXT, -- Stripe meter ID for tracking usage
+    -- Usage-based submissions (charged per submission)
+    monthly_usage_submissions_count INTEGER DEFAULT 0 NOT NULL,
+    total_usage_submissions INTEGER DEFAULT 0 NOT NULL, -- Lifetime count
+    monthly_estimated_usage_cost NUMERIC(10, 2) DEFAULT 0.00 NOT NULL,
+    actual_usage_cost NUMERIC(10, 2) DEFAULT 0.00 NOT NULL, -- From last invoice
+    last_invoice_date TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT chk_monthly_submissions_used CHECK (monthly_submissions_used >= 0),
-    CONSTRAINT chk_monthly_submissions_limit CHECK (monthly_submissions_limit > 0)
+    CONSTRAINT chk_monthly_submissions_limit CHECK (monthly_submissions_limit > 0),
+    CONSTRAINT chk_monthly_usage_submissions_count CHECK (monthly_usage_submissions_count >= 0),
+    CONSTRAINT chk_total_usage_submissions CHECK (total_usage_submissions >= 0),
+    CONSTRAINT chk_monthly_estimated_usage_cost CHECK (monthly_estimated_usage_cost >= 0),
+    CONSTRAINT chk_actual_usage_cost CHECK (actual_usage_cost >= 0)
 );
 
 -- Create trigger to auto-create profile when user signs up
@@ -693,8 +707,18 @@ CREATE TABLE profiles_archive (
     subscription_status subscription_status,
     subscription_current_period_end TIMESTAMPTZ,
     permission_level permission_level DEFAULT 'FREE' NOT NULL,
+    -- Plan-based submissions (included in subscription)
     monthly_submissions_used INTEGER DEFAULT 0 NOT NULL,
     monthly_submissions_limit INTEGER DEFAULT 3 NOT NULL,
+    -- Usage billing fields
+    usage_billing_enabled BOOLEAN DEFAULT FALSE NOT NULL,
+    usage_billing_meter_id TEXT,
+    -- Usage-based submissions (charged per submission)
+    monthly_usage_submissions_count INTEGER DEFAULT 0 NOT NULL,
+    total_usage_submissions INTEGER DEFAULT 0 NOT NULL,
+    monthly_estimated_usage_cost NUMERIC(10, 2) DEFAULT 0.00 NOT NULL,
+    actual_usage_cost NUMERIC(10, 2) DEFAULT 0.00 NOT NULL,
+    last_invoice_date TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     -- Archive-specific fields

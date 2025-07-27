@@ -732,6 +732,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          actual_usage_cost: number
           created_at: string | null
           deleted_at: string | null
           email: string | null
@@ -739,8 +740,11 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_subscribed: boolean | null
+          last_invoice_date: string | null
+          monthly_estimated_usage_cost: number
           monthly_submissions_limit: number
           monthly_submissions_used: number
+          monthly_usage_submissions_count: number
           permission_level: Database['public']['Enums']['permission_level']
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -748,9 +752,13 @@ export type Database = {
           subscription_status:
             | Database['public']['Enums']['subscription_status']
             | null
+          total_usage_submissions: number
           updated_at: string | null
+          usage_billing_enabled: boolean
+          usage_billing_meter_id: string | null
         }
         Insert: {
+          actual_usage_cost?: number
           created_at?: string | null
           deleted_at?: string | null
           email?: string | null
@@ -758,8 +766,11 @@ export type Database = {
           id: string
           is_active?: boolean | null
           is_subscribed?: boolean | null
+          last_invoice_date?: string | null
+          monthly_estimated_usage_cost?: number
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
+          monthly_usage_submissions_count?: number
           permission_level?: Database['public']['Enums']['permission_level']
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -767,9 +778,13 @@ export type Database = {
           subscription_status?:
             | Database['public']['Enums']['subscription_status']
             | null
+          total_usage_submissions?: number
           updated_at?: string | null
+          usage_billing_enabled?: boolean
+          usage_billing_meter_id?: string | null
         }
         Update: {
+          actual_usage_cost?: number
           created_at?: string | null
           deleted_at?: string | null
           email?: string | null
@@ -777,8 +792,11 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_subscribed?: boolean | null
+          last_invoice_date?: string | null
+          monthly_estimated_usage_cost?: number
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
+          monthly_usage_submissions_count?: number
           permission_level?: Database['public']['Enums']['permission_level']
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -786,12 +804,16 @@ export type Database = {
           subscription_status?:
             | Database['public']['Enums']['subscription_status']
             | null
+          total_usage_submissions?: number
           updated_at?: string | null
+          usage_billing_enabled?: boolean
+          usage_billing_meter_id?: string | null
         }
         Relationships: []
       }
       profiles_archive: {
         Row: {
+          actual_usage_cost: number
           archived_at: string
           archived_reason: string
           created_at: string | null
@@ -801,8 +823,11 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_subscribed: boolean | null
+          last_invoice_date: string | null
+          monthly_estimated_usage_cost: number
           monthly_submissions_limit: number
           monthly_submissions_used: number
+          monthly_usage_submissions_count: number
           original_id: string
           permission_level: Database['public']['Enums']['permission_level']
           stripe_customer_id: string | null
@@ -811,9 +836,13 @@ export type Database = {
           subscription_status:
             | Database['public']['Enums']['subscription_status']
             | null
+          total_usage_submissions: number
           updated_at: string | null
+          usage_billing_enabled: boolean
+          usage_billing_meter_id: string | null
         }
         Insert: {
+          actual_usage_cost?: number
           archived_at?: string
           archived_reason?: string
           created_at?: string | null
@@ -823,8 +852,11 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_subscribed?: boolean | null
+          last_invoice_date?: string | null
+          monthly_estimated_usage_cost?: number
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
+          monthly_usage_submissions_count?: number
           original_id: string
           permission_level?: Database['public']['Enums']['permission_level']
           stripe_customer_id?: string | null
@@ -833,9 +865,13 @@ export type Database = {
           subscription_status?:
             | Database['public']['Enums']['subscription_status']
             | null
+          total_usage_submissions?: number
           updated_at?: string | null
+          usage_billing_enabled?: boolean
+          usage_billing_meter_id?: string | null
         }
         Update: {
+          actual_usage_cost?: number
           archived_at?: string
           archived_reason?: string
           created_at?: string | null
@@ -845,8 +881,11 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_subscribed?: boolean | null
+          last_invoice_date?: string | null
+          monthly_estimated_usage_cost?: number
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
+          monthly_usage_submissions_count?: number
           original_id?: string
           permission_level?: Database['public']['Enums']['permission_level']
           stripe_customer_id?: string | null
@@ -855,7 +894,10 @@ export type Database = {
           subscription_status?:
             | Database['public']['Enums']['subscription_status']
             | null
+          total_usage_submissions?: number
           updated_at?: string | null
+          usage_billing_enabled?: boolean
+          usage_billing_meter_id?: string | null
         }
         Relationships: []
       }
@@ -1761,6 +1803,10 @@ export type Database = {
         Args: { p_startup_id: string }
         Returns: Json
       }
+      get_usage_billing_stats: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       get_user_agent_settings: {
         Args: { p_user_id: string; p_startup_id?: string }
         Returns: Json
@@ -1778,6 +1824,10 @@ export type Database = {
         Returns: Json
       }
       get_user_startups: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_user_usage_billing: {
         Args: { p_user_id: string }
         Returns: Json
       }
@@ -1805,9 +1855,21 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      record_usage_submission: {
+        Args: { p_user_id: string; p_submission_cost?: number }
+        Returns: Json
+      }
       remove_startup_founder: {
         Args: { p_user_id: string; p_founder_id: string }
         Returns: Json
+      }
+      reset_monthly_usage_billing: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      reset_monthly_usage_costs: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       retry_submission: {
         Args: {
@@ -1828,6 +1890,10 @@ export type Database = {
       }
       soft_delete_user_account: {
         Args: { p_user_id: string }
+        Returns: Json
+      }
+      toggle_usage_billing: {
+        Args: { p_user_id: string; p_enable: boolean; p_meter_id?: string }
         Returns: Json
       }
       update_accelerator_submission_status: {

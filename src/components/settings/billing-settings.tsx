@@ -139,9 +139,47 @@ export default function BillingSettings() {
   const [isPortalLoading, setIsPortalLoading] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successPlan, setSuccessPlan] = useState<string>('')
+  const [usageBillingData, setUsageBillingData] = useState({
+    usageBillingEnabled: false,
+    currentMonthUsageCost: 0,
+    monthlyUsageSubmissionsCount: 0,
+    totalUsageSubmissions: 0,
+    monthlySubmissionsUsed: 0,
+    monthlySubmissionsLimit: 0,
+  })
+  const [usageBillingLoading, setUsageBillingLoading] = useState(false)
   const params = useParams()
   const searchParams = useSearchParams()
   const startupId = params.startupId as string
+
+  // Fetch usage billing data
+  React.useEffect(() => {
+    const fetchUsageBillingData = async () => {
+      if (!user?.id) return
+
+      try {
+        const response = await fetch('/api/usage-billing')
+        if (!response.ok) return
+
+        const data = await response.json()
+        if (data && !data.error) {
+          setUsageBillingData({
+            usageBillingEnabled: data.usageBillingEnabled || false,
+            currentMonthUsageCost: data.currentMonthUsageCost || 0,
+            monthlyUsageSubmissionsCount:
+              data.monthlyUsageSubmissionsCount || 0,
+            totalUsageSubmissions: data.totalUsageSubmissions || 0,
+            monthlySubmissionsUsed: data.monthlySubmissionsUsed || 0,
+            monthlySubmissionsLimit: data.monthlySubmissionsLimit || 0,
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching usage billing data:', error)
+      }
+    }
+
+    fetchUsageBillingData()
+  }, [user?.id])
 
   // Check for success parameter from Stripe redirect
   React.useEffect(() => {
@@ -227,6 +265,54 @@ export default function BillingSettings() {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleToggleUsageBilling = async () => {
+    playClickSound()
+    setUsageBillingLoading(true)
+
+    try {
+      const response = await fetch('/api/usage-billing/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          enable: !usageBillingData.usageBillingEnabled,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update usage billing')
+      }
+
+      // Update local state
+      setUsageBillingData((prev) => ({
+        ...prev,
+        usageBillingEnabled: !prev.usageBillingEnabled,
+      }))
+
+      toast({
+        variant: 'success',
+        title: 'Usage billing updated',
+        description:
+          data.message || 'Usage billing settings updated successfully.',
+      })
+    } catch (error) {
+      console.error('Usage billing error:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update usage billing settings.',
+      })
+    } finally {
+      setUsageBillingLoading(false)
     }
   }
 
@@ -343,6 +429,75 @@ export default function BillingSettings() {
               </div>
             )}
           </div>
+
+          {/* Usage Billing Toggle - only for Pro+ users */}
+          {isSubscribed &&
+            (subscription?.permission_level === 'PRO' ||
+              subscription?.permission_level === 'MAX') && (
+              <div
+                className={cn(
+                  'group relative p-4 border rounded-sm transition-all duration-200',
+                  'hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/50 dark:hover:bg-purple-950/20',
+                  usageBillingData.usageBillingEnabled &&
+                    'border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/10',
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-medium text-lg">Usage billing</h3>
+                      <Badge
+                        className={cn(
+                          'border text-xs font-medium',
+                          subscription?.permission_level === 'MAX'
+                            ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                            : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                        )}
+                      >
+                        {subscription?.permission_level}
+                      </Badge>
+                    </div>
+                    <p className="text-sm leading-relaxed text-muted-foreground mb-2">
+                      Continue running after your monthly quota with
+                      pay-per-submission billing at $0.85 per submission.
+                    </p>
+                    {usageBillingData.usageBillingEnabled && (
+                      <div className="text-xs text-purple-600 dark:text-purple-400 space-y-1">
+                        <p>
+                          Plan quota used:{' '}
+                          {usageBillingData.monthlySubmissionsUsed}/
+                          {usageBillingData.monthlySubmissionsLimit}
+                        </p>
+                        <p>
+                          Usage submissions this month:{' '}
+                          {usageBillingData.monthlyUsageSubmissionsCount}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleToggleUsageBilling}
+                    disabled={usageBillingLoading}
+                    className={cn(
+                      'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2',
+                      usageBillingData.usageBillingEnabled
+                        ? 'bg-purple-600'
+                        : 'bg-gray-200 dark:bg-gray-700',
+                      usageBillingLoading && 'opacity-50 cursor-not-allowed',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
+                        usageBillingData.usageBillingEnabled
+                          ? 'translate-x-5'
+                          : 'translate-x-1',
+                      )}
+                    />
+                  </button>
+                </div>
+              </div>
+            )}
 
           {/* Subscription Management - moved above pricing for Pro+ users */}
           {isSubscribed && (

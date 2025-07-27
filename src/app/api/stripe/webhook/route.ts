@@ -32,10 +32,12 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Handle subscription events by calling Edge Function
+  // Handle subscription events and usage billing events by calling Edge Function
   if (
     event.type.startsWith('customer.subscription.') ||
-    event.type.startsWith('invoice.payment_')
+    event.type.startsWith('invoice.payment_') ||
+    event.type.startsWith('billing.meter.') ||
+    event.type === 'invoice.finalized'
   ) {
     try {
       let subscriptionData: {
@@ -46,6 +48,8 @@ export async function POST(req: NextRequest) {
         currentPeriodEnd?: string
         planName?: string
         priceId?: string
+        usageAmount?: number
+        meteringData?: object
       } = {
         customerId: '',
         eventType: event.type,
@@ -81,9 +85,40 @@ export async function POST(req: NextRequest) {
         }
       }
       // Handle invoice events
-      else if (event.type.startsWith('invoice.payment_')) {
+      else if (
+        event.type.startsWith('invoice.payment_') ||
+        event.type === 'invoice.finalized'
+      ) {
         const invoice = event.data.object as Stripe.Invoice
         subscriptionData.customerId = invoice.customer as string
+
+        // For usage billing invoices, extract usage amount
+        if (invoice.lines?.data) {
+          const usageLineItem = invoice.lines.data.find(
+            (line) =>
+              line.description?.includes('usage') &&
+              line.metadata?.usage_billing === 'true',
+          )
+
+          if (usageLineItem && usageLineItem.amount) {
+            subscriptionData.usageAmount = usageLineItem.amount / 100 // Convert from cents
+          }
+        }
+      }
+      // Handle billing meter events
+      else if (event.type.startsWith('billing.meter.')) {
+        const meterEvent = event.data.object as unknown as Record<
+          string,
+          unknown
+        >
+        // For billing meter events, customer ID might be in different location
+        subscriptionData.customerId =
+          (meterEvent.customer_id as string) ||
+          (meterEvent.stripe_customer_id as string) ||
+          ((meterEvent.payload as Record<string, unknown>)
+            ?.stripe_customer_id as string) ||
+          ''
+        subscriptionData.meteringData = meterEvent
       }
 
       console.log('Calling Edge Function with:', subscriptionData)

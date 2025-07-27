@@ -13,6 +13,7 @@ DECLARE
     v_affected_rows INTEGER;
 BEGIN
     -- Reset monthly submission counts for free users whose monthly anniversary has passed
+    -- Only reset plan-based submissions, not usage billing submissions
     UPDATE profiles 
     SET 
         monthly_submissions_used = 0,
@@ -49,6 +50,7 @@ DECLARE
     v_affected_rows INTEGER;
 BEGIN
     -- Reset monthly submission counts for paid users whose billing period has ended
+    -- Only reset plan-based submissions, not usage billing submissions
     UPDATE profiles 
     SET 
         monthly_submissions_used = 0,
@@ -78,6 +80,38 @@ BEGIN
 END;
 $$;
 
+-- Function to reset usage billing monthly counters (separate from plan-based)
+CREATE OR REPLACE FUNCTION reset_monthly_usage_billing()
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+    v_affected_rows INTEGER;
+BEGIN
+    -- Reset usage billing counters but preserve actual costs until next invoice period
+    -- This depends on your billing cycle - for weekly billing, you might want different logic
+    UPDATE profiles 
+    SET 
+        monthly_usage_submissions_count = 0,
+        monthly_estimated_usage_cost = 0.00,
+        -- Keep actual_usage_cost - it gets reset when Stripe processes the invoice
+        updated_at = NOW()
+    WHERE 
+        is_active = TRUE 
+        AND usage_billing_enabled = TRUE
+        AND (monthly_usage_submissions_count > 0 OR monthly_estimated_usage_cost > 0);
+    
+    GET DIAGNOSTICS v_affected_rows = ROW_COUNT;
+    
+    RETURN json_build_object(
+        'success', true,
+        'affected_rows', v_affected_rows,
+        'type', 'usage_billing_estimated_reset'
+    );
+END;
+$$;
+
 -- Function to run all automatic resets (can be called by cron or manually)
 CREATE OR REPLACE FUNCTION run_automatic_subscription_resets()
 RETURNS JSON
@@ -87,93 +121,34 @@ AS $$
 DECLARE
     v_free_result JSON;
     v_paid_result JSON;
+    v_usage_result JSON;
     v_total_affected INTEGER;
 BEGIN
-    -- Reset free users
+    -- Reset free users (plan-based submissions)
     SELECT check_and_reset_free_users() INTO v_free_result;
     
-    -- Reset paid users
+    -- Reset paid users (plan-based submissions)
     SELECT check_and_reset_paid_users() INTO v_paid_result;
+    
+    -- Reset usage billing counters (usage-based submissions)
+    SELECT reset_monthly_usage_billing() INTO v_usage_result;
     
     -- Calculate total affected rows
     v_total_affected := 
         COALESCE((v_free_result->>'affected_rows')::INTEGER, 0) + 
-        COALESCE((v_paid_result->>'affected_rows')::INTEGER, 0);
+        COALESCE((v_paid_result->>'affected_rows')::INTEGER, 0) +
+        COALESCE((v_usage_result->>'affected_rows')::INTEGER, 0);
     
     RETURN json_build_object(
         'success', true,
         'total_affected_rows', v_total_affected,
         'free_users_result', v_free_result,
         'paid_users_result', v_paid_result,
+        'usage_billing_result', v_usage_result,
         'executed_at', NOW()
     );
 END;
 $$;
-
--- Create a trigger function that runs on profile updates to check for resets
-CREATE OR REPLACE FUNCTION trigger_check_submission_reset()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_should_reset BOOLEAN := FALSE;
-BEGIN
-    -- Only check for resets if this is an update (not insert)
-    IF TG_OP = 'UPDATE' THEN
-        -- Check if this is a free user who might need a reset
-        IF NEW.permission_level = 'FREE' AND NEW.monthly_submissions_used > 0 THEN
-            -- Check if it's been at least 30 days since account creation
-            IF NEW.created_at + INTERVAL '30 days' <= NOW() THEN
-                -- Check if we haven't reset this month
-                IF DATE_TRUNC('month', OLD.updated_at) < DATE_TRUNC('month', NOW()) THEN
-                    v_should_reset := TRUE;
-                END IF;
-            END IF;
-        END IF;
-        
-        -- Check if this is a paid user who might need a reset
-        IF NEW.is_subscribed = TRUE AND NEW.permission_level IN ('PRO', 'MAX') 
-           AND NEW.monthly_submissions_used > 0 
-           AND NEW.subscription_current_period_end IS NOT NULL THEN
-            -- Check if billing period has ended
-            IF NEW.subscription_current_period_end <= NOW() THEN
-                -- Check if we haven't reset since the period ended
-                IF OLD.updated_at < NEW.subscription_current_period_end THEN
-                    v_should_reset := TRUE;
-                END IF;
-            END IF;
-        END IF;
-        
-        -- If we should reset, do it
-        IF v_should_reset THEN
-            NEW.monthly_submissions_used := 0;
-            NEW.updated_at := NOW();
-        END IF;
-    END IF;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
--- Create the trigger (but make it conditional to avoid affecting other updates)
-CREATE TRIGGER auto_reset_subscription_limits
-    BEFORE UPDATE ON profiles
-    FOR EACH ROW
-    WHEN (
-        -- Only trigger when relevant fields are being accessed/updated
-        OLD.monthly_submissions_used IS DISTINCT FROM NEW.monthly_submissions_used
-        OR OLD.subscription_current_period_end IS DISTINCT FROM NEW.subscription_current_period_end
-        OR OLD.permission_level IS DISTINCT FROM NEW.permission_level
-    )
-    EXECUTE FUNCTION trigger_check_submission_reset();
-
--- Grant execute permissions for the new functions
-GRANT EXECUTE ON FUNCTION check_and_reset_free_users() TO authenticated;
-GRANT EXECUTE ON FUNCTION check_and_reset_paid_users() TO authenticated;
-GRANT EXECUTE ON FUNCTION run_automatic_subscription_resets() TO authenticated;
-
--- Also grant to service role for automated operations
-GRANT EXECUTE ON FUNCTION check_and_reset_free_users() TO service_role;
-GRANT EXECUTE ON FUNCTION check_and_reset_paid_users() TO service_role;
-GRANT EXECUTE ON FUNCTION run_automatic_subscription_resets() TO service_role;
 
 -- Create a simple view for monitoring subscription usage (explicitly without SECURITY DEFINER)
 -- This view uses the permissions of the querying user, not the view creator

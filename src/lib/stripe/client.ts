@@ -40,6 +40,15 @@ export const STRIPE_PRICE_IDS = {
   max_yearly: process.env.NEXT_PUBLIC_STRIPE_MAX_YEARLY_PRICE_ID!,
 }
 
+// Usage billing configuration
+export const USAGE_BILLING_CONFIG = {
+  pricePerSubmission: 0.85, // $0.85 per submission ($0.60 base + $0.25 processing)
+  baseCost: 0.6, // Base cost per submission
+  processingCost: 0.25, // Processing cost per submission
+  meterId: process.env.NEXT_PUBLIC_STRIPE_USAGE_BILLING_METER_ID!, // Stripe billing meter ID
+  priceId: process.env.NEXT_PUBLIC_STRIPE_USAGE_BILLING_PRICE_ID!, // Stripe price ID for usage billing
+}
+
 // Subscription plans configuration
 export const SUBSCRIPTION_PLANS = {
   starter: {
@@ -77,4 +86,31 @@ export const SUBSCRIPTION_PLANS = {
     interval: 'year' as const,
     tier: 'max' as const,
   },
+}
+
+// Helper function to record usage meter event in Stripe
+export const recordUsageEvent = async (
+  customerId: string,
+  eventName: string = 'submission',
+) => {
+  if (typeof window !== 'undefined') {
+    throw new Error('This function can only be called on the server side')
+  }
+
+  try {
+    const stripe = getServerStripe()
+
+    await stripe.billing.meterEvents.create({
+      event_name: eventName,
+      payload: {
+        stripe_customer_id: customerId,
+        value: '1', // 1 submission
+      },
+    })
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error recording usage event:', error)
+    return { success: false, error }
+  }
 }

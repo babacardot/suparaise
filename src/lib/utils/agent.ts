@@ -200,7 +200,9 @@ function buildDataPayload(
         .join(', '),
     },
     asset_cloud_drive: { value: startup.google_drive_url },
-    asset_pitch_deck: { value: startup.google_drive_url || startup.pitch_deck_url },
+    asset_pitch_deck: {
+      value: startup.google_drive_url || startup.pitch_deck_url,
+    },
     asset_demo_video: { value: startup.intro_video_url },
   }
 }

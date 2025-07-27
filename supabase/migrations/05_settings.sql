@@ -1625,3 +1625,205 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 GRANT EXECUTE ON FUNCTION calculate_target_success_rate(UUID, TEXT) TO authenticated;
 
+-- =================================================================
+-- USAGE BILLING FUNCTIONS
+-- =================================================================
+
+-- Function to get user's usage billing settings and current usage
+CREATE OR REPLACE FUNCTION get_user_usage_billing(p_user_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    SELECT jsonb_build_object(
+        'usageBillingEnabled', p.usage_billing_enabled,
+        'usageBillingMeterId', p.usage_billing_meter_id,
+        'monthlyUsageSubmissionsCount', p.monthly_usage_submissions_count,
+        'totalUsageSubmissions', p.total_usage_submissions,
+        'monthlyEstimatedUsageCost', p.monthly_estimated_usage_cost,
+        'permissionLevel', p.permission_level,
+        'isSubscribed', p.is_subscribed,
+        'monthlySubmissionsUsed', p.monthly_submissions_used,
+        'monthlySubmissionsLimit', p.monthly_submissions_limit,
+        'stripeCustomerId', p.stripe_customer_id
+    )
+    INTO result
+    FROM profiles p
+    WHERE p.id = p_user_id AND p.is_active = TRUE;
+
+    -- Return error if user not found
+    IF result IS NULL THEN
+        RETURN jsonb_build_object('error', 'User not found or inactive');
+    END IF;
+
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to enable/disable usage billing
+CREATE OR REPLACE FUNCTION toggle_usage_billing(
+    p_user_id UUID,
+    p_enable BOOLEAN,
+    p_meter_id TEXT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    user_permission permission_level;
+    user_subscribed BOOLEAN;
+BEGIN
+    -- Get user's permission level and subscription status
+    SELECT permission_level, is_subscribed 
+    INTO user_permission, user_subscribed
+    FROM profiles
+    WHERE id = p_user_id AND is_active = TRUE;
+
+    -- Check if user exists
+    IF user_permission IS NULL THEN
+        RETURN jsonb_build_object('error', 'User not found or inactive');
+    END IF;
+
+    -- Only allow PRO and MAX users to enable usage billing
+    IF p_enable = TRUE AND user_permission NOT IN ('PRO', 'MAX', 'ENTERPRISE') THEN
+        RETURN jsonb_build_object('error', 'Usage billing is only available for PRO and MAX users');
+    END IF;
+
+    -- Only allow subscribed users to enable usage billing
+    IF p_enable = TRUE AND user_subscribed = FALSE THEN
+        RETURN jsonb_build_object('error', 'Usage billing requires an active subscription');
+    END IF;
+
+    -- Update the usage billing status
+    UPDATE profiles
+    SET 
+        usage_billing_enabled = p_enable,
+        usage_billing_meter_id = CASE 
+            WHEN p_enable = TRUE THEN COALESCE(p_meter_id, usage_billing_meter_id)
+            ELSE NULL
+        END,
+        updated_at = NOW()
+    WHERE id = p_user_id;
+
+    RETURN jsonb_build_object(
+        'success', TRUE,
+        'usageBillingEnabled', p_enable,
+        'message', CASE 
+            WHEN p_enable = TRUE THEN 'Usage billing enabled successfully'
+            ELSE 'Usage billing disabled successfully'
+        END
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to record a usage submission and update costs
+-- This is now handled automatically by the triggers, but keeping for manual use
+CREATE OR REPLACE FUNCTION record_usage_submission(
+    p_user_id UUID,
+    p_submission_cost NUMERIC DEFAULT 0.85
+)
+RETURNS JSONB AS $$
+DECLARE
+    user_billing_enabled BOOLEAN;
+BEGIN
+    -- Check if user has usage billing enabled
+    SELECT usage_billing_enabled 
+    INTO user_billing_enabled
+    FROM profiles
+    WHERE id = p_user_id AND is_active = TRUE;
+
+    -- Return error if user not found
+    IF user_billing_enabled IS NULL THEN
+        RETURN jsonb_build_object('error', 'User not found or inactive');
+    END IF;
+
+    -- Only record usage if billing is enabled
+    IF user_billing_enabled = FALSE THEN
+        RETURN jsonb_build_object('error', 'Usage billing is not enabled for this user');
+    END IF;
+
+    -- Update usage costs and submission count
+    UPDATE profiles
+    SET 
+        monthly_usage_submissions_count = monthly_usage_submissions_count + 1,
+        total_usage_submissions = total_usage_submissions + 1,
+        monthly_estimated_usage_cost = monthly_estimated_usage_cost + p_submission_cost,
+        updated_at = NOW()
+    WHERE id = p_user_id;
+
+    RETURN jsonb_build_object(
+        'success', TRUE,
+        'submissionCost', p_submission_cost,
+        'message', 'Usage submission recorded successfully'
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to reset monthly usage costs (typically called by a monthly cron job)
+CREATE OR REPLACE FUNCTION reset_monthly_usage_costs()
+RETURNS INTEGER AS $$
+DECLARE
+    reset_count INTEGER := 0;
+BEGIN
+    -- Reset monthly usage cost and usage count for all users
+    -- Preserve total_usage_submissions as it's a lifetime counter
+    UPDATE profiles
+    SET 
+        monthly_usage_submissions_count = 0,
+        monthly_estimated_usage_cost = 0.00,
+        updated_at = NOW()
+    WHERE usage_billing_enabled = TRUE
+      AND (monthly_usage_submissions_count > 0 OR monthly_estimated_usage_cost > 0);
+
+    GET DIAGNOSTICS reset_count = ROW_COUNT;
+
+    RETURN reset_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function to get usage billing statistics for a user
+CREATE OR REPLACE FUNCTION get_usage_billing_stats(p_user_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    -- Build comprehensive stats with separated estimated/actual costs
+    SELECT jsonb_build_object(
+        -- Usage billing stats
+        'estimatedUsageCost', p.monthly_estimated_usage_cost,
+        'actualUsageCost', p.actual_usage_cost,
+        'totalPendingCost', p.monthly_estimated_usage_cost, -- Estimated cost for current period
+        'lastInvoiceDate', p.last_invoice_date,
+        'monthlyUsageSubmissionsCount', p.monthly_usage_submissions_count,
+        'totalUsageSubmissions', p.total_usage_submissions,
+        'usageBillingEnabled', p.usage_billing_enabled,
+        -- Plan-based submission stats
+        'monthlySubmissionsUsed', p.monthly_submissions_used,
+        'monthlySubmissionsLimit', p.monthly_submissions_limit,
+        'planSubmissionsRemaining', GREATEST(0, p.monthly_submissions_limit - p.monthly_submissions_used),
+        -- Combined stats
+        'totalMonthlySubmissions', p.monthly_submissions_used + p.monthly_usage_submissions_count,
+        'avgUsageCostPerSubmission', CASE 
+            WHEN p.monthly_usage_submissions_count > 0 
+            THEN p.monthly_estimated_usage_cost / p.monthly_usage_submissions_count
+            ELSE 0.85
+        END,
+        'lastUpdated', p.updated_at
+    )
+    INTO result
+    FROM profiles p
+    WHERE p.id = p_user_id AND p.is_active = TRUE;
+
+    -- Return error if user not found
+    IF result IS NULL THEN
+        RETURN jsonb_build_object('error', 'User not found or inactive');
+    END IF;
+
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Grant permissions for usage billing functions
+GRANT EXECUTE ON FUNCTION get_user_usage_billing(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION toggle_usage_billing(UUID, BOOLEAN, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION record_usage_submission(UUID, NUMERIC) TO authenticated;
+GRANT EXECUTE ON FUNCTION reset_monthly_usage_costs() TO service_role;
+GRANT EXECUTE ON FUNCTION get_usage_billing_stats(UUID) TO authenticated;
