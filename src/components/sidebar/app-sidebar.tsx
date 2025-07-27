@@ -83,10 +83,28 @@ export function AppSidebar({
   const [isToggleHovered, setIsToggleHovered] = React.useState(false)
 
   // Check if user profile is complete
-  const { isValid: isProfileComplete } = useValidation({
+  const { isValid: isProfileComplete, checkValidation, missingFields } = useValidation({
     requirements: VALIDATION_PRESETS.BASIC_APPLICATION,
     autoCheck: true,
   })
+
+  // Debug missing fields in development
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && missingFields.length > 0) {
+      console.log('🔍 Missing validation fields:', missingFields)
+    }
+  }, [missingFields])
+
+  // Force re-check validation when startup changes (helps with cache issues)
+  React.useEffect(() => {
+    if (currentStartupId) {
+      const timeoutId = setTimeout(() => {
+        checkValidation()
+      }, 500) // Small delay to ensure data is loaded
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [currentStartupId, checkValidation])
 
   // Get permission level, defaulting to FREE if not available
   const permissionLevel = subscription?.permission_level || 'FREE'
@@ -113,10 +131,10 @@ export function AppSidebar({
   // Create display startup object for the switcher with formatted name
   const displayStartupForSwitcher = currentStartup
     ? {
-        id: currentStartup.id,
-        name: displayText, // Use formatted display text
-        logo_url: currentStartup.logo_url,
-      }
+      id: currentStartup.id,
+      name: displayText, // Use formatted display text
+      logo_url: currentStartup.logo_url,
+    }
     : null
 
   const userData = {
@@ -178,14 +196,14 @@ export function AppSidebar({
       // Show Complete your onboarding if profile is incomplete
       ...(!isProfileComplete && currentStartupId
         ? [
-            {
-              title: 'Complete your onboarding',
-              url: '#',
-              animation: animations.checkmark,
-              onClick: handleCompleteProfileClick,
-              isSpecial: true,
-            },
-          ]
+          {
+            title: 'Complete your onboarding',
+            url: '#',
+            animation: animations.checkmark,
+            onClick: handleCompleteProfileClick,
+            isSpecial: true,
+          },
+        ]
         : []),
       {
         title: 'Recommend',
@@ -217,8 +235,8 @@ export function AppSidebar({
                 currentStartupId={currentStartupId}
                 currentStartupDisplay={displayStartupForSwitcher}
                 firstName={firstName}
-                onStartupSelect={onStartupSelect || (() => {})}
-                onCreateNew={onCreateNewStartup || (() => {})}
+                onStartupSelect={onStartupSelect || (() => { })}
+                onCreateNew={onCreateNewStartup || (() => { })}
                 isCollapsed={state === 'collapsed'}
               />
             </SidebarMenuItem>
@@ -251,11 +269,10 @@ export function AppSidebar({
         onMouseLeave={() => setIsToggleHovered(false)}
         variant="ghost"
         size="sm"
-        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-sm bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
-          state === 'collapsed'
+        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-sm bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
             ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
             : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
-        }`}
+          }`}
       >
         <LottieIcon
           animationData={animations.nineGrid}

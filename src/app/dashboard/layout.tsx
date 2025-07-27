@@ -122,6 +122,11 @@ export default function DashboardLayout({
     setNeedsOnboarding(false)
     if (user) {
       await refreshStartups() // Re-fetch startups to get the new one
+
+      // Add a small delay and trigger a window event to force validation refresh
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('validation-refresh'))
+      }, 1000) // 1 second delay to ensure data is fully saved and available
     }
   }, [user, refreshStartups, setNeedsOnboarding])
 
@@ -129,6 +134,11 @@ export default function DashboardLayout({
     setIsCreatingNewStartup(false)
     if (user) {
       await refreshStartups() // Re-fetch startups to get the new one
+
+      // Add a small delay and trigger a window event to force validation refresh
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('validation-refresh'))
+      }, 1000) // 1 second delay to ensure data is fully saved and available
     }
   }, [user, refreshStartups])
 
@@ -195,12 +205,12 @@ export default function DashboardLayout({
         user={
           user
             ? {
-                name: user.user_metadata?.full_name || user.email || '',
-                email: user.email || '',
-                avatar: user.user_metadata?.avatar_url,
-                startupName: currentStartup?.name || undefined,
-                startupLogo: currentStartup?.logo_url || undefined,
-              }
+              name: user.user_metadata?.full_name || user.email || '',
+              email: user.email || '',
+              avatar: user.user_metadata?.avatar_url,
+              startupName: currentStartup?.name || undefined,
+              startupLogo: currentStartup?.logo_url || undefined,
+            }
             : null
         }
         startups={startups}

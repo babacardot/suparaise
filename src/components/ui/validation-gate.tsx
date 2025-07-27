@@ -246,14 +246,14 @@ export function ValidationGate({
                       {missingFields.filter(
                         (field) => field.category !== 'documents',
                       ).length > 4 && (
-                        <div className="text-xs text-sidebar-foreground/50 italic">
-                          +
-                          {missingFields.filter(
-                            (field) => field.category !== 'documents',
-                          ).length - 4}{' '}
-                          more fields...
-                        </div>
-                      )}
+                          <div className="text-xs text-sidebar-foreground/50 italic">
+                            +
+                            {missingFields.filter(
+                              (field) => field.category !== 'documents',
+                            ).length - 4}{' '}
+                            more fields...
+                          </div>
+                        )}
                     </div>
                   </div>
                 )}
@@ -280,7 +280,7 @@ export const VALIDATION_PRESETS = {
       firstName: true,
       lastName: true,
       email: true,
-      phone: true,
+      phone: false,
       role: true,
       // bio: true,
       // linkedin: true,
@@ -305,7 +305,7 @@ export const VALIDATION_PRESETS = {
       // isIncorporated: true,
     },
     financial: {
-      fundingAmountSought: true,
+      fundingAmountSought: false,
       // investmentInstrument: true,
       // preMoneyValuation: true,
       // mrr: true,
@@ -322,7 +322,7 @@ export const VALIDATION_PRESETS = {
       firstName: true,
       lastName: true,
       email: true,
-      phone: true,
+      phone: false,
       // role: true,
       // bio: true,
       // linkedin: true,
@@ -343,7 +343,7 @@ export const VALIDATION_PRESETS = {
       // revenueModel: true,
     },
     financial: {
-      fundingAmountSought: true,
+      fundingAmountSought: false,
       // investmentInstrument: true,
       // preMoneyValuation: true,
       // mrr: true,
@@ -377,7 +377,7 @@ export const VALIDATION_PRESETS = {
       // legalStructure: true,
     },
     financial: {
-      fundingAmountSought: true,
+      fundingAmountSought: false,
       // preMoneyValuation: true,
       // mrr: true,
       // arr: true,

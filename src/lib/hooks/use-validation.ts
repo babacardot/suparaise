@@ -301,6 +301,22 @@ export function useValidation({
     }
   }, [user, currentStartupId, autoCheck, checkValidation])
 
+  // Listen for custom validation refresh events (triggered after onboarding completion)
+  useEffect(() => {
+    const handleValidationRefresh = () => {
+      if (user && currentStartupId) {
+        console.log('🔄 Forcing validation refresh after onboarding completion')
+        checkValidation()
+      }
+    }
+
+    window.addEventListener('validation-refresh', handleValidationRefresh)
+    
+    return () => {
+      window.removeEventListener('validation-refresh', handleValidationRefresh)
+    }
+  }, [user, currentStartupId, checkValidation])
+
   return {
     isValid,
     missingFields,

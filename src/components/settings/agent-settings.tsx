@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -124,6 +124,7 @@ export default function AgentSettings() {
   const [isLoading, setIsLoading] = useState(false)
 
   const [dataLoading, setDataLoading] = useState(true)
+  const [isKnowledgeBaseExpanded, setIsKnowledgeBaseExpanded] = useState(false)
 
   const [formData, setFormData] = useState({
     submissionDelay: 30, // seconds between submissions
@@ -362,7 +363,7 @@ export default function AgentSettings() {
                 'group relative p-4 border rounded-sm transition-all duration-200',
                 'hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20',
                 formData.enableStealth &&
-                  'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10',
+                'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10',
               )}
             >
               <div className="flex items-center justify-between">
@@ -413,8 +414,8 @@ export default function AgentSettings() {
                   ? 'bg-muted/30 border-muted'
                   : 'hover:border-orange-200 dark:hover:border-orange-800 hover:bg-orange-50/50 dark:hover:bg-orange-950/20',
                 formData.enableDebugMode &&
-                  isAdvancedFeatureAvailable() &&
-                  'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/10',
+                isAdvancedFeatureAvailable() &&
+                'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/10',
               )}
             >
               <div className="flex items-center justify-between">
@@ -425,7 +426,7 @@ export default function AgentSettings() {
                       className={cn(
                         'font-medium text-sm',
                         !isAdvancedFeatureAvailable() &&
-                          'text-muted-foreground',
+                        'text-muted-foreground',
                       )}
                     >
                       Developer mode
@@ -466,7 +467,7 @@ export default function AgentSettings() {
                       ? 'bg-orange-600'
                       : 'bg-gray-200 dark:bg-gray-700',
                     !isAdvancedFeatureAvailable() &&
-                      'opacity-50 cursor-not-allowed',
+                    'opacity-50 cursor-not-allowed',
                   )}
                 >
                   <span
@@ -608,7 +609,7 @@ export default function AgentSettings() {
                   className={cn(
                     'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                     !isProPlusFeatureAvailable() &&
-                      'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                    'bg-muted/50 text-muted-foreground cursor-not-allowed',
                   )}
                   value={formData.preferredTone}
                   onChange={async (e) => {
@@ -651,7 +652,7 @@ export default function AgentSettings() {
                   className={cn(
                     'rounded-sm pr-8 min-h-[100px] select-auto',
                     !isProPlusFeatureAvailable() &&
-                      'dark:bg-muted cursor-not-allowed text-muted-foreground',
+                    'dark:bg-muted cursor-not-allowed text-muted-foreground',
                   )}
                   placeholder={
                     isProPlusFeatureAvailable()
@@ -675,71 +676,87 @@ export default function AgentSettings() {
 
           {/* Agent Knowledge Base */}
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground -mt-2">
-              Provide detailed answers to these key questions to give your agent
-              a deep, contextual understanding of your startup.
-            </p>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="kpis" className="text-sm font-medium">
-                  About your key performance indicators
-                </Label>
-                <Textarea
-                  id="kpis"
-                  value={formData.kpis}
-                  onChange={(e) => handleInputChange('kpis', e.target.value)}
-                  onBlur={() => handleFieldSave('kpis')}
-                  className="rounded-sm min-h-[80px]"
-                  placeholder="e.g., Customer Acquisition Cost (CAC), Customer Lifetime Value (LTV), Churn Rate..."
-                />
+            <button
+              onClick={() => setIsKnowledgeBaseExpanded(!isKnowledgeBaseExpanded)}
+              className="flex items-center gap-2 w-full text-left hover:text-foreground transition-colors"
+            >
+              {isKnowledgeBaseExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+              <span className="font-medium text-sm">Agent context</span>
+            </button>
+
+            {isKnowledgeBaseExpanded && (
+              <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <p className="text-xs text-muted-foreground">
+                  Provide detailed answers to these key questions to give your agent
+                  a deep, contextual understanding of your startup.
+                </p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="kpis" className="text-sm font-medium">
+                      About your key performance indicators
+                    </Label>
+                    <Textarea
+                      id="kpis"
+                      value={formData.kpis}
+                      onChange={(e) => handleInputChange('kpis', e.target.value)}
+                      onBlur={() => handleFieldSave('kpis')}
+                      className="rounded-sm min-h-[80px]"
+                      placeholder="e.g., Customer Acquisition Cost (CAC), Customer Lifetime Value (LTV), Churn Rate..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="risks" className="text-sm font-medium">
+                      About your current challenges
+                    </Label>
+                    <Textarea
+                      id="risks"
+                      value={formData.risks}
+                      onChange={(e) => handleInputChange('risks', e.target.value)}
+                      onBlur={() => handleFieldSave('risks')}
+                      className="rounded-sm min-h-[80px]"
+                      placeholder="e.g., Market competition, regulatory hurdles, technological challenges, key dependencies..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="unfairAdvantage"
+                      className="text-sm font-medium"
+                    >
+                      About your unfair advantage
+                    </Label>
+                    <Textarea
+                      id="unfairAdvantage"
+                      value={formData.unfairAdvantage}
+                      onChange={(e) =>
+                        handleInputChange('unfairAdvantage', e.target.value)
+                      }
+                      onBlur={() => handleFieldSave('unfairAdvantage')}
+                      className="rounded-sm min-h-[80px]"
+                      placeholder="e.g., Proprietary technology, exclusive partnerships, unique data access, world-class team expertise..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="useOfFunds" className="text-sm font-medium">
+                      About your use of funds
+                    </Label>
+                    <Textarea
+                      id="useOfFunds"
+                      value={formData.useOfFunds}
+                      onChange={(e) =>
+                        handleInputChange('useOfFunds', e.target.value)
+                      }
+                      onBlur={() => handleFieldSave('useOfFunds')}
+                      className="rounded-sm min-h-[80px]"
+                      placeholder="e.g., 40% for product development, 30% for sales & marketing, 20% for hiring key personnel, 10% for operational expenses..."
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="risks" className="text-sm font-medium">
-                  About your current challenges
-                </Label>
-                <Textarea
-                  id="risks"
-                  value={formData.risks}
-                  onChange={(e) => handleInputChange('risks', e.target.value)}
-                  onBlur={() => handleFieldSave('risks')}
-                  className="rounded-sm min-h-[80px]"
-                  placeholder="e.g., Market competition, regulatory hurdles, technological challenges, key dependencies..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="unfairAdvantage"
-                  className="text-sm font-medium"
-                >
-                  About your unfair advantage
-                </Label>
-                <Textarea
-                  id="unfairAdvantage"
-                  value={formData.unfairAdvantage}
-                  onChange={(e) =>
-                    handleInputChange('unfairAdvantage', e.target.value)
-                  }
-                  onBlur={() => handleFieldSave('unfairAdvantage')}
-                  className="rounded-sm min-h-[80px]"
-                  placeholder="e.g., Proprietary technology, exclusive partnerships, unique data access, world-class team expertise..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="useOfFunds" className="text-sm font-medium">
-                  About your use of funds
-                </Label>
-                <Textarea
-                  id="useOfFunds"
-                  value={formData.useOfFunds}
-                  onChange={(e) =>
-                    handleInputChange('useOfFunds', e.target.value)
-                  }
-                  onBlur={() => handleFieldSave('useOfFunds')}
-                  className="rounded-sm min-h-[80px]"
-                  placeholder="e.g., 40% for product development, 30% for sales & marketing, 20% for hiring key personnel, 10% for operational expenses..."
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
