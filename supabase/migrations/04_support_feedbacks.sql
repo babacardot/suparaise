@@ -257,3 +257,104 @@ $$;
 
 -- Grant execute permission to the function
 GRANT EXECUTE ON FUNCTION create_feedback(uuid, text, text, uuid) TO authenticated;
+
+--------------------------------------------------------------------------------
+-- SUGGESTIONS
+--------------------------------------------------------------------------------
+-- Create suggestions table for users to suggest new VCs, accelerators, or angels
+CREATE TABLE IF NOT EXISTS suggestions (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at timestamptz DEFAULT now() NOT NULL,
+    updated_at timestamptz DEFAULT now() NOT NULL,
+    user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    startup_id uuid REFERENCES startups(id) ON DELETE CASCADE, -- Link suggestion to specific startup
+    suggestion_type TEXT NOT NULL CHECK (suggestion_type IN ('vc', 'accelerator', 'angel')),
+    name TEXT NOT NULL, -- Name of the suggested entity
+    website TEXT, -- Optional website URL
+    email TEXT, -- Optional contact email
+    description TEXT, -- User's description/reason for suggestion
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'reviewing', 'approved', 'rejected'))
+);
+
+-- Create trigger for updated_at
+CREATE TRIGGER set_suggestions_timestamp
+BEFORE UPDATE ON suggestions
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- RLS policies for suggestions table
+ALTER TABLE suggestions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow authenticated users to insert their own suggestions"
+ON suggestions
+FOR INSERT
+TO authenticated
+WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Allow users to view their own suggestions"
+ON suggestions
+FOR SELECT
+TO authenticated
+USING ((select auth.uid()) = user_id);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_suggestions_user_id ON suggestions(user_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_startup_id ON suggestions(startup_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_type ON suggestions(suggestion_type);
+CREATE INDEX IF NOT EXISTS idx_suggestions_status ON suggestions(status);
+CREATE INDEX IF NOT EXISTS idx_suggestions_created_at ON suggestions(created_at);
+
+-- Create RPC function to create suggestions
+CREATE OR REPLACE FUNCTION create_suggestion(
+    p_user_id uuid,
+    p_suggestion_type text,
+    p_name text,
+    p_website text DEFAULT NULL,
+    p_email text DEFAULT NULL,
+    p_description text DEFAULT NULL,
+    p_startup_id uuid DEFAULT NULL
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+    suggestion_id uuid;
+BEGIN
+    -- Validate that the user can create this suggestion
+    IF auth.uid() != p_user_id THEN
+        RAISE EXCEPTION 'Unauthorized: You can only create suggestions for yourself';
+    END IF;
+
+    -- Validate that the startup belongs to the user (if startup_id is provided)
+    IF p_startup_id IS NOT NULL THEN
+        IF NOT EXISTS (SELECT 1 FROM startups WHERE id = p_startup_id AND user_id = p_user_id) THEN
+            RAISE EXCEPTION 'Unauthorized: You can only create suggestions for your own startups';
+        END IF;
+    END IF;
+
+    -- Insert the suggestion
+    INSERT INTO suggestions (
+        user_id,
+        startup_id,
+        suggestion_type,
+        name,
+        website,
+        email,
+        description
+    ) VALUES (
+        p_user_id,
+        p_startup_id,
+        p_suggestion_type,
+        p_name,
+        p_website,
+        p_email,
+        p_description
+    ) RETURNING id INTO suggestion_id;
+
+    RETURN suggestion_id;
+END;
+$$;
+
+-- Grant execute permission to the function
+GRANT EXECUTE ON FUNCTION create_suggestion(uuid, text, text, text, text, text, uuid) TO authenticated;

@@ -188,6 +188,11 @@ export function AppSidebar({
           ]
         : []),
       {
+        title: 'Recommend',
+        url: '#',
+        animation: animations.bulb,
+      },
+      {
         title: 'Feedback',
         url: '#',
         animation: animations.chat,

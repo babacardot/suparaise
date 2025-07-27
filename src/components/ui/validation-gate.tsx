@@ -246,14 +246,14 @@ export function ValidationGate({
                       {missingFields.filter(
                         (field) => field.category !== 'documents',
                       ).length > 4 && (
-                          <div className="text-xs text-sidebar-foreground/50 italic">
-                            +
-                            {missingFields.filter(
-                              (field) => field.category !== 'documents',
-                            ).length - 4}{' '}
-                            more fields...
-                          </div>
-                        )}
+                        <div className="text-xs text-sidebar-foreground/50 italic">
+                          +
+                          {missingFields.filter(
+                            (field) => field.category !== 'documents',
+                          ).length - 4}{' '}
+                          more fields...
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -280,8 +280,8 @@ export const VALIDATION_PRESETS = {
       firstName: true,
       lastName: true,
       email: true,
-      // phone: true,
-      // role: true,
+      phone: true,
+      role: true,
       // bio: true,
       // linkedin: true,
       // githubUrl: true,
@@ -296,9 +296,16 @@ export const VALIDATION_PRESETS = {
       fundingRound: true,
       // revenueModel: true,
       // legalStructure: true,
+      // employeeCount: true,
+      // foundedYear: true,
+      // revenueModel: true,
+      // currentRunway: true,
+      // keyCustomers: true,
+      // competitors: true,
+      // isIncorporated: true,
     },
     financial: {
-      // fundingAmountSought: true,
+      fundingAmountSought: true,
       // investmentInstrument: true,
       // preMoneyValuation: true,
       // mrr: true,
@@ -315,7 +322,7 @@ export const VALIDATION_PRESETS = {
       firstName: true,
       lastName: true,
       email: true,
-      // phone: true,
+      phone: true,
       // role: true,
       // bio: true,
       // linkedin: true,
@@ -328,12 +335,12 @@ export const VALIDATION_PRESETS = {
       industry: true,
       location: true,
       descriptionShort: true,
-      descriptionMedium: true, // More detailed pitch
-      fundingRound: true,
-      legalStructure: true,
-      employeeCount: true,
-      foundedYear: true,
-      revenueModel: true,
+      descriptionMedium: true,
+      // fundingRound: true,
+      // legalStructure: true,
+      // employeeCount: true,
+      // foundedYear: true,
+      // revenueModel: true,
     },
     financial: {
       fundingAmountSought: true,
@@ -353,7 +360,7 @@ export const VALIDATION_PRESETS = {
       firstName: true,
       lastName: true,
       email: true,
-      // phone: true,
+      phone: true,
       // role: true,
       // linkedin: true,
       // githubUrl: true,
@@ -370,7 +377,7 @@ export const VALIDATION_PRESETS = {
       // legalStructure: true,
     },
     financial: {
-      // fundingAmountSought: true,
+      fundingAmountSought: true,
       // preMoneyValuation: true,
       // mrr: true,
       // arr: true,

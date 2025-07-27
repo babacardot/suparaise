@@ -1335,6 +1335,56 @@ export type Database = {
         }
         Relationships: []
       }
+      suggestions: {
+        Row: {
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          name: string
+          startup_id: string | null
+          status: string
+          suggestion_type: string
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          startup_id?: string | null
+          status?: string
+          suggestion_type: string
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          startup_id?: string | null
+          status?: string
+          suggestion_type?: string
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'suggestions_startup_id_fkey'
+            columns: ['startup_id']
+            isOneToOne: false
+            referencedRelation: 'startups'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       support_requests: {
         Row: {
           category: string
@@ -1592,6 +1642,18 @@ export type Database = {
       create_startup_and_founders: {
         Args: { p_data: Json }
         Returns: Json
+      }
+      create_suggestion: {
+        Args: {
+          p_user_id: string
+          p_suggestion_type: string
+          p_name: string
+          p_website?: string
+          p_email?: string
+          p_description?: string
+          p_startup_id?: string
+        }
+        Returns: string
       }
       create_support_request: {
         Args: {

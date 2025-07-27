@@ -675,7 +675,6 @@ export default function AgentSettings() {
 
           {/* Agent Knowledge Base */}
           <div className="space-y-3">
-            <Label>Agent Knowledge Base</Label>
             <p className="text-xs text-muted-foreground -mt-2">
               Provide detailed answers to these key questions to give your agent
               a deep, contextual understanding of your startup.
@@ -683,7 +682,7 @@ export default function AgentSettings() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="kpis" className="text-sm font-medium">
-                  Key Performance Indicators (KPIs)
+                  About your key performance indicators
                 </Label>
                 <Textarea
                   id="kpis"
@@ -691,12 +690,12 @@ export default function AgentSettings() {
                   onChange={(e) => handleInputChange('kpis', e.target.value)}
                   onBlur={() => handleFieldSave('kpis')}
                   className="rounded-sm min-h-[80px]"
-                  placeholder="e.g., Monthly Recurring Revenue (MRR), Customer Acquisition Cost (CAC), Lifetime Value (LTV), Churn Rate..."
+                  placeholder="e.g., Customer Acquisition Cost (CAC), Customer Lifetime Value (LTV), Churn Rate..."
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="risks" className="text-sm font-medium">
-                  Challenges & Risks
+                  About your current challenges
                 </Label>
                 <Textarea
                   id="risks"
@@ -712,7 +711,7 @@ export default function AgentSettings() {
                   htmlFor="unfairAdvantage"
                   className="text-sm font-medium"
                 >
-                  Unfair Advantage
+                  About your unfair advantage
                 </Label>
                 <Textarea
                   id="unfairAdvantage"
@@ -727,7 +726,7 @@ export default function AgentSettings() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="useOfFunds" className="text-sm font-medium">
-                  Use of Funds
+                  About your use of funds
                 </Label>
                 <Textarea
                   id="useOfFunds"

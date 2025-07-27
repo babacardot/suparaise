@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import FeedbackModal from '@/components/dashboard/feedback-modal'
 import SupportModal from '@/components/dashboard/support-modal'
+import SuggestionModal from '@/components/dashboard/suggestion-modal'
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -28,6 +29,7 @@ export function NavSecondary({
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false)
   const [isSupportOpen, setIsSupportOpen] = React.useState(false)
+  const [isSuggestionOpen, setIsSuggestionOpen] = React.useState(false)
 
   return (
     <SidebarGroup {...props}>
@@ -35,6 +37,39 @@ export function NavSecondary({
         <SidebarMenu>
           {items.map((item) => {
             const isHovered = hoveredItem === item.title
+
+            // Special handling for Suggest item
+            if (item.title === 'Suggest') {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SuggestionModal
+                    isOpen={isSuggestionOpen}
+                    onClose={() => setIsSuggestionOpen(false)}
+                  >
+                    <SidebarMenuButton
+                      size="sm"
+                      tooltip={item.title}
+                      onClick={() => {
+                        onItemClick?.()
+                        setIsSuggestionOpen(true)
+                      }}
+                      onMouseEnter={() => setHoveredItem(item.title)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                    >
+                      <LottieIcon
+                        animationData={item.animation}
+                        size={14}
+                        loop={false}
+                        autoplay={false}
+                        initialFrame={0}
+                        isHovered={isHovered}
+                      />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SuggestionModal>
+                </SidebarMenuItem>
+              )
+            }
 
             // Special handling for Feedback item
             if (item.title === 'Feedback') {
