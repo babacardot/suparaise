@@ -16,7 +16,7 @@ if (!WEBHOOK_SECRET || !INTERNAL_API_SECRET) {
     {
       hasWebhookSecret: !!WEBHOOK_SECRET,
       hasInternalSecret: !!INTERNAL_API_SECRET,
-    }
+    },
   )
 }
 
@@ -155,15 +155,14 @@ export async function POST(request: NextRequest) {
     event = JSON.parse(rawBody)
   } catch (error) {
     console.error('Failed to parse webhook body:', error)
-    return NextResponse.json(
-      { error: 'Invalid JSON payload' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
   }
 
   // Allow test events to pass without headers or signature verification for setup
   if (event.type === 'test') {
-    console.log('✅ Received Browser Use test webhook (bypassing all verification for setup).')
+    console.log(
+      '✅ Received Browser Use test webhook (bypassing all verification for setup).',
+    )
     return NextResponse.json({
       status: 'success',
       message: 'Test webhook received',
@@ -172,7 +171,10 @@ export async function POST(request: NextRequest) {
 
   // For non-test events, require headers and signature
   if (!timestamp || !signature) {
-    console.error('Missing required headers for non-test event:', { timestamp, signature })
+    console.error('Missing required headers for non-test event:', {
+      timestamp,
+      signature,
+    })
     return NextResponse.json(
       { error: 'Missing timestamp or signature headers' },
       { status: 400 },
