@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getFormSpecialistByType } from '@/lib/specialists'
-import { getOrCreateBrowserProfileForStartup } from '@/lib/browser-profiles'
+import { getOrCreateBrowserProfileForStartup } from '@/lib/browser-use/profiles'
 import { BrowserUseClient, buildSmartDataMapping } from '@/lib/utils/agent'
 
 const supabaseAdmin = createClient(
