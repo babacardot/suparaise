@@ -311,7 +311,7 @@ export function useValidation({
     }
 
     window.addEventListener('validation-refresh', handleValidationRefresh)
-    
+
     return () => {
       window.removeEventListener('validation-refresh', handleValidationRefresh)
     }

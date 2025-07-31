@@ -157,7 +157,7 @@ BEGIN
         'logoUrl', s.logo_url,
         'pitchDeckUrl', s.pitch_deck_url,
         'introVideoUrl', s.intro_video_url,
-        'financialProjectionsUrl', s.financial_projections_url,
+        'financialProjectionsUrl', s.financials_url,
         'businessPlanUrl', s.business_plan_url,
         'googleDriveUrl', s.google_drive_url,
         'onboarded', s.onboarded,

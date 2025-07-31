@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { LRUCache } from 'lru-cache'
+import { ENUM_VALUES } from '@/lib/types'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -269,42 +270,42 @@ const scrapeWebsite = async (url: string): Promise<string> => {
 // Map common industry variations to exact database enum values
 const mapIndustryToEnum = (industry: string): string => {
   const industryMap: Record<string, string> = {
-    // Common variations that AI might return
+    // Common variations that AI might return - mapped to actual database enum values
+    'B2B SaaS': 'SaaS',
     FinTech: 'Fintech',
     fintech: 'Fintech',
     FINTECH: 'Fintech',
     HealthTech: 'Healthtech',
     healthtech: 'Healthtech',
     HEALTHTECH: 'Healthtech',
-    SaaS: 'B2B SaaS',
-    saas: 'B2B SaaS',
-    SAAS: 'B2B SaaS',
-    'B2B SaaS': 'B2B SaaS', // Keep exact matches
     EdTech: 'Education',
     edtech: 'Education',
     EDTECH: 'Education',
-    PropTech: 'PropTech', // Keep exact match
-    proptech: 'PropTech',
-    PROPTECH: 'PropTech',
-    InsurTech: 'InsurTech', // Keep exact match
-    insurtech: 'InsurTech',
-    INSURTECH: 'InsurTech',
-    AdTech: 'AdTech', // Keep exact match
-    adtech: 'AdTech',
-    ADTECH: 'AdTech',
-    AI: 'AI/ML',
-    'Machine Learning': 'AI/ML',
-    'Artificial Intelligence': 'AI/ML',
-    ML: 'AI/ML',
+    PropTech: 'Proptech',
+    proptech: 'Proptech',
+    PROPTECH: 'Proptech',
+    InsurTech: 'Insurtech',
+    insurtech: 'Insurtech',
+    INSURTECH: 'Insurtech',
+    AdTech: 'Adtech',
+    adtech: 'Adtech',
+    ADTECH: 'Adtech',
+    'AI/ML': 'AI',
+    AI: 'AI',
+    'Machine Learning': 'AI',
+    'Artificial Intelligence': 'AI',
+    ML: 'AI',
     Ecommerce: 'E-commerce',
     ecommerce: 'E-commerce',
     'E-Commerce': 'E-commerce',
-    'Food and Beverage': 'Food & Beverage',
-    'F&B': 'Food & Beverage',
-    'Real estate': 'Real Estate',
-    realestate: 'Real Estate',
-    Tech: 'Other',
-    Technology: 'Other',
+    'Food and Beverage': 'Food',
+    'Food & Beverage': 'Food',
+    'Real Estate': 'Real estate',
+    'Environmental Services': 'Environment',
+    Environmental: 'Environment',
+    'Consumer Goods': 'Consumer',
+    'Healthcare Services': 'Healthtech',
+    Healthcare: 'Healthtech',
   }
 
   // Return mapped value or original value if no mapping exists
@@ -342,7 +343,7 @@ Guidelines:
 - For descriptionLong: Extract comprehensive descriptions from about pages, but preserve the original tone and wording when it's professional
 - Only reformulate or combine text when the original content is unclear, too long, or unprofessional
 - Be flexible and creative with limited content, but prioritize authentic website language over AI-generated alternatives
-- Industry should be one of these exact values: "B2B SaaS", "Fintech", "Healthtech", "AI/ML", "Deep tech", "Climate tech", "Consumer", "E-commerce", "Marketplace", "Gaming", "Web3", "Developer tools", "Cybersecurity", "Logistics", "AdTech", "PropTech", "InsurTech", "Agriculture", "Automotive", "Biotechnology", "Construction", "Consulting", "Consumer Goods", "Education", "Energy", "Entertainment", "Environmental Services", "Fashion", "Food & Beverage", "Government", "Healthcare Services", "Hospitality", "Human Resources", "Insurance", "Legal", "Manufacturing", "Media", "Non-profit", "Pharmaceuticals", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Other"
+- Industry should be one of these exact values: ${ENUM_VALUES.industryType.map((industry) => `"${industry}"`).join(', ')}
 - Look for founded year in various formats: "founded", "established", "since", "started", copyright years, etc.
 - Even if content seems minimal, try to extract at least the company name and a basic description
 - Preserve the company's authentic voice and messaging style

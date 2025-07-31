@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/popover'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
+import { FILTER_OPTIONS } from '@/lib/types'
 
 export interface AcceleratorsFilters {
   search: string
@@ -48,87 +49,11 @@ interface AcceleratorsFiltersProps {
   totalSubmissions?: number
 }
 
-// Memoized static data
+// Memoized static data with animations
 const SUBMISSION_TYPES = [
   { value: 'form', label: 'Form', animation: animations.fileplus },
   { value: 'email', label: 'Email', animation: animations.mail },
   { value: 'other', label: 'Other', animation: animations.help },
-] as const
-
-const INVESTMENT_STAGES = [
-  'All',
-  'Pre-seed',
-  'Seed',
-  'Series A',
-  'Series B',
-  'Series C',
-  'Growth',
-] as const
-
-const INDUSTRIES = [
-  'B2B SaaS',
-  'AI/ML',
-  'Deep tech',
-  'Developer tools',
-  'Cybersecurity',
-  'Fintech',
-  'Healthtech',
-  'Consumer',
-  'E-commerce',
-  'Marketplace',
-  'Gaming',
-  'Climate tech',
-  'PropTech',
-  'InsurTech',
-  'AdTech',
-  'Logistics',
-  'Web3',
-] as const
-
-const REGIONS = [
-  'Global',
-  'North America',
-  'Europe',
-  'Western Europe',
-  'Eastern Europe',
-  'Continental Europe',
-  'Asia',
-  'East Asia',
-  'South Asia',
-  'South East Asia',
-  'LATAM',
-  'South America',
-  'Middle East',
-  'Africa',
-  'Oceania',
-  'EMEA',
-  'Emerging Markets',
-] as const
-
-const REQUIRED_DOCUMENTS = [
-  { value: 'pitch_deck', label: 'Deck' },
-  { value: 'video', label: 'Video' },
-  { value: 'financial_projections', label: 'Financials' },
-  { value: 'business_plan', label: 'Business Plan' },
-  { value: 'traction_data', label: 'Traction' },
-] as const
-
-const PROGRAM_TYPES = ['in-person', 'remote', 'hybrid'] as const
-const EQUITY_RANGES = [
-  '0%',
-  '1 — 3%',
-  '4 — 6%',
-  '7 — 10%',
-  '10% +',
-  'Variable',
-] as const
-const FUNDING_RANGES = [
-  '0 — 25K',
-  '25K — 50K',
-  '50K — 100K',
-  '100K — 250K',
-  '250K — 500K',
-  '500K +',
 ] as const
 
 const DEBOUNCE_DELAY = 1500
@@ -355,10 +280,8 @@ export default function AcceleratorsFilters({
           return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
         if (value === 'video')
           return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
-        if (value === 'financial_projections')
+        if (value === 'financials')
           return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
-        if (value === 'traction_data')
-          return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40'
         if (value === 'business_plan')
           return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
       }
@@ -571,10 +494,7 @@ export default function AcceleratorsFilters({
               >
                 <FilterSection
                   filterKey="regionFocus"
-                  options={REGIONS.map((region) => ({
-                    value: region,
-                    label: region,
-                  }))}
+                  options={FILTER_OPTIONS.regions}
                 />
               </PopoverContent>
             </Popover>
@@ -646,10 +566,7 @@ export default function AcceleratorsFilters({
               >
                 <FilterSection
                   filterKey="stageFocus"
-                  options={INVESTMENT_STAGES.map((stage) => ({
-                    value: stage,
-                    label: stage,
-                  }))}
+                  options={FILTER_OPTIONS.investmentStages}
                 />
               </PopoverContent>
             </Popover>
@@ -721,10 +638,7 @@ export default function AcceleratorsFilters({
               >
                 <FilterSection
                   filterKey="industryFocus"
-                  options={INDUSTRIES.map((industry) => ({
-                    value: industry,
-                    label: industry,
-                  }))}
+                  options={FILTER_OPTIONS.industries}
                 />
               </PopoverContent>
             </Popover>
@@ -872,12 +786,7 @@ export default function AcceleratorsFilters({
               >
                 <FilterSection
                   filterKey="programTypes"
-                  options={PROGRAM_TYPES.map((type) => ({
-                    value: type,
-                    label: type
-                      .replace(/-/g, ' ')
-                      .replace(/\b\w/g, (l) => l.toUpperCase()),
-                  }))}
+                  options={FILTER_OPTIONS.programTypes}
                 />
               </PopoverContent>
             </Popover>
@@ -951,10 +860,7 @@ export default function AcceleratorsFilters({
               >
                 <FilterSection
                   filterKey="equityRanges"
-                  options={EQUITY_RANGES.map((range) => ({
-                    value: range,
-                    label: range,
-                  }))}
+                  options={FILTER_OPTIONS.equityRanges}
                 />
               </PopoverContent>
             </Popover>
@@ -1028,10 +934,7 @@ export default function AcceleratorsFilters({
               >
                 <FilterSection
                   filterKey="fundingRanges"
-                  options={FUNDING_RANGES.map((range) => ({
-                    value: range,
-                    label: range,
-                  }))}
+                  options={FILTER_OPTIONS.fundingRanges}
                 />
               </PopoverContent>
             </Popover>
@@ -1051,7 +954,7 @@ export default function AcceleratorsFilters({
                     {localFilters.requiredDocuments &&
                     localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
-                        const docOption = REQUIRED_DOCUMENTS.find(
+                        const docOption = FILTER_OPTIONS.requiredDocuments.find(
                           (d) => d.value === doc,
                         )
                         const docColor = getOptionColors(
@@ -1111,7 +1014,7 @@ export default function AcceleratorsFilters({
               >
                 <FilterSection
                   filterKey="requiredDocuments"
-                  options={[...REQUIRED_DOCUMENTS]}
+                  options={FILTER_OPTIONS.requiredDocuments}
                 />
               </PopoverContent>
             </Popover>

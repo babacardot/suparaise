@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/popover'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
+import { FILTER_OPTIONS } from '@/lib/types'
 
 export interface FundsFilters {
   search: string
@@ -47,64 +48,6 @@ const SUBMISSION_TYPES = [
   { value: 'form', label: 'Form', animation: animations.fileplus },
   { value: 'email', label: 'Email', animation: animations.mail },
   { value: 'other', label: 'Other', animation: animations.help },
-] as const
-
-const INVESTMENT_STAGES = [
-  'All',
-  'Pre-seed',
-  'Seed',
-  'Series A',
-  'Series B',
-  'Series C',
-  'Growth',
-] as const
-
-const INDUSTRIES = [
-  'B2B SaaS',
-  'AI/ML',
-  'Deep tech',
-  'Developer tools',
-  'Cybersecurity',
-  'Fintech',
-  'Healthtech',
-  'Consumer',
-  'E-commerce',
-  'Marketplace',
-  'Gaming',
-  'Climate tech',
-  'PropTech',
-  'InsurTech',
-  'AdTech',
-  'Logistics',
-  'Web3',
-] as const
-
-const REGIONS = [
-  'Global',
-  'North America',
-  'Europe',
-  'Western Europe',
-  'Eastern Europe',
-  'Continental Europe',
-  'Asia',
-  'East Asia',
-  'South Asia',
-  'South East Asia',
-  'LATAM',
-  'South America',
-  'Middle East',
-  'Africa',
-  'Oceania',
-  'EMEA',
-  'Emerging Markets',
-] as const
-
-const REQUIRED_DOCUMENTS = [
-  { value: 'pitch_deck', label: 'Deck' },
-  { value: 'video', label: 'Video' },
-  { value: 'financial_projections', label: 'Financials' },
-  { value: 'business_plan', label: 'Business Plan' },
-  { value: 'traction_data', label: 'Traction' },
 ] as const
 
 const DEBOUNCE_DELAY = 1500
@@ -356,10 +299,8 @@ export default function FundsFilters({
           return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
         if (value === 'video')
           return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
-        if (value === 'financial_projections')
+        if (value === 'financials')
           return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
-        if (value === 'traction_data')
-          return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40'
         if (value === 'business_plan')
           return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
       }
@@ -566,10 +507,7 @@ export default function FundsFilters({
               >
                 <FilterSection
                   filterKey="regionFocus"
-                  options={REGIONS.map((region) => ({
-                    value: region,
-                    label: region,
-                  }))}
+                  options={FILTER_OPTIONS.regions}
                 />
               </PopoverContent>
             </Popover>
@@ -641,10 +579,7 @@ export default function FundsFilters({
               >
                 <FilterSection
                   filterKey="stageFocus"
-                  options={INVESTMENT_STAGES.map((stage) => ({
-                    value: stage,
-                    label: stage,
-                  }))}
+                  options={FILTER_OPTIONS.investmentStages}
                 />
               </PopoverContent>
             </Popover>
@@ -716,10 +651,7 @@ export default function FundsFilters({
               >
                 <FilterSection
                   filterKey="industryFocus"
-                  options={INDUSTRIES.map((industry) => ({
-                    value: industry,
-                    label: industry,
-                  }))}
+                  options={FILTER_OPTIONS.industries}
                 />
               </PopoverContent>
             </Popover>
@@ -814,7 +746,7 @@ export default function FundsFilters({
                     {localFilters.requiredDocuments &&
                     localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
-                        const docOption = REQUIRED_DOCUMENTS.find(
+                        const docOption = FILTER_OPTIONS.requiredDocuments.find(
                           (d) => d.value === doc,
                         )
                         const docColor = getOptionColors(
@@ -874,7 +806,7 @@ export default function FundsFilters({
               >
                 <FilterSection
                   filterKey="requiredDocuments"
-                  options={[...REQUIRED_DOCUMENTS]}
+                  options={FILTER_OPTIONS.requiredDocuments}
                 />
               </PopoverContent>
             </Popover>

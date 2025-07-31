@@ -193,10 +193,9 @@ export default React.memo(function AcceleratorsActions({
       return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800'
     if (doc === 'video')
       return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800'
-    if (doc === 'financial_projections')
+    if (doc === 'financials')
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
-    if (doc === 'traction_data')
-      return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200 dark:border-violet-800'
+
     if (doc === 'business_plan')
       return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
@@ -206,9 +205,8 @@ export default React.memo(function AcceleratorsActions({
     const labels: Record<string, string> = {
       pitch_deck: 'Deck',
       video: 'Video',
-      financial_projections: 'Financials',
+      financials: 'Financials',
       business_plan: 'Business Plan',
-      traction_data: 'Traction',
     }
     return labels[value] || value.replace(/_/g, ' ')
   }

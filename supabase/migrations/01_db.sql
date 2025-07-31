@@ -4,16 +4,15 @@ CREATE TYPE submission_status AS ENUM ('pending', 'in_progress', 'completed', 'f
 CREATE TYPE form_complexity AS ENUM ('simple', 'standard', 'comprehensive');
 CREATE TYPE question_count_range AS ENUM ('1-5', '6-10', '11-20', '21+');
 CREATE TYPE required_document_type AS ENUM (
-    'pitch_deck', 
-    'video', 
-    'financial_projections', 
-    'business_plan', 
-    'traction_data'
+    'pitch_deck', -- company presentation or deck
+    'video', -- company presentation video or product demo
+    'financials', -- financial projections
+    'business_plan'
 );
 CREATE TYPE region_type AS ENUM (
     'Global',
     'North America', 
-    'South America', 
+    'South America',
     'LATAM',
     'Europe', 
     'Western Europe',
@@ -27,10 +26,22 @@ CREATE TYPE region_type AS ENUM (
     'South East Asia', 
     'Oceania',
     'EMEA',
-    'Emerging Markets'
+    'Emerging Markets',
+    'India',
+    'China',
+    'Japan',
+    'Korea',
+    'Australia',
+    'United States',
+    'Canada',
+    'United Kingdom',
+    'France',
+    'Netherlands',
+    'Sweden',
+    'Other'
 );
 CREATE TYPE founder_role AS ENUM (
-    'Founder', 
+    'Founder',
     'Co-founder', 
     'CEO', 
     'CTO', 
@@ -46,15 +57,49 @@ CREATE TYPE founder_role AS ENUM (
 );
 CREATE TYPE investment_stage AS ENUM ('Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'All');
 CREATE TYPE industry_type AS ENUM (
-    'B2B SaaS', 'Fintech', 'Healthtech', 'AI/ML', 'Deep tech', 'Climate tech', 
-    'Consumer', 'E-commerce', 'Marketplace', 'Gaming', 'Web3', 
-    'Developer tools', 'Cybersecurity', 'Logistics', 'AdTech', 'PropTech', 'InsurTech',
-    'Agriculture', 'Automotive', 'Biotechnology', 'Construction', 'Consulting', 
-    'Consumer Goods', 'Education', 'Energy', 'Entertainment', 'Environmental Services', 
-    'Fashion', 'Food & Beverage', 'Government', 'Healthcare Services', 'Hospitality', 
-    'Human Resources', 'Insurance', 'Legal', 'Manufacturing', 'Media', 
-    'Non-profit', 'Pharmaceuticals', 'Real Estate', 'Retail', 'Telecommunications', 
-    'Transportation', 'Utilities', 'Other'
+    'SaaS',
+    'Fintech',
+    'Healthtech',
+    'AI',
+    'Computing',
+    'Deep tech',
+    'Climate tech',
+    'Consumer',
+    'E-commerce',
+    'Marketplace',
+    'Gaming',
+    'Web3',
+    'Developer tools',
+    'Cybersecurity',
+    'Logistics',
+    'Adtech',
+    'Proptech',
+    'Insurtech',
+    'Agriculture',
+    'Automotive',
+    'Biotechnology',
+    'Technology',
+    'Construction',
+    'Consulting', 
+    'Education',
+    'Energy',
+    'Entertainment',
+    'Environment', 
+    'Fashion',
+    'Real estate',
+    'Food',
+    'Government',
+    'Hospitality', 
+    'Human Resources',
+    'Insurance',
+    'Legal',
+    'Manufacturing',
+    'Media',
+    'Pharmaceuticals',
+    'Retail',
+    'Telecommunications',
+    'Transportation',
+    'Other'
 );
 CREATE TYPE legal_structure AS ENUM (
     'Not yet incorporated',
@@ -329,7 +374,7 @@ CREATE TABLE startups (
     logo_url TEXT,
     pitch_deck_url TEXT,
     intro_video_url TEXT,
-    financial_projections_url TEXT,
+    financials_url TEXT,
     business_plan_url TEXT,
     google_drive_url TEXT,
     -- New agent knowledge base fields
@@ -763,7 +808,7 @@ CREATE TABLE startups_archive (
     logo_url TEXT,
     pitch_deck_url TEXT,
     intro_video_url TEXT,
-    financial_projections_url TEXT,
+    financials_url TEXT,
     business_plan_url TEXT,
     google_drive_url TEXT,
     -- New agent knowledge base fields

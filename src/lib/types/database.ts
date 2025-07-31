@@ -914,7 +914,7 @@ export type Database = {
           description_medium: string | null
           description_short: string | null
           employee_count: number | null
-          financial_projections_url: string | null
+          financials_url: string | null
           founded_year: number | null
           funding_amount_sought: number | null
           funding_round: Database['public']['Enums']['investment_stage'] | null
@@ -964,7 +964,7 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
-          financial_projections_url?: string | null
+          financials_url?: string | null
           founded_year?: number | null
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
@@ -1016,7 +1016,7 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
-          financial_projections_url?: string | null
+          financials_url?: string | null
           founded_year?: number | null
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
@@ -1072,7 +1072,7 @@ export type Database = {
           description_medium: string | null
           description_short: string | null
           employee_count: number | null
-          financial_projections_url: string | null
+          financials_url: string | null
           founded_year: number | null
           funding_amount_sought: number | null
           funding_round: Database['public']['Enums']['investment_stage'] | null
@@ -1125,7 +1125,7 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
-          financial_projections_url?: string | null
+          financials_url?: string | null
           founded_year?: number | null
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
@@ -1180,7 +1180,7 @@ export type Database = {
           description_medium?: string | null
           description_short?: string | null
           employee_count?: number | null
-          financial_projections_url?: string | null
+          financials_url?: string | null
           founded_year?: number | null
           funding_amount_sought?: number | null
           funding_round?: Database['public']['Enums']['investment_stage'] | null
@@ -2079,10 +2079,11 @@ export type Database = {
         | '250K-500K'
         | '500K+'
       industry_type:
-        | 'B2B SaaS'
+        | 'SaaS'
         | 'Fintech'
         | 'Healthtech'
-        | 'AI/ML'
+        | 'AI'
+        | 'Computing'
         | 'Deep tech'
         | 'Climate tech'
         | 'Consumer'
@@ -2093,36 +2094,33 @@ export type Database = {
         | 'Developer tools'
         | 'Cybersecurity'
         | 'Logistics'
-        | 'AdTech'
-        | 'PropTech'
-        | 'InsurTech'
+        | 'Adtech'
+        | 'Proptech'
+        | 'Insurtech'
         | 'Agriculture'
         | 'Automotive'
         | 'Biotechnology'
+        | 'Technology'
         | 'Construction'
         | 'Consulting'
-        | 'Consumer Goods'
         | 'Education'
         | 'Energy'
         | 'Entertainment'
-        | 'Environmental Services'
+        | 'Environment'
         | 'Fashion'
-        | 'Food & Beverage'
+        | 'Real estate'
+        | 'Food'
         | 'Government'
-        | 'Healthcare Services'
         | 'Hospitality'
         | 'Human Resources'
         | 'Insurance'
         | 'Legal'
         | 'Manufacturing'
         | 'Media'
-        | 'Non-profit'
         | 'Pharmaceuticals'
-        | 'Real Estate'
         | 'Retail'
         | 'Telecommunications'
         | 'Transportation'
-        | 'Utilities'
         | 'Other'
       investment_approach:
         | 'hands-on'
@@ -2180,12 +2178,23 @@ export type Database = {
         | 'Oceania'
         | 'EMEA'
         | 'Emerging Markets'
+        | 'India'
+        | 'China'
+        | 'Japan'
+        | 'Korea'
+        | 'Australia'
+        | 'United States'
+        | 'Canada'
+        | 'United Kingdom'
+        | 'France'
+        | 'Netherlands'
+        | 'Sweden'
+        | 'Other'
       required_document_type:
         | 'pitch_deck'
         | 'video'
-        | 'financial_projections'
+        | 'financials'
         | 'business_plan'
-        | 'traction_data'
       response_time: '1-3 days' | '1 week' | '2 weeks' | '1 month' | '2+ months'
       revenue_model_type:
         | 'Subscription'
@@ -2386,10 +2395,11 @@ export const Constants = {
         '500K+',
       ],
       industry_type: [
-        'B2B SaaS',
+        'SaaS',
         'Fintech',
         'Healthtech',
-        'AI/ML',
+        'AI',
+        'Computing',
         'Deep tech',
         'Climate tech',
         'Consumer',
@@ -2400,36 +2410,33 @@ export const Constants = {
         'Developer tools',
         'Cybersecurity',
         'Logistics',
-        'AdTech',
-        'PropTech',
-        'InsurTech',
+        'Adtech',
+        'Proptech',
+        'Insurtech',
         'Agriculture',
         'Automotive',
         'Biotechnology',
+        'Technology',
         'Construction',
         'Consulting',
-        'Consumer Goods',
         'Education',
         'Energy',
         'Entertainment',
-        'Environmental Services',
+        'Environment',
         'Fashion',
-        'Food & Beverage',
+        'Real estate',
+        'Food',
         'Government',
-        'Healthcare Services',
         'Hospitality',
         'Human Resources',
         'Insurance',
         'Legal',
         'Manufacturing',
         'Media',
-        'Non-profit',
         'Pharmaceuticals',
-        'Real Estate',
         'Retail',
         'Telecommunications',
         'Transportation',
-        'Utilities',
         'Other',
       ],
       investment_approach: [
@@ -2493,13 +2500,24 @@ export const Constants = {
         'Oceania',
         'EMEA',
         'Emerging Markets',
+        'India',
+        'China',
+        'Japan',
+        'Korea',
+        'Australia',
+        'United States',
+        'Canada',
+        'United Kingdom',
+        'France',
+        'Netherlands',
+        'Sweden',
+        'Other',
       ],
       required_document_type: [
         'pitch_deck',
         'video',
-        'financial_projections',
+        'financials',
         'business_plan',
-        'traction_data',
       ],
       response_time: ['1-3 days', '1 week', '2 weeks', '1 month', '2+ months'],
       revenue_model_type: [

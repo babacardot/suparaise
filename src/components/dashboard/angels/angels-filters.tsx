@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/popover'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
+import { FILTER_OPTIONS } from '@/lib/types'
 
 export interface AngelsFilters {
   search: string
@@ -48,74 +49,6 @@ const SUBMISSION_TYPES = [
   { value: 'form', label: 'Form', animation: animations.fileplus },
   { value: 'email', label: 'Email', animation: animations.mail },
   { value: 'other', label: 'Other', animation: animations.help },
-] as const
-
-const INVESTMENT_STAGES = [
-  'All',
-  'Pre-seed',
-  'Seed',
-  'Series A',
-  'Series B',
-  'Series C',
-  'Growth',
-] as const
-
-const INDUSTRIES = [
-  'B2B SaaS',
-  'AI/ML',
-  'Deep tech',
-  'Developer tools',
-  'Cybersecurity',
-  'Fintech',
-  'Healthtech',
-  'Consumer',
-  'E-commerce',
-  'Marketplace',
-  'Gaming',
-  'Climate tech',
-  'PropTech',
-  'InsurTech',
-  'AdTech',
-  'Logistics',
-  'Web3',
-] as const
-
-const REGIONS = [
-  'Global',
-  'North America',
-  'Europe',
-  'Western Europe',
-  'Eastern Europe',
-  'Continental Europe',
-  'Asia',
-  'East Asia',
-  'South Asia',
-  'South East Asia',
-  'LATAM',
-  'South America',
-  'Middle East',
-  'Africa',
-  'Oceania',
-  'EMEA',
-  'Emerging Markets',
-] as const
-
-const CHECK_SIZES = [
-  '1K — 10K',
-  '10K — 25K',
-  '25K — 50K',
-  '50K — 100K',
-  '100K — 250K',
-  '250K — 500K',
-  '500K — 1M',
-  '1M +',
-] as const
-
-const INVESTMENT_APPROACHES = [
-  'hands-on',
-  'passive',
-  'advisory',
-  'network-focused',
 ] as const
 
 const DEBOUNCE_DELAY = 1500
@@ -526,10 +459,7 @@ export default function AngelsFilters({
               >
                 <FilterSection
                   filterKey="regionFocus"
-                  options={REGIONS.map((region) => ({
-                    value: region,
-                    label: region,
-                  }))}
+                  options={FILTER_OPTIONS.regions}
                 />
               </PopoverContent>
             </Popover>
@@ -601,10 +531,7 @@ export default function AngelsFilters({
               >
                 <FilterSection
                   filterKey="stageFocus"
-                  options={INVESTMENT_STAGES.map((stage) => ({
-                    value: stage,
-                    label: stage,
-                  }))}
+                  options={FILTER_OPTIONS.investmentStages}
                 />
               </PopoverContent>
             </Popover>
@@ -676,10 +603,7 @@ export default function AngelsFilters({
               >
                 <FilterSection
                   filterKey="industryFocus"
-                  options={INDUSTRIES.map((industry) => ({
-                    value: industry,
-                    label: industry,
-                  }))}
+                  options={FILTER_OPTIONS.industries}
                 />
               </PopoverContent>
             </Popover>
@@ -753,10 +677,7 @@ export default function AngelsFilters({
               >
                 <FilterSection
                   filterKey="checkSizes"
-                  options={CHECK_SIZES.map((size) => ({
-                    value: size,
-                    label: size,
-                  }))}
+                  options={FILTER_OPTIONS.checkSizes}
                 />
               </PopoverContent>
             </Popover>
@@ -835,12 +756,7 @@ export default function AngelsFilters({
               >
                 <FilterSection
                   filterKey="investmentApproaches"
-                  options={INVESTMENT_APPROACHES.map((approach) => ({
-                    value: approach,
-                    label:
-                      approach.charAt(0).toUpperCase() +
-                      approach.slice(1).replace('-', ' '),
-                  }))}
+                  options={FILTER_OPTIONS.investmentApproaches}
                 />
               </PopoverContent>
             </Popover>

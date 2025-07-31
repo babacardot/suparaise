@@ -1413,7 +1413,7 @@ export default function CompanySettings() {
       const fileName = `${user.id}/financial-projections-${Date.now()}-${file.name}`
 
       const { error: uploadError } = await supabase.storage
-        .from('financial_projections')
+        .from('financials')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true,
@@ -1423,7 +1423,7 @@ export default function CompanySettings() {
 
       const {
         data: { publicUrl },
-      } = supabase.storage.from('financial_projections').getPublicUrl(fileName)
+      } = supabase.storage.from('financials').getPublicUrl(fileName)
 
       const { data, error } = await supabase.rpc('update_user_startup_data', {
         p_user_id: user.id,

@@ -201,7 +201,7 @@ BEGIN
         'logoUrl', s.logo_url,
         'pitchDeckUrl', s.pitch_deck_url,
         'introVideoUrl', s.intro_video_url,
-        'financialProjectionsUrl', s.financial_projections_url,
+        'financialProjectionsUrl', s.financials_url,
         'businessPlanUrl', s.business_plan_url,
         'googleDriveUrl', s.google_drive_url,
         'kpis', s.kpis,
@@ -300,9 +300,9 @@ BEGIN
             WHEN p_data ? 'introVideoUrl' THEN p_data->>'introVideoUrl'
             ELSE intro_video_url 
         END,
-        financial_projections_url = CASE
+        financials_url = CASE
             WHEN p_data ? 'financialProjectionsUrl' THEN p_data->>'financialProjectionsUrl'
-            ELSE financial_projections_url
+            ELSE financials_url
         END,
         business_plan_url = CASE
             WHEN p_data ? 'businessPlanUrl' THEN p_data->>'businessPlanUrl'
@@ -898,7 +898,7 @@ BEGIN
         traction_summary, market_summary, mrr, arr, employee_count, founded_year,
         revenue_model, current_runway, key_customers, competitors, onboarded,
         is_active, deleted_at, logo_url, pitch_deck_url, intro_video_url,
-        financial_projections_url, business_plan_url, google_drive_url,
+        financials_url, business_plan_url, google_drive_url,
         created_at, updated_at, original_id, original_user_id
     )
     SELECT 
@@ -909,7 +909,7 @@ BEGIN
         traction_summary, market_summary, mrr, arr, employee_count, founded_year,
         revenue_model, current_runway, key_customers, competitors, onboarded,
         is_active, deleted_at, logo_url, pitch_deck_url, intro_video_url,
-        financial_projections_url, business_plan_url, google_drive_url,
+        financials_url, business_plan_url, google_drive_url,
         created_at, updated_at, id, user_id
     FROM startups 
     WHERE user_id = p_user_id AND is_active = TRUE;

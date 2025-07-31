@@ -27,9 +27,9 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 6. Create the 'financial_projections' bucket
+-- 6. Create the 'financials' bucket
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('financial_projections', 'financial_projections', true)
+VALUES ('financials', 'financials', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- 7. Create the 'business_plans' bucket
@@ -142,21 +142,21 @@ USING (
 ); 
 
 -- Financial Projections: Same policies as logos/decks
-CREATE POLICY "Allow public read on financial_projections"
+CREATE POLICY "Allow public read on financials"
 ON storage.objects FOR SELECT
-USING (bucket_id = 'financial_projections');
+USING (bucket_id = 'financials');
 
-CREATE POLICY "Allow authenticated users to manage their financial_projections"
+CREATE POLICY "Allow authenticated users to manage their financials"
 ON storage.objects FOR INSERT
-WITH CHECK (bucket_id = 'financial_projections' AND auth.role() = 'authenticated');
+WITH CHECK (bucket_id = 'financials' AND auth.role() = 'authenticated');
 
-CREATE POLICY "Allow authenticated users to update their own financial_projections"
+CREATE POLICY "Allow authenticated users to update their own financials"
 ON storage.objects FOR UPDATE
-USING (bucket_id = 'financial_projections' AND auth.role() = 'authenticated');
+USING (bucket_id = 'financials' AND auth.role() = 'authenticated');
 
-CREATE POLICY "Allow authenticated users to delete their own financial_projections"
+CREATE POLICY "Allow authenticated users to delete their own financials"
 ON storage.objects FOR DELETE
-USING (bucket_id = 'financial_projections' AND auth.role() = 'authenticated');
+USING (bucket_id = 'financials' AND auth.role() = 'authenticated');
 
 
 -- Business Plans: Same policies as logos/decks

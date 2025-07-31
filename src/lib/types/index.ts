@@ -1,4 +1,4 @@
-import { Tables } from './database'
+import { Tables, Constants } from './database'
 
 export type Target = Tables<'targets'>
 export type Profile = Tables<'profiles'>
@@ -62,7 +62,7 @@ export type CompanySettingsData = {
   marketSummary: Tables<'startups'>['market_summary']
   pitchDeckUrl: Tables<'startups'>['pitch_deck_url']
   introVideoUrl: Tables<'startups'>['intro_video_url']
-  financialProjectionsUrl: Tables<'startups'>['financial_projections_url']
+  financialProjectionsUrl: Tables<'startups'>['financials_url']
   businessPlanUrl: Tables<'startups'>['business_plan_url']
   googleDriveUrl: Tables<'startups'>['google_drive_url']
 }
@@ -99,3 +99,82 @@ export type Startup = {
     [question: string]: string
   }
 }
+
+// Export database enums as constants for use in components
+export const DATABASE_ENUMS = Constants.public.Enums
+
+// Create filter-friendly versions with proper labels for UI components
+export const FILTER_OPTIONS = {
+  submissionTypes: [
+    { value: 'form', label: 'Form' },
+    { value: 'email', label: 'Email' },
+    { value: 'other', label: 'Other' },
+  ] as const,
+
+  investmentStages: DATABASE_ENUMS.investment_stage.map((stage) => ({
+    value: stage,
+    label: stage,
+  })),
+
+  industries: DATABASE_ENUMS.industry_type.map((industry) => ({
+    value: industry,
+    label: industry,
+  })),
+
+  regions: DATABASE_ENUMS.region_type.map((region) => ({
+    value: region,
+    label: region,
+  })),
+
+  requiredDocuments: DATABASE_ENUMS.required_document_type.map((doc) => {
+    const labelMap: Record<string, string> = {
+      pitch_deck: 'Deck',
+      video: 'Video',
+      financials: 'Financials',
+      business_plan: 'Business Plan',
+    }
+    return {
+      value: doc,
+      label: labelMap[doc] || doc,
+    }
+  }),
+
+  programTypes: DATABASE_ENUMS.program_type.map((type) => ({
+    value: type,
+    label: type.charAt(0).toUpperCase() + type.slice(1),
+  })),
+
+  equityRanges: DATABASE_ENUMS.equity_range.map((range) => ({
+    value: range,
+    label: range,
+  })),
+
+  fundingRanges: DATABASE_ENUMS.funding_range.map((range) => ({
+    value: range,
+    label: range,
+  })),
+
+  checkSizes: DATABASE_ENUMS.check_size_range.map((size) => ({
+    value: size,
+    label: size,
+  })),
+
+  investmentApproaches: DATABASE_ENUMS.investment_approach.map((approach) => ({
+    value: approach,
+    label: approach.charAt(0).toUpperCase() + approach.slice(1),
+  })),
+} as const
+
+// Export raw enum arrays for type checking and validation
+export const ENUM_VALUES = {
+  submissionType: DATABASE_ENUMS.submission_type,
+  investmentStage: DATABASE_ENUMS.investment_stage,
+  industryType: DATABASE_ENUMS.industry_type,
+  regionType: DATABASE_ENUMS.region_type,
+  requiredDocumentType: DATABASE_ENUMS.required_document_type,
+  programType: DATABASE_ENUMS.program_type,
+  equityRange: DATABASE_ENUMS.equity_range,
+  fundingRange: DATABASE_ENUMS.funding_range,
+  checkSizeRange: DATABASE_ENUMS.check_size_range,
+  investmentApproach: DATABASE_ENUMS.investment_approach,
+} as const
