@@ -73,7 +73,7 @@ export const Footer = () => {
               className="text-muted-foreground hover:text-[#000000] dark:hover:text-[#FFFFFF] transition-colors"
               aria-label="Follow us on X"
             >
-              <XIcon className="h-5 w-5" />
+              <XIcon className="h-5.5 w-5.5" />
             </Link>
             <Link
               href="https://github.com/princemuichkine"
@@ -93,7 +93,7 @@ export const Footer = () => {
               className="text-muted-foreground hover:text-[#DA552F] dark:hover:text-[#DA552F] transition-colors"
               aria-label="Check us out on Product Hunt"
             >
-              <PHIcon className="h-6 w-6 translate-y-0.25" />
+              <PHIcon className="h-6.5 w-6.5 translate-y-0.25" />
             </Link>
           </div>
         </div>
