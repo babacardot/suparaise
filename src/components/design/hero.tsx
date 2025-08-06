@@ -8,6 +8,7 @@ import { useUser } from '@/lib/contexts/user-context'
 import { Button } from '@/components/ui/button'
 import { Button as ExpandButton } from '@/components/design/button-expand'
 import { AnimatedGroup } from '@/components/ui/animated-group'
+import { ProductHuntBadge } from '@/components/design/product-hunt-badge'
 
 const transitionVariants = {
   item: {
@@ -99,6 +100,11 @@ export function HeroSection() {
                         <span className="text-nowrap">Learn more</span>
                       </Link>
                     </Button>
+                  </div>
+
+                  {/* Product Hunt Badge */}
+                  <div className="mt-6 -mb-8 translate-x-5 flex justify-end">
+                    <ProductHuntBadge />
                   </div>
                 </AnimatedGroup>
               </div>

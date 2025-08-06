@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 import { useUser } from '@/lib/contexts/user-context'
@@ -36,8 +35,12 @@ export function NavUser({
   const { isMobile } = useSidebar()
   const { user, signOut } = useUser()
   const { theme, setTheme } = useTheme()
-  const router = useRouter()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
@@ -168,7 +171,7 @@ export function NavUser({
               <DropdownMenuItem
                 onClick={() => {
                   playClickSound()
-                  router.push('/')
+                  window.open('/', '_blank')
                 }}
                 onMouseEnter={() => setHoveredItem('homepage')}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -215,17 +218,23 @@ export function NavUser({
                 onMouseLeave={() => setHoveredItem(null)}
                 className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
               >
-                <LottieIcon
-                  animationData={
-                    theme === 'dark' ? animations.sun : animations.point
-                  }
-                  size={16}
-                  loop={false}
-                  autoplay={false}
-                  initialFrame={0}
-                  isHovered={hoveredItem === 'theme'}
-                />
-                {theme === 'dark' ? 'Light' : 'Dark'} mode
+                {mounted ? (
+                  <LottieIcon
+                    animationData={
+                      theme === 'dark' ? animations.sun : animations.point
+                    }
+                    size={16}
+                    loop={false}
+                    autoplay={false}
+                    initialFrame={0}
+                    isHovered={hoveredItem === 'theme'}
+                  />
+                ) : (
+                  <div className="h-4 w-4 rounded-sm bg-muted animate-pulse" />
+                )}
+                {mounted
+                  ? (theme === 'dark' ? 'Light' : 'Dark') + ' mode'
+                  : 'Theme'}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

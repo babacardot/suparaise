@@ -51,6 +51,19 @@ export default function SuggestionModal({
     }
   }
 
+  // Validation functions
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const isValidUrl = (url: string): boolean => {
+    // Allow URLs with or without protocol
+    const urlRegex =
+      /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/
+    return urlRegex.test(url)
+  }
+
   const handleSubmit = async () => {
     playClickSound()
 
@@ -69,6 +82,28 @@ export default function SuggestionModal({
         variant: 'info',
         title: 'Missing information',
         description: 'Please enter the name of the entity you want to suggest.',
+      })
+      return
+    }
+
+    // Validate website URL if provided
+    if (showWebsiteField && website.trim() && !isValidUrl(website.trim())) {
+      toast({
+        variant: 'info',
+        title: 'Invalid website',
+        description:
+          'Please enter a valid website URL (e.g., https://www.example.com, www.example.com, or example.com).',
+      })
+      return
+    }
+
+    // Validate email if provided
+    if (showEmailField && email.trim() && !isValidEmail(email.trim())) {
+      toast({
+        variant: 'info',
+        title: 'Invalid email',
+        description:
+          'Please enter a valid email address (e.g., name@example.com).',
       })
       return
     }
@@ -102,7 +137,7 @@ export default function SuggestionModal({
           title: 'Suggestion submitted',
           duration: 2000,
           variant: 'success',
-          description: `Thank you for suggesting a new ${suggestionType}! We'll review it soon.`,
+          description: `Thank you for suggesting ${suggestionType === 'accelerator' || suggestionType === 'angel' ? 'an' : 'a'} ${suggestionType}! We'll review it soon.`,
         })
         resetForm()
         onClose()
@@ -134,7 +169,7 @@ export default function SuggestionModal({
   const suggestionTypeLabels = {
     vc: 'Fund',
     accelerator: 'Accelerator',
-    angel: 'Angel Investor',
+    angel: 'Angel',
   }
 
   // Determine which fields to show based on suggestion type
@@ -169,10 +204,11 @@ export default function SuggestionModal({
                     playClickSound()
                     setSuggestionType(type)
                   }}
-                  className={`flex-1 px-2 py-1 text-xs rounded-sm transition-all duration-200 ${suggestionType === type
+                  className={`flex-1 px-2 py-1 text-xs rounded-sm transition-all duration-200 ${
+                    suggestionType === type
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
                       : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                    }`}
+                  }`}
                 >
                   {suggestionTypeLabels[type]}
                 </button>
@@ -210,7 +246,11 @@ export default function SuggestionModal({
 
           <div className="flex justify-between items-center">
             <div className="text-xs text-sidebar-foreground/70">
-              Suggest a new {suggestionTypeLabels[suggestionType].toLowerCase()}
+              Suggest{' '}
+              {suggestionType === 'accelerator' || suggestionType === 'angel'
+                ? 'an'
+                : 'a'}{' '}
+              {suggestionTypeLabels[suggestionType].toLowerCase()}
             </div>
 
             <div className="flex space-x-2 flex-shrink-0">
