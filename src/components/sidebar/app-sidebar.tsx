@@ -273,7 +273,7 @@ export function AppSidebar({
         onMouseLeave={() => setIsToggleHovered(false)}
         variant="ghost"
         size="sm"
-        className={`fixed top-1/2 -translate-y-1/2 z-30 h-4 w-3 rounded-sm bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
+        className={`hidden md:block fixed top-1/2 -translate-y-1/2 z-30 h-3.5 w-3 rounded-xs bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
           state === 'collapsed'
             ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
             : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
@@ -282,7 +282,7 @@ export function AppSidebar({
         <LottieIcon
           animationData={animations.nineGrid}
           size={8}
-          className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors duration-200"
+          className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors duration-200 -translate-y-1.25"
           isHovered={isToggleHovered}
         />
         <span className="sr-only">Toggle Sidebar</span>

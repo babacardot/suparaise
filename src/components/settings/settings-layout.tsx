@@ -76,18 +76,27 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         </p>
       </div>
 
-      <Separator className="flex-shrink-0 max-w-[75.8%]" />
+      <Separator className="flex-shrink-0 max-w-[75.8%] hidden md:block" />
 
-      <div className="flex-1 flex gap-6 pt-6 min-h-0 overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-56 flex-shrink-0">
+      <div className="flex-1 flex flex-col md:flex-row gap-6 pt-3 md:pt-6 min-h-0 overflow-hidden">
+        {/* Mobile Navigation */}
+        <div className="block md:hidden -mb-3">
           <SettingsNav items={sidebarItems} currentPath={pathname} />
         </div>
 
-        {/* Content */}
-        <div className="flex-1 max-w-2xl overflow-hidden">
-          <div className="h-full bg-background border rounded-sm overflow-hidden">
-            <div className="h-full p-6 overflow-hidden">{children}</div>
+        <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block w-56 flex-shrink-0">
+            <SettingsNav items={sidebarItems} currentPath={pathname} />
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 w-full md:max-w-2xl overflow-hidden">
+            <div className="h-full bg-background border rounded-sm overflow-hidden">
+              <div className="h-full p-4 md:p-6 overflow-hidden">
+                {children}
+              </div>
+            </div>
           </div>
         </div>
       </div>

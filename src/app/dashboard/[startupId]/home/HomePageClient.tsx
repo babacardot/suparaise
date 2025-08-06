@@ -15,6 +15,7 @@ import {
   Recommendation,
 } from '@/components/dashboard/home/recommendation-modal'
 import { ResourcesSection } from '@/components/dashboard/home/resources-section'
+import { MobileUpgradeCard } from '@/components/dashboard/home/mobile-upgrade-card'
 
 interface HomePageClientProps {
   startupId: string
@@ -78,15 +79,21 @@ export default function HomePageClient({
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-10 gap-4 items-start mt-4">
         <div className="lg:col-span-7 flex flex-col gap-4">
           <ActivityWidget />
-          <ResourcesSection className="mt-2" startupId={startupId} />
+          <ResourcesSection
+            className="mt-2 hidden md:block"
+            startupId={startupId}
+          />
         </div>
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 flex flex-col gap-4">
           <SubmissionsWidget
             submissions={recentSubmissions}
             isLoading={isLoading}
           />
         </div>
       </div>
+
+      {/* Mobile upgrade card - only shown on mobile */}
+      <MobileUpgradeCard className="mt-4 md:hidden" startupId={startupId} />
     </div>
   )
 }

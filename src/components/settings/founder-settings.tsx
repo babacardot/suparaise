@@ -103,7 +103,7 @@ function ProfileSettingsSkeleton() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
-        <h2 className="text-2xl font-semibold -mt-2 mb-2">Founder</h2>
+        <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Founder</h2>
         <p className="text-muted-foreground">
           Manage your details and contact information.
         </p>
@@ -721,7 +721,7 @@ export default function ProfileSettings() {
   return (
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
-        <h2 className="text-2xl font-semibold -mt-2 mb-2">
+        <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">
           {founders.length > 1 ? 'Founders' : 'Founder'}
         </h2>
         <p className="text-muted-foreground">

@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, VariantProps } from 'class-variance-authority'
+import { X } from 'lucide-react'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 
@@ -17,6 +18,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -29,7 +31,6 @@ import {
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = '16rem'
-const SIDEBAR_WIDTH_MOBILE = '18rem'
 const SIDEBAR_WIDTH_ICON = '3rem'
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b'
 
@@ -188,18 +189,28 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-          style={
-            {
-              '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
-          side={side}
+          className="bg-sidebar text-sidebar-foreground h-screen w-screen p-0 duration-300 flex flex-col border-none [&>button]:hidden"
+          side="top"
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
+
+          {/* Close button positioned exactly where menu icon was */}
+          <div className="absolute top-5 right-6 z-50">
+            <SheetClose asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative z-20 -m-1 -mr-4 cursor-pointer p-2 flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent"
+              >
+                <X className="size-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </SheetClose>
+          </div>
+
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
       </Sheet>
@@ -259,7 +270,7 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, isMobile } = useSidebar()
   const [isHovered, setIsHovered] = React.useState(false)
 
   return (
@@ -281,7 +292,7 @@ function SidebarTrigger({
       {...props}
     >
       <LottieIcon
-        animationData={animations.sidepanel}
+        animationData={isMobile ? animations.view3 : animations.sidepanel}
         size={16}
         loop={false}
         autoplay={false}

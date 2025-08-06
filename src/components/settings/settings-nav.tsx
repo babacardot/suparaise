@@ -5,6 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { cn } from '@/lib/actions/utils'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
@@ -197,6 +204,7 @@ export default function SettingsNav({
 }: SettingsNavProps) {
   const { subscription } = useUser()
   const router = useRouter()
+  const [val, setVal] = useState(currentPath)
 
   // Get permission level, defaulting to FREE if not available - memoize for performance
   const permissionLevel = useMemo(
@@ -214,6 +222,11 @@ export default function SettingsNav({
       }
     })
   }, [items, router])
+
+  // Update val when currentPath changes
+  useEffect(() => {
+    setVal(currentPath)
+  }, [currentPath])
 
   // Memoize the items processing for better performance
   const processedItems = useMemo(
@@ -242,18 +255,121 @@ export default function SettingsNav({
     [items, currentPath],
   )
 
+  const handleSelect = useCallback(
+    (href: string) => {
+      playClickSound()
+      setVal(href)
+      router.push(href)
+    },
+    [router],
+  )
+
+  // Get current item title for mobile select
+  const currentItem = processedItems.find((item) => item.isActive)
+  const currentTitle = currentItem?.title || 'Settings'
+
   return (
-    <div className="w-full bg-background border rounded-sm">
-      <nav className={cn('flex flex-col p-2', className)} {...props}>
-        {processedItems.map((item) => (
-          <NavItem
-            key={item.href}
-            item={item}
-            isActive={item.isActive}
-            permissionLevel={permissionLevel}
-          />
-        ))}
-      </nav>
-    </div>
+    <>
+      {/* Mobile Navigation - Always show on mobile */}
+      <div className="block md:hidden mb-2">
+        <Select value={val} onValueChange={handleSelect}>
+          <SelectTrigger className="h-16 w-full rounded-sm border-2 text-left px-4">
+            <SelectValue placeholder="Settings">
+              <span className="flex items-center gap-x-3 w-full">
+                <span className="flex items-center justify-center flex-shrink-0 h-5 w-5 overflow-visible">
+                  {(() => {
+                    const currentItem = processedItems.find(
+                      (item) => item.isActive,
+                    )
+                    const animationData = currentItem
+                      ? animations[currentItem.icon as keyof typeof animations]
+                      : null
+                    return animationData ? (
+                      <LottieIcon
+                        animationData={animationData}
+                        size={18}
+                        className="translate-y-[1px]"
+                      />
+                    ) : null
+                  })()}
+                </span>
+                <span className="text-base font-medium">{currentTitle}</span>
+              </span>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="w-full max-h-[60vh] overflow-y-auto">
+            <style>{`
+              .mobile-select-item .absolute.left-2 {
+                display: none !important;
+              }
+              .mobile-select-item [data-radix-select-item-indicator] {
+                display: none !important;
+              }
+            `}</style>
+            {items.map((item) => {
+              const animationData =
+                animations[item.icon as keyof typeof animations]
+              const requiresMaxPermission = item.title === 'Integrations'
+              const hasMaxAccess = permissionLevel === 'MAX'
+              const isLockedForUser = requiresMaxPermission && !hasMaxAccess
+
+              return (
+                <SelectItem
+                  key={item.href}
+                  value={item.href}
+                  disabled={isLockedForUser}
+                  className="mobile-select-item py-4 pl-4 pr-4 cursor-pointer focus:bg-[#E9EAEF] dark:focus:bg-[#2A2B30] data-[highlighted]:bg-[#E9EAEF] dark:data-[highlighted]:bg-[#2A2B30] relative h-16"
+                >
+                  <span className="flex items-center gap-x-4 w-full">
+                    <span className="scale-125 flex items-center justify-center flex-shrink-0 h-6 w-6 overflow-visible">
+                      {animationData && (
+                        <LottieIcon
+                          animationData={animationData}
+                          size={18}
+                          className="translate-y-[2px]"
+                        />
+                      )}
+                    </span>
+                    <span className="text-base font-medium leading-none translate-y-[2px] flex-1">
+                      {item.title}
+                    </span>
+                    {requiresMaxPermission && (
+                      <Badge
+                        variant="secondary"
+                        className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                      >
+                        MAX
+                      </Badge>
+                    )}
+                    {item.title === 'Integrations' && hasMaxAccess && (
+                      <Badge
+                        variant="secondary"
+                        className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
+                      >
+                        BETA
+                      </Badge>
+                    )}
+                  </span>
+                </SelectItem>
+              )
+            })}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Desktop Navigation - Only show on desktop */}
+      <div className="hidden w-full bg-background border rounded-sm md:block">
+        <nav className={cn('flex flex-col p-2', className)} {...props}>
+          {processedItems.map((item) => (
+            <NavItem
+              key={item.href}
+              item={item}
+              isActive={item.isActive}
+              permissionLevel={permissionLevel}
+            />
+          ))}
+        </nav>
+      </div>
+    </>
   )
 }

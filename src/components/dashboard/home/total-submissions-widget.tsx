@@ -15,7 +15,9 @@ export function TotalApplicationsWidget({
   return (
     <Card className="rounded-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-1">
-        <CardTitle className="text-lg font-medium">Submissions</CardTitle>
+        <CardTitle className="text-base md:text-lg font-medium">
+          Submissions
+        </CardTitle>
         {usageSubmissionsThisMonth > 0 && (
           <Badge
             variant="outline"
@@ -27,9 +29,11 @@ export function TotalApplicationsWidget({
       </CardHeader>
       <CardContent className="pb-0.5">
         <div className="flex justify-start items-end gap-2">
-          <div className="text-4xl font-bold">{totalApplications}</div>
+          <div className="text-3xl md:text-4xl font-bold">
+            {totalApplications}
+          </div>
           {usageSubmissionsThisMonth > 0 && (
-            <div className="text-sm text-muted-foreground pb-1">
+            <div className="text-xs md:text-sm text-muted-foreground pb-1">
               ({totalApplications - usageSubmissionsThisMonth} plan +{' '}
               {usageSubmissionsThisMonth} usage)
             </div>

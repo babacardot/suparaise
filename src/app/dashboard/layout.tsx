@@ -220,11 +220,22 @@ export default function DashboardLayout({
       />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" onClick={playClickSound} />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <div className="-ml-2">
-              <TopBanner breadcrumbs={breadcrumbs} />
+          <div className="flex items-center justify-between w-full px-4">
+            {/* Desktop layout: SidebarTrigger + Separator + Breadcrumbs */}
+            <div className="hidden md:flex items-center gap-2">
+              <SidebarTrigger className="-ml-1" onClick={playClickSound} />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <div className="-ml-2">
+                <TopBanner breadcrumbs={breadcrumbs} />
+              </div>
+            </div>
+
+            {/* Mobile layout: Breadcrumbs on left, SidebarTrigger on right */}
+            <div className="md:hidden flex items-center justify-between w-full">
+              <div>
+                <TopBanner breadcrumbs={breadcrumbs} />
+              </div>
+              <SidebarTrigger onClick={playClickSound} />
             </div>
           </div>
         </header>

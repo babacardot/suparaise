@@ -226,7 +226,7 @@ function CompanySettingsSkeleton() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
-        <h2 className="text-2xl font-semibold -mt-2 mb-2">Company</h2>
+        <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Company</h2>
         <p className="text-muted-foreground">
           Tell us about your startup, what you&apos;re building and why it
           matters.
@@ -248,7 +248,7 @@ function CompanySettingsSkeleton() {
 
           {/* Basic Information Skeleton */}
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-9 w-full" />
@@ -259,7 +259,7 @@ function CompanySettingsSkeleton() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-9 w-full" />
@@ -270,7 +270,7 @@ function CompanySettingsSkeleton() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Skeleton className="h-4 w-16" />
                 <Skeleton className="h-9 w-full" />
@@ -304,7 +304,7 @@ function CompanySettingsSkeleton() {
 
           {/* Company Details Skeleton */}
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-9 w-full" />
@@ -1679,7 +1679,7 @@ export default function CompanySettings() {
   return (
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
-        <h2 className="text-2xl font-semibold -mt-2 mb-2">Company</h2>
+        <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Company</h2>
         <p className="text-muted-foreground">
           Tell us about your startup, what you&apos;re building and why it
           matters.
@@ -1753,7 +1753,7 @@ export default function CompanySettings() {
 
           {/* Basic Information */}
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="name">Company name</Label>
                 <Input
@@ -1801,7 +1801,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="foundedYear">Founded year</Label>
                 <Input
@@ -1848,7 +1848,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="location">Location</Label>
                 <div className="relative">
@@ -2039,7 +2039,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="fundingRound">Funding stage</Label>
                 <div className="relative">
@@ -2091,7 +2091,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="revenueModel">Revenue model</Label>
                 <div className="relative">
@@ -2330,7 +2330,7 @@ export default function CompanySettings() {
 
           {/* Investment & Financial Information */}
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="fundingAmountSought">Funding amount</Label>
                 <Input
@@ -2374,7 +2374,7 @@ export default function CompanySettings() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="mrr">MRR</Label>
                 <Input
@@ -2530,7 +2530,7 @@ export default function CompanySettings() {
                 className="rounded-sm"
                 placeholder="https://drive.google.com/drive/folders/..."
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-2">
                 Link to a shared folder with your pitch deck, financials, and
                 other materials. While the agent can use this instead of
                 individual uploads, we recommend uploading your deck and demo

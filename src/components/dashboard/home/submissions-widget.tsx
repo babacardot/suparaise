@@ -121,7 +121,7 @@ const SubmissionCard = ({
       </CardHeader>
       <CardContent className="flex flex-col justify-between gap-y-4 pb-6 flex-1">
         <div className="space-y-3">
-          <h3 className="font-semibold text-lg leading-tight text-foreground">
+          <h3 className="font-semibold text-base md:text-lg leading-tight text-foreground">
             {submission.submitted_to_name}
           </h3>
 
@@ -187,8 +187,13 @@ export function SubmissionsWidget({
 
   if (!submissions || submissions.length === 0) {
     return (
-      <Card className={twMerge('h-full min-h-[367px] rounded-sm', className)}>
-        <div className="flex h-full flex-col items-center justify-center p-6 translate-y-20 space-y-4">
+      <Card
+        className={twMerge(
+          'h-full min-h-[280px] md:min-h-[367px] rounded-sm',
+          className,
+        )}
+      >
+        <div className="flex h-full flex-col items-center justify-center p-4 md:p-6 translate-y-10 md:translate-y-20 space-y-4">
           <Image
             src="/placeholder/loading_accounts.webp"
             alt="No submissions found"
@@ -206,7 +211,7 @@ export function SubmissionsWidget({
     return (
       <SubmissionCard
         submission={submissions[0]}
-        className={twMerge('h-full min-h-[367px]', className)}
+        className={twMerge('h-full min-h-[280px] md:min-h-[367px]', className)}
         showDetails={true} // Pass showDetails={true} for single card layout
       />
     )
@@ -215,9 +220,14 @@ export function SubmissionsWidget({
   // For 2 submissions, show them in a grid layout
   if (submissions.length === 2) {
     return (
-      <Card className={twMerge('h-full min-h-[367px] rounded-sm', className)}>
-        <CardContent className="p-4 h-full">
-          <div className="grid h-full grid-rows-2 gap-4">
+      <Card
+        className={twMerge(
+          'h-full min-h-[280px] md:min-h-[367px] rounded-sm',
+          className,
+        )}
+      >
+        <CardContent className="p-3 md:p-4 h-full">
+          <div className="grid h-full grid-rows-2 gap-3 md:gap-4">
             {submissions.map((submission: SubmissionData) => (
               <SubmissionCard
                 key={submission.submission_id}
@@ -242,7 +252,7 @@ export function SubmissionsWidget({
   return (
     <Card
       className={twMerge(
-        'relative h-full min-h-[367px] rounded-sm p-4',
+        'relative h-full min-h-[280px] md:min-h-[367px] rounded-sm p-3 md:p-4',
         className,
       )}
     >
@@ -253,7 +263,7 @@ export function SubmissionsWidget({
             key={submission.submission_id}
             className={twMerge(
               stackingClassNames[index],
-              'absolute w-[calc(100%-2rem)]',
+              'absolute w-[calc(100%-1.5rem)] md:w-[calc(100%-2rem)]',
             )}
           >
             <SubmissionCard

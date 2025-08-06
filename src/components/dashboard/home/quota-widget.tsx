@@ -18,11 +18,13 @@ export function SubmissionsQuotaWidget({
   return (
     <Card className="rounded-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-1">
-        <CardTitle className="text-lg font-medium">Quota</CardTitle>
+        <CardTitle className="text-base md:text-lg font-medium">
+          Quota
+        </CardTitle>
       </CardHeader>
       <CardContent className="pb-0">
         <div className="flex justify-start">
-          <div className="text-4xl font-bold">
+          <div className="text-3xl md:text-4xl font-bold">
             {submissionsUsed} / {submissionsLimit}
           </div>
         </div>

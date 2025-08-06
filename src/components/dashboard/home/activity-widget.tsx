@@ -146,6 +146,20 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
   const [runMetrics, setRunMetrics] = useState<{
     periods: RunMetricsPeriod[]
   } | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Check if mobile on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  const days = isMobile ? 100 : 270
 
   useEffect(() => {
     const fetchActivity = async () => {
@@ -154,16 +168,17 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
       }
       const data = await fetchActivityWidget({
         startupId: currentStartupId,
+        days,
       })
       setRunMetrics(data)
     }
 
     fetchActivity()
-  }, [currentStartupId])
+  }, [currentStartupId, days])
 
   const { grid, totalRuns } = useMemo(() => {
     const periods = runMetrics?.periods || []
-    const fullPeriodPeriods = generateFullPeriodGrid(periods, 270)
+    const fullPeriodPeriods = generateFullPeriodGrid(periods, days)
 
     const gridItems = fullPeriodPeriods
       .map((period: RunMetricsPeriod, i: number) => {
@@ -175,7 +190,7 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
           <Tooltip key={i} delayDuration={0}>
             <TooltipTrigger
               className={twMerge(
-                'h-3 w-3 rounded-sm transition-all cursor-pointer border border-transparent hover:border-blue-400/50 dark:hover:border-blue-500/50',
+                'h-3 w-3 md:h-3 md:w-3 rounded-sm transition-all cursor-pointer border border-transparent hover:border-blue-400/50 dark:hover:border-blue-500/50',
                 activeClass,
               )}
             />
@@ -198,7 +213,7 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
     )
 
     return { grid: gridItems, totalRuns: total }
-  }, [runMetrics?.periods])
+  }, [runMetrics?.periods, days])
 
   return (
     <Card
@@ -209,13 +224,20 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
     >
       <>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-medium">Runs</CardTitle>
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm text-muted-foreground">Last 270 days</h2>
+          <CardTitle className="text-base md:text-lg font-medium">
+            Runs
+          </CardTitle>
+          <div className="flex items-center gap-1 md:gap-2">
+            <h2 className="text-xs md:text-sm text-muted-foreground">
+              Last <span className="md:hidden">100</span>
+              <span className="hidden md:inline">270</span> days
+            </h2>
             {totalRuns > 0 && (
               <>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground hidden sm:inline">
+                  •
+                </span>
+                <span className="text-xs md:text-sm text-muted-foreground">
                   {totalRuns} {totalRuns === 1 ? 'run' : 'runs'}
                 </span>
               </>
@@ -223,36 +245,42 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
           </div>
         </CardHeader>
         <TooltipProvider>
-          <CardContent className="bg-background/50 dark:bg-background/30 mx-4 mb-2 flex flex-row gap-x-1 rounded-sm p-4">
-            <div className="hidden flex-col font-mono text-[9px] text-muted-foreground xl:flex gap-2">
+          <CardContent className="bg-background/50 dark:bg-background/30 mx-2 md:mx-4 mb-2 flex flex-row gap-x-1 rounded-sm p-2 md:p-4 pl-4 md:pl-4">
+            <div className="hidden flex-col font-mono text-[9px] text-muted-foreground xl:flex gap-2 md:gap-2">
               {[null, 'Mon', null, 'Wed', null, 'Fri', null].map((day, i) => (
                 <div
                   key={i}
-                  className="h-3 flex items-center justify-start leading-none w-6"
+                  className="h-3 md:h-3 flex items-center justify-start leading-none w-6 md:w-6"
                 >
-                  {day && <span>{day}</span>}
+                  {day && (
+                    <span className="text-[9px] md:text-[9px]">{day}</span>
+                  )}
                 </div>
               ))}
             </div>
-            <div className="grid grid-flow-col grid-cols-[repeat(39,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-2">
+            <div className="grid grid-flow-col grid-cols-[repeat(13,minmax(0,1fr))] md:grid-cols-[repeat(39,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-2 md:gap-2">
               {grid}
             </div>
           </CardContent>
         </TooltipProvider>
-        <CardContent className="pt-0 mx-2 pb-4">
+        <CardContent className="pt-0 mx-1 md:mx-2 pb-2 md:pb-4">
           <div className="flex items-center justify-end">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Less</span>
-              <div className="flex gap-1">
-                <div className="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-800/60" />
-                <div className="w-3 h-3 rounded-sm bg-blue-100 dark:bg-blue-900/40" />
-                <div className="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-800/60" />
-                <div className="w-3 h-3 rounded-sm bg-blue-300 dark:bg-blue-700/80" />
-                <div className="w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-600/90" />
-                <div className="w-3 h-3 rounded-sm bg-blue-500 dark:bg-blue-500" />
-                <div className="w-3 h-3 rounded-sm bg-blue-600 dark:bg-blue-400" />
+            <div className="flex items-center gap-1 md:gap-2">
+              <span className="text-[10px] md:text-xs text-muted-foreground">
+                Less
+              </span>
+              <div className="flex gap-1 md:gap-1">
+                <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-gray-100 dark:bg-gray-800/60" />
+                <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-blue-100 dark:bg-blue-900/40" />
+                <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-blue-200 dark:bg-blue-800/60" />
+                <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-blue-300 dark:bg-blue-700/80" />
+                <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-blue-400 dark:bg-blue-600/90" />
+                <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-blue-500 dark:bg-blue-500" />
+                <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-blue-600 dark:bg-blue-400" />
               </div>
-              <span className="text-xs text-muted-foreground">More</span>
+              <span className="text-[10px] md:text-xs text-muted-foreground">
+                More
+              </span>
             </div>
           </div>
         </CardContent>

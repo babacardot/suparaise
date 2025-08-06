@@ -103,7 +103,7 @@ export function HeroSection() {
                   </div>
 
                   {/* Product Hunt Badge */}
-                  <div className="mt-6 -mb-8 translate-x-5 flex justify-end">
+                  <div className="hidden sm:flex mt-6 -mb-8 translate-x-5 justify-end">
                     <ProductHuntBadge />
                   </div>
                 </AnimatedGroup>

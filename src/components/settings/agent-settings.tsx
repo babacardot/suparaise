@@ -47,7 +47,7 @@ function AgentSettingsSkeleton() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
-        <h2 className="text-2xl font-semibold -mt-2 mb-2">Agents</h2>
+        <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Agents</h2>
         <p className="text-muted-foreground">
           Customize how agents represent you to investors.
         </p>
@@ -59,7 +59,7 @@ function AgentSettingsSkeleton() {
         <div className="space-y-6 pr-2">
           {/* Basic Agents Settings Skeleton */}
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Skeleton className="h-4 w-40" />
                 <Skeleton className="h-9 w-full" />
@@ -70,7 +70,7 @@ function AgentSettingsSkeleton() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Skeleton className="h-4 w-36" />
                 <Skeleton className="h-9 w-full" />
@@ -346,7 +346,7 @@ export default function AgentSettings() {
   return (
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
-        <h2 className="text-2xl font-semibold -mt-2 mb-2">Agents</h2>
+        <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Agents</h2>
         <p className="text-muted-foreground">
           Customize how agents represent you to investors.
         </p>
@@ -485,7 +485,7 @@ export default function AgentSettings() {
 
           {/* Basic Agents Settings */}
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="submissionDelay">
                   Delay between submissions
@@ -674,8 +674,8 @@ export default function AgentSettings() {
             </div>
           </div>
 
-          {/* Agent Knowledge Base */}
-          <div className="space-y-3">
+          {/* Agent Knowledge Base - Hidden on mobile */}
+          <div className="space-y-3 hidden md:block">
             <button
               onClick={() =>
                 setIsKnowledgeBaseExpanded(!isKnowledgeBaseExpanded)
@@ -687,7 +687,7 @@ export default function AgentSettings() {
               ) : (
                 <ChevronRight className="h-4 w-4" />
               )}
-              <span className="font-medium text-sm">Agent context</span>
+              <span className="font-medium text-sm">More context</span>
             </button>
 
             {isKnowledgeBaseExpanded && (
