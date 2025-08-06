@@ -4,9 +4,9 @@ CREATE TYPE submission_status AS ENUM ('pending', 'in_progress', 'completed', 'f
 CREATE TYPE form_complexity AS ENUM ('simple', 'standard', 'comprehensive');
 CREATE TYPE question_count_range AS ENUM ('1-5', '6-10', '11-20', '21+');
 CREATE TYPE required_document_type AS ENUM (
-    'pitch_deck', -- company presentation or deck
-    'video', -- company presentation video or product demo
-    'financials', -- financial projections
+    'pitch_deck',
+    'video',
+    'financials',
     'business_plan'
 );
 CREATE TYPE region_type AS ENUM (
@@ -59,6 +59,7 @@ CREATE TYPE investment_stage AS ENUM ('Pre-seed', 'Seed', 'Series A', 'Series B'
 CREATE TYPE industry_type AS ENUM (
     'SaaS',
     'Fintech',
+    'Healthcare',
     'Healthtech',
     'AI',
     'Computing',
@@ -88,10 +89,15 @@ CREATE TYPE industry_type AS ENUM (
     'Fashion',
     'Real estate',
     'Food',
+    'IoT',
     'Government',
     'Hospitality', 
     'Human Resources',
     'Insurance',
+    'Security',
+    'Social',
+    'Aerospace',
+    'AR/VR',
     'Legal',
     'Manufacturing',
     'Media',
@@ -99,6 +105,7 @@ CREATE TYPE industry_type AS ENUM (
     'Retail',
     'Telecommunications',
     'Transportation',
+    'Agnostic',
     'Other'
 );
 CREATE TYPE legal_structure AS ENUM (
@@ -133,7 +140,7 @@ CREATE TYPE equity_range AS ENUM ('0%', '1-3%', '4-6%', '7-10%', '10%+', 'variab
 CREATE TYPE funding_range AS ENUM ('0-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K+');
 CREATE TYPE batch_size AS ENUM ('1-10', '11-20', '21-50', '51-100', '100+');
 CREATE TYPE acceptance_rate AS ENUM ('<1%', '1-5%', '6-10%', '11-20%', '20%+');
-CREATE TYPE form_type AS ENUM ('contact', 'typeform', 'google', 'generic');
+CREATE TYPE form_type AS ENUM ('contact', 'airtable', 'typeform', 'google', 'generic');
 CREATE TYPE browser_system AS ENUM ('browser_use', 'browser_base', 'computer_use', 'hyperbrowser');
 
 -- --------------------------------------------------

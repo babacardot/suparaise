@@ -38,8 +38,8 @@ export function NavSecondary({
           {items.map((item) => {
             const isHovered = hoveredItem === item.title
 
-            // Special handling for Suggest item
-            if (item.title === 'Suggest') {
+            // Special handling for Recommend item
+            if (item.title === 'Recommend') {
               return (
                 <SidebarMenuItem key={item.title}>
                   <SuggestionModal

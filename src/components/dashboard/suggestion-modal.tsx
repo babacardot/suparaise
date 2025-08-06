@@ -169,11 +169,10 @@ export default function SuggestionModal({
                     playClickSound()
                     setSuggestionType(type)
                   }}
-                  className={`flex-1 px-2 py-1 text-xs rounded-sm transition-all duration-200 ${
-                    suggestionType === type
+                  className={`flex-1 px-2 py-1 text-xs rounded-sm transition-all duration-200 ${suggestionType === type
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
                       : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                  }`}
+                    }`}
                 >
                   {suggestionTypeLabels[type]}
                 </button>
@@ -228,7 +227,7 @@ export default function SuggestionModal({
               <ExpandButton
                 onClick={handleSubmit}
                 disabled={!name.trim() || isSubmitting}
-                className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 rounded-sm shadow-none px-3 py-1 h-8 text-xs disabled:opacity-50 disabled:hover:bg-blue-50 disabled:dark:hover:bg-blue-900/30 [&>div>svg]:h-3 [&>div>svg]:w-3"
+                className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm shadow-none px-3 py-1 h-8 text-xs disabled:opacity-50 disabled:hover:bg-green-50 disabled:dark:hover:bg-green-900/30 [&>div>svg]:h-3 [&>div>svg]:w-3"
                 Icon={ArrowRight}
                 iconPlacement="right"
                 size="sm"
