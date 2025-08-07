@@ -212,25 +212,23 @@ export default function BillingSettings() {
   // Plan features for display
   const planFeatures = {
     pro_monthly: [
-      '20 runs per month',
-      'Access to 1,200 global funds',
+      '20 applications per month',
+      'Access to 500 global funds',
       '3 parallel submissions',
-      'Smart queuing system',
+      'Background runs',
       'Agent customization',
     ],
     max_monthly: [
-      '125 runs per month',
-      'Access to 2,000+ global funds',
+      '50 applications per month',
+      'Access to 1,000+ global funds',
       '5 parallel submissions',
-      'Advanced application tracking',
+      'Detailed submission analytics',
       'Developer mode',
       'Priority support',
     ],
   }
 
-  const handleSubscribe = async (
-    plan: 'pro_monthly' | 'pro_yearly' | 'max_monthly' | 'max_yearly',
-  ) => {
+  const handleSubscribe = async (plan: 'pro_monthly' | 'max_monthly') => {
     playClickSound()
     setIsLoading(true)
     try {
@@ -459,7 +457,7 @@ export default function BillingSettings() {
                     </div>
                     <p className="text-sm leading-relaxed text-muted-foreground mb-2">
                       Continue running after your monthly quota with
-                      pay-per-submission billing at $0.85 per submission.
+                      pay-per-submission billing at $2.49 per additional run.
                     </p>
                     {usageBillingData.usageBillingEnabled && (
                       <div className="text-xs text-purple-600 dark:text-purple-400 space-y-1">

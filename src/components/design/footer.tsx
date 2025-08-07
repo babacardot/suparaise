@@ -7,6 +7,7 @@ import { XIcon } from '@/components/icons/XIcon'
 import { PHIcon } from '@/components/icons/PHIcon'
 import { GitHubIcon } from '@/components/icons/GitHubIcon'
 import { LottieIcon } from '@/components/design/lottie-icon'
+import { animateThemeSweep } from '@/lib/utils/theme-transition'
 import { animations } from '@/lib/utils/lottie-animations'
 
 export const Footer = () => {
@@ -29,7 +30,8 @@ export const Footer = () => {
 
   const toggleTheme = () => {
     playClickSound()
-    setTheme(theme === 'dark' ? 'light' : 'dark')
+    const next = (theme === 'dark' ? 'light' : 'dark') as 'light' | 'dark'
+    animateThemeSweep(next, () => setTheme(next))
   }
 
   return (

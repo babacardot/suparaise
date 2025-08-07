@@ -34,17 +34,15 @@ export const getStripe = () => {
 
 // Price IDs - these will be configured in Stripe dashboard
 export const STRIPE_PRICE_IDS = {
-  pro_monthly: process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID!,
-  pro_yearly: process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID!,
-  max_monthly: process.env.NEXT_PUBLIC_STRIPE_MAX_MONTHLY_PRICE_ID!,
-  max_yearly: process.env.NEXT_PUBLIC_STRIPE_MAX_YEARLY_PRICE_ID!,
+  pro_monthly: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!,
+  max_monthly: process.env.NEXT_PUBLIC_STRIPE_MAX_PRICE_ID!,
 }
 
 // Usage billing configuration
 export const USAGE_BILLING_CONFIG = {
-  pricePerSubmission: 0.85, // $0.85 per submission ($0.60 base + $0.25 processing)
-  baseCost: 0.6, // Base cost per submission
-  processingCost: 0.25, // Processing cost per submission
+  pricePerSubmission: 2.49, // $2.49 per additional application (psychological pricing with healthy margin)
+  baseCost: 1.8, // Base cost portion ($1.80)
+  processingCost: 0.69, // Processing cost portion ($0.69)
   meterId: process.env.NEXT_PUBLIC_STRIPE_USAGE_BILLING_METER_ID!, // Stripe billing meter ID
   priceId: process.env.NEXT_PUBLIC_STRIPE_USAGE_BILLING_PRICE_ID!, // Stripe price ID for usage billing
 }
@@ -52,7 +50,7 @@ export const USAGE_BILLING_CONFIG = {
 // Subscription plans configuration
 export const SUBSCRIPTION_PLANS = {
   starter: {
-    name: 'Starter',
+    name: 'Core',
     description: 'Get started with agentic fundraising',
     price: 0,
     interval: 'month' as const,
@@ -61,29 +59,15 @@ export const SUBSCRIPTION_PLANS = {
   pro_monthly: {
     name: 'Pro',
     description: 'For startups actively raising their first round',
-    price: 15,
+    price: 29,
     interval: 'month' as const,
-    tier: 'pro' as const,
-  },
-  pro_yearly: {
-    name: 'Pro Yearly',
-    description: 'For startups actively raising their first round',
-    price: 150,
-    interval: 'year' as const,
     tier: 'pro' as const,
   },
   max_monthly: {
     name: 'Max',
     description: 'For startups that need meetings now',
-    price: 100,
+    price: 79,
     interval: 'month' as const,
-    tier: 'max' as const,
-  },
-  max_yearly: {
-    name: 'Max Yearly',
-    description: 'For startups that need meetings now',
-    price: 1020,
-    interval: 'year' as const,
     tier: 'max' as const,
   },
 }

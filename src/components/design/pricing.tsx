@@ -23,8 +23,8 @@ const pricingTiers: PricingTier[] = [
     priceSuffix: '',
     description: 'Get started with agentic fundraising',
     features: [
-      '2 fund applications per month',
-      'Access to 150 pre-screened funds',
+      '2 applications per month',
+      'Access to 150 curated funds',
       'Claude 4 sonnet',
     ],
     buttonText: '',
@@ -33,13 +33,13 @@ const pricingTiers: PricingTier[] = [
   },
   {
     name: 'Pro',
-    price: 15,
+    price: 29,
     priceSuffix: '/mo',
     description: 'For startups actively raising their first round',
     features: [
-      '20 runs per month',
-      'Access to 1,200 global funds',
-      '3 parallel submissions',
+      '20 applications per month',
+      'Access to 500 global funds',
+      '3x faster with concurrent processing',
       'Background runs',
       'Agent customization',
     ],
@@ -50,15 +50,15 @@ const pricingTiers: PricingTier[] = [
   },
   {
     name: 'Max',
-    price: 100,
+    price: 79,
     priceSuffix: '/mo',
     description: 'For startups that need meetings now',
     features: [
-      '125 runs per month',
-      'Access to 2,000+ global funds',
-      '5 parallel submissions',
+      '50 applications per month',
+      'Access to 1,000+ global funds',
+      '5x faster with concurrent processing',
       'Detailed submission analytics',
-      'Developer mode',
+      'Full application transparency',
       'Priority support',
     ],
     buttonText: 'Get started',
@@ -72,7 +72,7 @@ const pricingTiers: PricingTier[] = [
     description: 'Volume discounts available',
     features: [
       '500+ fund applications per month',
-      'Up to 25 parallel submissions',
+      'Up to 25 concurrent submissions',
       'Premium support',
     ],
     buttonText: 'Contact sales',
@@ -106,7 +106,7 @@ export const Pricing = () => {
             Choose the plan that fits your needs.
           </p>
 
-          <div className="grid gap-8 lg:grid-cols-3 mt-12 w-full max-w-6xl">
+          <div className="grid gap-4 lg:grid-cols-3 mt-12 w-full max-w-6xl">
             {pricingTiers.slice(0, 3).map((tier, idx) => (
               <div
                 key={idx}
@@ -171,12 +171,27 @@ export const Pricing = () => {
             ))}
           </div>
 
-          <div className="flex justify-center mt-0 -mb-6">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-sm bg-transparent dark:bg-muted/50 border">
-              <div className="w-3 h-3 rounded-full bg-green-500 -mt-0.25"></div>
-              <span className="text-sm font-medium">
-                $0.60 / per application
-              </span>
+          {/* Context: why usage-based and Pro matter */}
+          <div className="w-full max-w-4xl mt-4 mx-auto ">
+            <div className="rounded-sm border bg-zinc-50 dark:bg-zinc-900/30 p-4 text-sm ">
+              <p className="leading-relaxed">
+                Founders typically submit between 20 and 50 applications per
+                round to secure 4 to 8 meetings. Each manual submission can take
+                anywhere from 15 to 45 minutes of deep work — that&apos;s{' '}
+                <span className="font-bold">12 to 45 hours</span> per raise.
+              </p>
+              <p className="leading-relaxed mt-2">
+                With <span className="font-bold">Pro</span>, get 20 high-quality
+                applications running in the background while you focus on
+                building your business.
+              </p>
+              <p className="block md:hidden h-2" />
+              <p className="leading-relaxed italic mt-0">
+                You think you&apos;ll need more? You can always continue to
+                apply with{' '}
+                <span className="font-bold">usage-based billing</span> at $2.49
+                per additional run.
+              </p>
             </div>
           </div>
 

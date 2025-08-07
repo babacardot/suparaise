@@ -172,6 +172,13 @@
   .dark .required-asterisk {
     color: #f87171; /* Lighter red for dark mode */
   }
+
+  /* Theme sweep overlay will animate cleanly thanks to these hints */
+  .theme-sweep-overlay {
+    will-change: clip-path, opacity;
+    backface-visibility: hidden;
+    contain: layout paint;
+  }
 }
 
 /* Custom selection color for inputs and textareas */

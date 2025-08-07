@@ -5,6 +5,7 @@ import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 import { useUser } from '@/lib/contexts/user-context'
 import { useTheme } from 'next-themes'
+import { animateThemeSweep } from '@/lib/utils/theme-transition'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -55,7 +56,8 @@ export function NavUser({
   }
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
+    const next = (theme === 'dark' ? 'light' : 'dark') as 'light' | 'dark'
+    animateThemeSweep(next, () => setTheme(next))
   }
 
   // Determine user data, prioritizing live context user

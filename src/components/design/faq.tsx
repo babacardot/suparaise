@@ -18,7 +18,7 @@ const faqData = [
       'Yes, we take security seriously. All your data is encrypted in transit and at rest. We never share your information with third parties.',
   },
   {
-    question: 'How quickly can I start using Suparaise ?',
+    question: 'How quickly can I get started ?',
     answer:
       'You can get started immediately! Simply sign up, share your startup information with us, and our agents can begin submitting applications within minutes. No complex setup required.',
   },

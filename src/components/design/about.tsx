@@ -28,9 +28,9 @@ const transitionVariants = {
 }
 
 const achievements = [
-  { label: 'Applications automated', value: '25000+' },
-  { label: 'Founders served', value: '1000+' },
-  { label: 'Success rate', value: '99.9%' },
+  { label: 'Applications automated', value: '25,000+' },
+  { label: 'Founders served', value: '1,000+' },
+  { label: 'Success rate', value: '97.9%' },
   { label: 'Meetings booked', value: '400+' },
 ]
 
@@ -39,7 +39,7 @@ const features = [
     animation: animations.bolt,
     title: 'Accuracy',
     description:
-      'The most advanced AI fill out applications exactly as you would, with precision that matches your voice.',
+      'The most advanced AI models fill out applications exactly as you would, with precision that matches your voice.',
     color: 'green',
     bgClass:
       'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800',
@@ -49,7 +49,7 @@ const features = [
     animation: animations.speed,
     title: 'Scale',
     description:
-      'Our agents can fill out 25+ applications simultaneously in the time it takes you to complete just one.',
+      'Our agents can fill out 5 applications simultaneously in the time it takes you to complete just one.',
     color: 'blue',
     bgClass:
       'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800',
@@ -59,7 +59,7 @@ const features = [
     animation: animations.globe,
     title: 'Reach',
     description:
-      'Access 2,000+ funds, angels, and accelerators from Silicon Valley to Singapore and throughout EMEA.',
+      'Access 2,000+ funds, and accelerators from Silicon Valley to Singapore and throughout EMEA.',
     color: 'amber',
     bgClass:
       'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800',
@@ -111,7 +111,7 @@ export const About = () => {
                 You&apos;re spending 40% of your time on mind-numbing tasks:
                 copying the same pitch into countless forms, researching which
                 VCs actually invest in your stage, and crafting personalized
-                outreach emails. Each application takes 2-3 hours of your
+                outreach emails. Each application takes 45 minutes of your
                 valuable time - time worth $100+ per hour that should be spent
                 building your product and acquiring customers.
               </p>
