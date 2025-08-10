@@ -264,18 +264,18 @@ const FundsTable = React.memo(function FundsTable({
   }, [filteredTargets, onTargetUpdate, pollingSubmissions])
 
   // Memoize color functions to prevent recreation on every render
-  const getSubmissionTypeColor = React.useCallback((type: string) => {
-    switch (type) {
-      case 'form':
-        return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-      case 'email':
-        return 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-      case 'other':
-        return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
-      default:
-        return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
-    }
-  }, [])
+  // const getSubmissionTypeColor = React.useCallback((type: string) => {
+  //   switch (type) {
+  //     case 'form':
+  //       return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+  //     case 'email':
+  //       return 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+  //     case 'other':
+  //       return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+  //     default:
+  //       return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+  //   }
+  // }, [])
 
   const getRegionColor = React.useCallback((region: string) => {
     // Global and Emerging Markets - Sky
@@ -444,9 +444,9 @@ const FundsTable = React.memo(function FundsTable({
     }
   }, [])
 
-  const capitalizeFirst = React.useCallback((str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-  }, [])
+  // const capitalizeFirst = React.useCallback((str: string) => {
+  //   return str.charAt(0).toUpperCase() + str.slice(1)
+  // }, [])
 
   // Extract the first sentence (ending with ., !, or ?) for lightweight table display
   const extractFirstSentence = React.useCallback((text: string) => {
@@ -696,7 +696,7 @@ const FundsTable = React.memo(function FundsTable({
                           </button>
                         </TableHead>
                       )}
-                      {columnVisibility.type && (
+                      {/* {columnVisibility.type && (
                         <TableHead className="w-[90px]">
                           <button
                             onClick={() => handleSort('type')}
@@ -705,7 +705,7 @@ const FundsTable = React.memo(function FundsTable({
                             Type
                           </button>
                         </TableHead>
-                      )}
+                      )} */}
                       {columnVisibility.requirements && (
                         <TableHead className="w-[140px]">
                           <button
@@ -877,7 +877,7 @@ const FundsTable = React.memo(function FundsTable({
                             </div>
                           </TableCell>
                         )}
-                        {columnVisibility.type && (
+                        {/* {columnVisibility.type && (
                           <TableCell className="p-2">
                             <Badge
                               className={`rounded-sm text-xs ${getSubmissionTypeColor(target.submission_type)}`}
@@ -885,7 +885,7 @@ const FundsTable = React.memo(function FundsTable({
                               {capitalizeFirst(target.submission_type)}
                             </Badge>
                           </TableCell>
-                        )}
+                        )} */}
                         {columnVisibility.requirements && (
                           <TableCell className="p-2">
                             <div className="flex flex-wrap gap-1">

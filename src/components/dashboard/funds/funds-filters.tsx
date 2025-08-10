@@ -23,6 +23,14 @@ export interface FundsFilters {
   submissionFilter: 'all' | 'hide_submitted' | 'only_submitted'
 }
 
+// Keys in FundsFilters that are array-based filters
+type ArrayFilterKey =
+  | 'submissionTypes'
+  | 'stageFocus'
+  | 'industryFocus'
+  | 'regionFocus'
+  | 'requiredDocuments'
+
 interface ColumnVisibility {
   region: boolean
   focus: boolean
@@ -43,12 +51,12 @@ interface FundsFiltersProps {
   totalSubmissions?: number // Add this prop to track total submissions
 }
 
-// Memoized static data
-const SUBMISSION_TYPES = [
-  { value: 'form', label: 'Form', animation: animations.fileplus },
-  { value: 'email', label: 'Email', animation: animations.mail },
-  { value: 'other', label: 'Other', animation: animations.help },
-] as const
+// Memoized static data (commented out until Type filter is re-enabled)
+// const SUBMISSION_TYPES = [
+//   { value: 'form', label: 'Form', animation: animations.fileplus },
+//   { value: 'email', label: 'Email', animation: animations.mail },
+//   { value: 'other', label: 'Other', animation: animations.help },
+// ] as const
 
 const DEBOUNCE_DELAY = 250
 
@@ -115,12 +123,9 @@ export default function FundsFilters({
 
   // Memoized filter update function
   const updateFilter = useCallback(
-    (filterKey: keyof FundsFilters, value: string, checked: boolean) => {
-      // Skip non-array filters like search and submissionFilter
-      if (filterKey === 'search' || filterKey === 'submissionFilter') return
-
+    (filterKey: ArrayFilterKey, value: string, checked: boolean) => {
       setLocalFilters((prevFilters) => {
-        const currentValues = prevFilters[filterKey] as string[]
+        const currentValues = (prevFilters[filterKey] as string[]) || []
         const newValues = checked
           ? [...currentValues, value]
           : currentValues.filter((v: string) => v !== value)
@@ -128,7 +133,7 @@ export default function FundsFilters({
         return {
           ...prevFilters,
           [filterKey]: newValues,
-        }
+        } as FundsFilters
       })
     },
     [],
@@ -317,7 +322,7 @@ export default function FundsFilters({
     options,
     hasIcon = false,
   }: {
-    filterKey: keyof FundsFilters
+    filterKey: ArrayFilterKey
     options: Array<{ value: string; label: string; animation?: object }>
     hasIcon?: boolean
   }) {
@@ -352,21 +357,23 @@ export default function FundsFilters({
         // Update immediately for snappy UX and bypass debounce
         updateFilter(filterKey, optionValue, !isSelected)
         // Force immediate parent update
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         Promise.resolve().then(() => {
           if (debounceTimeoutRef.current) {
             clearTimeout(debounceTimeoutRef.current)
             debounceTimeoutRef.current = null
           }
-          const next = { ...localFilters }
-          const currentValues = (next[filterKey] as string[]) || []
-          next[filterKey] = (isSelected
+          const currentValues = (localFilters[filterKey] as string[]) || []
+          const updatedValues = isSelected
             ? currentValues.filter((v: string) => v !== optionValue)
-            : [...currentValues, optionValue]) as any
-          onFiltersChange(next)
+            : [...currentValues, optionValue]
+          const nextFilters = {
+            ...localFilters,
+            [filterKey]: updatedValues,
+          } as FundsFilters
+          onFiltersChange(nextFilters)
         })
       },
-      [filterKey, localFilters, onFiltersChange],
+      [filterKey],
     )
 
     return (
@@ -673,7 +680,7 @@ export default function FundsFilters({
           </div>
         )}
 
-        {/* Type Filter - standardized width */}
+        {/* Type Filter - standardized width (commented out for now)
         {columnVisibility.type && (
           <div className="w-full sm:w-40">
             <Popover>
@@ -747,6 +754,7 @@ export default function FundsFilters({
             </Popover>
           </div>
         )}
+        */}
 
         {/* Requirements Filter - standardized width */}
         {columnVisibility.requirements && (
@@ -848,7 +856,7 @@ export default function FundsFilters({
               align="end"
             >
               <div className="space-y-2">
-                {['region', 'focus', 'industry', 'type', 'requirements'].map(
+                {['region', 'focus', 'industry', /* 'type', */ 'requirements'].map(
                   (key) => (
                     <div
                       key={key}
@@ -903,10 +911,10 @@ export default function FundsFilters({
                 onFiltersChange(newFilters)
               }}
               className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
-                  ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
-                  : localFilters.submissionFilter === 'only_submitted'
-                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
-                    : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
+                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
+                : localFilters.submissionFilter === 'only_submitted'
+                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
+                  : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
                 }`}
               title={
                 localFilters.submissionFilter === 'all'

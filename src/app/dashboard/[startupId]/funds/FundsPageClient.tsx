@@ -134,7 +134,7 @@ export default function FundsPageClient({
 
   // Removed prefetch to avoid impacting initial load
 
-  const [isNavigating, startTransition] = useTransition()
+  const startTransition = useTransition()[1]
 
   const updateUrl = useCallback(
     (newParams: URLSearchParams) => {
@@ -204,6 +204,8 @@ export default function FundsPageClient({
 
   const updateColumnVisibility = useCallback(
     (column: keyof ColumnVisibility, visible: boolean) => {
+      // Temporarily ignore toggling 'type' column (feature commented out)
+      if (column === 'type') return
       const newVisibility = { ...columnVisibility, [column]: visible }
       setColumnVisibility(newVisibility)
       if (typeof window !== 'undefined') {
