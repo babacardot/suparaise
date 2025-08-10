@@ -82,12 +82,19 @@ export default React.memo(function AcceleratorsActions({
   const { user, currentStartupId, subscription } = useUser()
   const { toast } = useToast()
   const [submitting, setSubmitting] = React.useState(false)
+  const playClickSound = React.useCallback(() => {
+    try {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.4
+      void audio.play().catch(() => { })
+    } catch { }
+  }, [])
 
   const isQuotaReached = React.useMemo(() => {
     return (
       !!subscription &&
       subscription.monthly_submissions_used >=
-        subscription.monthly_submissions_limit
+      subscription.monthly_submissions_limit
     )
   }, [subscription])
 
@@ -119,6 +126,7 @@ export default React.memo(function AcceleratorsActions({
       return
     }
 
+    playClickSound()
     setSubmitting(true)
     try {
       toast({
@@ -187,6 +195,7 @@ export default React.memo(function AcceleratorsActions({
     toast,
     subscription,
     isQuotaReached,
+    playClickSound,
   ])
 
   const getStageColor = (stage: string) => {
@@ -635,17 +644,16 @@ export default React.memo(function AcceleratorsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
-                            index === timeline.length - 1
-                              ? event.status === 'completed'
-                                ? 'bg-green-500'
-                                : event.status === 'failed'
-                                  ? 'bg-red-500'
-                                  : event.status === 'pending'
-                                    ? 'bg-orange-500'
-                                    : 'bg-gray-300'
-                              : 'bg-transparent'
-                          } ${index === timeline.length - 1 ? '' : ''}`}
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${index === timeline.length - 1
+                            ? event.status === 'completed'
+                              ? 'bg-green-500'
+                              : event.status === 'failed'
+                                ? 'bg-red-500'
+                                : event.status === 'pending'
+                                  ? 'bg-orange-500'
+                                  : 'bg-gray-300'
+                            : 'bg-transparent'
+                            } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}

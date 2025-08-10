@@ -69,6 +69,13 @@ export default function AcceleratorsFilters({
   const [localFilters, setLocalFilters] = useState(filters)
   const isMounted = useRef(false)
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const playClickSound = useCallback(() => {
+    try {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.4
+      void audio.play().catch(() => { })
+    } catch { }
+  }, [])
 
   useEffect(() => {
     setLocalFilters(filters)
@@ -146,13 +153,14 @@ export default function AcceleratorsFilters({
       setLocalFilters(newFilters)
 
       if (immediate) {
+        playClickSound()
         if (debounceTimeoutRef.current) {
           clearTimeout(debounceTimeoutRef.current)
         }
         onFiltersChange(newFilters)
       }
     },
-    [localFilters, onFiltersChange],
+    [localFilters, onFiltersChange, playClickSound],
   )
 
   const handleSearchChange = useCallback(
@@ -166,8 +174,9 @@ export default function AcceleratorsFilters({
   )
 
   const handleSearchClear = useCallback(() => {
+    playClickSound()
     clearFilter('search', true)
-  }, [clearFilter])
+  }, [clearFilter, playClickSound])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -390,6 +399,7 @@ export default function AcceleratorsFilters({
             scrollContainerRef.current.scrollTop
         }
 
+        playClickSound()
         updateFilter(filterKey, optionValue, !isSelected)
       },
       [filterKey],
@@ -518,6 +528,7 @@ export default function AcceleratorsFilters({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        playClickSound()
                         clearFilter('regionFocus', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
@@ -590,6 +601,7 @@ export default function AcceleratorsFilters({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        playClickSound()
                         clearFilter('stageFocus', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
@@ -662,6 +674,7 @@ export default function AcceleratorsFilters({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        playClickSound()
                         clearFilter('industryFocus', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
@@ -811,6 +824,7 @@ export default function AcceleratorsFilters({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        playClickSound()
                         clearFilter('programTypes', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
@@ -885,6 +899,7 @@ export default function AcceleratorsFilters({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        playClickSound()
                         clearFilter('equityRanges', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
@@ -959,6 +974,7 @@ export default function AcceleratorsFilters({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        playClickSound()
                         clearFilter('fundingRanges', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
@@ -1002,7 +1018,7 @@ export default function AcceleratorsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
+                      localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = FILTER_OPTIONS.requiredDocuments.find(
                           (d) => d.value === doc,
@@ -1034,11 +1050,12 @@ export default function AcceleratorsFilters({
                       )}
                   </div>
                   {localFilters.requiredDocuments &&
-                  localFilters.requiredDocuments.length > 0 ? (
+                    localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        playClickSound()
                         clearFilter('requiredDocuments', true)
                       }}
                       className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
@@ -1106,16 +1123,16 @@ export default function AcceleratorsFilters({
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
+                      playClickSound()
                       onColumnVisibilityChange(
                         key as keyof ColumnVisibility,
                         !columnVisibility[key as keyof ColumnVisibility],
                       )
                     }}
-                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${
-                      columnVisibility[key as keyof ColumnVisibility]
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                    }`}
+                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${columnVisibility[key as keyof ColumnVisibility]
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                      }`}
                   >
                     <span className="text-sm font-medium capitalize">
                       {key === 'programType'
@@ -1135,6 +1152,7 @@ export default function AcceleratorsFilters({
             <Button
               variant="outline"
               onClick={() => {
+                playClickSound()
                 const nextState: 'all' | 'hide_submitted' | 'only_submitted' =
                   localFilters.submissionFilter === 'all'
                     ? 'hide_submitted'
@@ -1148,13 +1166,12 @@ export default function AcceleratorsFilters({
                 setLocalFilters(newFilters)
                 onFiltersChange(newFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
-                localFilters.submissionFilter === 'hide_submitted'
-                  ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
-                  : localFilters.submissionFilter === 'only_submitted'
-                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                    : 'bg-card border-border'
-              }`}
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
+                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
+                : localFilters.submissionFilter === 'only_submitted'
+                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                  : 'bg-card border-border'
+                }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all (click to hide submitted)'
@@ -1183,7 +1200,10 @@ export default function AcceleratorsFilters({
           <div className="w-full sm:w-auto">
             <Button
               variant="outline"
-              onClick={onClearFilters}
+              onClick={() => {
+                playClickSound()
+                onClearFilters()
+              }}
               className="w-full sm:w-auto h-10 px-3 rounded-sm bg-card border-border text-muted-foreground hover:text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
             >
               <LottieIcon
