@@ -38,6 +38,10 @@ const playClickSound = () => {
   playSound('/sounds/light.mp3')
 }
 
+const playNopeSound = () => {
+  playSound('/sounds/nope.mp3')
+}
+
 interface SettingsNavProps extends React.HTMLAttributes<HTMLElement> {
   items: {
     href: string
@@ -76,6 +80,7 @@ function NavItem({
     (e: React.MouseEvent) => {
       if (isLockedForUser) {
         e.preventDefault()
+        playNopeSound()
         toast({
           variant: 'info',
           title: 'Feature locked',
@@ -207,8 +212,8 @@ export default function SettingsNav({
   const [val, setVal] = useState(currentPath)
 
   // Get permission level, defaulting to FREE if not available - memoize for performance
-  const permissionLevel = useMemo(
-    () => subscription?.permission_level || 'FREE',
+  const permissionLevel = useMemo<'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'>(
+    () => (subscription?.permission_level as any) || 'FREE',
     [subscription?.permission_level],
   )
 
@@ -310,7 +315,9 @@ export default function SettingsNav({
               const animationData =
                 animations[item.icon as keyof typeof animations]
               const requiresEnterprisePermission = item.title === 'Integrations'
-              const hasEnterpriseAccess = permissionLevel === 'ENTERPRISE'
+              const hasEnterpriseAccess =
+                (permissionLevel as 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE') ===
+                'ENTERPRISE'
               const isLockedForUser =
                 requiresEnterprisePermission && !hasEnterpriseAccess
 

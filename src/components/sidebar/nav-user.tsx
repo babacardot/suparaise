@@ -84,6 +84,13 @@ export function NavUser({
     const next = !soundEnabled
     setSoundEnabledState(next)
     setSoundEnabled(next)
+    if (next && typeof window !== 'undefined') {
+      try {
+        const audio = new Audio('/sounds/light.mp3')
+        audio.volume = 0.4
+        void audio.play()
+      } catch { }
+    }
   }
 
   // Determine user data, prioritizing live context user

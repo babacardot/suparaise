@@ -43,6 +43,18 @@ export function NavMain({
   const { toast } = useToast()
   const { isMobile, state } = useSidebar()
 
+  // Plays a subtle negative feedback sound when a locked feature is clicked
+  const playNopeSound = () => {
+    if (typeof window === 'undefined') return
+    try {
+      const audio = new Audio('/sounds/nope.mp3')
+      audio.volume = 0.5
+      void audio.play()
+    } catch {
+      // ignore playback errors
+    }
+  }
+
   // Prefetch all navigation links for faster navigation
   useEffect(() => {
     items.forEach((item) => {
@@ -82,6 +94,7 @@ export function NavMain({
           const handleClick = (e: React.MouseEvent) => {
             if (isLockedForUser) {
               e.preventDefault()
+              playNopeSound()
               const upgradeMessage = requiresEnterprisePermission
                 ? `${item.title} is only available for Enterprise users. Please upgrade your plan.`
                 : requiresMaxPermission
@@ -111,7 +124,7 @@ export function NavMain({
                   'h-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!',
                   '[&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
                   isActive &&
-                    'bg-sidebar-accent text-sidebar-accent-foreground',
+                  'bg-sidebar-accent text-sidebar-accent-foreground',
                 )}
                 onMouseEnter={() => setHoveredItem(item.title)}
                 onMouseLeave={() => setHoveredItem(null)}

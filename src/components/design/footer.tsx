@@ -9,13 +9,19 @@ import { GitHubIcon } from '@/components/icons/GitHubIcon'
 import { LottieIcon } from '@/components/design/lottie-icon'
 import { animateThemeSweep } from '@/lib/utils/theme-transition'
 import { animations } from '@/lib/utils/lottie-animations'
+import { getSoundEnabled, setSoundEnabled } from '@/lib/utils/sound'
 
 export const Footer = () => {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
+  const [soundEnabled, setSoundEnabledState] = React.useState<boolean>(true)
 
   React.useEffect(() => {
     setMounted(true)
+    // Initialize sound state from storage
+    try {
+      setSoundEnabledState(getSoundEnabled())
+    } catch { }
   }, [])
 
   const playClickSound = () => {
@@ -32,6 +38,20 @@ export const Footer = () => {
     playClickSound()
     const next = (theme === 'dark' ? 'light' : 'dark') as 'light' | 'dark'
     animateThemeSweep(next, () => setTheme(next))
+  }
+
+  const toggleSound = () => {
+    const next = !soundEnabled
+    setSoundEnabledState(next)
+    setSoundEnabled(next)
+    // Provide immediate audio feedback when turning sound on
+    if (next && typeof window !== 'undefined') {
+      try {
+        const audio = new Audio('/sounds/light.mp3')
+        audio.volume = 0.4
+        void audio.play()
+      } catch { }
+    }
   }
 
   return (
@@ -104,30 +124,46 @@ export const Footer = () => {
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} suparaise.com — All rights reserved.
           </p>
-          <button
-            onClick={toggleTheme}
-            className="h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors [&_svg]:fill-current"
-            aria-label={
-              mounted
-                ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
-                : 'Toggle theme'
-            }
-          >
-            {mounted ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors [&_svg]:fill-current"
+              aria-label={
+                mounted
+                  ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
+                  : 'Toggle theme'
+              }
+            >
+              {mounted ? (
+                <LottieIcon
+                  animationData={
+                    theme === 'dark' ? animations.sun : animations.point
+                  }
+                  size={16}
+                  loop={false}
+                  autoplay={false}
+                  initialFrame={0}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                />
+              ) : (
+                <div className="h-4 w-4 rounded-sm bg-muted animate-pulse" />
+              )}
+            </button>
+            <button
+              onClick={toggleSound}
+              className="h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors [&_svg]:fill-current"
+              aria-label={soundEnabled ? 'Turn sound off' : 'Turn sound on'}
+            >
               <LottieIcon
-                animationData={
-                  theme === 'dark' ? animations.sun : animations.point
-                }
+                animationData={soundEnabled ? animations.play : animations.pause}
                 size={16}
                 loop={false}
                 autoplay={false}
                 initialFrame={0}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               />
-            ) : (
-              <div className="h-4 w-4 rounded-sm bg-muted animate-pulse" />
-            )}
-          </button>
+            </button>
+          </div>
         </div>
       </div>
     </footer>
