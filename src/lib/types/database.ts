@@ -2056,7 +2056,7 @@ export type Database = {
         | '1M+'
       equity_range: '0%' | '1-3%' | '4-6%' | '7-10%' | '10%+' | 'variable'
       form_complexity: 'simple' | 'standard' | 'comprehensive'
-      form_type: 'contact' | 'typeform' | 'google' | 'generic'
+      form_type: 'contact' | 'airtable' | 'typeform' | 'google' | 'generic'
       founder_role:
         | 'Founder'
         | 'Co-founder'
@@ -2079,13 +2079,14 @@ export type Database = {
         | '250K-500K'
         | '500K+'
       industry_type:
-        | 'SaaS'
+        | 'Software'
         | 'Fintech'
-        | 'Healthtech'
+        | 'Healthcare'
+        | 'Medtech'
         | 'AI'
         | 'Computing'
         | 'Deep tech'
-        | 'Climate tech'
+        | 'Climate'
         | 'Consumer'
         | 'E-commerce'
         | 'Marketplace'
@@ -2096,13 +2097,10 @@ export type Database = {
         | 'Logistics'
         | 'Adtech'
         | 'Proptech'
-        | 'Insurtech'
         | 'Agriculture'
         | 'Automotive'
         | 'Biotechnology'
-        | 'Technology'
         | 'Construction'
-        | 'Consulting'
         | 'Education'
         | 'Energy'
         | 'Entertainment'
@@ -2110,10 +2108,20 @@ export type Database = {
         | 'Fashion'
         | 'Real estate'
         | 'Food'
+        | 'IoT'
         | 'Government'
         | 'Hospitality'
-        | 'Human Resources'
+        | 'HR'
         | 'Insurance'
+        | 'Security'
+        | 'Social'
+        | 'Aerospace'
+        | 'AR/VR'
+        | 'Mining'
+        | 'Advanced Materials'
+        | 'Biofuels'
+        | 'Hardware'
+        | 'Nanotechnology'
         | 'Legal'
         | 'Manufacturing'
         | 'Media'
@@ -2121,6 +2129,7 @@ export type Database = {
         | 'Retail'
         | 'Telecommunications'
         | 'Transportation'
+        | 'Agnostic'
         | 'Other'
       investment_approach:
         | 'hands-on'
@@ -2166,15 +2175,12 @@ export type Database = {
         | 'South America'
         | 'LATAM'
         | 'Europe'
-        | 'Western Europe'
-        | 'Eastern Europe'
-        | 'Continental Europe'
         | 'Middle East'
         | 'Africa'
         | 'Asia'
         | 'East Asia'
-        | 'South Asia'
         | 'South East Asia'
+        | 'South Asia'
         | 'Oceania'
         | 'EMEA'
         | 'Emerging Markets'
@@ -2185,8 +2191,13 @@ export type Database = {
         | 'Australia'
         | 'United States'
         | 'Canada'
-        | 'United Kingdom'
+        | 'UK'
         | 'France'
+        | 'Nigeria'
+        | 'Kenya'
+        | 'Egypt'
+        | 'Senegal'
+        | 'South Africa'
         | 'Netherlands'
         | 'Sweden'
         | 'Other'
@@ -2370,7 +2381,7 @@ export const Constants = {
       ],
       equity_range: ['0%', '1-3%', '4-6%', '7-10%', '10%+', 'variable'],
       form_complexity: ['simple', 'standard', 'comprehensive'],
-      form_type: ['contact', 'typeform', 'google', 'generic'],
+      form_type: ['contact', 'airtable', 'typeform', 'google', 'generic'],
       founder_role: [
         'Founder',
         'Co-founder',
@@ -2395,13 +2406,14 @@ export const Constants = {
         '500K+',
       ],
       industry_type: [
-        'SaaS',
+        'Software',
         'Fintech',
-        'Healthtech',
+        'Healthcare',
+        'Medtech',
         'AI',
         'Computing',
         'Deep tech',
-        'Climate tech',
+        'Climate',
         'Consumer',
         'E-commerce',
         'Marketplace',
@@ -2412,13 +2424,10 @@ export const Constants = {
         'Logistics',
         'Adtech',
         'Proptech',
-        'Insurtech',
         'Agriculture',
         'Automotive',
         'Biotechnology',
-        'Technology',
         'Construction',
-        'Consulting',
         'Education',
         'Energy',
         'Entertainment',
@@ -2426,10 +2435,20 @@ export const Constants = {
         'Fashion',
         'Real estate',
         'Food',
+        'IoT',
         'Government',
         'Hospitality',
-        'Human Resources',
+        'HR',
         'Insurance',
+        'Security',
+        'Social',
+        'Aerospace',
+        'AR/VR',
+        'Mining',
+        'Advanced Materials',
+        'Biofuels',
+        'Hardware',
+        'Nanotechnology',
         'Legal',
         'Manufacturing',
         'Media',
@@ -2437,6 +2456,7 @@ export const Constants = {
         'Retail',
         'Telecommunications',
         'Transportation',
+        'Agnostic',
         'Other',
       ],
       investment_approach: [
@@ -2488,15 +2508,12 @@ export const Constants = {
         'South America',
         'LATAM',
         'Europe',
-        'Western Europe',
-        'Eastern Europe',
-        'Continental Europe',
         'Middle East',
         'Africa',
         'Asia',
         'East Asia',
-        'South Asia',
         'South East Asia',
+        'South Asia',
         'Oceania',
         'EMEA',
         'Emerging Markets',
@@ -2507,8 +2524,13 @@ export const Constants = {
         'Australia',
         'United States',
         'Canada',
-        'United Kingdom',
+        'UK',
         'France',
+        'Nigeria',
+        'Kenya',
+        'Egypt',
+        'Senegal',
+        'South Africa',
         'Netherlands',
         'Sweden',
         'Other',

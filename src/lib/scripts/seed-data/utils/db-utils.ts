@@ -135,7 +135,12 @@ const parseEnumsFromSql = (sqlContent: string): Record<string, string[]> => {
 
 const buildEnumValues = (): Record<string, readonly string[]> => {
   try {
-    const schemaPath = path.join(process.cwd(), 'supabase', 'migrations', '01_db.sql')
+    const schemaPath = path.join(
+      process.cwd(),
+      'supabase',
+      'migrations',
+      '01_db.sql',
+    )
     const sql = fs.readFileSync(schemaPath, 'utf-8')
     const parsed = parseEnumsFromSql(sql)
     // Freeze arrays to mimic readonly behavior and avoid accidental mutation
@@ -144,7 +149,12 @@ const buildEnumValues = (): Record<string, readonly string[]> => {
     return frozen
   } catch {
     // Fallback to generated constants (may be out of date if types not regenerated)
-    return (Constants?.public?.Enums as unknown as Record<string, readonly string[]>) || {}
+    return (
+      (Constants?.public?.Enums as unknown as Record<
+        string,
+        readonly string[]
+      >) || {}
+    )
   }
 }
 
