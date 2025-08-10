@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useTransition } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import AcceleratorsTableWrapper from '@/components/dashboard/accelerators/accelerators-table-wrapper'
@@ -162,20 +162,16 @@ export default function AcceleratorsPageClient({
     [page, paginationData],
   )
 
-  // Prefetch the next page to make navigation feel faster
-  useEffect(() => {
-    if (paginationData?.hasMore) {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set('page', String(page + 1))
-      router.prefetch(`${pathname}?${params.toString()}`)
-    }
-  }, [page, paginationData, pathname, router, searchParams])
+  // Removed prefetch to avoid impacting initial load
 
+  const startTransition = useTransition()[1]
   const updateUrl = useCallback(
     (newParams: URLSearchParams) => {
-      router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
+      startTransition(() => {
+        router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+      })
     },
-    [pathname, router],
+    [pathname, router, startTransition],
   )
 
   const handleFiltersChange = useCallback(

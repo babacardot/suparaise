@@ -149,7 +149,9 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     return null
   }, [subscription?.permission_level])
 
-  const filteredAccelerators = React.useMemo(() => accelerators, [accelerators])
+  // Defer rendering to keep pagination snappy
+  const deferredAccelerators = React.useDeferredValue(accelerators)
+  const filteredAccelerators = React.useMemo(() => deferredAccelerators, [deferredAccelerators])
 
   const handleSort = React.useCallback(
     (key: string) => {
@@ -179,18 +181,18 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     return () => clearInterval(interval)
   }, [user?.id, startupId])
 
-  const getSubmissionTypeColor = React.useCallback((type: string) => {
-    switch (type) {
-      case 'form':
-        return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-      case 'email':
-        return 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-      case 'other':
-        return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
-      default:
-        return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
-    }
-  }, [])
+  // const getSubmissionTypeColor = React.useCallback((type: string) => {
+  //   switch (type) {
+  //     case 'form':
+  //       return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+  //     case 'email':
+  //       return 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+  //     case 'other':
+  //       return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+  //     default:
+  //       return 'bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+  //   }
+  // }, [])
 
   const getRegionColor = React.useCallback((region: string) => {
     if (['Global', 'Emerging Markets'].includes(region)) {
@@ -553,7 +555,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                           </button>
                         </TableHead>
                       )}
-                      {columnVisibility.type && (
+                      {/* {columnVisibility.type && (
                         <TableHead className="w-[90px]">
                           <button
                             onClick={() => handleSort('submission_type')}
@@ -562,7 +564,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                             Type
                           </button>
                         </TableHead>
-                      )}
+                      )} */}
                       {columnVisibility.programType && (
                         <TableHead className="w-[100px]">
                           <button
@@ -766,7 +768,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                             </div>
                           </TableCell>
                         )}
-                        {columnVisibility.type && (
+                        {/* {columnVisibility.type && (
                           <TableCell className="p-2">
                             <Badge
                               className={`rounded-sm text-xs ${getSubmissionTypeColor(accelerator.submission_type)}`}
@@ -774,7 +776,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                               {capitalizeFirst(accelerator.submission_type)}
                             </Badge>
                           </TableCell>
-                        )}
+                        )} */}
                         {columnVisibility.programType &&
                           accelerator.program_type && (
                             <TableCell className="p-2">
@@ -904,14 +906,14 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                   }
                                   onMouseLeave={() => setHoveredButton(null)}
                                   className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${isQuotaReached
-                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
+                                    ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
+                                    : queueStatus &&
+                                      !queueStatus.canSubmitMore
+                                      ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
                                       : queueStatus &&
-                                        !queueStatus.canSubmitMore
-                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
-                                        : queueStatus &&
-                                          queueStatus.availableSlots === 0
-                                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                        queueStatus.availableSlots === 0
+                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
                                     }`}
                                   title={
                                     isQuotaReached

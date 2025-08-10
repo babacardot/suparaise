@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import AcceleratorsTable from './accelerators-table'
-import AcceleratorsActions from './accelerators-actions'
+const AcceleratorsActions = React.lazy(() => import('./accelerators-actions'))
 
 type Accelerator = {
   id: string
@@ -172,12 +172,14 @@ const AcceleratorsTableWrapper = React.memo(function AcceleratorsTableWrapper({
         />
       </div>
 
-      <AcceleratorsActions
-        accelerator={selectedAccelerator}
-        submissions={submissions}
-        isOpen={isActionsOpen}
-        onOpenChange={handleOpenChange}
-      />
+      <React.Suspense fallback={null}>
+        <AcceleratorsActions
+          accelerator={selectedAccelerator}
+          submissions={submissions}
+          isOpen={isActionsOpen}
+          onOpenChange={handleOpenChange}
+        />
+      </React.Suspense>
     </>
   )
 })

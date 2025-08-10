@@ -59,18 +59,18 @@ export default React.memo(function AcceleratorsActions({
   isOpen,
   onOpenChange,
 }: AcceleratorsActionsProps) {
-  const getSubmissionTypeColor = (type: string) => {
-    switch (type) {
-      case 'form':
-        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-      case 'email':
-        return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-      case 'other':
-        return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
-      default:
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
-    }
-  }
+  // const getSubmissionTypeColor = (type: string) => {
+  //   switch (type) {
+  //     case 'form':
+  //       return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+  //     case 'email':
+  //       return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+  //     case 'other':
+  //       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
+  //     default:
+  //       return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
+  //   }
+  // }
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
@@ -292,6 +292,7 @@ export default React.memo(function AcceleratorsActions({
           <CardContent className="p-4 space-y-3 overflow-auto flex-1 text-xs">
             <div className="space-y-3 pl-4 pr-2 sm:px-0">
               {/* Basic Info */}
+              {/* Type (commented out for now)
               <div
                 className="flex items-center justify-between"
                 style={{ marginTop: '-15px' }}
@@ -303,6 +304,7 @@ export default React.memo(function AcceleratorsActions({
                   {capitalizeFirst(accelerator.submission_type)}
                 </Badge>
               </div>
+              */}
 
               {accelerator.form_complexity && (
                 <div className="flex items-center justify-between">
@@ -466,17 +468,16 @@ export default React.memo(function AcceleratorsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
-                            index === timeline.length - 1
-                              ? event.status === 'completed'
-                                ? 'bg-green-500'
-                                : event.status === 'failed'
-                                  ? 'bg-red-500'
-                                  : event.status === 'pending'
-                                    ? 'bg-orange-500'
-                                    : 'bg-gray-300'
-                              : 'bg-transparent'
-                          } ${index === timeline.length - 1 ? '' : ''}`}
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${index === timeline.length - 1
+                            ? event.status === 'completed'
+                              ? 'bg-green-500'
+                              : event.status === 'failed'
+                                ? 'bg-red-500'
+                                : event.status === 'pending'
+                                  ? 'bg-orange-500'
+                                  : 'bg-gray-300'
+                            : 'bg-transparent'
+                            } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}

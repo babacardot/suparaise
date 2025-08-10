@@ -54,35 +54,35 @@ BEGIN
     END IF;
 
     IF p_submission_types IS NOT NULL AND array_length(p_submission_types, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.submission_type = ANY(%L)', p_submission_types));
+        where_conditions := array_append(where_conditions, format('t.submission_type = ANY(%L::submission_type[])', p_submission_types));
     END IF;
 
     IF p_stage_focus IS NOT NULL AND array_length(p_stage_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.stage_focus && %L', p_stage_focus));
+        where_conditions := array_append(where_conditions, format('t.stage_focus && %L::investment_stage[]', p_stage_focus));
     END IF;
 
     IF p_industry_focus IS NOT NULL AND array_length(p_industry_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.industry_focus && %L', p_industry_focus));
+        where_conditions := array_append(where_conditions, format('t.industry_focus && %L::industry_type[]', p_industry_focus));
     END IF;
 
     IF p_region_focus IS NOT NULL AND array_length(p_region_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.region_focus && %L', p_region_focus));
+        where_conditions := array_append(where_conditions, format('t.region_focus && %L::region_type[]', p_region_focus));
     END IF;
 
     IF p_required_documents IS NOT NULL AND array_length(p_required_documents, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.required_documents && %L', p_required_documents));
+        where_conditions := array_append(where_conditions, format('t.required_documents && %L::required_document_type[]', p_required_documents));
     END IF;
 
     IF p_program_types IS NOT NULL AND array_length(p_program_types, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.program_type = ANY(%L)', p_program_types));
+        where_conditions := array_append(where_conditions, format('t.program_type = ANY(%L::program_type[])', p_program_types));
     END IF;
 
     IF p_equity_ranges IS NOT NULL AND array_length(p_equity_ranges, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.equity_taken = ANY(%L)', p_equity_ranges));
+        where_conditions := array_append(where_conditions, format('t.equity_taken = ANY(%L::equity_range[])', p_equity_ranges));
     END IF;
 
     IF p_funding_ranges IS NOT NULL AND array_length(p_funding_ranges, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.funding_provided = ANY(%L)', p_funding_ranges));
+        where_conditions := array_append(where_conditions, format('t.funding_provided = ANY(%L::funding_range[])', p_funding_ranges));
     END IF;
 
     IF p_tags IS NOT NULL AND array_length(p_tags, 1) > 0 THEN
@@ -136,11 +136,8 @@ BEGIN
             SELECT 
                 fa.*,
                 s.status as submission_status,
-                s.queue_position,
                 s.submission_date,
                 s.agent_notes,
-                s.queued_at,
-                s.started_at,
                 s.updated_at as submission_updated_at
             FROM filtered_accelerators fa
             LEFT JOIN accelerator_submissions s ON fa.id = s.accelerator_id AND s.startup_id = %L
