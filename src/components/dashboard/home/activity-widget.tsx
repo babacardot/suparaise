@@ -147,9 +147,12 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
     periods: RunMetricsPeriod[]
   } | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
-  // Check if mobile on mount and window resize
+  // Set mounted state and check mobile on mount
   useEffect(() => {
+    setIsMounted(true)
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
@@ -162,19 +165,30 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
   const days = isMobile ? 100 : 270
 
   useEffect(() => {
+    // Only run on client-side to prevent SSR fetch issues
+    if (!isMounted || typeof window === 'undefined') {
+      return
+    }
+
     const fetchActivity = async () => {
       if (!currentStartupId) {
         return
       }
-      const data = await fetchActivityWidget({
-        startupId: currentStartupId,
-        days,
-      })
-      setRunMetrics(data)
+      try {
+        const data = await fetchActivityWidget({
+          startupId: currentStartupId,
+          days,
+        })
+        setRunMetrics(data)
+      } catch (error) {
+        console.error('Failed to fetch activity data:', error)
+        // Set empty data on error to prevent layout issues
+        setRunMetrics({ periods: [] })
+      }
     }
 
     fetchActivity()
-  }, [currentStartupId, days])
+  }, [currentStartupId, days, isMounted])
 
   const { grid, totalRuns } = useMemo(() => {
     const periods = runMetrics?.periods || []
@@ -214,6 +228,22 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
 
     return { grid: gridItems, totalRuns: total }
   }, [runMetrics?.periods, days])
+
+  // Prevent SSR rendering issues - only render on client
+  if (!isMounted) {
+    return (
+      <Card className={twMerge('h-full flex-col justify-between rounded-sm', className)}>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base md:text-lg font-medium">
+            Activity
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="bg-background/50 dark:bg-background/30 mx-2 md:mx-4 mb-2 flex flex-row gap-x-1 rounded-sm p-2 md:p-4 pl-4 md:pl-4">
+          <div className="h-24 w-full bg-muted animate-pulse rounded-sm" />
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card

@@ -278,6 +278,54 @@ export default function ProfileSettings() {
     user?.user_metadata?.twitterUrl,
   ])
 
+  // Determine avatar URL first for preloading
+  const getUserAvatarUrl = () => {
+    if (!user) return ''
+
+    const { avatar_url, avatar_removed } = user.user_metadata
+
+    if (avatar_removed) {
+      return `https://avatar.vercel.sh/${encodeURIComponent(
+        user.email?.toLowerCase() || '',
+      )}.png?size=80`
+    }
+
+    return (
+      avatar_url ||
+      `https://avatar.vercel.sh/${encodeURIComponent(
+        user.email?.toLowerCase() || '',
+      )}.png?size=80`
+    )
+  }
+
+  const mainUserAvatarUrl = getUserAvatarUrl()
+
+  // Preload main user avatar image to ensure seamless loading
+  React.useEffect(() => {
+    if (mainUserAvatarUrl && typeof window !== 'undefined') {
+      // Create preload link
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'image'
+      link.href = mainUserAvatarUrl
+      link.crossOrigin = 'anonymous'
+      document.head.appendChild(link)
+
+      // Also preload via Image object for better browser cache
+      const img = new Image()
+      img.src = mainUserAvatarUrl
+
+      // Cleanup
+      return () => {
+        try {
+          document.head.removeChild(link)
+        } catch {
+          // Link might already be removed
+        }
+      }
+    }
+  }, [mainUserAvatarUrl])
+
   if (!user) {
     return <div></div>
   }
@@ -721,27 +769,7 @@ export default function ProfileSettings() {
     )
   }
 
-  // Determine which avatar to display for the main user (founderIndex 0)
-  const getUserAvatarUrl = () => {
-    if (!user) return ''
 
-    const { avatar_url, avatar_removed } = user.user_metadata
-
-    if (avatar_removed) {
-      return `https://avatar.vercel.sh/${encodeURIComponent(
-        user.email?.toLowerCase() || '',
-      )}.png?size=80`
-    }
-
-    return (
-      avatar_url ||
-      `https://avatar.vercel.sh/${encodeURIComponent(
-        user.email?.toLowerCase() || '',
-      )}.png?size=80`
-    )
-  }
-
-  const mainUserAvatarUrl = getUserAvatarUrl()
 
   return (
     <div className="h-full flex flex-col overflow-hidden select-none">

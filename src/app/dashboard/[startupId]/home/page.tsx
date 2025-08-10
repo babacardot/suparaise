@@ -82,18 +82,19 @@ async function getDashboardData(startupId: string) {
   }
 
   try {
-    // Add timeout to prevent hanging requests
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
-
-    const { data: dashboardData, error } = await supabase.rpc(
-      'get_dashboard_data',
-      {
-        p_startup_id: startupId,
-      },
+    // Add timeout logic to prevent hanging requests
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Request timeout')), 12000) // 12 second timeout
     )
 
-    clearTimeout(timeoutId)
+    const rpcPromise = supabase.rpc('get_dashboard_data', {
+      p_startup_id: startupId,
+    })
+
+    const { data: dashboardData, error } = await Promise.race([
+      rpcPromise,
+      timeoutPromise,
+    ]) as { data: DashboardData; error: Error | null }
 
     if (error) {
       console.error('Error fetching dashboard data:', error)
@@ -125,11 +126,11 @@ async function getDashboardData(startupId: string) {
     ).filter((submission): submission is SubmissionData =>
       Boolean(
         submission.submission_id &&
-          submission.submitted_to_name &&
-          submission.submitted_to_type &&
-          submission.submitted_at &&
-          submission.status &&
-          submission.entity_id,
+        submission.submitted_to_name &&
+        submission.submitted_to_type &&
+        submission.submitted_at &&
+        submission.status &&
+        submission.entity_id,
       ),
     )
 
@@ -142,6 +143,12 @@ async function getDashboardData(startupId: string) {
     }
   } catch (error) {
     console.error('Error in getDashboardData:', error)
+
+    // Handle specific abort errors
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('Dashboard data request was aborted due to timeout')
+    }
+
     // Return fallback data instead of null to prevent crashes
     return {
       profile: null,

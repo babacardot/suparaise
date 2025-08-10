@@ -45,6 +45,8 @@ export function NavUser({
     setMounted(true)
   }, [])
 
+
+
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
@@ -124,7 +126,12 @@ export function NavUser({
     )
   }
 
-  const avatarUrl = getAvatarUrl()
+  const avatarUrl = React.useMemo(() => getAvatarUrl(), [
+    user?.user_metadata?.avatar_url,
+    user?.user_metadata?.avatar_removed,
+    displayEmail,
+    propUser.avatar
+  ])
 
   // Generate fallback initials
   const getInitials = (n: string, e: string) => {
@@ -140,6 +147,32 @@ export function NavUser({
   }
 
   const initials = getInitials(displayName, displayEmail)
+
+  // Preload avatar image to ensure seamless loading
+  React.useEffect(() => {
+    if (avatarUrl && typeof window !== 'undefined') {
+      // Create preload link
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'image'
+      link.href = avatarUrl
+      link.crossOrigin = 'anonymous'
+      document.head.appendChild(link)
+
+      // Also preload via Image object for better browser cache
+      const img = new Image()
+      img.src = avatarUrl
+
+      // Cleanup
+      return () => {
+        try {
+          document.head.removeChild(link)
+        } catch {
+          // Link might already be removed
+        }
+      }
+    }
+  }, [avatarUrl])
 
   return (
     <SidebarMenu className="select-none" onCopy={(e) => e.preventDefault()}>
