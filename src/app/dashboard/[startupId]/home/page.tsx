@@ -93,8 +93,9 @@ async function getDashboardData(startupId: string) {
     }
 
     // Add aggressive timeout to prevent hanging
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Request timeout')), 8000) // 8 second timeout
+    const timeoutPromise = new Promise<never>(
+      (_, reject) =>
+        setTimeout(() => reject(new Error('Request timeout')), 8000), // 8 second timeout
     )
 
     const rpcPromise = supabase.rpc('get_dashboard_data', {
@@ -124,11 +125,11 @@ async function getDashboardData(startupId: string) {
     ).filter((submission): submission is SubmissionData =>
       Boolean(
         submission.submission_id &&
-        submission.submitted_to_name &&
-        submission.submitted_to_type &&
-        submission.submitted_at &&
-        submission.status &&
-        submission.entity_id,
+          submission.submitted_to_name &&
+          submission.submitted_to_type &&
+          submission.submitted_at &&
+          submission.status &&
+          submission.entity_id,
       ),
     )
 
@@ -146,8 +147,13 @@ async function getDashboardData(startupId: string) {
     if (error instanceof Error) {
       if (error.name === 'AbortError' || error.message === 'Request timeout') {
         console.warn('Dashboard data request timed out - using fallback data')
-      } else if (error.message.includes('network') || error.message.includes('fetch failed')) {
-        console.warn('Network error loading dashboard data - using fallback data')
+      } else if (
+        error.message.includes('network') ||
+        error.message.includes('fetch failed')
+      ) {
+        console.warn(
+          'Network error loading dashboard data - using fallback data',
+        )
       }
     }
 
@@ -165,8 +171,16 @@ export default async function HomePage({
 
   // Always provide fallback data to prevent crashes
   let data: {
-    profile: { monthly_submissions_used?: number; monthly_submissions_limit?: number; permission_level?: string } | null
-    startup: { name?: string; pitch_deck_url?: string; updated_at?: string } | null
+    profile: {
+      monthly_submissions_used?: number
+      monthly_submissions_limit?: number
+      permission_level?: string
+    } | null
+    startup: {
+      name?: string
+      pitch_deck_url?: string
+      updated_at?: string
+    } | null
     totalApplications: number
     recommendations: Recommendation[] | null
     recentSubmissions: SubmissionData[]

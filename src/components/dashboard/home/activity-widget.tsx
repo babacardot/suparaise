@@ -232,7 +232,12 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
   // Prevent SSR rendering issues - only render on client
   if (!isMounted) {
     return (
-      <Card className={twMerge('h-full flex-col justify-between rounded-sm', className)}>
+      <Card
+        className={twMerge(
+          'h-full flex-col justify-between rounded-sm',
+          className,
+        )}
+      >
         <CardHeader className="pb-3">
           <CardTitle className="text-base md:text-lg font-medium">
             Activity

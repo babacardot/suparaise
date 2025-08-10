@@ -60,7 +60,7 @@ export function StartupSwitcher({
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      audio.play().catch(() => { })
+      audio.play().catch(() => {})
     }
   }
 
@@ -74,9 +74,9 @@ export function StartupSwitcher({
     currentStartupDisplay ||
     (currentStartup
       ? {
-        ...currentStartup,
-        name: `${firstName}+${currentStartup.name}`,
-      }
+          ...currentStartup,
+          name: `${firstName}+${currentStartup.name}`,
+        }
       : null)
 
   // Keep the original company name for avatar generation to maintain consistent colors

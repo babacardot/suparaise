@@ -45,13 +45,11 @@ export function NavUser({
     setMounted(true)
   }, [])
 
-
-
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      audio.play().catch(() => { })
+      audio.play().catch(() => {})
     }
   }
 
@@ -62,9 +60,11 @@ export function NavUser({
   const toggleTheme = () => {
     const next = (theme === 'dark' ? 'light' : 'dark') as 'light' | 'dark'
     const skipSweep =
-      typeof pathname === 'string' &&
-      pathname.includes('/dashboard/') &&
-      (pathname.includes('/funds') || pathname.includes('/accelerators')) || pathname.includes('/angels') || pathname.includes('/applications')
+      (typeof pathname === 'string' &&
+        pathname.includes('/dashboard/') &&
+        (pathname.includes('/funds') || pathname.includes('/accelerators'))) ||
+      pathname.includes('/angels') ||
+      pathname.includes('/applications')
 
     if (skipSweep) {
       setTheme(next)
@@ -126,12 +126,15 @@ export function NavUser({
     )
   }
 
-  const avatarUrl = React.useMemo(() => getAvatarUrl(), [
-    user?.user_metadata?.avatar_url,
-    user?.user_metadata?.avatar_removed,
-    displayEmail,
-    propUser.avatar
-  ])
+  const avatarUrl = React.useMemo(
+    () => getAvatarUrl(),
+    [
+      user?.user_metadata?.avatar_url,
+      user?.user_metadata?.avatar_removed,
+      displayEmail,
+      propUser.avatar,
+    ],
+  )
 
   // Generate fallback initials
   const getInitials = (n: string, e: string) => {
@@ -175,7 +178,11 @@ export function NavUser({
   }, [avatarUrl])
 
   return (
-    <SidebarMenu className="select-none" onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}>
+    <SidebarMenu
+      className="select-none"
+      onCopy={(e) => e.preventDefault()}
+      onCut={(e) => e.preventDefault()}
+    >
       <SidebarMenuItem>
         <DropdownMenu
           onOpenChange={(open) => {

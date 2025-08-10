@@ -769,8 +769,6 @@ export default function ProfileSettings() {
     )
   }
 
-
-
   return (
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">

@@ -7,7 +7,10 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { ValidationGate, VALIDATION_PRESETS } from '@/components/ui/validation-gate'
+import {
+  ValidationGate,
+  VALIDATION_PRESETS,
+} from '@/components/ui/validation-gate'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 
@@ -63,7 +66,7 @@ export default React.memo(function FundsActions({
     return (
       !!subscription &&
       subscription.monthly_submissions_used >=
-      subscription.monthly_submissions_limit
+        subscription.monthly_submissions_limit
     )
   }, [subscription])
 
@@ -148,7 +151,9 @@ export default React.memo(function FundsActions({
       toast({
         title: 'Error',
         description:
-          error instanceof Error ? error.message : 'Failed to submit application',
+          error instanceof Error
+            ? error.message
+            : 'Failed to submit application',
         variant: 'destructive',
       })
     } finally {
@@ -423,7 +428,12 @@ export default React.memo(function FundsActions({
               <X className="h-4 w-4" />
             </button>
           </CardHeader>
-          <CardContent className="select-none p-4 space-y-3 overflow-auto flex-1 text-xs" onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()} onPaste={(e) => e.preventDefault()}>
+          <CardContent
+            className="select-none p-4 space-y-3 overflow-auto flex-1 text-xs"
+            onCopy={(e) => e.preventDefault()}
+            onCut={(e) => e.preventDefault()}
+            onPaste={(e) => e.preventDefault()}
+          >
             <div className="space-y-3 pl-4 pr-2 sm:px-0">
               {/* Basic Info */}
 
@@ -525,22 +535,23 @@ export default React.memo(function FundsActions({
 
               <Separator />
 
-              {target.submission_type === 'form' && submissions.length === 0 && (
-                <div className="flex justify-end">
-                  <ValidationGate
-                    requirements={VALIDATION_PRESETS.BASIC_APPLICATION}
-                    onValidationPass={handleApply}
-                  >
-                    <Button
-                      size="sm"
-                      disabled={submitting}
-                      className="rounded-sm px-3 h-8 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+              {target.submission_type === 'form' &&
+                submissions.length === 0 && (
+                  <div className="flex justify-end">
+                    <ValidationGate
+                      requirements={VALIDATION_PRESETS.BASIC_APPLICATION}
+                      onValidationPass={handleApply}
                     >
-                      Apply
-                    </Button>
-                  </ValidationGate>
-                </div>
-              )}
+                      <Button
+                        size="sm"
+                        disabled={submitting}
+                        className="rounded-sm px-3 h-8 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                      >
+                        Apply
+                      </Button>
+                    </ValidationGate>
+                  </div>
+                )}
 
               {/* Timeline */}
               {timeline.length > 0 && (
@@ -555,16 +566,17 @@ export default React.memo(function FundsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${index === timeline.length - 1
-                            ? event.status === 'completed'
-                              ? 'bg-green-500'
-                              : event.status === 'failed'
-                                ? 'bg-red-500'
-                                : event.status === 'pending'
-                                  ? 'bg-orange-500'
-                                  : 'bg-gray-300'
-                            : 'bg-transparent'
-                            } ${index === timeline.length - 1 ? '' : ''}`}
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
+                            index === timeline.length - 1
+                              ? event.status === 'completed'
+                                ? 'bg-green-500'
+                                : event.status === 'failed'
+                                  ? 'bg-red-500'
+                                  : event.status === 'pending'
+                                    ? 'bg-orange-500'
+                                    : 'bg-gray-300'
+                              : 'bg-transparent'
+                          } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}
@@ -579,7 +591,6 @@ export default React.memo(function FundsActions({
               )}
             </div>
           </CardContent>
-
         </Card>
       </SheetContent>
     </Sheet>
