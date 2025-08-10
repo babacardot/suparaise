@@ -67,12 +67,11 @@ export default function SuggestionModal({
     return urlRegex.test(url)
   }
 
-
-
   // Validate LinkedIn profile URL: allows linkedin.com/in/username with or without protocol
   const isValidLinkedInProfileUrl = (url: string): boolean => {
     const trimmed = url.trim()
-    const linkedInRegex = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[A-Za-z0-9-_%]+\/?$/
+    const linkedInRegex =
+      /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[A-Za-z0-9-_%]+\/?$/
     return linkedInRegex.test(trimmed)
   }
 
@@ -129,7 +128,10 @@ export default function SuggestionModal({
     // Validate angel contact if provided
     if (showEmailField) {
       if (useLinkedInForAngel) {
-        if (angelLinkedIn.trim() && !isValidLinkedInProfileUrl(angelLinkedIn.trim())) {
+        if (
+          angelLinkedIn.trim() &&
+          !isValidLinkedInProfileUrl(angelLinkedIn.trim())
+        ) {
           toast({
             variant: 'info',
             title: 'Invalid LinkedIn',
@@ -155,12 +157,15 @@ export default function SuggestionModal({
       // Map contact fields depending on the current suggestion type
       const websiteValue = showWebsiteField ? website.trim() : undefined
       const normalizedAngelLinkedIn =
-        suggestionType === 'angel' && useLinkedInForAngel && angelLinkedIn.trim()
+        suggestionType === 'angel' &&
+        useLinkedInForAngel &&
+        angelLinkedIn.trim()
           ? normalizeLinkedInUrl(angelLinkedIn.trim())
           : undefined
-      const emailValue = showEmailField && !useLinkedInForAngel
-        ? email.trim() || undefined
-        : undefined
+      const emailValue =
+        showEmailField && !useLinkedInForAngel
+          ? email.trim() || undefined
+          : undefined
 
       const { error: suggestionError } = await supabase.rpc(
         'create_suggestion',
@@ -257,10 +262,11 @@ export default function SuggestionModal({
                     playClickSound()
                     setSuggestionType(type)
                   }}
-                  className={`flex-1 px-2 py-1 text-xs rounded-sm transition-all duration-200 ${suggestionType === type
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                    : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                    }`}
+                  className={`flex-1 px-2 py-1 text-xs rounded-sm transition-all duration-200 ${
+                    suggestionType === type
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
+                      : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                  }`}
                 >
                   {suggestionTypeLabels[type]}
                 </button>
@@ -308,7 +314,11 @@ export default function SuggestionModal({
                   setUseLinkedInForAngel((prev) => !prev)
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 p-0 rounded-[2px] bg-transparent focus:outline-none"
-                aria-label={useLinkedInForAngel ? 'Use email instead' : 'Use LinkedIn instead'}
+                aria-label={
+                  useLinkedInForAngel
+                    ? 'Use email instead'
+                    : 'Use LinkedIn instead'
+                }
               >
                 {useLinkedInForAngel ? (
                   <Mail className="h-4 w-4 text-muted-foreground rounded-xs" />

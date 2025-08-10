@@ -121,7 +121,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
   const isQuotaReached =
     subscription &&
     subscription.monthly_submissions_used >=
-    subscription.monthly_submissions_limit
+      subscription.monthly_submissions_limit
 
   const showUpgradeBanner = React.useMemo(() => {
     const level = subscription?.permission_level
@@ -151,7 +151,10 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
 
   // Defer rendering to keep pagination snappy
   const deferredAccelerators = React.useDeferredValue(accelerators)
-  const filteredAccelerators = React.useMemo(() => deferredAccelerators, [deferredAccelerators])
+  const filteredAccelerators = React.useMemo(
+    () => deferredAccelerators,
+    [deferredAccelerators],
+  )
 
   const handleSort = React.useCallback(
     (key: string) => {
@@ -905,24 +908,25 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                     setHoveredButton(`apply-${accelerator.id}`)
                                   }
                                   onMouseLeave={() => setHoveredButton(null)}
-                                  className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${isQuotaReached
-                                    ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
-                                    : queueStatus &&
-                                      !queueStatus.canSubmitMore
-                                      ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                  className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    isQuotaReached
+                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
                                       : queueStatus &&
-                                        queueStatus.availableSlots === 0
-                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                                    }`}
+                                          !queueStatus.canSubmitMore
+                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                        : queueStatus &&
+                                            queueStatus.availableSlots === 0
+                                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                  }`}
                                   title={
                                     isQuotaReached
                                       ? `You have reached your monthly submission limit of ${subscription?.monthly_submissions_limit}.`
                                       : queueStatus &&
-                                        !queueStatus.canSubmitMore
+                                          !queueStatus.canSubmitMore
                                         ? 'Queue is full. Cannot add more applications.'
                                         : queueStatus &&
-                                          queueStatus.availableSlots === 0
+                                            queueStatus.availableSlots === 0
                                           ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
                                           : queueStatus
                                             ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
@@ -936,10 +940,10 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                         : isQuotaReached
                                           ? animations.cross
                                           : queueStatus &&
-                                            !queueStatus.canSubmitMore
+                                              !queueStatus.canSubmitMore
                                             ? animations.cross
                                             : queueStatus &&
-                                              queueStatus.availableSlots === 0
+                                                queueStatus.availableSlots === 0
                                               ? animations.hourglass
                                               : animations.takeoff
                                     }
@@ -947,7 +951,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                     className=""
                                     isHovered={
                                       hoveredButton ===
-                                      `apply-${accelerator.id}` &&
+                                        `apply-${accelerator.id}` &&
                                       !submittingAccelerators.has(
                                         accelerator.id,
                                       ) &&
@@ -957,10 +961,10 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                     customColor={
                                       isQuotaReached
                                         ? ([0.918, 0.435, 0.071] as [
-                                          number,
-                                          number,
-                                          number,
-                                        ])
+                                            number,
+                                            number,
+                                            number,
+                                          ])
                                         : undefined
                                     }
                                   />

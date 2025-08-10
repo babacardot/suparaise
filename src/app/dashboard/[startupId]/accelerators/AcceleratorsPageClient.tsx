@@ -1,6 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo, useTransition } from 'react'
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useTransition,
+} from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import AcceleratorsTableWrapper from '@/components/dashboard/accelerators/accelerators-table-wrapper'

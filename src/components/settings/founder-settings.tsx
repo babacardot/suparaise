@@ -372,7 +372,8 @@ export default function ProfileSettings() {
             }
 
             if (field === 'firstName' || field === 'lastName') {
-              const fullName = `${updatedFounder.firstName} ${updatedFounder.lastName}`.trim()
+              const fullName =
+                `${updatedFounder.firstName} ${updatedFounder.lastName}`.trim()
               updates.name = fullName
               updates.firstName = updatedFounder.firstName
               updates.lastName = updatedFounder.lastName
@@ -384,7 +385,11 @@ export default function ProfileSettings() {
             }
 
             // Write metadata updates if any field we care about changed
-            if (field === 'firstName' || field === 'lastName' || field === 'email') {
+            if (
+              field === 'firstName' ||
+              field === 'lastName' ||
+              field === 'email'
+            ) {
               await supabase.auth.updateUser({ data: updates })
               await refreshUser()
             }

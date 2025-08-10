@@ -1,6 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo, useTransition } from 'react'
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useTransition,
+} from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import FundsTableWrapper from '@/components/dashboard/funds/funds-table-wrapper'
 import SecureFundsWrapper from '@/components/dashboard/funds/secure-funds-wrapper'
