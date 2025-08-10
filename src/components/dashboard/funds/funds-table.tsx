@@ -162,7 +162,9 @@ const FundsTable = React.memo(function FundsTable({
   }, [subscription?.permission_level])
 
   // Memoize the filtered targets to prevent unnecessary recalculations
-  const filteredTargets = React.useMemo(() => targets, [targets])
+  // Defer heavy table rendering when inputs change to keep page switches snappy
+  const deferredTargets = React.useDeferredValue(targets)
+  const filteredTargets = React.useMemo(() => deferredTargets, [deferredTargets])
 
   const handleSort = React.useCallback(
     (key: string) => {
@@ -444,6 +446,14 @@ const FundsTable = React.memo(function FundsTable({
 
   const capitalizeFirst = React.useCallback((str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1)
+  }, [])
+
+  // Extract the first sentence (ending with ., !, or ?) for lightweight table display
+  const extractFirstSentence = React.useCallback((text: string) => {
+    const trimmed = (text || '').trim()
+    if (!trimmed) return ''
+    const match = trimmed.match(/(.+?[.!?])(\s|$)/)
+    return match ? match[1] : trimmed
   }, [])
 
   const handleApplyForm = React.useCallback(
@@ -738,7 +748,7 @@ const FundsTable = React.memo(function FundsTable({
                             </div>
                             {target.notes && (
                               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                {target.notes}
+                                {extractFirstSentence(target.notes)}
                               </p>
                             )}
                           </div>

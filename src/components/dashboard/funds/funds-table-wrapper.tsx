@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import FundsTable from './funds-table'
-import FundsActions from './funds-actions'
+const FundsActions = React.lazy(() => import('./funds-actions'))
 
 type Target = {
   id: string
@@ -170,12 +170,14 @@ const FundsTableWrapper = React.memo(function FundsTableWrapper({
         />
       </div>
 
-      <FundsActions
-        target={selectedTarget}
-        submissions={submissions}
-        isOpen={isActionsOpen}
-        onOpenChange={handleOpenChange}
-      />
+      <React.Suspense fallback={null}>
+        <FundsActions
+          target={selectedTarget}
+          submissions={submissions}
+          isOpen={isActionsOpen}
+          onOpenChange={handleOpenChange}
+        />
+      </React.Suspense>
     </>
   )
 })

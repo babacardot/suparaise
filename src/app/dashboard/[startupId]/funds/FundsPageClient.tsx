@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useTransition } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import FundsTableWrapper from '@/components/dashboard/funds/funds-table-wrapper'
 import SecureFundsWrapper from '@/components/dashboard/funds/secure-funds-wrapper'
@@ -132,23 +132,20 @@ export default function FundsPageClient({
     [page, paginationData],
   )
 
-  // Prefetch the next page to make navigation feel faster
-  useEffect(() => {
-    if (paginationData?.hasMore) {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set('page', String(page + 1))
-      router.prefetch(`${pathname}?${params.toString()}`)
-    }
-  }, [page, paginationData, pathname, router, searchParams])
+  // Removed prefetch to avoid impacting initial load
+
+  const [isNavigating, startTransition] = useTransition()
 
   const updateUrl = useCallback(
     (newParams: URLSearchParams) => {
-      // Preserve URL state but avoid redundant pushes that can cause resets
       const next = `${pathname}?${newParams.toString()}`
       const current = `${pathname}?${searchParams.toString()}`
-      if (next !== current) router.replace(next, { scroll: false })
+      if (next === current) return
+      startTransition(() => {
+        router.replace(next, { scroll: false })
+      })
     },
-    [pathname, router, searchParams],
+    [pathname, router, searchParams, startTransition],
   )
 
   const handleFiltersChange = useCallback(
