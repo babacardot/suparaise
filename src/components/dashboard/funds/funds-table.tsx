@@ -105,6 +105,19 @@ const FundsTable = React.memo(function FundsTable({
   const [pollingSubmissions, setPollingSubmissions] = React.useState<
     Set<string>
   >(new Set())
+  // Scroll management: reset to top on page change
+  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null)
+  const previousPageRef = React.useRef<number | null>(null)
+  React.useEffect(() => {
+    const currentPage = Number(paginationData?.currentPage ?? 1)
+    if (previousPageRef.current !== null && previousPageRef.current !== currentPage) {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0
+      }
+    }
+    previousPageRef.current = currentPage
+  }, [paginationData?.currentPage])
+
 
   const isQuotaReached =
     subscription &&
@@ -628,6 +641,7 @@ const FundsTable = React.memo(function FundsTable({
           ) : (
             <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[75vh]">
               <div
+                ref={scrollContainerRef}
                 className="flex-1 overflow-auto hide-scrollbar"
                 data-scroll-preserve="funds-table-scroll"
               >
@@ -953,11 +967,11 @@ const FundsTable = React.memo(function FundsTable({
                                     }
                                     onMouseLeave={() => setHoveredButton(null)}
                                     className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${isQuotaReached
-                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
-                                        : queueStatus &&
-                                          !queueStatus.canSubmitMore
-                                          ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
-                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
+                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
+                                      : queueStatus &&
+                                        !queueStatus.canSubmitMore
+                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
+                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
                                       }`}
                                     title={
                                       isQuotaReached

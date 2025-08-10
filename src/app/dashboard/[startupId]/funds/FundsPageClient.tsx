@@ -74,7 +74,9 @@ export default function FundsPageClient({
   const [totalSubmissions, setTotalSubmissions] = useState<number>(0)
 
   useEffect(() => {
-    setTargets(initialTargets)
+    // Guard against transient states where server returned no data
+    const safeTargets = Array.isArray(initialTargets) ? initialTargets : []
+    setTargets(safeTargets)
     setPaginationData(initialPaginationData)
     const newTotalSubmissions =
       initialPaginationData?.totalApplicationsCount?.total_applications ?? 0
@@ -119,10 +121,12 @@ export default function FundsPageClient({
     [],
   )
 
-  const page = useMemo(
-    () => Number(initialPaginationData?.currentPage ?? 1),
-    [initialPaginationData],
-  )
+  const page = useMemo(() => {
+    const sp = new URLSearchParams(searchParams?.toString?.() || '')
+    const fromUrl = Number(sp.get('page') || '1')
+    const fromServer = Number(initialPaginationData?.currentPage ?? 1)
+    return Number.isFinite(fromUrl) && fromUrl > 0 ? fromUrl : fromServer
+  }, [initialPaginationData, searchParams])
   const offset = useMemo(
     () => (page - 1) * (paginationData?.limit || 100),
     [page, paginationData],
@@ -139,9 +143,12 @@ export default function FundsPageClient({
 
   const updateUrl = useCallback(
     (newParams: URLSearchParams) => {
-      router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
+      // Preserve URL state but avoid redundant pushes that can cause resets
+      const next = `${pathname}?${newParams.toString()}`
+      const current = `${pathname}?${searchParams.toString()}`
+      if (next !== current) router.replace(next, { scroll: false })
     },
-    [pathname, router],
+    [pathname, router, searchParams],
   )
 
   const handleFiltersChange = useCallback(

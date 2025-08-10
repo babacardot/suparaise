@@ -20,6 +20,10 @@ export async function generateMetadata({
   })
 }
 
+// Ensure no caching and always fetch with current auth
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const PAGE_SIZE = 100
 
 type Target = {
@@ -138,11 +142,12 @@ export default async function FundsPage({
       initialPaginationData={
         responseData
           ? {
-              totalCount: responseData.totalCount,
-              hasMore: responseData.hasMore,
-              currentPage: responseData.currentPage,
-              limit: responseData.limit,
-            }
+            totalCount: responseData.totalCount,
+            hasMore: responseData.hasMore,
+            currentPage: responseData.currentPage,
+            limit: responseData.limit,
+            totalApplicationsCount: responseData.totalApplicationsCount,
+          }
           : null
       }
       initialFilters={filters}

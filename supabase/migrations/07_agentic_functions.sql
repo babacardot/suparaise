@@ -142,23 +142,23 @@ BEGIN
     
     -- Array filter conditions - these use GIN indexes efficiently
     IF p_submission_types IS NOT NULL AND array_length(p_submission_types, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.submission_type = ANY(%L)', p_submission_types));
+        where_conditions := array_append(where_conditions, format('t.submission_type = ANY(%L::submission_type[])', p_submission_types));
     END IF;
     
     IF p_stage_focus IS NOT NULL AND array_length(p_stage_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.stage_focus && %L', p_stage_focus));
+        where_conditions := array_append(where_conditions, format('t.stage_focus && %L::investment_stage[]', p_stage_focus));
     END IF;
     
     IF p_industry_focus IS NOT NULL AND array_length(p_industry_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.industry_focus && %L', p_industry_focus));
+        where_conditions := array_append(where_conditions, format('t.industry_focus && %L::industry_type[]', p_industry_focus));
     END IF;
     
     IF p_region_focus IS NOT NULL AND array_length(p_region_focus, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.region_focus && %L', p_region_focus));
+        where_conditions := array_append(where_conditions, format('t.region_focus && %L::region_type[]', p_region_focus));
     END IF;
     
     IF p_required_documents IS NOT NULL AND array_length(p_required_documents, 1) > 0 THEN
-        where_conditions := array_append(where_conditions, format('t.required_documents && %L', p_required_documents));
+        where_conditions := array_append(where_conditions, format('t.required_documents && %L::required_document_type[]', p_required_documents));
     END IF;
 
     IF p_tags IS NOT NULL AND array_length(p_tags, 1) > 0 THEN

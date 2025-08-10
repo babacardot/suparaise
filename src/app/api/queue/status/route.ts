@@ -16,24 +16,40 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Call the get_queue_status RPC function
-    const { data: queueStatus, error: queueError } = await supabase.rpc(
-      'get_queue_status',
-      {
-        p_user_id: userId,
-        p_startup_id: startupId,
-      },
+    // Enforce a server-side timeout so we don't hang the UI
+    const TIMEOUT_MS = 4500
+    const timeout = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(
+        () => resolve({ data: null, error: new Error('Timeout') }),
+        TIMEOUT_MS,
+      ),
     )
 
-    if (queueError) {
-      console.error('Error fetching queue status:', queueError)
-      return NextResponse.json(
-        { error: 'Failed to fetch queue status' },
-        { status: 500 },
-      )
+    // Call the get_queue_status RPC function with timeout protection
+    const rpcCall = supabase.rpc('get_queue_status', {
+      p_user_id: userId,
+      p_startup_id: startupId,
+    })
+
+    const raced = (await Promise.race([rpcCall, timeout])) as
+      | { data: unknown; error: null }
+      | { data: null; error: Error }
+
+    if ('error' in raced && raced.error) {
+      // Soft-fallback to permissive defaults to avoid blocking submissions UI
+      return NextResponse.json({
+        maxParallel: 1,
+        maxQueue: 3,
+        currentInProgress: 0,
+        currentQueued: 0,
+        availableSlots: 1,
+        availableQueueSlots: 3,
+        canSubmitMore: true,
+        _fallback: true,
+      })
     }
 
-    return NextResponse.json(queueStatus)
+    return NextResponse.json(raced.data)
   } catch (error) {
     console.error('Queue status API error:', error)
     return NextResponse.json(

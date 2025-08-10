@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Button as ExpandButton } from '@/components/design/button-expand'
 import { Input } from '@/components/ui/input'
-import { ArrowRight, Eraser } from 'lucide-react'
+import { ArrowRight, Eraser, Mail } from 'lucide-react'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
 import {
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useSidebar } from '@/components/ui/sidebar'
+import Image from 'next/image'
 
 type SuggestionType = 'vc' | 'accelerator' | 'angel'
 
@@ -32,6 +33,8 @@ export default function SuggestionModal({
   const [name, setName] = useState('')
   const [website, setWebsite] = useState('')
   const [email, setEmail] = useState('')
+  const [angelLinkedIn, setAngelLinkedIn] = useState('')
+  const [useLinkedInForAngel, setUseLinkedInForAngel] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { isMobile } = useSidebar()
 
@@ -62,6 +65,32 @@ export default function SuggestionModal({
     const urlRegex =
       /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/
     return urlRegex.test(url)
+  }
+
+
+
+  // Validate LinkedIn profile URL: allows linkedin.com/in/username with or without protocol
+  const isValidLinkedInProfileUrl = (url: string): boolean => {
+    const trimmed = url.trim()
+    const linkedInRegex = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[A-Za-z0-9-_%]+\/?$/
+    return linkedInRegex.test(trimmed)
+  }
+
+  // Normalize LinkedIn URL to https://linkedin.com/in/username format
+  const normalizeLinkedInUrl = (url: string): string => {
+    const trimmed = url.trim()
+    if (!trimmed) return ''
+    let normalized = trimmed
+    // Remove protocol if http to replace with https
+    normalized = normalized.replace(/^http:\/\//, 'https://')
+    // Ensure protocol present
+    if (!/^https?:\/\//.test(normalized)) {
+      normalized = `https://${normalized}`
+    }
+    // Collapse www to non-www (optional)
+    normalized = normalized.replace(/^https:\/\/www\./, 'https://')
+    // Ensure single trailing slash optional - leave as is
+    return normalized
   }
 
   const handleSubmit = async () => {
@@ -97,28 +126,50 @@ export default function SuggestionModal({
       return
     }
 
-    // Validate email if provided
-    if (showEmailField && email.trim() && !isValidEmail(email.trim())) {
-      toast({
-        variant: 'info',
-        title: 'Invalid email',
-        description:
-          'Please enter a valid email address (e.g., name@example.com).',
-      })
-      return
+    // Validate angel contact if provided
+    if (showEmailField) {
+      if (useLinkedInForAngel) {
+        if (angelLinkedIn.trim() && !isValidLinkedInProfileUrl(angelLinkedIn.trim())) {
+          toast({
+            variant: 'info',
+            title: 'Invalid LinkedIn',
+            description:
+              'Enter a LinkedIn profile URL like linkedin.com/in/username or https://linkedin.com/in/username.',
+          })
+          return
+        }
+      } else if (email.trim() && !isValidEmail(email.trim())) {
+        toast({
+          variant: 'info',
+          title: 'Invalid email',
+          description:
+            'Please enter a valid email address (e.g., name@example.com).',
+        })
+        return
+      }
     }
 
     setIsSubmitting(true)
 
     try {
+      // Map contact fields depending on the current suggestion type
+      const websiteValue = showWebsiteField ? website.trim() : undefined
+      const normalizedAngelLinkedIn =
+        suggestionType === 'angel' && useLinkedInForAngel && angelLinkedIn.trim()
+          ? normalizeLinkedInUrl(angelLinkedIn.trim())
+          : undefined
+      const emailValue = showEmailField && !useLinkedInForAngel
+        ? email.trim() || undefined
+        : undefined
+
       const { error: suggestionError } = await supabase.rpc(
         'create_suggestion',
         {
           p_user_id: user.id,
           p_suggestion_type: suggestionType,
           p_name: name.trim(),
-          p_website: website.trim() || undefined,
-          p_email: email.trim() || undefined,
+          p_website: normalizedAngelLinkedIn || websiteValue,
+          p_email: emailValue,
           p_description: undefined,
           p_startup_id: currentStartupId || undefined,
         },
@@ -158,6 +209,8 @@ export default function SuggestionModal({
     setName('')
     setWebsite('')
     setEmail('')
+    setAngelLinkedIn('')
+    setUseLinkedInForAngel(false)
     setSuggestionType('vc')
   }
 
@@ -204,11 +257,10 @@ export default function SuggestionModal({
                     playClickSound()
                     setSuggestionType(type)
                   }}
-                  className={`flex-1 px-2 py-1 text-xs rounded-sm transition-all duration-200 ${
-                    suggestionType === type
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                      : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                  }`}
+                  className={`flex-1 px-2 py-1 text-xs rounded-sm transition-all duration-200 ${suggestionType === type
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
+                    : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                    }`}
                 >
                   {suggestionTypeLabels[type]}
                 </button>
@@ -234,14 +286,43 @@ export default function SuggestionModal({
             />
           )}
 
-          {/* Email Input - Only for Angel Investor */}
+          {/* Angel contact Input - toggles between Email and LinkedIn URL */}
           {showEmailField && (
-            <Input
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mb-3 text-sm placeholder:text-sm bg-background text-foreground rounded-sm"
-            />
+            <div className="relative mb-3">
+              <Input
+                type={useLinkedInForAngel ? 'text' : 'email'}
+                placeholder={useLinkedInForAngel ? 'LinkedIn' : 'Email'}
+                value={useLinkedInForAngel ? angelLinkedIn : email}
+                onChange={(e) =>
+                  useLinkedInForAngel
+                    ? setAngelLinkedIn(e.target.value)
+                    : setEmail(e.target.value)
+                }
+                className="text-sm placeholder:text-sm bg-background text-foreground rounded-sm pr-10"
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound()
+                  setUseLinkedInForAngel((prev) => !prev)
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 p-0 rounded-[2px] bg-transparent focus:outline-none"
+                aria-label={useLinkedInForAngel ? 'Use email instead' : 'Use LinkedIn instead'}
+              >
+                {useLinkedInForAngel ? (
+                  <Mail className="h-4 w-4 text-muted-foreground rounded-xs" />
+                ) : (
+                  <Image
+                    src="/integrations/linkedin.webp"
+                    alt="LinkedIn"
+                    width={16}
+                    height={16}
+                    className="h-4 w-4 object-cover rounded-xs"
+                  />
+                )}
+              </button>
+            </div>
           )}
 
           <div className="flex justify-between items-center">
