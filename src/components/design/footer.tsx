@@ -43,7 +43,7 @@ export const Footer = () => {
               href="/about"
               prefetch={true}
               onClick={playClickSound}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent dark:hover:bg-sidebar-accent px-2 py-1.5 rounded-sm transition-colors"
             >
               About
             </Link>
@@ -52,7 +52,7 @@ export const Footer = () => {
               href="/privacy"
               prefetch={true}
               onClick={playClickSound}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent dark:hover:bg-sidebar-accent px-2 py-1.5 rounded-sm transition-colors"
             >
               Privacy
             </Link>
@@ -60,7 +60,7 @@ export const Footer = () => {
               href="/terms"
               prefetch={true}
               onClick={playClickSound}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent dark:hover:bg-sidebar-accent px-2 py-1.5 rounded-sm transition-colors"
             >
               Terms
             </Link>
@@ -72,7 +72,7 @@ export const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={playClickSound}
-              className="text-muted-foreground hover:text-[#000000] dark:hover:text-[#FFFFFF] transition-colors"
+              className="text-black dark:text-white hover:text-[#000000] dark:hover:text-[#FFFFFF] transition-colors"
               aria-label="Follow us on X"
             >
               <XIcon className="h-5.5 w-5.5" />
@@ -82,7 +82,7 @@ export const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={playClickSound}
-              className="text-muted-foreground hover:text-[#6f42c1] dark:hover:text-[#6f42c1] transition-colors"
+              className="text-black dark:text-white hover:text-[#6f42c1] dark:hover:text-[#6f42c1] transition-colors"
               aria-label="Follow us on Github"
             >
               <GitHubIcon className="h-5 w-5" />
@@ -92,7 +92,7 @@ export const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={playClickSound}
-              className="text-muted-foreground hover:text-[#DA552F] dark:hover:text-[#DA552F] transition-colors"
+              className="text-black dark:text-white hover:text-[#DA552F] dark:hover:text-[#DA552F] transition-colors"
               aria-label="Check us out on Product Hunt"
             >
               <PHIcon className="h-6.5 w-6.5 translate-y-0.25" />

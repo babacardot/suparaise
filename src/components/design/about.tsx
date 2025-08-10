@@ -95,11 +95,11 @@ export const About = () => {
             <h1 className="text-5xl font-bold tracking-tight mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Turn months of fundraising into days
             </h1>
-            <p className="text-lg text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-              Suparaise automates the entire fundraising process, from
-              application forms to personalized emails. Built by founders who
-              got tired of wasting time on paperwork instead of building their
-              business.
+            <p className="text-lg text-foreground max-w-4xl mx-auto leading-relaxed">
+              Suparaise puts your fundraising on autopilot. Let AI agents handle
+              everything from application forms to personalized outreach. Built
+              by a founder who got tired of wasting his time on paperwork
+              instead of building his business.
             </p>
           </div>
 
@@ -107,19 +107,20 @@ export const About = () => {
           <div className="grid gap-12 lg:grid-cols-2 items-center mb-20">
             <div className="space-y-6">
               <h2 className="text-3xl font-semibold mb-4">The struggle</h2>
-              <p className="text-muted-foreground text-md leading-relaxed">
-                You&apos;re spending 40% of your time on mind-numbing tasks:
-                copying the same pitch into countless forms, researching which
-                VCs actually invest in your stage, and crafting personalized
-                outreach emails. Each application takes 45 minutes of your
-                valuable time - time worth $100+ per hour that should be spent
-                building your product and acquiring customers.
+              <p className="text-foreground text-md leading-relaxed">
+                Fundraising steals your most valuable resource: time.
+                You&apos;re spending weeks on mind-numbing tasks: copying the
+                same pitch into countless forms, researching which VCs actually
+                invest in your stage, and crafting personalized outreach emails
+                that often go unanswered. Each application takes 45 minutes of
+                your valuable time - time worth $100+ per hour that should be
+                spent building your product and acquiring customers.
               </p>
-              <p className="text-muted-foreground text-md leading-relaxed">
-                That&apos;s why we created Suparaise: agents that act as your
-                dedicated fundraising team. They fill out applications, send
-                personalized outreach, and connect you with relevant investors,
-                all with human-level accuracy but at machine speed and scale.
+              <p className="text-foreground text-md leading-relaxed">
+                Suparaise changes this. Our agents act as your dedicated
+                fundraising team, handling applications and outreach with
+                human-level personalization at machine speed and scale. You
+                focus on building; we handle the fundraising grind.
               </p>
             </div>
 
@@ -150,8 +151,10 @@ export const About = () => {
                       customColor={feature.customColor}
                     />
                   </div>
-                  <h3 className="font-semibold text-lg">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                  <h3 className="font-semibold text-lg text-foreground">
+                    {feature.title}
+                  </h3>
+                  <p className="text-foreground/80 text-sm leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -163,7 +166,7 @@ export const About = () => {
           <div className="relative overflow-hidden rounded-sm bg-gradient-to-br from-muted/50 via-background to-muted/30 p-12 border mb-20">
             <div className="relative z-10">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-semibold mb-4">
+                <h2 className="text-3xl font-semibold mb-4 text-foreground">
                   Our impact in numbers
                 </h2>
                 <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
@@ -209,11 +212,14 @@ export const About = () => {
                   }
 
                   return (
-                    <div key={index} className="space-y-2">
+                    <div
+                      key={index}
+                      className={`space-y-2 ${index > 0 ? 'lg:border-l lg:border-border/40 lg:pl-6' : ''}`}
+                    >
                       <div className="flex items-baseline justify-center">
                         {formatStatValue(stat.value)}
                       </div>
-                      <div className="text-muted-foreground font-medium text-sm">
+                      <div className="text-foreground font-medium text-sm">
                         {stat.label}
                       </div>
                     </div>

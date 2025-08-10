@@ -106,7 +106,7 @@ export function ResourcesSection({
                           repeatDelay: hoveredIndex === index ? 2 : 0,
                           ease: 'easeInOut',
                         }}
-                        className={`text-muted-foreground transition-colors ${item.hoverColor}`}
+                        className={`text-black dark:text-white transition-colors ${item.hoverColor}`}
                       >
                         {item.icon === 'lottie' ? (
                           <LottieIcon

@@ -82,8 +82,8 @@ const testimonials = [
   {
     text: "The agents filled out complex VC forms with remarkable accuracy. It even customized our pitch for each firm's investment thesis. Game-changer!",
     image: '/testimonials/3.webp',
-    name: 'Jonathan Meyer',
-    role: 'Founder, Edupro',
+    name: 'David Carson',
+    role: 'Founder, Voicyx',
   },
   {
     text: 'We received 4 meeting requests in two weeks after starting to use Suparaise. The automated outreach feature connected us with VCs we honestly would have never discovered manually.',
@@ -123,7 +123,7 @@ const thirdColumn = testimonials.slice(6, 9)
 
 const Testimonials = () => {
   return (
-    <section className="bg-background my-20 relative select-none">
+    <section className="bg-background my-20 lg:mb-8 relative select-none">
       <div className="mx-auto max-w-5xl px-6 z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

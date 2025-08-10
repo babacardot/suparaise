@@ -81,7 +81,7 @@ export const Header = () => {
                     <li key={index}>
                       <Link
                         href={item.href}
-                        className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                        className="text-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent dark:hover:bg-sidebar-accent px-2 py-1.5 rounded-sm transition-colors duration-200"
                         onClick={playClickSound}
                       >
                         <span>{item.name}</span>
@@ -145,7 +145,7 @@ export const Header = () => {
                                   className={`text-3xl font-semibold transition-colors duration-200 ${
                                     item.name === 'Dashboard'
                                       ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
-                                      : 'text-foreground hover:text-muted-foreground'
+                                      : 'text-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent dark:hover:bg-sidebar-accent px-2 py-1.5 rounded-sm'
                                   }`}
                                   onClick={playClickSound}
                                 >
@@ -163,7 +163,7 @@ export const Header = () => {
                                       ? 'text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200'
                                       : item.isGreen
                                         ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
-                                        : 'text-foreground hover:text-muted-foreground'
+                                        : 'text-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent dark:hover:bg-sidebar-accent px-2 py-1.5 rounded-sm'
                                   }`}
                                   onClick={playClickSound}
                                 >
