@@ -61,12 +61,23 @@ export function NavUser({
   }
 
   // Determine user data, prioritizing live context user
-  const name = user?.user_metadata?.name || propUser.name || 'User'
-  const email =
+  // Email: prefer modified contact_email set via founder settings, else auth email, else prop
+  const displayEmail =
     (user?.user_metadata?.contact_email as string | undefined) ||
     user?.email ||
     propUser.email ||
     ''
+
+  // Name: prefer modified name set via founder settings, else construct from first/last, else prop/fallback
+  const metadataName = (user?.user_metadata?.name as string | undefined) || ''
+  const firstName = (user?.user_metadata?.firstName as string | undefined) || ''
+  const lastName = (user?.user_metadata?.lastName as string | undefined) || ''
+  const fallbackConstructedName = `${firstName} ${lastName}`.trim()
+  const displayName =
+    (metadataName && metadataName.trim()) ||
+    fallbackConstructedName ||
+    propUser.name ||
+    'User'
 
   // Generate avatar URL using the logic that respects custom uploads and removals
   const getAvatarUrl = () => {
@@ -77,7 +88,7 @@ export function NavUser({
       // If avatar was explicitly removed, use default
       if (avatar_removed) {
         return `https://avatar.vercel.sh/${encodeURIComponent(
-          email.toLowerCase(),
+          displayEmail.toLowerCase(),
         )}.png?size=80`
       }
 
@@ -88,7 +99,7 @@ export function NavUser({
 
       // Default fallback
       return `https://avatar.vercel.sh/${encodeURIComponent(
-        email.toLowerCase(),
+        displayEmail.toLowerCase(),
       )}.png?size=80`
     }
 
@@ -96,7 +107,7 @@ export function NavUser({
     return (
       propUser.avatar ||
       `https://avatar.vercel.sh/${encodeURIComponent(
-        email.toLowerCase(),
+        displayEmail.toLowerCase(),
       )}.png?size=80`
     )
   }
@@ -104,22 +115,22 @@ export function NavUser({
   const avatarUrl = getAvatarUrl()
 
   // Generate fallback initials
-  const getInitials = (name: string, email: string) => {
-    if (name && name !== 'User') {
-      return name
+  const getInitials = (n: string, e: string) => {
+    if (n && n !== 'User') {
+      return n
         .split(' ')
         .map((n) => n[0])
         .join('')
         .toUpperCase()
         .slice(0, 2)
     }
-    return email.split('@')[0].slice(0, 2).toUpperCase()
+    return e.split('@')[0].slice(0, 2).toUpperCase()
   }
 
-  const initials = getInitials(name, email)
+  const initials = getInitials(displayName, displayEmail)
 
   return (
-    <SidebarMenu className="select-none">
+    <SidebarMenu className="select-none" onCopy={(e) => e.preventDefault()}>
       <SidebarMenuItem>
         <DropdownMenu
           onOpenChange={(open) => {
@@ -135,7 +146,7 @@ export function NavUser({
               <Avatar className="h-8 w-8 rounded-sm">
                 <AvatarImage
                   src={avatarUrl}
-                  alt={name}
+                  alt={displayName}
                   className="h-full w-full rounded-sm"
                 />
                 <AvatarFallback className="rounded-sm">
@@ -143,8 +154,8 @@ export function NavUser({
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{name}</span>
-                <span className="truncate text-xs">{email}</span>
+                <span className="truncate font-semibold">{displayName}</span>
+                <span className="truncate text-xs">{displayEmail}</span>
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -153,13 +164,14 @@ export function NavUser({
             side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={18}
+            onCopy={(e) => e.preventDefault()}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-sm">
                   <AvatarImage
                     src={avatarUrl}
-                    alt={name}
+                    alt={displayName}
                     className="h-full w-full rounded-sm"
                   />
                   <AvatarFallback className="rounded-sm">
@@ -167,8 +179,8 @@ export function NavUser({
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{name}</span>
-                  <span className="truncate text-xs">{email}</span>
+                  <span className="truncate font-semibold">{displayName}</span>
+                  <span className="truncate text-xs">{displayEmail}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
