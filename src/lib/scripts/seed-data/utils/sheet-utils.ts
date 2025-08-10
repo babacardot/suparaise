@@ -19,7 +19,11 @@ const parseEnumsFromSql = (sqlContent: string): Map<string, string[]> => {
   let match
   while ((match = enumRegex.exec(sqlContent)) !== null) {
     const typeName = match[1]
-    const values = match[2].split(',').map((v) => v.trim().replace(/'/g, ''))
+    const valuesText = match[2]
+    const values = valuesText
+      .split(',')
+      .map((v) => v.trim().replace(/^'|'$/g, '')) // Remove surrounding quotes
+      .filter(Boolean)
     enumMap.set(typeName, values)
   }
   return enumMap

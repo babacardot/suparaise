@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import fs from 'fs'
+import path from 'path'
 import { Constants } from '@/lib/types/database'
 
 // Simple database client setup
@@ -113,9 +115,40 @@ export async function upsertBatch(
   return { success: successCount, errors }
 }
 
-// Use enum values directly from the generated database types (now always in sync!)
-// Safe access with fallback to prevent runtime errors
-export const ENUM_VALUES = Constants?.public?.Enums || {}
+// Build ENUM values from local SQL schema to stay perfectly in sync with recent changes
+// Falls back to generated types if local schema cannot be read
+const parseEnumsFromSql = (sqlContent: string): Record<string, string[]> => {
+  const enumMap: Record<string, string[]> = {}
+  const enumRegex = /CREATE TYPE (\w+) AS ENUM \(([\s\S]+?)\);/g
+  let match: RegExpExecArray | null
+  while ((match = enumRegex.exec(sqlContent)) !== null) {
+    const typeName = match[1]
+    const valuesText = match[2]
+    const values = valuesText
+      .split(',')
+      .map((v) => v.trim().replace(/^'|'$/g, '')) // Remove surrounding quotes
+      .filter(Boolean)
+    enumMap[typeName] = values
+  }
+  return enumMap
+}
+
+const buildEnumValues = (): Record<string, readonly string[]> => {
+  try {
+    const schemaPath = path.join(process.cwd(), 'supabase', 'migrations', '01_db.sql')
+    const sql = fs.readFileSync(schemaPath, 'utf-8')
+    const parsed = parseEnumsFromSql(sql)
+    // Freeze arrays to mimic readonly behavior and avoid accidental mutation
+    const frozen: Record<string, readonly string[]> = {}
+    for (const [k, v] of Object.entries(parsed)) frozen[k] = Object.freeze(v)
+    return frozen
+  } catch {
+    // Fallback to generated constants (may be out of date if types not regenerated)
+    return (Constants?.public?.Enums as unknown as Record<string, readonly string[]>) || {}
+  }
+}
+
+export const ENUM_VALUES = buildEnumValues()
 
 export function validateEnumValue(
   enumType: keyof typeof ENUM_VALUES,
