@@ -517,7 +517,8 @@ export default React.memo(function AcceleratorsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${index === timeline.length - 1
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
+                            index === timeline.length - 1
                               ? event.status === 'completed'
                                 ? 'bg-green-500'
                                 : event.status === 'failed'
@@ -526,7 +527,7 @@ export default React.memo(function AcceleratorsActions({
                                     ? 'bg-orange-500'
                                     : 'bg-gray-300'
                               : 'bg-transparent'
-                            } ${index === timeline.length - 1 ? '' : ''}`}
+                          } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}

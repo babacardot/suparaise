@@ -136,17 +136,20 @@ export function AppSidebar({
   // Create display startup object for the switcher with formatted name
   const displayStartupForSwitcher = currentStartup
     ? {
-      id: currentStartup.id,
-      name: displayText, // Use formatted display text
-      logo_url: currentStartup.logo_url,
-    }
+        id: currentStartup.id,
+        name: displayText, // Use formatted display text
+        logo_url: currentStartup.logo_url,
+      }
     : null
 
   // Get display name using same logic as nav-user
-  const userFirstName = (contextUser?.user_metadata?.firstName as string | undefined) || ''
-  const userLastName = (contextUser?.user_metadata?.lastName as string | undefined) || ''
+  const userFirstName =
+    (contextUser?.user_metadata?.firstName as string | undefined) || ''
+  const userLastName =
+    (contextUser?.user_metadata?.lastName as string | undefined) || ''
   const userConstructedName = `${userFirstName} ${userLastName}`.trim()
-  const userMetadataName = (contextUser?.user_metadata?.name as string | undefined) || ''
+  const userMetadataName =
+    (contextUser?.user_metadata?.name as string | undefined) || ''
   const userDisplayName =
     userConstructedName ||
     (userMetadataName && userMetadataName.trim()) ||
@@ -212,14 +215,14 @@ export function AppSidebar({
       // Show Complete your onboarding if profile is incomplete
       ...(!isProfileComplete && currentStartupId
         ? [
-          {
-            title: 'Complete your onboarding',
-            url: '#',
-            animation: animations.checkmark,
-            onClick: handleCompleteProfileClick,
-            isSpecial: true,
-          },
-        ]
+            {
+              title: 'Complete your onboarding',
+              url: '#',
+              animation: animations.checkmark,
+              onClick: handleCompleteProfileClick,
+              isSpecial: true,
+            },
+          ]
         : []),
       {
         title: 'Recommend',
@@ -251,8 +254,8 @@ export function AppSidebar({
                 currentStartupId={currentStartupId}
                 currentStartupDisplay={displayStartupForSwitcher}
                 firstName={firstName}
-                onStartupSelect={onStartupSelect || (() => { })}
-                onCreateNew={onCreateNewStartup || (() => { })}
+                onStartupSelect={onStartupSelect || (() => {})}
+                onCreateNew={onCreateNewStartup || (() => {})}
                 isCollapsed={state === 'collapsed'}
               />
             </SidebarMenuItem>
@@ -285,10 +288,11 @@ export function AppSidebar({
         onMouseLeave={() => setIsToggleHovered(false)}
         variant="ghost"
         size="sm"
-        className={`hidden md:block fixed top-1/2 -translate-y-1/2 z-30 h-3.5 w-3 rounded-xs bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
-          ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
-          : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
-          }`}
+        className={`hidden md:block fixed top-1/2 -translate-y-1/2 z-30 h-3.5 w-3 rounded-xs bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
+          state === 'collapsed'
+            ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
+            : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
+        }`}
       >
         <LottieIcon
           animationData={animations.nineGrid}

@@ -67,8 +67,11 @@ export function NavMain({
           const requiresMaxPermission = item.requiresMax || false
           const requiresEnterprisePermission = item.requiresEnterprise || false
           const hasProAccess =
-            permissionLevel === 'PRO' || permissionLevel === 'MAX' || permissionLevel === 'ENTERPRISE'
-          const hasMaxAccess = permissionLevel === 'MAX' || permissionLevel === 'ENTERPRISE'
+            permissionLevel === 'PRO' ||
+            permissionLevel === 'MAX' ||
+            permissionLevel === 'ENTERPRISE'
+          const hasMaxAccess =
+            permissionLevel === 'MAX' || permissionLevel === 'ENTERPRISE'
           const hasEnterpriseAccess = permissionLevel === 'ENTERPRISE'
 
           const isLockedForUser =
@@ -108,7 +111,7 @@ export function NavMain({
                   'h-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!',
                   '[&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
                   isActive &&
-                  'bg-sidebar-accent text-sidebar-accent-foreground',
+                    'bg-sidebar-accent text-sidebar-accent-foreground',
                 )}
                 onMouseEnter={() => setHoveredItem(item.title)}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -137,7 +140,11 @@ export function NavMain({
                         : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
                   )}
                 >
-                  {requiresEnterprisePermission ? 'ENT' : requiresMaxPermission ? 'MAX' : 'PRO'}
+                  {requiresEnterprisePermission
+                    ? 'ENT'
+                    : requiresMaxPermission
+                      ? 'MAX'
+                      : 'PRO'}
                 </Badge>
               </div>
             )

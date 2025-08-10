@@ -405,7 +405,7 @@ export default function ProfileSettings() {
             ) {
               await supabase.auth.updateUser({ data: updates })
               // Small delay to ensure auth service has processed the update
-              await new Promise(resolve => setTimeout(resolve, 100))
+              await new Promise((resolve) => setTimeout(resolve, 100))
               await refreshUser()
             }
           }
