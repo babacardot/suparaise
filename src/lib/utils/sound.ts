@@ -2,6 +2,14 @@
 // This installs a single runtime gate on HTMLMediaElement.play so existing
 // `new Audio(...).play()` calls are respected without per-call changes.
 
+declare global {
+  interface Window {
+    __suparaiseSoundEnabled?: boolean
+    __suparaiseSoundGateInitialized?: boolean
+    __suparaiseOriginalMediaPlay?: HTMLMediaElement['play']
+  }
+}
+
 export const SOUND_STORAGE_KEY = 'suparaise-sound-enabled'
 
 /**
@@ -28,7 +36,7 @@ export const setSoundEnabled = (enabled: boolean): void => {
   } catch {
     // ignore storage failures
   }
-  ;(window as any).__suparaiseSoundEnabled = enabled
+  window.__suparaiseSoundEnabled = enabled
   try {
     window.dispatchEvent(
       new CustomEvent('suparaise:sound-changed', { detail: { enabled } }),
@@ -43,7 +51,7 @@ export const setSoundEnabled = (enabled: boolean): void => {
  */
 export const initSoundGate = (): void => {
   if (typeof window === 'undefined') return
-  const w = window as any
+  const w = window
   if (w.__suparaiseSoundGateInitialized) return
   w.__suparaiseSoundGateInitialized = true
 
@@ -51,7 +59,7 @@ export const initSoundGate = (): void => {
   w.__suparaiseSoundEnabled = getSoundEnabled()
 
   const originalPlay: HTMLMediaElement['play'] =
-    (HTMLMediaElement.prototype.play as any)
+    HTMLMediaElement.prototype.play
   w.__suparaiseOriginalMediaPlay = originalPlay
 
   // Patch play to no-op when muted

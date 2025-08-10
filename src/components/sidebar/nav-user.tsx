@@ -106,7 +106,7 @@ export function NavUser({
     'User'
 
   // Generate avatar URL using the logic that respects custom uploads and removals
-  const getAvatarUrl = () => {
+  const getAvatarUrl = React.useCallback(() => {
     // Prioritize live user from context
     if (user && user.user_metadata) {
       const { avatar_url, avatar_removed } = user.user_metadata
@@ -136,17 +136,9 @@ export function NavUser({
         displayEmail.toLowerCase(),
       )}.png?size=80`
     )
-  }
+  }, [user, displayEmail, propUser.avatar])
 
-  const avatarUrl = React.useMemo(
-    () => getAvatarUrl(),
-    [
-      user?.user_metadata?.avatar_url,
-      user?.user_metadata?.avatar_removed,
-      displayEmail,
-      propUser.avatar,
-    ],
-  )
+  const avatarUrl = getAvatarUrl()
 
   // Generate fallback initials
   const getInitials = (n: string, e: string) => {
@@ -273,25 +265,6 @@ export function NavUser({
               <DropdownMenuItem
                 onClick={() => {
                   playClickSound()
-                  toggleSound()
-                }}
-                onMouseEnter={() => setHoveredItem('sound')}
-                onMouseLeave={() => setHoveredItem(null)}
-                className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
-              >
-                <LottieIcon
-                  animationData={soundEnabled ? animations.view : animations.visibility}
-                  size={16}
-                  loop={false}
-                  autoplay={false}
-                  initialFrame={0}
-                  isHovered={hoveredItem === 'sound'}
-                />
-                {soundEnabled ? 'Sound on' : 'Sound off'}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  playClickSound()
                   window.open(
                     'https://www.producthunt.com/posts/suparaise',
                     '_blank',
@@ -337,6 +310,25 @@ export function NavUser({
                 {mounted
                   ? (theme === 'dark' ? 'Light' : 'Dark') + ' mode'
                   : 'Theme'}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  playClickSound()
+                  toggleSound()
+                }}
+                onMouseEnter={() => setHoveredItem('sound')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
+              >
+                <LottieIcon
+                  animationData={soundEnabled ? animations.play : animations.pause}
+                  size={16}
+                  loop={false}
+                  autoplay={false}
+                  initialFrame={0}
+                  isHovered={hoveredItem === 'sound'}
+                />
+                {soundEnabled ? 'Sound on' : 'Sound off'}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

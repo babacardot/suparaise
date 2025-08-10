@@ -151,17 +151,16 @@ export const Pricing = () => {
                     asChild
                     onClick={
                       tier.permissionLevel === 'PRO' ||
-                      tier.permissionLevel === 'MAX'
+                        tier.permissionLevel === 'MAX'
                         ? playClickSound
                         : undefined
                     }
-                    className={`mt-6 w-full ${
-                      tier.popular
-                        ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                        : tier.permissionLevel === 'MAX'
-                          ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800'
-                          : ''
-                    }`}
+                    className={`mt-6 w-full ${tier.popular
+                      ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                      : tier.permissionLevel === 'MAX'
+                        ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800'
+                        : ''
+                      }`}
                     variant="outline"
                   >
                     <Link href={tier.href}>{tier.buttonText}</Link>
@@ -186,11 +185,12 @@ export const Pricing = () => {
                 building your business.
               </p>
               <p className="block md:hidden h-2" />
-              <p className="leading-relaxed italic mt-0">
+              <p className="leading-relaxed mt-0">
                 You think you&apos;ll need more? You can always continue to
                 apply with{' '}
-                <span className="font-bold">usage-based billing</span> at $2.49
-                per additional run.
+                <span className="font-bold">usage-based billing</span>.
+                {/* <span className="font-bold">usage-based billing</span> at $2.49
+                per additional run. */}
               </p>
             </div>
           </div>
