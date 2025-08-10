@@ -32,9 +32,10 @@ export function NavMain({
     animation: object
     requiresPro?: boolean
     requiresMax?: boolean
+    requiresEnterprise?: boolean
   }[]
   onItemClick?: () => void
-  permissionLevel?: 'FREE' | 'PRO' | 'MAX'
+  permissionLevel?: 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -64,20 +65,25 @@ export function NavMain({
           // Check if this item requires special permissions
           const requiresProPermission = item.requiresPro || false
           const requiresMaxPermission = item.requiresMax || false
+          const requiresEnterprisePermission = item.requiresEnterprise || false
           const hasProAccess =
-            permissionLevel === 'PRO' || permissionLevel === 'MAX'
-          const hasMaxAccess = permissionLevel === 'MAX'
+            permissionLevel === 'PRO' || permissionLevel === 'MAX' || permissionLevel === 'ENTERPRISE'
+          const hasMaxAccess = permissionLevel === 'MAX' || permissionLevel === 'ENTERPRISE'
+          const hasEnterpriseAccess = permissionLevel === 'ENTERPRISE'
 
           const isLockedForUser =
             (requiresProPermission && !hasProAccess) ||
-            (requiresMaxPermission && !hasMaxAccess)
+            (requiresMaxPermission && !hasMaxAccess) ||
+            (requiresEnterprisePermission && !hasEnterpriseAccess)
 
           const handleClick = (e: React.MouseEvent) => {
             if (isLockedForUser) {
               e.preventDefault()
-              const upgradeMessage = requiresMaxPermission
-                ? `${item.title} is only available for MAX users. Please upgrade your plan.`
-                : `${item.title} is only available for PRO and MAX users. Please upgrade your plan.`
+              const upgradeMessage = requiresEnterprisePermission
+                ? `${item.title} is only available for Enterprise users. Please upgrade your plan.`
+                : requiresMaxPermission
+                  ? `${item.title} is only available for MAX and Enterprise users. Please upgrade your plan.`
+                  : `${item.title} is only available for PRO, MAX and Enterprise users. Please upgrade your plan.`
               toast({
                 variant: 'info',
                 title: 'Feature locked',
@@ -102,7 +108,7 @@ export function NavMain({
                   'h-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!',
                   '[&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
                   isActive &&
-                    'bg-sidebar-accent text-sidebar-accent-foreground',
+                  'bg-sidebar-accent text-sidebar-accent-foreground',
                 )}
                 onMouseEnter={() => setHoveredItem(item.title)}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -124,12 +130,14 @@ export function NavMain({
                   variant="secondary"
                   className={cn(
                     'text-xs border group-data-[collapsible=icon]:sr-only',
-                    requiresMaxPermission
-                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                    requiresEnterprisePermission
+                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                      : requiresMaxPermission
+                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
                   )}
                 >
-                  {requiresMaxPermission ? 'MAX' : 'PRO'}
+                  {requiresEnterprisePermission ? 'ENT' : requiresMaxPermission ? 'MAX' : 'PRO'}
                 </Badge>
               </div>
             )

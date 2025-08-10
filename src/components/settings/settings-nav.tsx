@@ -55,7 +55,7 @@ function NavItem({
 }: {
   item: { href: string; title: string; icon: string }
   isActive: boolean
-  permissionLevel: 'FREE' | 'PRO' | 'MAX'
+  permissionLevel: 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'
 }) {
   const [isHovered, setIsHovered] = useState(false)
   const { toast } = useToast()
@@ -66,10 +66,10 @@ function NavItem({
     [item.icon],
   )
 
-  // Check if this item requires MAX permission
-  const requiresMaxPermission = item.title === 'Integrations'
-  const hasMaxAccess = permissionLevel === 'MAX'
-  const isLockedForUser = requiresMaxPermission && !hasMaxAccess
+  // Check if this item requires ENTERPRISE permission
+  const requiresEnterprisePermission = item.title === 'Integrations'
+  const hasEnterpriseAccess = permissionLevel === 'ENTERPRISE'
+  const isLockedForUser = requiresEnterprisePermission && !hasEnterpriseAccess
 
   // Optimize click handler with useCallback
   const handleClick = useCallback(
@@ -79,7 +79,7 @@ function NavItem({
         toast({
           variant: 'info',
           title: 'Feature locked',
-          description: `${item.title} is only available for MAX users. Please upgrade your plan.`,
+          description: `${item.title} is only available for Enterprise users. Please upgrade your plan.`,
         })
         return
       }
@@ -132,12 +132,12 @@ function NavItem({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {requiresMaxPermission && (
+            {requiresEnterprisePermission && (
               <Badge
                 variant="secondary"
-                className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
               >
-                MAX
+                ENT
               </Badge>
             )}
           </div>
@@ -309,9 +309,10 @@ export default function SettingsNav({
             {items.map((item) => {
               const animationData =
                 animations[item.icon as keyof typeof animations]
-              const requiresMaxPermission = item.title === 'Integrations'
-              const hasMaxAccess = permissionLevel === 'MAX'
-              const isLockedForUser = requiresMaxPermission && !hasMaxAccess
+              const requiresEnterprisePermission = item.title === 'Integrations'
+              const hasEnterpriseAccess = permissionLevel === 'ENTERPRISE'
+              const isLockedForUser =
+                requiresEnterprisePermission && !hasEnterpriseAccess
 
               return (
                 <SelectItem
@@ -333,15 +334,15 @@ export default function SettingsNav({
                     <span className="text-base font-medium leading-none translate-y-[2px] flex-1">
                       {item.title}
                     </span>
-                    {requiresMaxPermission && (
+                    {requiresEnterprisePermission && (
                       <Badge
                         variant="secondary"
-                        className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                        className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
                       >
-                        MAX
+                        ENT
                       </Badge>
                     )}
-                    {item.title === 'Integrations' && hasMaxAccess && (
+                    {item.title === 'Integrations' && hasEnterpriseAccess && (
                       <Badge
                         variant="secondary"
                         className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
