@@ -64,6 +64,9 @@ interface GetTargetsSimpleResponse {
   hasMore: boolean
   currentPage: number
   limit: number
+  totalApplicationsCount?: {
+    total_applications: number
+  }
 }
 
 export default async function FundsPage({
@@ -142,12 +145,12 @@ export default async function FundsPage({
       initialPaginationData={
         responseData
           ? {
-              totalCount: responseData.totalCount,
-              hasMore: responseData.hasMore,
-              currentPage: responseData.currentPage,
-              limit: responseData.limit,
-              totalApplicationsCount: responseData.totalApplicationsCount,
-            }
+            totalCount: responseData.totalCount,
+            hasMore: responseData.hasMore,
+            currentPage: responseData.currentPage,
+            limit: responseData.limit,
+            totalApplicationsCount: responseData.totalApplicationsCount,
+          }
           : null
       }
       initialFilters={filters}

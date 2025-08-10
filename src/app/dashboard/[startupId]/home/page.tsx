@@ -73,18 +73,28 @@ export async function generateMetadata({
 
 async function getDashboardData(startupId: string) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
 
-  if (!user) {
-    return null
+  // Default fallback data to prevent crashes
+  const fallbackData = {
+    profile: null,
+    startup: null,
+    totalApplications: 0,
+    recommendations: null,
+    recentSubmissions: [],
   }
 
   try {
-    // Add timeout logic to prevent hanging requests
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Request timeout')), 12000) // 12 second timeout
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return fallbackData
+    }
+
+    // Add aggressive timeout to prevent hanging
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Request timeout')), 8000) // 8 second timeout
     )
 
     const rpcPromise = supabase.rpc('get_dashboard_data', {
@@ -94,30 +104,18 @@ async function getDashboardData(startupId: string) {
     const { data: dashboardData, error } = await Promise.race([
       rpcPromise,
       timeoutPromise,
-    ]) as { data: DashboardData; error: Error | null }
+    ])
 
     if (error) {
       console.error('Error fetching dashboard data:', error)
-      return {
-        profile: null,
-        startup: null,
-        totalApplications: 0,
-        recommendations: null,
-        recentSubmissions: [],
-      }
+      return fallbackData
     }
 
     const typedData = dashboardData as DashboardData
 
     if (typedData?.error) {
       console.error('Dashboard RPC error:', typedData.error)
-      return {
-        profile: null,
-        startup: null,
-        totalApplications: 0,
-        recommendations: null,
-        recentSubmissions: [],
-      }
+      return fallbackData
     }
 
     // Transform and validate recent submissions to match SubmissionData interface
@@ -144,19 +142,17 @@ async function getDashboardData(startupId: string) {
   } catch (error) {
     console.error('Error in getDashboardData:', error)
 
-    // Handle specific abort errors
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.warn('Dashboard data request was aborted due to timeout')
+    // Handle specific network and timeout errors gracefully
+    if (error instanceof Error) {
+      if (error.name === 'AbortError' || error.message === 'Request timeout') {
+        console.warn('Dashboard data request timed out - using fallback data')
+      } else if (error.message.includes('network') || error.message.includes('fetch failed')) {
+        console.warn('Network error loading dashboard data - using fallback data')
+      }
     }
 
-    // Return fallback data instead of null to prevent crashes
-    return {
-      profile: null,
-      startup: null,
-      totalApplications: 0,
-      recommendations: null,
-      recentSubmissions: [],
-    }
+    // Always return fallback data instead of null to prevent crashes
+    return fallbackData
   }
 }
 
@@ -166,17 +162,40 @@ export default async function HomePage({
   params: Promise<{ startupId: string }>
 }) {
   const { startupId } = await params
-  const data = await getDashboardData(startupId)
 
-  // getDashboardData now always returns an object, never null
+  // Always provide fallback data to prevent crashes
+  let data: {
+    profile: { monthly_submissions_used?: number; monthly_submissions_limit?: number; permission_level?: string } | null
+    startup: { name?: string; pitch_deck_url?: string; updated_at?: string } | null
+    totalApplications: number
+    recommendations: Recommendation[] | null
+    recentSubmissions: SubmissionData[]
+  } = {
+    profile: null,
+    startup: null,
+    totalApplications: 0,
+    recommendations: null,
+    recentSubmissions: [],
+  }
+
+  try {
+    const dashboardData = await getDashboardData(startupId)
+    if (dashboardData) {
+      data = dashboardData
+    }
+  } catch (error) {
+    console.error('Failed to load dashboard data in HomePage:', error)
+    // Use default fallback data
+  }
+
   return (
     <HomePageClient
       startupId={startupId}
-      submissionsUsed={data?.profile?.monthly_submissions_used ?? 0}
-      submissionsLimit={data?.profile?.monthly_submissions_limit ?? 3}
-      totalApplications={data?.totalApplications ?? 0}
-      recommendations={data?.recommendations ?? null}
-      recentSubmissions={data?.recentSubmissions ?? []}
+      submissionsUsed={data.profile?.monthly_submissions_used ?? 0}
+      submissionsLimit={data.profile?.monthly_submissions_limit ?? 3}
+      totalApplications={data.totalApplications ?? 0}
+      recommendations={data.recommendations ?? null}
+      recentSubmissions={data.recentSubmissions ?? []}
     />
   )
 }

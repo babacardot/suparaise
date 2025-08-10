@@ -405,7 +405,12 @@ export default React.memo(function FundsActions({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md w-full p-0 sm:m-4 h-full sm:h-[calc(100%-2rem)] rounded-sm sm:rounded-sm border-0 sm:border shadow-lg bg-background overflow-hidden flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-200">
+      <SheetContent
+        className="select-none sm:max-w-md w-full p-0 sm:m-4 h-full sm:h-[calc(100%-2rem)] rounded-sm sm:rounded-sm border-0 sm:border shadow-lg bg-background overflow-hidden flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-200"
+        onCopy={(e) => e.preventDefault()}
+        onCut={(e) => e.preventDefault()}
+        onPaste={(e) => e.preventDefault()}
+      >
         <Card className="border-0 shadow-none rounded-sm sm:rounded-sm h-full flex flex-col">
           <CardHeader className="sticky top-0 z-10 bg-background border-b px-4 -py-8 flex flex-row items-center justify-between flex-shrink-0">
             <SheetTitle className="text-base font-medium">
@@ -418,7 +423,7 @@ export default React.memo(function FundsActions({
               <X className="h-4 w-4" />
             </button>
           </CardHeader>
-          <CardContent className="p-4 space-y-3 overflow-auto flex-1 text-xs">
+          <CardContent className="select-none p-4 space-y-3 overflow-auto flex-1 text-xs" onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()} onPaste={(e) => e.preventDefault()}>
             <div className="space-y-3 pl-4 pr-2 sm:px-0">
               {/* Basic Info */}
 
