@@ -227,8 +227,8 @@ export function ResourcesSection({
                   Ready for maximum outreach?
                 </h3>
                 <p className="text-[10px] text-muted-foreground leading-tight">
-                  2,000+ funds • 125 applications monthly • 5 parallel
-                  submissions • Priority support
+                  Full database access • 50 applications monthly • 5x faster
+                  with concurrent processing • Priority support
                 </p>
               </CardContent>
             </Card>

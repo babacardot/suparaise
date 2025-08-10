@@ -59,7 +59,7 @@ const features = [
     animation: animations.globe,
     title: 'Reach',
     description:
-      'Access 2,000+ funds, and accelerators from Silicon Valley to Singapore and throughout EMEA.',
+      'Apply to funds, accelerators, and angels from Silicon Valley to Singapore and throughout EMEA.',
     color: 'amber',
     bgClass:
       'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800',

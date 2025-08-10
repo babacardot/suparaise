@@ -142,12 +142,12 @@ const AngelsTable = React.memo(function AngelsTable({
     const level = subscription?.permission_level
     if (level === 'FREE') {
       return {
-        text: 'Upgrade to Pro to unlock over 1,000 more angels and advanced agent capabilities.',
+        text: 'Upgrade to Pro to unlock more monthly runs, accelerators and concurrent processing.',
       }
     }
     if (level === 'PRO') {
       return {
-        text: 'Upgrade to Max to access our full database of 2,000+ angels and powerful developer tools.',
+        text: 'Upgrade to Max to access our full database and advanced agent capabilities.',
       }
     }
     return null

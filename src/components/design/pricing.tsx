@@ -24,7 +24,7 @@ const pricingTiers: PricingTier[] = [
     description: 'Get started with agentic fundraising',
     features: [
       '2 applications per month',
-      'Access to 150 curated funds',
+      'Access to 100 curated funds',
       'Claude 4 sonnet',
     ],
     buttonText: '',
@@ -38,7 +38,7 @@ const pricingTiers: PricingTier[] = [
     description: 'For startups actively raising their first round',
     features: [
       '20 applications per month',
-      'Access to 500 global funds',
+      'Access to 500+ global funds',
       '3x faster with concurrent processing',
       'Background runs',
       'Agent customization',
@@ -55,7 +55,7 @@ const pricingTiers: PricingTier[] = [
     description: 'For startups that need meetings now',
     features: [
       '50 applications per month',
-      'Access to 1,000+ global funds',
+      'Full database access',
       '5x faster with concurrent processing',
       'Detailed submission analytics',
       'Full application transparency',

@@ -213,17 +213,17 @@ export default function BillingSettings() {
   const planFeatures = {
     pro_monthly: [
       '20 applications per month',
-      'Access to 500 global funds',
-      '3 parallel submissions',
+      'Access to 500+ global funds',
+      '3x faster with concurrent processing',
       'Background runs',
       'Agent customization',
     ],
     max_monthly: [
       '50 applications per month',
-      'Access to 1,000+ global funds',
-      '5 parallel submissions',
+      'Full database access',
+      '5x faster with concurrent processing',
       'Detailed submission analytics',
-      'Developer mode',
+      'Full application transparency',
       'Priority support',
     ],
   }
@@ -804,23 +804,23 @@ export default function BillingSettings() {
                   <>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      125 runs per month
+                      50 applications per month
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      Access to 2,000+ global funds
+                      Full database access
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      5 parallel submissions
+                      5x faster with concurrent processing
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      Advanced application tracking
+                      Detailed submission analytics
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      Developer mode
+                      Full application transparency
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
@@ -831,15 +831,15 @@ export default function BillingSettings() {
                   <>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      20 runs per month
+                      20 applications per month
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      Access to 1,200+ global funds
+                      Access to 500+ global funds
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
-                      3 parallel submissions
+                      3x faster with concurrent processing
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />

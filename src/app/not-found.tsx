@@ -54,7 +54,7 @@ export default function NotFound() {
             Looks like this page got lost in the fundraising process. If you
             think this is an error, please{' '}
             <a
-              href="mailto:support@suparaise.com"
+              href="mailto:hello@suparaise.com"
               className="text-primary hover:underline font-medium"
             >
               contact our support team
