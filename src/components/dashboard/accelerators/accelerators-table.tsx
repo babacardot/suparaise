@@ -310,7 +310,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
         }
       case 'video':
         return {
-          label: 'Video',
+          label: 'Demo',
           animation: animations.ratio,
           color:
             'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800',

@@ -49,6 +49,7 @@ export interface ValidationRequirements {
     operatingCountries?: boolean
     tractionSummary?: boolean
     marketSummary?: boolean
+    googleDriveUrl?: boolean
   }
   financial?: {
     fundingAmountSought?: boolean
@@ -372,6 +373,7 @@ export const VALIDATION_PRESETS = {
       location: true,
       descriptionShort: true,
       descriptionMedium: true,
+      googleDriveUrl: true,
       // fundingRound: true,
       // revenueModel: true,
       // legalStructure: true,

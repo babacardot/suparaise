@@ -378,9 +378,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -687,8 +686,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                    .split(',')
-                    .filter(Boolean)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -2518,7 +2517,7 @@ export default function CompanySettings() {
 
           {/* Cloud storage */}
           <div className="space-y-3">
-            <Label htmlFor="googleDriveUrl">Cloud storage URL</Label>
+            <Label htmlFor="googleDriveUrl">Cloud storage / Docsend</Label>
             <div className="relative">
               <Input
                 id="googleDriveUrl"
@@ -2531,396 +2530,401 @@ export default function CompanySettings() {
                 placeholder="https://drive.google.com/drive/folders/..."
               />
               <p className="text-xs text-muted-foreground mt-2">
-                Link to a shared folder with your pitch deck, financials, and
-                other materials. While the agent can use this instead of
-                individual uploads, we recommend uploading your deck and demo
-                separately for better security and because most funds require
-                these files to be submitted individually.
+                Link to a folder with your pitch deck and any other materials you judge relevant for investors. The agent will privilege sharing this link over individual uploads.
               </p>
             </div>
           </div>
 
           {/* File Uploads */}
           <div className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Pitch Deck Upload */}
-              <div className="space-y-3">
-                <Label>Deck</Label>
-                <input
-                  ref={pitchDeckInputRef}
-                  type="file"
-                  accept=".pdf,.ppt,.pptx"
-                  className="hidden"
-                  onChange={(e) => {
-                    const selectedFile = e.target.files?.[0]
-                    if (selectedFile) handlePitchDeckUpload(selectedFile)
-                  }}
-                  disabled={pitchDeckUploading}
-                />
-                {!formData.pitchDeckUrl ? (
-                  <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-                      <LottieIcon
-                        animationData={animations.fileplus}
-                        size={32}
-                        loop={false}
-                        autoplay={false}
-                      />
+            <div className="rounded-sm border bg-cyan-50 dark:bg-cyan-900/30 border-cyan-200 dark:border-cyan-800 p-4 md:p-5">
+              <div className="grid gap-6 grid-cols-2">
+                {/* Pitch Deck Upload */}
+                <div className="space-y-3">
+                  <Label>Deck</Label>
+                  <input
+                    ref={pitchDeckInputRef}
+                    type="file"
+                    accept=".pdf,.ppt,.pptx"
+                    className="hidden"
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0]
+                      if (selectedFile) handlePitchDeckUpload(selectedFile)
+                    }}
+                    disabled={pitchDeckUploading}
+                  />
+                  {!formData.pitchDeckUrl ? (
+                    <div className="flex items-center space-x-4">
+                      <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                        <LottieIcon
+                          animationData={animations.fileplus}
+                          size={32}
+                          loop={false}
+                          autoplay={false}
+                        />
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            pitchDeckInputRef.current?.click()
+                          }}
+                          disabled={pitchDeckUploading}
+                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                        >
+                          {pitchDeckUploading ? (
+                            <>
+                              <Spinner className="h-3 w-3 mr-2" />
+                            </>
+                          ) : (
+                            'Upload'
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                    <div className="space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          pitchDeckInputRef.current?.click()
-                        }}
-                        disabled={pitchDeckUploading}
-                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                  ) : (
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('deck.pdf')}`}
                       >
-                        {pitchDeckUploading ? (
-                          <>
-                            <Spinner className="h-3 w-3 mr-2" />
-                          </>
-                        ) : (
-                          'Upload'
-                        )}
-                      </Button>
+                        <span className="text-xs font-bold">
+                          {getFileTypeText('deck.pdf')}
+                        </span>
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            pitchDeckInputRef.current?.click()
+                          }}
+                          disabled={pitchDeckUploading}
+                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                        >
+                          {pitchDeckUploading ? (
+                            <>
+                              <Spinner className="h-3 w-3 mr-2" />
+                            </>
+                          ) : (
+                            'Update'
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            handlePitchDeckRemove()
+                          }}
+                          className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('deck.pdf')}`}
-                    >
-                      <span className="text-xs font-bold">
-                        {getFileTypeText('deck.pdf')}
-                      </span>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    PDF, PPT, or PPTX (max 5MB)
+                  </p>
+                </div>
+                {/* Video Upload */}
+                <div className="relative space-y-3">
+                  <Label>Demo</Label>
+                  <Badge
+                    variant="secondary"
+                    className="absolute -top-2 -right-2 text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
+                  >
+                    BETA
+                  </Badge>
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept=".mp4,.mov,.avi,.webm"
+                    className="hidden"
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0]
+                      if (selectedFile) handleVideoUpload(selectedFile)
+                    }}
+                    disabled={videoUploading}
+                  />
+                  {!formData.introVideoUrl ? (
+                    <div className="flex items-center space-x-4">
+                      <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                        <LottieIcon
+                          animationData={animations.fileplus}
+                          size={32}
+                          loop={false}
+                          autoplay={false}
+                        />
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            videoInputRef.current?.click()
+                          }}
+                          disabled={videoUploading}
+                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                        >
+                          {videoUploading ? (
+                            <>
+                              <Spinner className="h-3 w-3 mr-2" />
+                            </>
+                          ) : (
+                            'Upload'
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                    <div className="space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          pitchDeckInputRef.current?.click()
-                        }}
-                        disabled={pitchDeckUploading}
-                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                  ) : (
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('demo.mp4')}`}
                       >
-                        {pitchDeckUploading ? (
-                          <>
-                            <Spinner className="h-3 w-3 mr-2" />
-                          </>
-                        ) : (
-                          'Update'
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          handlePitchDeckRemove()
-                        }}
-                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-                      >
-                        Remove
-                      </Button>
+                        <span className="text-xs font-bold">
+                          {getFileTypeText('demo.mp4')}
+                        </span>
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            videoInputRef.current?.click()
+                          }}
+                          disabled={videoUploading}
+                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                        >
+                          {videoUploading ? (
+                            <>
+                              <Spinner className="h-3 w-3 mr-2" />
+                            </>
+                          ) : (
+                            'Update'
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            handleVideoRemove()
+                          }}
+                          className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  PDF, PPT, or PPTX (max 5MB)
-                </p>
-              </div>
-
-              {/* Video Upload */}
-              <div className="space-y-3">
-                <Label>Demo</Label>
-                <input
-                  ref={videoInputRef}
-                  type="file"
-                  accept=".mp4,.mov,.avi,.webm"
-                  className="hidden"
-                  onChange={(e) => {
-                    const selectedFile = e.target.files?.[0]
-                    if (selectedFile) handleVideoUpload(selectedFile)
-                  }}
-                  disabled={videoUploading}
-                />
-                {!formData.introVideoUrl ? (
-                  <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-                      <LottieIcon
-                        animationData={animations.fileplus}
-                        size={32}
-                        loop={false}
-                        autoplay={false}
-                      />
-                    </div>
-                    <div className="space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          videoInputRef.current?.click()
-                        }}
-                        disabled={videoUploading}
-                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                      >
-                        {videoUploading ? (
-                          <>
-                            <Spinner className="h-3 w-3 mr-2" />
-                          </>
-                        ) : (
-                          'Upload'
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('demo.mp4')}`}
-                    >
-                      <span className="text-xs font-bold">
-                        {getFileTypeText('demo.mp4')}
-                      </span>
-                    </div>
-                    <div className="space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          videoInputRef.current?.click()
-                        }}
-                        disabled={videoUploading}
-                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                      >
-                        {videoUploading ? (
-                          <>
-                            <Spinner className="h-3 w-3 mr-2" />
-                          </>
-                        ) : (
-                          'Update'
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          handleVideoRemove()
-                        }}
-                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  MP4, MOV, AVI, or WebM (max 100MB)
-                </p>
-              </div>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Financial Projections Upload */}
-              <div className="space-y-3">
-                <Label>Financials</Label>
-                <input
-                  ref={financialProjectionsInputRef}
-                  type="file"
-                  accept=".pdf,.xls,.xlsx"
-                  className="hidden"
-                  onChange={(e) => {
-                    const selectedFile = e.target.files?.[0]
-                    if (selectedFile)
-                      handleFinancialProjectionsUpload(selectedFile)
-                  }}
-                  disabled={financialProjectionsUploading}
-                />
-                {!formData.financialProjectionsUrl ? (
-                  <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-                      <LottieIcon
-                        animationData={animations.fileplus}
-                        size={32}
-                        loop={false}
-                        autoplay={false}
-                      />
-                    </div>
-                    <div className="space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          financialProjectionsInputRef.current?.click()
-                        }}
-                        disabled={financialProjectionsUploading}
-                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                      >
-                        {financialProjectionsUploading ? (
-                          <>
-                            <Spinner className="h-3 w-3 mr-2" />
-                          </>
-                        ) : (
-                          'Upload'
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('financials.xlsx')}`}
-                    >
-                      <span className="text-xs font-bold">
-                        {getFileTypeText('financials.xlsx')}
-                      </span>
-                    </div>
-                    <div className="space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          financialProjectionsInputRef.current?.click()
-                        }}
-                        disabled={financialProjectionsUploading}
-                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                      >
-                        {financialProjectionsUploading ? (
-                          <>
-                            <Spinner className="h-3 w-3 mr-2" />
-                          </>
-                        ) : (
-                          'Update'
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          handleFinancialProjectionsRemove()
-                        }}
-                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  PDF, XLS, or XLSX (max 5MB)
-                </p>
-              </div>
-
-              {/* Business Plan Upload */}
-              <div className="space-y-3">
-                <Label>Business Plan</Label>
-                <input
-                  ref={businessPlanInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={(e) => {
-                    const selectedFile = e.target.files?.[0]
-                    if (selectedFile) handleBusinessPlanUpload(selectedFile)
-                  }}
-                  disabled={businessPlanUploading}
-                />
-                {!formData.businessPlanUrl ? (
-                  <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-                      <LottieIcon
-                        animationData={animations.fileplus}
-                        size={32}
-                        loop={false}
-                        autoplay={false}
-                      />
-                    </div>
-                    <div className="space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          businessPlanInputRef.current?.click()
-                        }}
-                        disabled={businessPlanUploading}
-                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                      >
-                        {businessPlanUploading ? (
-                          <>
-                            <Spinner className="h-3 w-3 mr-2" />
-                          </>
-                        ) : (
-                          'Upload'
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('business-plan.docx')}`}
-                    >
-                      <span className="text-xs font-bold">
-                        {getFileTypeText('business-plan.docx')}
-                      </span>
-                    </div>
-                    <div className="space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          businessPlanInputRef.current?.click()
-                        }}
-                        disabled={businessPlanUploading}
-                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-                      >
-                        {businessPlanUploading ? (
-                          <>
-                            <Spinner className="h-3 w-3 mr-2" />
-                          </>
-                        ) : (
-                          'Update'
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          playClickSound()
-                          handleBusinessPlanRemove()
-                        }}
-                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  PDF, DOC, or DOCX (max 5MB)
-                </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    MP4, MOV, AVI, or WebM (max 100MB)
+                  </p>
+                </div>
               </div>
             </div>
+            {false && (
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Financial Projections Upload */}
+                <div className="space-y-3">
+                  <Label>Financials</Label>
+                  <input
+                    ref={financialProjectionsInputRef}
+                    type="file"
+                    accept=".pdf,.xls,.xlsx"
+                    className="hidden"
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0]
+                      if (selectedFile)
+                        handleFinancialProjectionsUpload(selectedFile)
+                    }}
+                    disabled={financialProjectionsUploading}
+                  />
+                  {!formData.financialProjectionsUrl ? (
+                    <div className="flex items-center space-x-4">
+                      <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                        <LottieIcon
+                          animationData={animations.fileplus}
+                          size={32}
+                          loop={false}
+                          autoplay={false}
+                        />
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            financialProjectionsInputRef.current?.click()
+                          }}
+                          disabled={financialProjectionsUploading}
+                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                        >
+                          {financialProjectionsUploading ? (
+                            <>
+                              <Spinner className="h-3 w-3 mr-2" />
+                            </>
+                          ) : (
+                            'Upload'
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('financials.xlsx')}`}
+                      >
+                        <span className="text-xs font-bold">
+                          {getFileTypeText('financials.xlsx')}
+                        </span>
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            financialProjectionsInputRef.current?.click()
+                          }}
+                          disabled={financialProjectionsUploading}
+                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                        >
+                          {financialProjectionsUploading ? (
+                            <>
+                              <Spinner className="h-3 w-3 mr-2" />
+                            </>
+                          ) : (
+                            'Update'
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            handleFinancialProjectionsRemove()
+                          }}
+                          className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    PDF, XLS, or XLSX (max 5MB)
+                  </p>
+                </div>
+
+                {/* Business Plan Upload */}
+                <div className="space-y-3">
+                  <Label>Business Plan</Label>
+                  <input
+                    ref={businessPlanInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0]
+                      if (selectedFile) handleBusinessPlanUpload(selectedFile)
+                    }}
+                    disabled={businessPlanUploading}
+                  />
+                  {!formData.businessPlanUrl ? (
+                    <div className="flex items-center space-x-4">
+                      <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                        <LottieIcon
+                          animationData={animations.fileplus}
+                          size={32}
+                          loop={false}
+                          autoplay={false}
+                        />
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            businessPlanInputRef.current?.click()
+                          }}
+                          disabled={businessPlanUploading}
+                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                        >
+                          {businessPlanUploading ? (
+                            <>
+                              <Spinner className="h-3 w-3 mr-2" />
+                            </>
+                          ) : (
+                            'Upload'
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor('business-plan.docx')}`}
+                      >
+                        <span className="text-xs font-bold">
+                          {getFileTypeText('business-plan.docx')}
+                        </span>
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            businessPlanInputRef.current?.click()
+                          }}
+                          disabled={businessPlanUploading}
+                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                        >
+                          {businessPlanUploading ? (
+                            <>
+                              <Spinner className="h-3 w-3 mr-2" />
+                            </>
+                          ) : (
+                            'Update'
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            playClickSound()
+                            handleBusinessPlanRemove()
+                          }}
+                          className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    PDF, DOC, or DOCX (max 5MB)
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Danger Zone - Only show when user has more than 1 startup */}
@@ -2981,7 +2985,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

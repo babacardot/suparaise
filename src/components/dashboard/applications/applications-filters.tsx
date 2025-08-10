@@ -49,7 +49,7 @@ const STATUS_OPTIONS = [
 
 const TYPE_OPTIONS = [
   { value: 'Fund', label: 'Funds' },
-  { value: 'Angel', label: 'Angels' },
+  // { value: 'Angel', label: 'Angels' }, // TODO: Not yet activated
   { value: 'Accelerator', label: 'Accelerators' },
 ] as const
 
@@ -503,7 +503,7 @@ export default function ApplicationsFilters({
               align="end"
             >
               <div className="space-y-2">
-                {['status', 'type', 'submitted', 'notes'].map((key) => (
+                {['status', 'type', 'submitted'].map((key) => (
                   <div
                     key={key}
                     onClick={(e) => {
@@ -516,10 +516,9 @@ export default function ApplicationsFilters({
                     }}
                     className={`
                       flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
-                      ${
-                        columnVisibility[key as keyof ColumnVisibility]
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                          : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                      ${columnVisibility[key as keyof ColumnVisibility]
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
                       }
                     `}
                   >

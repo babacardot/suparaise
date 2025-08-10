@@ -47,7 +47,7 @@ export function NavUser({
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      audio.play().catch(() => {})
+      audio.play().catch(() => { })
     }
   }
 
@@ -62,7 +62,11 @@ export function NavUser({
 
   // Determine user data, prioritizing live context user
   const name = user?.user_metadata?.name || propUser.name || 'User'
-  const email = user?.email || propUser.email || ''
+  const email =
+    (user?.user_metadata?.contact_email as string | undefined) ||
+    user?.email ||
+    propUser.email ||
+    ''
 
   // Generate avatar URL using the logic that respects custom uploads and removals
   const getAvatarUrl = () => {

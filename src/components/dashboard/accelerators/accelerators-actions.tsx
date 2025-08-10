@@ -204,7 +204,7 @@ export default React.memo(function AcceleratorsActions({
   const getRequirementLabel = (value: string) => {
     const labels: Record<string, string> = {
       pitch_deck: 'Deck',
-      video: 'Video',
+      video: 'Demo',
       financials: 'Financials',
       business_plan: 'Business Plan',
     }

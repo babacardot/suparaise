@@ -361,28 +361,33 @@ export default function ProfileSettings() {
         throw new Error(result.error)
       }
 
-      // If this is the main founder (first in list) and we're updating name fields,
-      // also update the user metadata so nav-user and startup-switcher reflect the changes
+      // If this is the main founder (first in list), sync relevant changes to auth user metadata
       const isMainFounder = founders.findIndex((f) => f.id === founderId) === 0
-      if (isMainFounder && (field === 'firstName' || field === 'lastName')) {
+      if (isMainFounder) {
         try {
           const updatedFounder = founders.find((f) => f.id === founderId)
           if (updatedFounder) {
-            const fullName =
-              `${updatedFounder.firstName} ${updatedFounder.lastName}`.trim()
+            const updates: Record<string, string | boolean | null> = {
+              ...user.user_metadata,
+            }
 
-            // Update user metadata with the new name
-            await supabase.auth.updateUser({
-              data: {
-                ...user.user_metadata,
-                name: fullName,
-                firstName: updatedFounder.firstName,
-                lastName: updatedFounder.lastName,
-              },
-            })
+            if (field === 'firstName' || field === 'lastName') {
+              const fullName = `${updatedFounder.firstName} ${updatedFounder.lastName}`.trim()
+              updates.name = fullName
+              updates.firstName = updatedFounder.firstName
+              updates.lastName = updatedFounder.lastName
+            }
 
-            // Refresh user context to get updated data
-            await refreshUser()
+            if (field === 'email') {
+              // Only update our contact email in metadata. Do not change auth email here.
+              updates.contact_email = updatedFounder.email
+            }
+
+            // Write metadata updates if any field we care about changed
+            if (field === 'firstName' || field === 'lastName' || field === 'email') {
+              await supabase.auth.updateUser({ data: updates })
+              await refreshUser()
+            }
           }
         } catch (metadataError) {
           console.error('Error updating user metadata:', metadataError)

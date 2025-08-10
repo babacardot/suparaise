@@ -304,120 +304,46 @@ const FileUploadComponent: React.FC<
   maxSize,
   description,
 }) => {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (type === 'logo' && file) {
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
+    useEffect(() => {
+      if (type === 'logo' && file) {
+        const url = URL.createObjectURL(file)
+        setPreviewUrl(url)
 
-      return () => {
-        URL.revokeObjectURL(url)
+        return () => {
+          URL.revokeObjectURL(url)
+          setPreviewUrl(null)
+        }
+      } else {
         setPreviewUrl(null)
       }
-    } else {
-      setPreviewUrl(null)
-    }
-  }, [file, type])
+    }, [file, type])
 
-  return (
-    <div className="space-y-3">
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => {
-          const selectedFile = e.target.files?.[0]
-          if (selectedFile) onUpload(type, selectedFile)
-        }}
-        disabled={uploadStatus === 'uploading'}
-      />
-      {!file ? (
-        <div className="flex items-center space-x-4">
-          <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
-            <LottieIcon
-              animationData={animations.fileplus}
-              size={32}
-              loop={false}
-              autoplay={false}
-            />
-          </div>
-          <div className="space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => inputRef.current?.click()}
-              disabled={uploadStatus === 'uploading'}
-              className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
-            >
-              {uploadStatus === 'uploading' ? (
-                <>
-                  <Spinner className="h-3 w-3 mr-2" />
-                </>
-              ) : (
-                'Upload'
-              )}
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center space-x-4">
-          <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
-            {previewUrl ? (
-              type === 'logo' ? (
-                <Image
-                  src={previewUrl}
-                  alt="Logo preview"
-                  width={80}
-                  height={80}
-                  className="h-20 w-20 rounded-sm object-contain"
-                />
-              ) : (
-                <video
-                  src={previewUrl}
-                  muted
-                  playsInline
-                  className="h-20 w-20 rounded-sm object-contain"
-                />
-              )
-            ) : (
-              <div
-                className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}
-              >
-                <span className="text-xs font-bold">
-                  {getFileTypeText(file.name)}
-                </span>
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{file.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {uploadStatus === 'uploading'
-                ? `${formatFileSize(
-                    (uploadProgress / 100) * file.size,
-                  )} of ${formatFileSize(file.size)}`
-                : formatFileSize(file.size)}
-            </p>
-            {uploadStatus === 'uploading' && (
-              <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
-                <div
-                  className="bg-primary h-1.5 transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            )}
-            {uploadStatus === 'failed' && (
-              <button
-                onClick={() => onUpload(type, file)}
-                className="text-sm text-red-500 hover:underline"
-              >
-                Try again
-              </button>
-            )}
-            <div className="space-x-2 mt-2">
+    return (
+      <div className="space-y-3">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => {
+            const selectedFile = e.target.files?.[0]
+            if (selectedFile) onUpload(type, selectedFile)
+          }}
+          disabled={uploadStatus === 'uploading'}
+        />
+        {!file ? (
+          <div className="flex items-center space-x-4">
+            <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+              <LottieIcon
+                animationData={animations.fileplus}
+                size={32}
+                loop={false}
+                autoplay={false}
+              />
+            </div>
+            <div className="space-x-2">
               <Button
                 type="button"
                 variant="outline"
@@ -431,30 +357,104 @@ const FileUploadComponent: React.FC<
                     <Spinner className="h-3 w-3 mr-2" />
                   </>
                 ) : (
-                  'Update'
+                  'Upload'
                 )}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  playClickSound()
-                  onRemove()
-                }}
-                className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
-              >
-                Remove
               </Button>
             </div>
           </div>
-        </div>
-      )}
-      <p className="text-xs text-muted-foreground">
-        {description} (max {maxSize})
-      </p>
-    </div>
-  )
-}
+        ) : (
+          <div className="flex items-center space-x-4">
+            <div className="h-20 w-20 rounded-sm flex items-center justify-center overflow-hidden">
+              {previewUrl ? (
+                type === 'logo' ? (
+                  <Image
+                    src={previewUrl}
+                    alt="Logo preview"
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 rounded-sm object-contain"
+                  />
+                ) : (
+                  <video
+                    src={previewUrl}
+                    muted
+                    playsInline
+                    className="h-20 w-20 rounded-sm object-contain"
+                  />
+                )
+              ) : (
+                <div
+                  className={`h-20 w-20 rounded-sm flex items-center justify-center ${getFileTypeColor(file.name)}`}
+                >
+                  <span className="text-xs font-bold">
+                    {getFileTypeText(file.name)}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{file.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {uploadStatus === 'uploading'
+                  ? `${formatFileSize(
+                    (uploadProgress / 100) * file.size,
+                  )} of ${formatFileSize(file.size)}`
+                  : formatFileSize(file.size)}
+              </p>
+              {uploadStatus === 'uploading' && (
+                <div className="mt-2 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+                  <div
+                    className="bg-primary h-1.5 transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              )}
+              {uploadStatus === 'failed' && (
+                <button
+                  onClick={() => onUpload(type, file)}
+                  className="text-sm text-red-500 hover:underline"
+                >
+                  Try again
+                </button>
+              )}
+              <div className="space-x-2 mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => inputRef.current?.click()}
+                  disabled={uploadStatus === 'uploading'}
+                  className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                >
+                  {uploadStatus === 'uploading' ? (
+                    <>
+                      <Spinner className="h-3 w-3 mr-2" />
+                    </>
+                  ) : (
+                    'Update'
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    playClickSound()
+                    onRemove()
+                  }}
+                  className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm"
+                >
+                  Remove
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {description} (max {maxSize})
+        </p>
+      </div>
+    )
+  }
 
 const MultiSelectCountries: React.FC<{
   selected: string[]
@@ -480,9 +480,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -615,349 +614,349 @@ export const TeamStep: React.FC<
   isFirstStartup = true,
   prefilledFields,
 }) => {
-  const addFounder = () => {
-    setFounders([
-      ...founders,
-      {
-        firstName: '',
-        lastName: '',
-        role: 'Co-founder',
-        bio: '',
-        email: '',
-        phone: '',
-        linkedin: '',
-        githubUrl: '',
-        personalWebsiteUrl: '',
-        twitterUrl: '',
-      },
-    ])
-  }
-
-  const removeFounder = (index: number) => {
-    playClickSound()
-    if (founders.length > 1) {
-      setFounders(founders.filter((_, i) => i !== index))
+    const addFounder = () => {
+      setFounders([
+        ...founders,
+        {
+          firstName: '',
+          lastName: '',
+          role: 'Co-founder',
+          bio: '',
+          email: '',
+          phone: '',
+          linkedin: '',
+          githubUrl: '',
+          personalWebsiteUrl: '',
+          twitterUrl: '',
+        },
+      ])
     }
-  }
 
-  const updateFounder = (
-    index: number,
-    field: keyof FounderData,
-    value: string | FounderRole,
-  ) => {
-    const updatedFounders = [...founders]
-    updatedFounders[index] = { ...updatedFounders[index], [field]: value }
-    setFounders(updatedFounders)
-  }
+    const removeFounder = (index: number) => {
+      playClickSound()
+      if (founders.length > 1) {
+        setFounders(founders.filter((_, i) => i !== index))
+      }
+    }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Tell us about your team</h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          Start with the basics about yourself and any co-founders. You can
-          always add more details later as your startup evolves.
-        </p>
-        {!isFirstStartup && (
-          <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-sm p-4 mb-4">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Note:</strong> Since this is an additional company,
-              you&apos;ll need to use a different email address.
-            </p>
-          </div>
-        )}
-      </div>
+    const updateFounder = (
+      index: number,
+      field: keyof FounderData,
+      value: string | FounderRole,
+    ) => {
+      const updatedFounders = [...founders]
+      updatedFounders[index] = { ...updatedFounders[index], [field]: value }
+      setFounders(updatedFounders)
+    }
 
-      {founders.map((founder, index) => (
-        <Card key={index}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">
-              {index === 0 ? 'You' : 'Co-founder'}
-            </CardTitle>
-            {index > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeFounder(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-fname`}>
-                  First name <span className="required-asterisk">*</span>
-                </Label>
-                <Input
-                  id={`founder-${index}-fname`}
-                  value={founder.firstName}
-                  onChange={(e) =>
-                    updateFounder(index, 'firstName', e.target.value)
-                  }
-                  placeholder="Sarah"
-                  autoComplete="given-name"
-                  required
-                  className={
-                    fieldErrors[index]?.firstName
-                      ? 'border-red-500 focus:border-red-500'
-                      : ''
-                  }
-                />
-                {fieldErrors[index]?.firstName && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {fieldErrors[index].firstName}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-lname`}>
-                  Last name <span className="required-asterisk">*</span>
-                </Label>
-                <Input
-                  id={`founder-${index}-lname`}
-                  value={founder.lastName}
-                  onChange={(e) =>
-                    updateFounder(index, 'lastName', e.target.value)
-                  }
-                  placeholder="Chen"
-                  autoComplete="family-name"
-                  required
-                  className={
-                    fieldErrors[index]?.lastName
-                      ? 'border-red-500 focus:border-red-500'
-                      : ''
-                  }
-                />
-                {fieldErrors[index]?.lastName && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {fieldErrors[index].lastName}
-                  </p>
-                )}
-              </div>
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Tell us about your team</h3>
+          <p className="text-sm text-muted-foreground mb-6">
+            Start with the basics about yourself and any co-founders. You can
+            always add more details later as your startup evolves.
+          </p>
+          {!isFirstStartup && (
+            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-sm p-4 mb-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>Note:</strong> Since this is an additional company,
+                you&apos;ll need to use a different email address.
+              </p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-role`}>
-                  Role <span className="required-asterisk">*</span>
-                </Label>
-                <div className="relative">
-                  <select
-                    id={`founder-${index}-role`}
-                    className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
-                    value={founder.role}
+          )}
+        </div>
+
+        {founders.map((founder, index) => (
+          <Card key={index}>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">
+                {index === 0 ? 'You' : 'Co-founder'}
+              </CardTitle>
+              {index > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFounder(index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <Label htmlFor={`founder-${index}-fname`}>
+                    First name <span className="required-asterisk">*</span>
+                  </Label>
+                  <Input
+                    id={`founder-${index}-fname`}
+                    value={founder.firstName}
                     onChange={(e) =>
-                      updateFounder(
-                        index,
-                        'role',
-                        e.target.value as FounderRole,
-                      )
+                      updateFounder(index, 'firstName', e.target.value)
                     }
+                    placeholder="Sarah"
+                    autoComplete="given-name"
                     required
-                  >
-                    {FOUNDER_ROLES.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    className={
+                      fieldErrors[index]?.firstName
+                        ? 'border-red-500 focus:border-red-500'
+                        : ''
+                    }
+                  />
+                  {fieldErrors[index]?.firstName && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {fieldErrors[index].firstName}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <Label htmlFor={`founder-${index}-lname`}>
+                    Last name <span className="required-asterisk">*</span>
+                  </Label>
+                  <Input
+                    id={`founder-${index}-lname`}
+                    value={founder.lastName}
+                    onChange={(e) =>
+                      updateFounder(index, 'lastName', e.target.value)
+                    }
+                    placeholder="Chen"
+                    autoComplete="family-name"
+                    required
+                    className={
+                      fieldErrors[index]?.lastName
+                        ? 'border-red-500 focus:border-red-500'
+                        : ''
+                    }
+                  />
+                  {fieldErrors[index]?.lastName && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {fieldErrors[index].lastName}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <Label htmlFor={`founder-${index}-role`}>
+                    Role <span className="required-asterisk">*</span>
+                  </Label>
+                  <div className="relative">
+                    <select
+                      id={`founder-${index}-role`}
+                      className="w-full pl-3 p-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
+                      value={founder.role}
+                      onChange={(e) =>
+                        updateFounder(
+                          index,
+                          'role',
+                          e.target.value as FounderRole,
+                        )
+                      }
+                      required
+                    >
+                      {FOUNDER_ROLES.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Label htmlFor={`founder-${index}-email`}>
+                    Email <span className="required-asterisk">*</span>
+                  </Label>
+                  <Input
+                    id={`founder-${index}-email`}
+                    type="email"
+                    value={founder.email}
+                    onChange={(e) =>
+                      updateFounder(index, 'email', e.target.value)
+                    }
+                    placeholder="sarah@happy.ai"
+                    autoComplete="email"
+                    className={
+                      fieldErrors[index]?.email
+                        ? 'border-red-500 focus:border-red-500'
+                        : ''
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your company email is preferred.
+                  </p>
+                  {fieldErrors[index]?.email && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {fieldErrors[index].email}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <Label htmlFor={`founder-${index}-phone`}>Phone</Label>
+                  <PhoneNumberInput
+                    value={founder.phone}
+                    onChange={(value) =>
+                      updateFounder(index, 'phone', value || '')
+                    }
+                    placeholder="Phone number"
+                    className={
+                      fieldErrors[index]?.phone
+                        ? 'border-red-500 focus:border-red-500'
+                        : ''
+                    }
+                  />
+                  {fieldErrors[index]?.phone && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {fieldErrors[index].phone}
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Optional - helps investors reach you faster
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <Label htmlFor={`founder-${index}-linkedin`}>LinkedIn</Label>
+                  <Input
+                    id={`founder-${index}-linkedin`}
+                    value={founder.linkedin}
+                    onChange={(e) =>
+                      updateFounder(index, 'linkedin', e.target.value)
+                    }
+                    placeholder="https://linkedin.com/in/sarahchen"
+                    autoComplete="url"
+                    className={
+                      fieldErrors[index]?.linkedin
+                        ? 'border-red-500 focus:border-red-500'
+                        : ''
+                    }
+                  />
+                  {fieldErrors[index]?.linkedin && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {fieldErrors[index].linkedin}
+                    </p>
+                  )}
+                  {/* Show hint if LinkedIn URL was pre-populated */}
+                  {prefilledFields?.linkedin && index === 0 && (
+                    <p className="text-xs text-green-600 mt-1">
+                      ✓ Pre-filled from your profile
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <Label htmlFor={`founder-${index}-github`}>Github</Label>
+                  <Input
+                    id={`founder-${index}-github`}
+                    value={founder.githubUrl}
+                    onChange={(e) =>
+                      updateFounder(index, 'githubUrl', e.target.value)
+                    }
+                    placeholder="https://github.com/sarahchen"
+                    autoComplete="url"
+                    className={
+                      fieldErrors[index]?.githubUrl
+                        ? 'border-red-500 focus:border-red-500'
+                        : ''
+                    }
+                  />
+                  {fieldErrors[index]?.githubUrl && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {fieldErrors[index].githubUrl}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <Label htmlFor={`founder-${index}-twitter`}>X</Label>
+                  <Input
+                    id={`founder-${index}-twitter`}
+                    value={founder.twitterUrl}
+                    onChange={(e) =>
+                      updateFounder(index, 'twitterUrl', e.target.value)
+                    }
+                    placeholder="https://x.com/sarahchen"
+                    autoComplete="url"
+                    className={
+                      fieldErrors[index]?.twitterUrl
+                        ? 'border-red-500 focus:border-red-500'
+                        : ''
+                    }
+                  />
+                  {fieldErrors[index]?.twitterUrl && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {fieldErrors[index].twitterUrl}
+                    </p>
+                  )}
+                  {/* Show hint if Twitter URL was pre-populated */}
+                  {prefilledFields?.twitter && index === 0 && (
+                    <p className="text-xs text-green-600 mt-1">
+                      ✓ Pre-filled from your profile
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-email`}>
-                  Email <span className="required-asterisk">*</span>
+                <Label htmlFor={`founder-${index}-website`}>
+                  Personal website
                 </Label>
                 <Input
-                  id={`founder-${index}-email`}
-                  type="email"
-                  value={founder.email}
+                  id={`founder-${index}-website`}
+                  value={founder.personalWebsiteUrl}
                   onChange={(e) =>
-                    updateFounder(index, 'email', e.target.value)
+                    updateFounder(index, 'personalWebsiteUrl', e.target.value)
                   }
-                  placeholder="sarah@happy.ai"
-                  autoComplete="email"
-                  className={
-                    fieldErrors[index]?.email
-                      ? 'border-red-500 focus:border-red-500'
-                      : ''
-                  }
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Your company email is preferred.
-                </p>
-                {fieldErrors[index]?.email && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {fieldErrors[index].email}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-phone`}>Phone</Label>
-                <PhoneNumberInput
-                  value={founder.phone}
-                  onChange={(value) =>
-                    updateFounder(index, 'phone', value || '')
-                  }
-                  placeholder="Phone number"
-                  className={
-                    fieldErrors[index]?.phone
-                      ? 'border-red-500 focus:border-red-500'
-                      : ''
-                  }
-                />
-                {fieldErrors[index]?.phone && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {fieldErrors[index].phone}
-                  </p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Optional - helps investors reach you faster
-                </p>
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-linkedin`}>LinkedIn</Label>
-                <Input
-                  id={`founder-${index}-linkedin`}
-                  value={founder.linkedin}
-                  onChange={(e) =>
-                    updateFounder(index, 'linkedin', e.target.value)
-                  }
-                  placeholder="https://linkedin.com/in/sarahchen"
+                  placeholder="https://sarahchen.com"
                   autoComplete="url"
                   className={
-                    fieldErrors[index]?.linkedin
+                    fieldErrors[index]?.personalWebsiteUrl
                       ? 'border-red-500 focus:border-red-500'
                       : ''
                   }
                 />
-                {fieldErrors[index]?.linkedin && (
+                {fieldErrors[index]?.personalWebsiteUrl && (
                   <p className="text-sm text-red-600 mt-1">
-                    {fieldErrors[index].linkedin}
-                  </p>
-                )}
-                {/* Show hint if LinkedIn URL was pre-populated */}
-                {prefilledFields?.linkedin && index === 0 && (
-                  <p className="text-xs text-green-600 mt-1">
-                    ✓ Pre-filled from your profile
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-github`}>Github</Label>
-                <Input
-                  id={`founder-${index}-github`}
-                  value={founder.githubUrl}
-                  onChange={(e) =>
-                    updateFounder(index, 'githubUrl', e.target.value)
-                  }
-                  placeholder="https://github.com/sarahchen"
-                  autoComplete="url"
-                  className={
-                    fieldErrors[index]?.githubUrl
-                      ? 'border-red-500 focus:border-red-500'
-                      : ''
-                  }
-                />
-                {fieldErrors[index]?.githubUrl && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {fieldErrors[index].githubUrl}
+                    {fieldErrors[index].personalWebsiteUrl}
                   </p>
                 )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-twitter`}>X</Label>
-                <Input
-                  id={`founder-${index}-twitter`}
-                  value={founder.twitterUrl}
-                  onChange={(e) =>
-                    updateFounder(index, 'twitterUrl', e.target.value)
-                  }
-                  placeholder="https://x.com/sarahchen"
-                  autoComplete="url"
-                  className={
-                    fieldErrors[index]?.twitterUrl
-                      ? 'border-red-500 focus:border-red-500'
-                      : ''
+                <Label htmlFor={`founder-${index}-bio`}>Bio</Label>
+                <Textarea
+                  id={`founder-${index}-bio`}
+                  value={founder.bio}
+                  onChange={(e) => updateFounder(index, 'bio', e.target.value)}
+                  placeholder="Former Google engineer with 8 years in ML. Built 3 products from 0 to 1M users, currently building a new startup: Happy AI."
+                  rows={3}
+                  enableAI={true}
+                  aiFieldType="bio"
+                  aiContext={{
+                    founderName:
+                      `${founder.firstName} ${founder.lastName}`.trim(),
+                    role: founder.role,
+                  }}
+                  onAIEnhance={(enhancedText) =>
+                    updateFounder(index, 'bio', enhancedText)
                   }
                 />
-                {fieldErrors[index]?.twitterUrl && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {fieldErrors[index].twitterUrl}
-                  </p>
-                )}
-                {/* Show hint if Twitter URL was pre-populated */}
-                {prefilledFields?.twitter && index === 0 && (
-                  <p className="text-xs text-green-600 mt-1">
-                    ✓ Pre-filled from your profile
-                  </p>
-                )}
               </div>
-            </div>
-            <div className="space-y-3">
-              <Label htmlFor={`founder-${index}-website`}>
-                Personal website
-              </Label>
-              <Input
-                id={`founder-${index}-website`}
-                value={founder.personalWebsiteUrl}
-                onChange={(e) =>
-                  updateFounder(index, 'personalWebsiteUrl', e.target.value)
-                }
-                placeholder="https://sarahchen.com"
-                autoComplete="url"
-                className={
-                  fieldErrors[index]?.personalWebsiteUrl
-                    ? 'border-red-500 focus:border-red-500'
-                    : ''
-                }
-              />
-              {fieldErrors[index]?.personalWebsiteUrl && (
-                <p className="text-sm text-red-600 mt-1">
-                  {fieldErrors[index].personalWebsiteUrl}
-                </p>
-              )}
-            </div>
-            <div className="space-y-3">
-              <Label htmlFor={`founder-${index}-bio`}>Bio</Label>
-              <Textarea
-                id={`founder-${index}-bio`}
-                value={founder.bio}
-                onChange={(e) => updateFounder(index, 'bio', e.target.value)}
-                placeholder="Former Google engineer with 8 years in ML. Built 3 products from 0 to 1M users, currently building a new startup: Happy AI."
-                rows={3}
-                enableAI={true}
-                aiFieldType="bio"
-                aiContext={{
-                  founderName:
-                    `${founder.firstName} ${founder.lastName}`.trim(),
-                  role: founder.role,
-                }}
-                onAIEnhance={(enhancedText) =>
-                  updateFounder(index, 'bio', enhancedText)
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))}
 
-      <Button
-        variant="outline"
-        onClick={addFounder}
-        className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Add co-founder
-      </Button>
-    </div>
-  )
-}
+        <Button
+          variant="outline"
+          onClick={addFounder}
+          className="w-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add co-founder
+        </Button>
+      </div>
+    )
+  }
 
 // Step 2: Company Information
 export const CompanyStep: React.FC<CompanyStepProps> = ({
@@ -1027,9 +1026,8 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
         toast({
           title: 'Autofill complete',
           variant: 'success',
-          description: `Successfully autofilled ${numUpdatedFields} field${
-            numUpdatedFields > 1 ? 's' : ''
-          }.`,
+          description: `Successfully autofilled ${numUpdatedFields} field${numUpdatedFields > 1 ? 's' : ''
+            }.`,
         })
       } else {
         toast({
@@ -1044,9 +1042,8 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
       toast({
         variant: 'destructive',
         title: 'Autofill failed',
-        description: `Could not fetch company data. ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        description: `Could not fetch company data. ${error instanceof Error ? error.message : String(error)
+          }`,
         duration: 9000,
       })
     } finally {
@@ -1187,11 +1184,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             <div className="relative">
               <select
                 id="industry"
-                className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
-                  fieldErrors.industry
-                    ? 'border-red-500 focus:border-red-500'
-                    : 'border-input'
-                }`}
+                className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.industry
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-input'
+                  }`}
                 value={startup.industry || ''}
                 onChange={(e) =>
                   setStartup({
@@ -1496,7 +1492,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
         <div className="space-y-6">
           <div className="space-y-3">
-            <Label htmlFor="google-drive-url">Cloud storage URL</Label>
+            <Label htmlFor="google-drive-url">Cloud storage / Docsend</Label>
             <Input
               id="google-drive-url"
               value={startup.googleDriveUrl}
@@ -1512,7 +1508,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               }
             />
             <p className="text-xs text-muted-foreground">
-              Optional - link to a folder with your pitch deck, financials, etc.
+              Link to a folder with your pitch deck and any other materials you judge relevant for investors.
             </p>
             {fieldErrors.googleDriveUrl && (
               <p className="text-sm text-red-600 mt-1">
@@ -1521,7 +1517,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             )}
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 grid-cols-2">
             <div className="space-y-3">
               <Label>Logo</Label>
               <FileUploadComponent
@@ -1532,8 +1528,14 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               />
             </div>
 
-            <div className="space-y-3">
+            <div className="relative space-y-3 rounded-sm border bg-cyan-50 dark:bg-cyan-900/30 border-cyan-200 dark:border-cyan-800 p-4">
               <Label>Pitch deck</Label>
+              <Badge
+                variant="secondary"
+                className="absolute top-2 right-2 text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
+              >
+                BETA
+              </Badge>
               <FileUploadComponent
                 {...pitchDeckUploadProps}
                 accept=".pdf,.ppt,.pptx"
@@ -1651,11 +1653,10 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
             <div className="relative">
               <select
                 id="revenue-model"
-                className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${
-                  fieldErrors.revenueModel
-                    ? 'border-red-500 focus:border-red-500'
-                    : 'border-input'
-                }`}
+                className={`w-full pl-3 p-2 border rounded-sm appearance-none bg-transparent text-sm ${fieldErrors.revenueModel
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-input'
+                  }`}
                 value={startup.revenueModel || ''}
                 onChange={(e) =>
                   setStartup({
@@ -2243,57 +2244,57 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               startup.marketSummary ||
               startup.keyCustomers ||
               startup.competitors) && (
-              <div className="pt-2 border-t space-y-3">
-                {startup.tractionSummary && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Traction
-                    </span>
-                    <p className="text-sm break-words whitespace-pre-wrap">
-                      {startup.tractionSummary}
-                    </p>
-                  </div>
-                )}
-                {startup.marketSummary && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Market
-                    </span>
-                    <p className="text-sm break-words whitespace-pre-wrap">
-                      {startup.marketSummary}
-                    </p>
-                  </div>
-                )}
-                {startup.keyCustomers && (
-                  <div>
-                    <span className="font-medium text-muted-foreground text-sm">
-                      Key customers
-                    </span>
-                    <p className="text-sm break-words whitespace-pre-wrap">
-                      {startup.keyCustomers}
-                    </p>
-                  </div>
-                )}
-                {startup.competitorsList &&
-                  startup.competitorsList.length > 0 && (
+                <div className="pt-2 border-t space-y-3">
+                  {startup.tractionSummary && (
                     <div>
                       <span className="font-medium text-muted-foreground text-sm">
-                        Competitors
+                        Traction
                       </span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {startup.competitorsList.map((competitor, index) => (
-                          <Badge
-                            key={competitor}
-                            className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
-                          >
-                            {competitor}
-                          </Badge>
-                        ))}
-                      </div>
+                      <p className="text-sm break-words whitespace-pre-wrap">
+                        {startup.tractionSummary}
+                      </p>
                     </div>
                   )}
-              </div>
-            )}
+                  {startup.marketSummary && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Market
+                      </span>
+                      <p className="text-sm break-words whitespace-pre-wrap">
+                        {startup.marketSummary}
+                      </p>
+                    </div>
+                  )}
+                  {startup.keyCustomers && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-sm">
+                        Key customers
+                      </span>
+                      <p className="text-sm break-words whitespace-pre-wrap">
+                        {startup.keyCustomers}
+                      </p>
+                    </div>
+                  )}
+                  {startup.competitorsList &&
+                    startup.competitorsList.length > 0 && (
+                      <div>
+                        <span className="font-medium text-muted-foreground text-sm">
+                          Competitors
+                        </span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {startup.competitorsList.map((competitor, index) => (
+                            <Badge
+                              key={competitor}
+                              className={`rounded-sm px-2 py-0.5 border ${getBadgeColor(index)}`}
+                            >
+                              {competitor}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              )}
           </CardContent>
         </Card>
       </div>

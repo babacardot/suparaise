@@ -129,7 +129,7 @@ export const FILTER_OPTIONS = {
   requiredDocuments: DATABASE_ENUMS.required_document_type.map((doc) => {
     const labelMap: Record<string, string> = {
       pitch_deck: 'Deck',
-      video: 'Video',
+      video: 'Demo',
       financials: 'Financials',
       business_plan: 'Business Plan',
     }

@@ -67,6 +67,7 @@ const FIELD_LABELS: Record<
   operatingCountries: { label: 'Operating countries', page: 'company' },
   tractionSummary: { label: 'Traction', page: 'company' },
   marketSummary: { label: 'Market', page: 'company' },
+  googleDriveUrl: { label: 'Cloud storage', page: 'company' },
 
   // Financial fields
   fundingAmountSought: { label: 'Funding amount', page: 'company' },
