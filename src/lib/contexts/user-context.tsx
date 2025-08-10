@@ -37,7 +37,7 @@ interface SubscriptionData {
   subscription_status: string | null
   subscription_current_period_end: string | null
   stripe_customer_id: string | null
-  permission_level: 'FREE' | 'PRO' | 'MAX'
+  permission_level: 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'
   monthly_submissions_used: number
   monthly_submissions_limit: number
 }
