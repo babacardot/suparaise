@@ -24,6 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { getSoundEnabled, setSoundEnabled } from '@/lib/utils/sound'
 
 export function NavUser({
   user: propUser,
@@ -40,16 +41,21 @@ export function NavUser({
   const pathname = usePathname()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
   const [mounted, setMounted] = React.useState(false)
+  const [soundEnabled, setSoundEnabledState] = React.useState<boolean>(true)
 
   React.useEffect(() => {
     setMounted(true)
+    // Initialize sound state from storage
+    try {
+      setSoundEnabledState(getSoundEnabled())
+    } catch { }
   }, [])
 
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      audio.play().catch(() => {})
+      audio.play().catch(() => { })
     }
   }
 
@@ -72,6 +78,12 @@ export function NavUser({
     }
 
     animateThemeSweep(next, () => setTheme(next))
+  }
+
+  const toggleSound = () => {
+    const next = !soundEnabled
+    setSoundEnabledState(next)
+    setSoundEnabled(next)
   }
 
   // Determine user data, prioritizing live context user
@@ -257,6 +269,25 @@ export function NavUser({
                   isHovered={hoveredItem === 'homepage'}
                 />
                 Homepage
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  playClickSound()
+                  toggleSound()
+                }}
+                onMouseEnter={() => setHoveredItem('sound')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
+              >
+                <LottieIcon
+                  animationData={soundEnabled ? animations.view : animations.visibility}
+                  size={16}
+                  loop={false}
+                  autoplay={false}
+                  initialFrame={0}
+                  isHovered={hoveredItem === 'sound'}
+                />
+                {soundEnabled ? 'Sound on' : 'Sound off'}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {

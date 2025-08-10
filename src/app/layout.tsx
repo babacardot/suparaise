@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { UserProvider } from '@/lib/contexts/user-context'
 import { Toaster } from '@/components/ui/toaster'
 import './globals.css'
+import SoundGateInit from '@/components/ui/sound-gate-init'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -331,6 +332,7 @@ export default function RootLayout({
             disableTransitionOnChange={false}
             storageKey="suparaise-theme"
           >
+            <SoundGateInit />
             {children}
             <Toaster />
           </ThemeProvider>
