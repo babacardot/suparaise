@@ -4,8 +4,12 @@ import React from 'react'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { ValidationGate, VALIDATION_PRESETS } from '@/components/ui/validation-gate'
+import { useUser } from '@/lib/contexts/user-context'
+import { useToast } from '@/lib/hooks/use-toast'
 
 type Target = {
   id: string
@@ -51,6 +55,106 @@ export default React.memo(function FundsActions({
   isOpen,
   onOpenChange,
 }: FundsActionsProps) {
+  const { user, currentStartupId, subscription } = useUser()
+  const { toast } = useToast()
+  const [submitting, setSubmitting] = React.useState(false)
+
+  const isQuotaReached = React.useMemo(() => {
+    return (
+      !!subscription &&
+      subscription.monthly_submissions_used >=
+      subscription.monthly_submissions_limit
+    )
+  }, [subscription])
+
+  const handleApply = React.useCallback(async () => {
+    if (!target) return
+    if (!user?.id) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to submit applications',
+        variant: 'destructive',
+      })
+      return
+    }
+    if (!currentStartupId) {
+      toast({
+        title: 'Error',
+        description: 'No startup selected',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    if (isQuotaReached) {
+      toast({
+        title: 'Limit reached',
+        description: `You have used ${subscription?.monthly_submissions_used} of your ${subscription?.monthly_submissions_limit} monthly submissions.`,
+        variant: 'default',
+      })
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      toast({
+        title: 'Adding to queue',
+        variant: 'info',
+        duration: 4000,
+        description: `Adding application to ${target.name} to processing queue...`,
+      })
+
+      const response = await fetch('/api/agent/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startupId: currentStartupId,
+          targetId: target.id,
+          userId: user.id,
+        }),
+      })
+
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit application')
+      }
+
+      if (result.success) {
+        if (result.status === 'queued') {
+          toast({
+            title: 'Added to queue',
+            variant: 'success',
+            description: `Application to ${result.targetName} added to queue at position ${result.queuePosition}`,
+          })
+        } else {
+          toast({
+            title: 'Processing started',
+            variant: 'info',
+            duration: 4000,
+            description: `Application to ${result.targetName} is now being processed`,
+          })
+        }
+      } else {
+        toast({
+          title: 'Application failed',
+          description: result.error || 'Failed to submit application',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      console.error('Application submission error:', error)
+      toast({
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to submit application',
+        variant: 'destructive',
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }, [target, user?.id, currentStartupId, toast, subscription, isQuotaReached])
   // const getSubmissionTypeColor = (type: string) => {
   //   switch (type) {
   //     case 'form':
@@ -64,18 +168,7 @@ export default React.memo(function FundsActions({
   //   }
   // }
 
-  const getComplexityColor = (complexity: string) => {
-    switch (complexity) {
-      case 'simple':
-        return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
-      case 'standard':
-        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800'
-      case 'comprehensive':
-        return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800'
-      default:
-        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 border border-gray-200 dark:border-gray-800'
-    }
-  }
+  // Complexity display removed
 
   const getStageColor = (stage: string) => {
     switch (stage) {
@@ -237,9 +330,7 @@ export default React.memo(function FundsActions({
     })
   }
 
-  const capitalizeFirst = (str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-  }
+  // capitalizeFirst removed (unused)
 
   const formatTimeline = () => {
     if (!submissions || submissions.length === 0) return []
@@ -330,33 +421,11 @@ export default React.memo(function FundsActions({
           <CardContent className="p-4 space-y-3 overflow-auto flex-1 text-xs">
             <div className="space-y-3 pl-4 pr-2 sm:px-0">
               {/* Basic Info */}
-              {/* Type (commented out for now)
-              <div
-                className="flex items-center justify-between"
-                style={{ marginTop: '-15px' }}
-              >
-                <span className="text-muted-foreground">Type</span>
-                <Badge
-                  className={`rounded-sm text-[10px] font-normal ${getSubmissionTypeColor(target.submission_type)}`}
-                >
-                  {capitalizeFirst(target.submission_type)}
-                </Badge>
-              </div>
-              */}
 
-              {target.form_complexity && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Complexity</span>
-                  <Badge
-                    className={`rounded-sm text-[10px] font-normal ${getComplexityColor(target.form_complexity)}`}
-                  >
-                    {capitalizeFirst(target.form_complexity)}
-                  </Badge>
-                </div>
-              )}
+              {/* Complexity removed */}
 
               {target.notes && (
-                <div className="space-y-2">
+                <div className="space-y-2 -mt-4">
                   <p className="text-xs text-black dark:text-white pt-0">
                     {target.notes}
                   </p>
@@ -451,6 +520,23 @@ export default React.memo(function FundsActions({
 
               <Separator />
 
+              {target.submission_type === 'form' && submissions.length === 0 && (
+                <div className="flex justify-end">
+                  <ValidationGate
+                    requirements={VALIDATION_PRESETS.BASIC_APPLICATION}
+                    onValidationPass={handleApply}
+                  >
+                    <Button
+                      size="sm"
+                      disabled={submitting}
+                      className="rounded-sm px-3 h-8 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                    >
+                      Apply
+                    </Button>
+                  </ValidationGate>
+                </div>
+              )}
+
               {/* Timeline */}
               {timeline.length > 0 && (
                 <div className="space-y-3">
@@ -464,17 +550,16 @@ export default React.memo(function FundsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
-                            index === timeline.length - 1
-                              ? event.status === 'completed'
-                                ? 'bg-green-500'
-                                : event.status === 'failed'
-                                  ? 'bg-red-500'
-                                  : event.status === 'pending'
-                                    ? 'bg-orange-500'
-                                    : 'bg-gray-300'
-                              : 'bg-transparent'
-                          } ${index === timeline.length - 1 ? '' : ''}`}
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${index === timeline.length - 1
+                            ? event.status === 'completed'
+                              ? 'bg-green-500'
+                              : event.status === 'failed'
+                                ? 'bg-red-500'
+                                : event.status === 'pending'
+                                  ? 'bg-orange-500'
+                                  : 'bg-gray-300'
+                            : 'bg-transparent'
+                            } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}
@@ -489,6 +574,7 @@ export default React.memo(function FundsActions({
               )}
             </div>
           </CardContent>
+
         </Card>
       </SheetContent>
     </Sheet>

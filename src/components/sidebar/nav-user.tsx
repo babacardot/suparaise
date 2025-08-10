@@ -5,6 +5,7 @@ import { LottieIcon } from '@/components/design/lottie-icon'
 import { animations } from '@/lib/utils/lottie-animations'
 import { useUser } from '@/lib/contexts/user-context'
 import { useTheme } from 'next-themes'
+import { usePathname } from 'next/navigation'
 import { animateThemeSweep } from '@/lib/utils/theme-transition'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -36,6 +37,7 @@ export function NavUser({
   const { isMobile } = useSidebar()
   const { user, signOut } = useUser()
   const { theme, setTheme } = useTheme()
+  const pathname = usePathname()
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
   const [mounted, setMounted] = React.useState(false)
 
@@ -47,7 +49,7 @@ export function NavUser({
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      audio.play().catch(() => {})
+      audio.play().catch(() => { })
     }
   }
 
@@ -57,6 +59,16 @@ export function NavUser({
 
   const toggleTheme = () => {
     const next = (theme === 'dark' ? 'light' : 'dark') as 'light' | 'dark'
+    const skipSweep =
+      typeof pathname === 'string' &&
+      pathname.includes('/dashboard/') &&
+      (pathname.includes('/funds') || pathname.includes('/accelerators')) || pathname.includes('/angels') || pathname.includes('/applications')
+
+    if (skipSweep) {
+      setTheme(next)
+      return
+    }
+
     animateThemeSweep(next, () => setTheme(next))
   }
 

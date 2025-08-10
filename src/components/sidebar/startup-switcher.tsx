@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useSidebar } from '@/components/ui/sidebar'
 
 // Simple interface for startup switcher display
 interface StartupDisplay {
@@ -52,6 +53,16 @@ export function StartupSwitcher({
   isCollapsed = false,
 }: StartupSwitcherProps) {
   const [open, setOpen] = React.useState(false)
+  const { isMobile } = useSidebar()
+
+  // Play a light click sound when opening the switcher (UX parity with user menu)
+  const playClickSound = () => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.4
+      audio.play().catch(() => { })
+    }
+  }
 
   // Find current startup from the startups array to ensure consistency
   const currentStartup = currentStartupId
@@ -63,9 +74,9 @@ export function StartupSwitcher({
     currentStartupDisplay ||
     (currentStartup
       ? {
-          ...currentStartup,
-          name: `${firstName}+${currentStartup.name}`,
-        }
+        ...currentStartup,
+        name: `${firstName}+${currentStartup.name}`,
+      }
       : null)
 
   // Keep the original company name for avatar generation to maintain consistent colors
@@ -87,10 +98,7 @@ export function StartupSwitcher({
   }
 
   const handlePopoverChange = (newOpen: boolean) => {
-    // Prevent opening when sidebar is collapsed
-    if (isCollapsed && newOpen) {
-      return
-    }
+    if (newOpen) playClickSound()
     setOpen(newOpen)
   }
 
@@ -136,8 +144,12 @@ export function StartupSwitcher({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] p-0 bg-sidebar border-sidebar-border"
-        align="start"
+        className="w-[--radix-popover-trigger-width] min-w-56 rounded-sm p-0 bg-sidebar border-sidebar-border"
+        side={isMobile ? 'bottom' : isCollapsed ? 'right' : 'bottom'}
+        align={isCollapsed ? 'end' : 'start'}
+        sideOffset={isCollapsed ? 18 : 0}
+        alignOffset={isCollapsed ? 15 : 0}
+        style={isCollapsed ? { marginTop: 15 } : undefined}
       >
         <Command
           className="bg-sidebar [&_[cmdk-item]]:aria-selected:bg-sidebar-accent [&_[cmdk-item]]:data-[selected=true]:bg-sidebar-accent"

@@ -79,8 +79,13 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const router = useRouter()
   const { state, toggleSidebar } = useSidebar()
-  const { subscription, user: contextUser } = useUser()
+  const { subscription, user: contextUser, startupsInitialized } = useUser()
   const [isToggleHovered, setIsToggleHovered] = React.useState(false)
+  const [cachedSwitcherDisplay, setCachedSwitcherDisplay] = React.useState<{
+    id: string
+    name: string
+    logo_url?: string | null
+  } | null>(null)
 
   // Check if user profile is complete
   const {
@@ -136,11 +141,48 @@ export function AppSidebar({
   // Create display startup object for the switcher with formatted name
   const displayStartupForSwitcher = currentStartup
     ? {
-        id: currentStartup.id,
-        name: displayText, // Use formatted display text
-        logo_url: currentStartup.logo_url,
-      }
+      id: currentStartup.id,
+      name: displayText, // Use formatted display text
+      logo_url: currentStartup.logo_url,
+    }
     : null
+
+  // Load cached switcher display on mount for seamless first paint
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('suparaise:last_switcher_display')
+      if (raw) {
+        const parsed = JSON.parse(raw) as {
+          id: string
+          name: string
+          logo_url?: string | null
+        }
+        setCachedSwitcherDisplay(parsed)
+      }
+    } catch {
+      // no-op
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Persist latest display when we know the current startup and user's first name
+  React.useEffect(() => {
+    if (!currentStartup) return
+    try {
+      const toCache = {
+        id: currentStartup.id,
+        name: `${firstName}+${currentStartup.name}`,
+        logo_url: currentStartup.logo_url || null,
+      }
+      localStorage.setItem(
+        'suparaise:last_switcher_display',
+        JSON.stringify(toCache),
+      )
+      setCachedSwitcherDisplay(toCache)
+    } catch {
+      // no-op
+    }
+  }, [currentStartup, firstName])
 
   // Get display name using same logic as nav-user
   const userFirstName =
@@ -215,14 +257,14 @@ export function AppSidebar({
       // Show Complete your onboarding if profile is incomplete
       ...(!isProfileComplete && currentStartupId
         ? [
-            {
-              title: 'Complete your onboarding',
-              url: '#',
-              animation: animations.checkmark,
-              onClick: handleCompleteProfileClick,
-              isSpecial: true,
-            },
-          ]
+          {
+            title: 'Complete your onboarding',
+            url: '#',
+            animation: animations.checkmark,
+            onClick: handleCompleteProfileClick,
+            isSpecial: true,
+          },
+        ]
         : []),
       {
         title: 'Recommend',
@@ -249,15 +291,27 @@ export function AppSidebar({
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem className="-my-2 mt-0">
-              <StartupSwitcher
-                startups={startups}
-                currentStartupId={currentStartupId}
-                currentStartupDisplay={displayStartupForSwitcher}
-                firstName={firstName}
-                onStartupSelect={onStartupSelect || (() => {})}
-                onCreateNew={onCreateNewStartup || (() => {})}
-                isCollapsed={state === 'collapsed'}
-              />
+              {(!startupsInitialized || !currentStartup) && cachedSwitcherDisplay ? (
+                <StartupSwitcher
+                  startups={startups}
+                  currentStartupId={currentStartupId || cachedSwitcherDisplay.id}
+                  currentStartupDisplay={cachedSwitcherDisplay}
+                  firstName={firstName}
+                  onStartupSelect={onStartupSelect || (() => { })}
+                  onCreateNew={onCreateNewStartup || (() => { })}
+                  isCollapsed={state === 'collapsed'}
+                />
+              ) : (
+                <StartupSwitcher
+                  startups={startups}
+                  currentStartupId={currentStartupId}
+                  currentStartupDisplay={displayStartupForSwitcher}
+                  firstName={firstName}
+                  onStartupSelect={onStartupSelect || (() => { })}
+                  onCreateNew={onCreateNewStartup || (() => { })}
+                  isCollapsed={state === 'collapsed'}
+                />
+              )}
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
@@ -288,11 +342,10 @@ export function AppSidebar({
         onMouseLeave={() => setIsToggleHovered(false)}
         variant="ghost"
         size="sm"
-        className={`hidden md:block fixed top-1/2 -translate-y-1/2 z-30 h-3.5 w-3 rounded-xs bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${
-          state === 'collapsed'
+        className={`hidden md:block fixed top-1/2 -translate-y-1/2 z-30 h-3.5 w-3 rounded-xs bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
             ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
             : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
-        }`}
+          }`}
       >
         <LottieIcon
           animationData={animations.nineGrid}
