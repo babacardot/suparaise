@@ -121,7 +121,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
   const isQuotaReached =
     subscription &&
     subscription.monthly_submissions_used >=
-      subscription.monthly_submissions_limit
+    subscription.monthly_submissions_limit
 
   const showUpgradeBanner = React.useMemo(() => {
     const level = subscription?.permission_level
@@ -201,31 +201,60 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     if (['Global', 'Emerging Markets'].includes(region)) {
       return 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
     }
-    if (region === 'North America') {
+    // North America - includes country-level variants
+    if (['North America', 'United States', 'Canada'].includes(region)) {
       return 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
     }
+    // Europe - includes country-level variants
     if (
       [
         'Europe',
         'Western Europe',
         'Eastern Europe',
         'Continental Europe',
+        'UK',
+        'France',
+        'Netherlands',
+        'Sweden',
       ].includes(region)
     ) {
       return 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
     }
+    // Asia - includes country-level variants
     if (
-      ['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)
+      [
+        'Asia',
+        'East Asia',
+        'South Asia',
+        'South East Asia',
+        'India',
+        'China',
+        'Japan',
+        'Korea',
+      ].includes(region)
     ) {
       return 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800'
     }
     if (['LATAM', 'South America'].includes(region)) {
       return 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
     }
-    if (['Africa', 'Middle East', 'EMEA'].includes(region)) {
+    // Africa/Middle East/EMEA - includes country-level variants
+    if (
+      [
+        'Africa',
+        'Middle East',
+        'EMEA',
+        'Nigeria',
+        'Kenya',
+        'Egypt',
+        'Senegal',
+        'South Africa',
+      ].includes(region)
+    ) {
       return 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
     }
-    if (region === 'Oceania') {
+    // Oceania - includes country-level variants
+    if (['Oceania', 'Australia'].includes(region)) {
       return 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
     }
     return 'bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
@@ -235,31 +264,60 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     if (['Global', 'Emerging Markets'].includes(region)) {
       return [0.08, 0.55, 0.82] as [number, number, number]
     }
-    if (region === 'North America') {
+    // North America - includes country-level variants
+    if (['North America', 'United States', 'Canada'].includes(region)) {
       return [0.133, 0.773, 0.369] as [number, number, number]
     }
+    // Europe - includes country-level variants
     if (
       [
         'Europe',
         'Western Europe',
         'Eastern Europe',
         'Continental Europe',
+        'UK',
+        'France',
+        'Netherlands',
+        'Sweden',
       ].includes(region)
     ) {
       return [0.583, 0.278, 0.824] as [number, number, number]
     }
+    // Asia - includes country-level variants
     if (
-      ['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)
+      [
+        'Asia',
+        'East Asia',
+        'South Asia',
+        'South East Asia',
+        'India',
+        'China',
+        'Japan',
+        'Korea',
+      ].includes(region)
     ) {
       return [0.918, 0.435, 0.071] as [number, number, number]
     }
     if (['LATAM', 'South America'].includes(region)) {
       return [0.925, 0.314, 0.604] as [number, number, number]
     }
-    if (['Africa', 'Middle East', 'EMEA'].includes(region)) {
+    // Africa/Middle East/EMEA - includes country-level variants
+    if (
+      [
+        'Africa',
+        'Middle East',
+        'EMEA',
+        'Nigeria',
+        'Kenya',
+        'Egypt',
+        'Senegal',
+        'South Africa',
+      ].includes(region)
+    ) {
       return [0.059, 0.735, 0.616] as [number, number, number]
     }
-    if (region === 'Oceania') {
+    // Oceania - includes country-level variants
+    if (['Oceania', 'Australia'].includes(region)) {
       return [0.031, 0.678, 0.827] as [number, number, number]
     }
     return [0.467, 0.467, 0.467] as [number, number, number]
@@ -287,17 +345,39 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
   }, [])
 
   const getIndustryColor = React.useCallback((industry: string) => {
+    // Physical/hardware/deep science industries
     if (
       [
         'Deep tech',
-        'Healthtech',
-        'Climate tech',
-        'PropTech',
+        'Healthcare',
+        'Medtech',
+        'Climate',
+        'Environment',
+        'Proptech',
         'Logistics',
+        'Agriculture',
+        'Automotive',
+        'Robotics',
+        'Biotechnology',
+        'Construction',
+        'Energy',
+        'Hardware',
+        'Manufacturing',
+        'Mining',
+        'Advanced Materials',
+        'Biofuels',
+        'Nanotechnology',
+        'Real estate',
+        'IoT',
+        'Telecommunications',
+        'Transportation',
+        'Aerospace',
+        'Pharmaceuticals',
       ].includes(industry)
     ) {
       return 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
     }
+    // Default blue for software/digital/service industries
     return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
   }, [])
 
@@ -908,25 +988,24 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                     setHoveredButton(`apply-${accelerator.id}`)
                                   }
                                   onMouseLeave={() => setHoveredButton(null)}
-                                  className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    isQuotaReached
+                                  className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${isQuotaReached
                                       ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
                                       : queueStatus &&
-                                          !queueStatus.canSubmitMore
+                                        !queueStatus.canSubmitMore
                                         ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
                                         : queueStatus &&
-                                            queueStatus.availableSlots === 0
+                                          queueStatus.availableSlots === 0
                                           ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
                                           : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                                  }`}
+                                    }`}
                                   title={
                                     isQuotaReached
                                       ? `You have reached your monthly submission limit of ${subscription?.monthly_submissions_limit}.`
                                       : queueStatus &&
-                                          !queueStatus.canSubmitMore
+                                        !queueStatus.canSubmitMore
                                         ? 'Queue is full. Cannot add more applications.'
                                         : queueStatus &&
-                                            queueStatus.availableSlots === 0
+                                          queueStatus.availableSlots === 0
                                           ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
                                           : queueStatus
                                             ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
@@ -940,10 +1019,10 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                         : isQuotaReached
                                           ? animations.cross
                                           : queueStatus &&
-                                              !queueStatus.canSubmitMore
+                                            !queueStatus.canSubmitMore
                                             ? animations.cross
                                             : queueStatus &&
-                                                queueStatus.availableSlots === 0
+                                              queueStatus.availableSlots === 0
                                               ? animations.hourglass
                                               : animations.takeoff
                                     }
@@ -951,7 +1030,7 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                     className=""
                                     isHovered={
                                       hoveredButton ===
-                                        `apply-${accelerator.id}` &&
+                                      `apply-${accelerator.id}` &&
                                       !submittingAccelerators.has(
                                         accelerator.id,
                                       ) &&
@@ -961,10 +1040,10 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                                     customColor={
                                       isQuotaReached
                                         ? ([0.918, 0.435, 0.071] as [
-                                            number,
-                                            number,
-                                            number,
-                                          ])
+                                          number,
+                                          number,
+                                          number,
+                                        ])
                                         : undefined
                                     }
                                   />

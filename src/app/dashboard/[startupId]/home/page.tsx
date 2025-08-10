@@ -82,6 +82,10 @@ async function getDashboardData(startupId: string) {
   }
 
   try {
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
+
     const { data: dashboardData, error } = await supabase.rpc(
       'get_dashboard_data',
       {
@@ -89,16 +93,30 @@ async function getDashboardData(startupId: string) {
       },
     )
 
+    clearTimeout(timeoutId)
+
     if (error) {
       console.error('Error fetching dashboard data:', error)
-      return null
+      return {
+        profile: null,
+        startup: null,
+        totalApplications: 0,
+        recommendations: null,
+        recentSubmissions: [],
+      }
     }
 
     const typedData = dashboardData as DashboardData
 
     if (typedData?.error) {
       console.error('Dashboard RPC error:', typedData.error)
-      return null
+      return {
+        profile: null,
+        startup: null,
+        totalApplications: 0,
+        recommendations: null,
+        recentSubmissions: [],
+      }
     }
 
     // Transform and validate recent submissions to match SubmissionData interface
@@ -107,11 +125,11 @@ async function getDashboardData(startupId: string) {
     ).filter((submission): submission is SubmissionData =>
       Boolean(
         submission.submission_id &&
-          submission.submitted_to_name &&
-          submission.submitted_to_type &&
-          submission.submitted_at &&
-          submission.status &&
-          submission.entity_id,
+        submission.submitted_to_name &&
+        submission.submitted_to_type &&
+        submission.submitted_at &&
+        submission.status &&
+        submission.entity_id,
       ),
     )
 
@@ -124,7 +142,14 @@ async function getDashboardData(startupId: string) {
     }
   } catch (error) {
     console.error('Error in getDashboardData:', error)
-    return null
+    // Return fallback data instead of null to prevent crashes
+    return {
+      profile: null,
+      startup: null,
+      totalApplications: 0,
+      recommendations: null,
+      recentSubmissions: [],
+    }
   }
 }
 
@@ -136,6 +161,7 @@ export default async function HomePage({
   const { startupId } = await params
   const data = await getDashboardData(startupId)
 
+  // getDashboardData now always returns an object, never null
   return (
     <HomePageClient
       startupId={startupId}

@@ -211,11 +211,12 @@ export default function ProfileSettings() {
   })
 
   // Fetch all founders when component mounts or startup changes
-  // Optimized to only depend on essential values that actually change
+  // Debounced to prevent spam during rapid navigation
   useEffect(() => {
-    const fetchFoundersData = async () => {
-      if (!user?.id || !currentStartupId) return
+    if (!user?.id || !currentStartupId) return
 
+    // Debounce to prevent rapid successive calls during navigation
+    const timeoutId = setTimeout(async () => {
       setDataLoading(true)
       try {
         const { data, error } = await supabase.rpc('get_startup_founders', {
@@ -258,12 +259,24 @@ export default function ProfileSettings() {
       } finally {
         setDataLoading(false)
       }
-    }
+    }, 300) // 300ms debounce
 
-    fetchFoundersData()
-    // Only depend on values that actually matter for the fetch
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, currentStartupId]) // Intentionally omitting supabase, toast, and user.user_metadata properties - they are stable references or fallback values only
+    return () => clearTimeout(timeoutId)
+  }, [
+    user?.id,
+    currentStartupId,
+    supabase,
+    toast,
+    user?.email,
+    user?.user_metadata?.firstName,
+    user?.user_metadata?.lastName,
+    user?.user_metadata?.phone,
+    user?.user_metadata?.bio,
+    user?.user_metadata?.linkedin,
+    user?.user_metadata?.githubUrl,
+    user?.user_metadata?.personalWebsiteUrl,
+    user?.user_metadata?.twitterUrl,
+  ])
 
   if (!user) {
     return <div></div>
@@ -391,6 +404,8 @@ export default function ProfileSettings() {
               field === 'email'
             ) {
               await supabase.auth.updateUser({ data: updates })
+              // Small delay to ensure auth service has processed the update
+              await new Promise(resolve => setTimeout(resolve, 100))
               await refreshUser()
             }
           }

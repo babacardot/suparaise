@@ -18,10 +18,12 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const [foundersCount, setFoundersCount] = useState(1)
 
   // Fetch founders count to determine icon and title
+  // Debounced to prevent spam during rapid navigation
   useEffect(() => {
-    const fetchFoundersCount = async () => {
-      if (!user || !startupId) return
+    if (!user || !startupId) return
 
+    // Debounce to prevent rapid successive calls during navigation
+    const timeoutId = setTimeout(async () => {
       try {
         const { data, error } = await supabase.rpc('get_startup_founders', {
           p_user_id: user.id,
@@ -33,10 +35,12 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         }
       } catch (error) {
         console.error('Error fetching founders count:', error)
+        // Fallback to default of 1 founder on error
+        setFoundersCount(1)
       }
-    }
+    }, 300) // 300ms debounce
 
-    fetchFoundersCount()
+    return () => clearTimeout(timeoutId)
   }, [user, startupId, supabase])
 
   const sidebarItems = [

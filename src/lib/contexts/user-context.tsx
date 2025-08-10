@@ -525,13 +525,15 @@ export function UserProvider({ children }: UserProviderProps) {
         return
       }
 
-      // For sign in events, don't show loading if we already have data
+      // For sign in events, always update user data to get fresh metadata
+      // but don't reset loading states if it's the same user
       if (
         isSignedIn &&
         userRef.current &&
         newUser &&
         userRef.current.id === newUser.id
       ) {
+        setUser(newUser) // Update with fresh user data including metadata
         return // Don't reset loading states for same user
       }
 

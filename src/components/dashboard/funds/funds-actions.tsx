@@ -99,19 +99,39 @@ export default React.memo(function FundsActions({
   }
 
   const getIndustryColor = (industry: string) => {
-    // Industries with a strong physical or hardware component
+    // Physical/hardware/deep science industries
     if (
       [
         'Deep tech',
-        'Healthtech',
-        'Climate tech',
-        'PropTech',
+        'Healthcare',
+        'Medtech',
+        'Climate',
+        'Environment',
+        'Proptech',
         'Logistics',
+        'Agriculture',
+        'Automotive',
+        'Robotics',
+        'Biotechnology',
+        'Construction',
+        'Energy',
+        'Hardware',
+        'Manufacturing',
+        'Mining',
+        'Advanced Materials',
+        'Biofuels',
+        'Nanotechnology',
+        'Real estate',
+        'IoT',
+        'Telecommunications',
+        'Transportation',
+        'Aerospace',
+        'Pharmaceuticals',
       ].includes(industry)
     ) {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
     }
-    // Default blue for software/digital industries
+    // Default blue for software/digital/service industries
     return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
   }
 
@@ -120,24 +140,37 @@ export default React.memo(function FundsActions({
     if (['Global', 'Emerging Markets'].includes(region)) {
       return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
     }
-    // North America - Green
-    if (region === 'North America') {
+    // North America - Green (includes country-level variants)
+    if (['North America', 'United States', 'Canada'].includes(region)) {
       return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
     }
-    // Europe - Purple
+    // Europe - Purple (includes common country-level variants)
     if (
       [
         'Europe',
         'Western Europe',
         'Eastern Europe',
         'Continental Europe',
+        'UK',
+        'France',
+        'Netherlands',
+        'Sweden',
       ].includes(region)
     ) {
       return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
     }
-    // Asia - Orange
+    // Asia - Orange (includes country-level variants)
     if (
-      ['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)
+      [
+        'Asia',
+        'East Asia',
+        'South Asia',
+        'South East Asia',
+        'India',
+        'China',
+        'Japan',
+        'Korea',
+      ].includes(region)
     ) {
       return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 border border-orange-200 dark:border-orange-800'
     }
@@ -145,12 +178,23 @@ export default React.memo(function FundsActions({
     if (['LATAM', 'South America'].includes(region)) {
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
     }
-    // Africa, Middle East, and EMEA - Teal
-    if (['Africa', 'Middle East', 'EMEA'].includes(region)) {
+    // Africa, Middle East, and EMEA - Teal (includes country-level variants)
+    if (
+      [
+        'Africa',
+        'Middle East',
+        'EMEA',
+        'Nigeria',
+        'Kenya',
+        'Egypt',
+        'Senegal',
+        'South Africa',
+      ].includes(region)
+    ) {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
     }
-    // Oceania - Cyan
-    if (region === 'Oceania') {
+    // Oceania - Cyan (includes country-level variants)
+    if (['Oceania', 'Australia'].includes(region)) {
       return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
     }
     // Default
@@ -420,17 +464,16 @@ export default React.memo(function FundsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
-                            index === timeline.length - 1
-                              ? event.status === 'completed'
-                                ? 'bg-green-500'
-                                : event.status === 'failed'
-                                  ? 'bg-red-500'
-                                  : event.status === 'pending'
-                                    ? 'bg-orange-500'
-                                    : 'bg-gray-300'
-                              : 'bg-transparent'
-                          } ${index === timeline.length - 1 ? '' : ''}`}
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${index === timeline.length - 1
+                            ? event.status === 'completed'
+                              ? 'bg-green-500'
+                              : event.status === 'failed'
+                                ? 'bg-red-500'
+                                : event.status === 'pending'
+                                  ? 'bg-orange-500'
+                                  : 'bg-gray-300'
+                            : 'bg-transparent'
+                            } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}

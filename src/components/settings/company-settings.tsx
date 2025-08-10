@@ -378,9 +378,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -642,11 +641,12 @@ export default function CompanySettings() {
   const businessPlanInputRef = useRef<HTMLInputElement>(null)
 
   // Fetch startup data when component mounts or startup changes
-  // Optimized to only depend on essential values that actually change
+  // Debounced to prevent spam during rapid navigation
   useEffect(() => {
-    const fetchStartupData = async () => {
-      if (!user?.id || !currentStartupId) return
+    if (!user?.id || !currentStartupId) return
 
+    // Debounce to prevent rapid successive calls during navigation
+    const timeoutId = setTimeout(async () => {
       setDataLoading(true)
       try {
         const { data, error } = await supabase.rpc('get_user_startup_data', {
@@ -687,8 +687,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                    .split(',')
-                    .filter(Boolean)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -715,12 +715,10 @@ export default function CompanySettings() {
       } finally {
         setDataLoading(false)
       }
-    }
+    }, 300) // 300ms debounce
 
-    fetchStartupData()
-    // Only depend on values that actually matter for the fetch
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, currentStartupId]) // Intentionally omitting supabase and toast - they are stable references
+    return () => clearTimeout(timeoutId)
+  }, [user?.id, currentStartupId, supabase, toast])
 
   const handleWebsiteAutoFill = async () => {
     if (!formData.website?.trim()) {
@@ -2988,7 +2986,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

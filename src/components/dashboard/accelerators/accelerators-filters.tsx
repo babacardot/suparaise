@@ -211,10 +211,30 @@ export default function AcceleratorsFilters({
     if (
       [
         'Deep tech',
-        'Healthtech',
-        'Climate tech',
-        'PropTech',
+        'Healthcare',
+        'Medtech',
+        'Climate',
+        'Environment',
+        'Proptech',
         'Logistics',
+        'Agriculture',
+        'Automotive',
+        'Robotics',
+        'Biotechnology',
+        'Construction',
+        'Energy',
+        'Hardware',
+        'Manufacturing',
+        'Mining',
+        'Advanced Materials',
+        'Biofuels',
+        'Nanotechnology',
+        'Real estate',
+        'IoT',
+        'Telecommunications',
+        'Transportation',
+        'Aerospace',
+        'Pharmaceuticals',
       ].includes(industry)
     ) {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
@@ -226,31 +246,60 @@ export default function AcceleratorsFilters({
     if (['Global', 'Emerging Markets'].includes(region)) {
       return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40 border border-sky-200 dark:border-sky-800'
     }
-    if (region === 'North America') {
+    // North America - includes country-level variants
+    if (['North America', 'United States', 'Canada'].includes(region)) {
       return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 border border-green-200 dark:border-green-800'
     }
+    // Europe - includes country-level variants
     if (
       [
         'Europe',
         'Western Europe',
         'Eastern Europe',
         'Continental Europe',
+        'UK',
+        'France',
+        'Netherlands',
+        'Sweden',
       ].includes(region)
     ) {
       return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40'
     }
+    // Asia - includes country-level variants
     if (
-      ['Asia', 'East Asia', 'South Asia', 'South East Asia'].includes(region)
+      [
+        'Asia',
+        'East Asia',
+        'South Asia',
+        'South East Asia',
+        'India',
+        'China',
+        'Japan',
+        'Korea',
+      ].includes(region)
     ) {
       return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40'
     }
     if (['LATAM', 'South America'].includes(region)) {
       return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40'
     }
-    if (['Africa', 'Middle East', 'EMEA'].includes(region)) {
+    // Africa/Middle East/EMEA - includes country-level variants
+    if (
+      [
+        'Africa',
+        'Middle East',
+        'EMEA',
+        'Nigeria',
+        'Kenya',
+        'Egypt',
+        'Senegal',
+        'South Africa',
+      ].includes(region)
+    ) {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
     }
-    if (region === 'Oceania') {
+    // Oceania - includes country-level variants
+    if (['Oceania', 'Australia'].includes(region)) {
       return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/40'
     }
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
@@ -953,7 +1002,7 @@ export default function AcceleratorsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
+                      localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = FILTER_OPTIONS.requiredDocuments.find(
                           (d) => d.value === doc,
@@ -985,7 +1034,7 @@ export default function AcceleratorsFilters({
                       )}
                   </div>
                   {localFilters.requiredDocuments &&
-                  localFilters.requiredDocuments.length > 0 ? (
+                    localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
@@ -1062,11 +1111,10 @@ export default function AcceleratorsFilters({
                         !columnVisibility[key as keyof ColumnVisibility],
                       )
                     }}
-                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${
-                      columnVisibility[key as keyof ColumnVisibility]
+                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${columnVisibility[key as keyof ColumnVisibility]
                         ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                         : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                    }`}
+                      }`}
                   >
                     <span className="text-sm font-medium capitalize">
                       {key === 'programType'
@@ -1099,13 +1147,12 @@ export default function AcceleratorsFilters({
                 setLocalFilters(newFilters)
                 onFiltersChange(newFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
-                localFilters.submissionFilter === 'hide_submitted'
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
                   ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
                   : localFilters.submissionFilter === 'only_submitted'
                     ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                     : 'bg-card border-border'
-              }`}
+                }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all (click to hide submitted)'

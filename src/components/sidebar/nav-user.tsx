@@ -47,7 +47,7 @@ export function NavUser({
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      audio.play().catch(() => {})
+      audio.play().catch(() => { })
     }
   }
 
@@ -68,14 +68,14 @@ export function NavUser({
     propUser.email ||
     ''
 
-  // Name: prefer modified name set via founder settings, else construct from first/last, else prop/fallback
-  const metadataName = (user?.user_metadata?.name as string | undefined) || ''
+  // Name: prefer firstName/lastName from founder settings, else metadataName from OAuth, else prop/fallback
   const firstName = (user?.user_metadata?.firstName as string | undefined) || ''
   const lastName = (user?.user_metadata?.lastName as string | undefined) || ''
-  const fallbackConstructedName = `${firstName} ${lastName}`.trim()
+  const constructedName = `${firstName} ${lastName}`.trim()
+  const metadataName = (user?.user_metadata?.name as string | undefined) || ''
   const displayName =
+    constructedName ||
     (metadataName && metadataName.trim()) ||
-    fallbackConstructedName ||
     propUser.name ||
     'User'
 

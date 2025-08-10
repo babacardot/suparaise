@@ -115,9 +115,10 @@ export function AppSidebar({
 
   // Create display text: FirstName+StartupName
   // Use live user data from context for the most up-to-date firstName
+  // Prioritize firstName from founder settings over OAuth provider's name
   const firstName =
-    contextUser?.user_metadata?.name?.split(' ')[0] ||
     contextUser?.user_metadata?.firstName ||
+    contextUser?.user_metadata?.name?.split(' ')[0] ||
     user?.name?.split(' ')[0] ||
     'User'
 
@@ -141,8 +142,19 @@ export function AppSidebar({
     }
     : null
 
+  // Get display name using same logic as nav-user
+  const userFirstName = (contextUser?.user_metadata?.firstName as string | undefined) || ''
+  const userLastName = (contextUser?.user_metadata?.lastName as string | undefined) || ''
+  const userConstructedName = `${userFirstName} ${userLastName}`.trim()
+  const userMetadataName = (contextUser?.user_metadata?.name as string | undefined) || ''
+  const userDisplayName =
+    userConstructedName ||
+    (userMetadataName && userMetadataName.trim()) ||
+    user?.name ||
+    'User'
+
   const userData = {
-    name: contextUser?.user_metadata?.name || user?.name || 'User',
+    name: userDisplayName,
     email: contextUser?.email || user?.email || 'user@example.com',
     avatar: contextUser?.user_metadata?.avatar_url || user?.avatar || '',
   }
@@ -274,8 +286,8 @@ export function AppSidebar({
         variant="ghost"
         size="sm"
         className={`hidden md:block fixed top-1/2 -translate-y-1/2 z-30 h-3.5 w-3 rounded-xs bg-sidebar-border hover:bg-sidebar-accent border border-sidebar-border p-0 shadow-sm transition-all duration-200 hover:shadow-md ${state === 'collapsed'
-            ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
-            : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
+          ? 'left-[calc(3rem+4px)]' // SIDEBAR_WIDTH_ICON (3rem) + 2px to center on edge
+          : 'left-[calc(16rem-14px)]' // SIDEBAR_WIDTH (16rem) - 8px to position on edge
           }`}
       >
         <LottieIcon
