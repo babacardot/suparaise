@@ -48,14 +48,14 @@ export function NavUser({
     // Initialize sound state from storage
     try {
       setSoundEnabledState(getSoundEnabled())
-    } catch { }
+    } catch {}
   }, [])
 
   const playClickSound = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      audio.play().catch(() => { })
+      audio.play().catch(() => {})
     }
   }
 
@@ -89,7 +89,7 @@ export function NavUser({
         const audio = new Audio('/sounds/light.mp3')
         audio.volume = 0.4
         void audio.play()
-      } catch { }
+      } catch {}
     }
   }
 
@@ -328,7 +328,9 @@ export function NavUser({
                 className="text-sidebar-foreground hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"
               >
                 <LottieIcon
-                  animationData={soundEnabled ? animations.play : animations.pause}
+                  animationData={
+                    soundEnabled ? animations.play : animations.pause
+                  }
                   size={16}
                   loop={false}
                   autoplay={false}

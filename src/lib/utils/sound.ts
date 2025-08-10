@@ -58,8 +58,7 @@ export const initSoundGate = (): void => {
   // Initialize flag from storage once
   w.__suparaiseSoundEnabled = getSoundEnabled()
 
-  const originalPlay: HTMLMediaElement['play'] =
-    HTMLMediaElement.prototype.play
+  const originalPlay: HTMLMediaElement['play'] = HTMLMediaElement.prototype.play
   w.__suparaiseOriginalMediaPlay = originalPlay
 
   // Patch play to no-op when muted
@@ -95,5 +94,3 @@ export const initSoundGate = (): void => {
     }
   })
 }
-
-

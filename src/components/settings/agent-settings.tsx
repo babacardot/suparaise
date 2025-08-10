@@ -15,13 +15,12 @@ const playSound = (soundFile: string) => {
     try {
       const audio = new Audio(soundFile)
       audio.volume = 0.4
-      audio.play().catch(() => { })
-    } catch { }
+      audio.play().catch(() => {})
+    } catch {}
   }, 0)
 }
 
 const playNopeSound = () => playSound('/sounds/nope.mp3')
-
 
 // Helper function to format field names for display
 const formatFieldName = (fieldName: string): string => {
@@ -377,7 +376,7 @@ export default function AgentSettings() {
                 'group relative p-4 border rounded-sm transition-all duration-200',
                 'hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20',
                 formData.enableStealth &&
-                'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10',
+                  'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10',
               )}
             >
               <div className="flex items-center justify-between">
@@ -428,8 +427,8 @@ export default function AgentSettings() {
                   ? 'bg-muted/30 border-muted'
                   : 'hover:border-orange-200 dark:hover:border-orange-800 hover:bg-orange-50/50 dark:hover:bg-orange-950/20',
                 formData.enableDebugMode &&
-                isAdvancedFeatureAvailable() &&
-                'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/10',
+                  isAdvancedFeatureAvailable() &&
+                  'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/10',
               )}
             >
               <div className="flex items-center justify-between">
@@ -440,7 +439,7 @@ export default function AgentSettings() {
                       className={cn(
                         'font-medium text-sm',
                         !isAdvancedFeatureAvailable() &&
-                        'text-muted-foreground',
+                          'text-muted-foreground',
                       )}
                     >
                       Developer mode
@@ -493,7 +492,7 @@ export default function AgentSettings() {
                       ? 'bg-orange-600'
                       : 'bg-gray-200 dark:bg-gray-700',
                     !isAdvancedFeatureAvailable() &&
-                    'opacity-50 cursor-not-allowed',
+                      'opacity-50 cursor-not-allowed',
                   )}
                 >
                   <span
@@ -635,7 +634,7 @@ export default function AgentSettings() {
                   className={cn(
                     'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                     !isProPlusFeatureAvailable() &&
-                    'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                      'bg-muted/50 text-muted-foreground cursor-not-allowed',
                   )}
                   value={formData.preferredTone}
                   onChange={async (e) => {
@@ -678,7 +677,7 @@ export default function AgentSettings() {
                   className={cn(
                     'rounded-sm pr-8 min-h-[100px] select-auto',
                     !isProPlusFeatureAvailable() &&
-                    'dark:bg-muted cursor-not-allowed text-muted-foreground',
+                      'dark:bg-muted cursor-not-allowed text-muted-foreground',
                   )}
                   placeholder={
                     isProPlusFeatureAvailable()

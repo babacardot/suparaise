@@ -65,15 +65,15 @@ export default React.memo(function FundsActions({
     try {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      void audio.play().catch(() => { })
-    } catch { }
+      void audio.play().catch(() => {})
+    } catch {}
   }, [])
 
   const isQuotaReached = React.useMemo(() => {
     return (
       !!subscription &&
       subscription.monthly_submissions_used >=
-      subscription.monthly_submissions_limit
+        subscription.monthly_submissions_limit
     )
   }, [subscription])
 
@@ -167,7 +167,15 @@ export default React.memo(function FundsActions({
     } finally {
       setSubmitting(false)
     }
-  }, [target, user?.id, currentStartupId, toast, subscription, isQuotaReached, playClickSound])
+  }, [
+    target,
+    user?.id,
+    currentStartupId,
+    toast,
+    subscription,
+    isQuotaReached,
+    playClickSound,
+  ])
   // const getSubmissionTypeColor = (type: string) => {
   //   switch (type) {
   //     case 'form':
@@ -574,7 +582,8 @@ export default React.memo(function FundsActions({
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
-                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${index === timeline.length - 1
+                          className={`w-2 h-2 ml-1 mb-0.5 rounded-full flex-shrink-0 ${
+                            index === timeline.length - 1
                               ? event.status === 'completed'
                                 ? 'bg-green-500'
                                 : event.status === 'failed'
@@ -583,7 +592,7 @@ export default React.memo(function FundsActions({
                                     ? 'bg-orange-500'
                                     : 'bg-gray-300'
                               : 'bg-transparent'
-                            } ${index === timeline.length - 1 ? '' : ''}`}
+                          } ${index === timeline.length - 1 ? '' : ''}`}
                         />
                         <span className="text-[10px] font-medium">
                           {event.label}

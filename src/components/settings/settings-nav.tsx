@@ -213,7 +213,7 @@ export default function SettingsNav({
 
   // Get permission level, defaulting to FREE if not available - memoize for performance
   const permissionLevel = useMemo<'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'>(
-    () => (subscription?.permission_level ?? 'FREE'),
+    () => subscription?.permission_level ?? 'FREE',
     [subscription?.permission_level],
   )
 

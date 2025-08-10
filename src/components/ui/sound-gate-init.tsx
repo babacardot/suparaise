@@ -5,17 +5,15 @@ import { initSoundGate } from '@/lib/utils/sound'
 
 // Mount-only client component to initialize the global sound gate.
 const SoundGateInit = () => {
-    useEffect(() => {
-        try {
-            initSoundGate()
-        } catch {
-            // ignore
-        }
-    }, [])
+  useEffect(() => {
+    try {
+      initSoundGate()
+    } catch {
+      // ignore
+    }
+  }, [])
 
-    return null
+  return null
 }
 
 export default SoundGateInit
-
-

@@ -21,7 +21,7 @@ export const Footer = () => {
     // Initialize sound state from storage
     try {
       setSoundEnabledState(getSoundEnabled())
-    } catch { }
+    } catch {}
   }, [])
 
   const playClickSound = () => {
@@ -50,7 +50,7 @@ export const Footer = () => {
         const audio = new Audio('/sounds/light.mp3')
         audio.volume = 0.4
         void audio.play()
-      } catch { }
+      } catch {}
     }
   }
 
@@ -155,7 +155,9 @@ export const Footer = () => {
               aria-label={soundEnabled ? 'Turn sound off' : 'Turn sound on'}
             >
               <LottieIcon
-                animationData={soundEnabled ? animations.play : animations.pause}
+                animationData={
+                  soundEnabled ? animations.play : animations.pause
+                }
                 size={16}
                 loop={false}
                 autoplay={false}
