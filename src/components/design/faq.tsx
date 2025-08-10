@@ -10,7 +10,7 @@ const faqData = [
   {
     question: 'How does Suparaise automate my fundraising process ?',
     answer:
-      'Suparaise uses AI agents and more specifically browser automation to automatically fill out investment application forms on your behalf. Simply provide your startup information once, and our agents will handle the repetitive tasks of applying to multiple funds.',
+      'Suparaise uses AI agents  to automatically fill out investment application forms on your behalf. Simply provide your startup information once, and our agents will handle the repetitive tasks of applying to multiple funds.',
   },
   {
     question: 'Is my startup data secure ?',
@@ -20,12 +20,12 @@ const faqData = [
   {
     question: 'How quickly can I get started ?',
     answer:
-      'You can get started immediately! Simply sign up, share your startup information with us, and our agents can begin submitting applications within minutes. No complex setup required.',
+      'You can get started immediately! Simply sign up, complete your profile, and select the investors you want to apply to. Our agents will begin automating the process within seconds. No complex setup required.',
   },
   {
     question: 'Can I track which applications have been submitted ?',
     answer:
-      "Yes! Our dashboard shows you exactly which investors you've applied to, submission dates, and the data provided by the agents. Full transparency on all activity.",
+      "Yes! Our dashboard shows you exactly which investors you've applied to, submission dates, and the data provided by the agents. Full transparency on the outreach.",
   },
   {
     question: 'Do you guarantee meetings or funding success ?',
@@ -33,14 +33,14 @@ const faqData = [
       "We automate the application process, but we cannot guarantee meetings or funding outcomes. Success depends on your startup's fit with investor criteria, market conditions, and timing. We help you reach more investors efficiently.",
   },
   {
-    question: 'How accurate are the agents when filling out applications ?',
+    question: 'How accurate are the agents ?',
     answer:
-      'Our AI agents are highly accurate when filling out applications based on the information you provide. The quality of outputs directly correlates with the quality of your input data. We include customization features that let you refine your startup information and tailor responses for different investor types and funds, ensuring maximum accuracy for your most important applications.',
+      'Our AI agents are highly accurate when filling out applications based on the information you provide. The quality of outputs directly correlates with the quality of your company information. We include customization features that let you refine your startup information and tailor responses for different investor types and funds, ensuring maximum accuracy for your most important applications.',
   },
   {
     question: 'Can I get a refund if I am not satisfied ?',
     answer:
-      'Yes, we offer refunds within 7 days of purchase if our service fails to meet the technical specifications promised or if there are significant technical issues preventing you from using our platform. If you experience other issues with our service, please contact us with details and we will work together to find a solution that works for you.',
+      'Yes, we offer refunds within 7 days of purchase if our service fails to meet the technical specifications promised or if there are significant technical issues preventing you from using our platform. If you experience other issues, please reach out with details and we will work together to find a solution that works for you.',
   },
 ]
 

@@ -10,12 +10,12 @@ const faqAboutData = [
   {
     question: 'Can I customize the information sent to each investor ?',
     answer:
-      'Absolutely! While our agents handle the automation, you can customize your pitch and responses for different types of investors. Our platform learns your preferences and adapts submissions accordingly, with built-in features that can help you tailor the outreach to each specific investor.',
+      'Absolutely! While our agents handle the automation, you can customize your pitch and responses for different types of investors. Our platform learns your preferences and adapts submissions accordingly, with built-in features that can help you tailor the outreach to each specific investor or accelerator.',
   },
   {
-    question: 'How many VC applications can I submit?',
+    question: 'How many applications can I submit?',
     answer:
-      'The number of applications depends on your plan. Our Starter plan includes 3 applications per month, while our Pro plan offers 50 applications. The Max plan offers 125 applications. If you need more runs, you can always contact us; we can always increase your limit.',
+      'The number of applications depends on your plan. Our free plan includes 2 applications per month, while our Pro plan offers 20 applications. The Max plan offers 50 applications. If you need more runs, you can continue using our services in self-service with usage-based billing. If you anticipate more than 100 runs per month, we\'ll recommend to reach out to us to upgrade to a higher plan.',
   },
   {
     question: 'What happens if an investor responds to my application ?',
@@ -25,7 +25,7 @@ const faqAboutData = [
   {
     question: 'What types of investors are in your database?',
     answer:
-      'Our database includes VCs, angels, accelerators, and incubators from all around the world. We cover early-stage to growth-stage investors across all industries and geographies. We are also constantly updating our database to ensure we have the most up-to-date information.',
+      'Our database includes VCs, angels, and accelerators from all around the world. We cover early-stage to growth-stage investors across all industries and geographies. We are also constantly updating our database to ensure we have the most up-to-date information.',
   },
   {
     question: 'Do you work with startups at any stage?',
@@ -35,12 +35,12 @@ const faqAboutData = [
   {
     question: 'Will Suparaise steal my startup idea ?',
     answer:
-      'Absolutely not. We built Suparaise because fundraising is hard and time-consuming. We have our hands already full building this product and no interest in copying your product or using your materials for competitive purposes. We lack both the bandwidth and desire to replicate what you do. Your ideas and data are yours and we will never use them for any other purpose.',
+      'Absolutely not. We built Suparaise because fundraising is hard and time-consuming. We have our hands already full building this product and the other product that led us to this point. We have no interest in copying your product or using your materials for competitive purposes, we lack both the bandwidth and desire to replicate what you do. Your ideas and data are yours and we will never use them for any other purpose.',
   },
   {
     question: 'Can I cancel my subscription anytime?',
     answer:
-      "Yes, you have complete control over your subscription. Cancel anytime directly from your dashboard with no penalties or fees. You'll retain full access until your current billing period ends. You can also permanently delete your account and all associated data from our system at any time.",
+      "Yes, you have complete control over your subscription. Cancel anytime directly from your dashboard with no penalties or fees. You'll retain full access and remaining quota until your current billing period ends. You can also permanently delete your account and all associated data from our system at any time.",
   },
 ]
 
