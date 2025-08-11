@@ -109,8 +109,8 @@ const FundsTable = React.memo(function FundsTable({
     try {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      void audio.play().catch(() => {})
-    } catch {}
+      void audio.play().catch(() => { })
+    } catch { }
   }, [])
   // Scroll management: reset to top on page change
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null)
@@ -131,7 +131,7 @@ const FundsTable = React.memo(function FundsTable({
   const isQuotaReached =
     subscription &&
     subscription.monthly_submissions_used >=
-      subscription.monthly_submissions_limit
+    subscription.monthly_submissions_limit
 
   const [queueStatus, setQueueStatus] = React.useState<{
     maxParallel: number
@@ -1045,7 +1045,7 @@ const FundsTable = React.memo(function FundsTable({
 
                         <TableCell className="text-right p-2">
                           <div
-                            className="flex justify-end mr-[5px]"
+                            className="flex justify-end mr-[6.5px]"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {target.submission_type === 'form' &&
@@ -1070,22 +1070,21 @@ const FundsTable = React.memo(function FundsTable({
                                       setHoveredButton(`apply-${target.id}`)
                                     }
                                     onMouseLeave={() => setHoveredButton(null)}
-                                    className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                      isQuotaReached
-                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
-                                        : queueStatus &&
-                                            !queueStatus.canSubmitMore
-                                          ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
-                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
-                                    }`}
+                                    className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${isQuotaReached
+                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
+                                      : queueStatus &&
+                                        !queueStatus.canSubmitMore
+                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
+                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
+                                      }`}
                                     title={
                                       isQuotaReached
                                         ? `You have reached your monthly submission limit of ${subscription?.monthly_submissions_limit}.`
                                         : queueStatus &&
-                                            !queueStatus.canSubmitMore
+                                          !queueStatus.canSubmitMore
                                           ? 'Queue is full. Cannot add more applications.'
                                           : queueStatus &&
-                                              queueStatus.availableSlots === 0
+                                            queueStatus.availableSlots === 0
                                             ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
                                             : queueStatus
                                               ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
@@ -1099,7 +1098,7 @@ const FundsTable = React.memo(function FundsTable({
                                           : isQuotaReached
                                             ? animations.cross
                                             : queueStatus &&
-                                                !queueStatus.canSubmitMore
+                                              !queueStatus.canSubmitMore
                                               ? animations.cross // Show cross if no more submissions are possible at all
                                               : animations.takeoff // Default "apply" icon if submissions are possible (direct or queued)
                                       }
@@ -1107,7 +1106,7 @@ const FundsTable = React.memo(function FundsTable({
                                       className=""
                                       isHovered={
                                         hoveredButton ===
-                                          `apply-${target.id}` &&
+                                        `apply-${target.id}` &&
                                         !submittingTargets.has(target.id) &&
                                         !isQuotaReached &&
                                         queueStatus?.canSubmitMore !== false
@@ -1115,10 +1114,10 @@ const FundsTable = React.memo(function FundsTable({
                                       customColor={
                                         isQuotaReached
                                           ? ([0.918, 0.435, 0.071] as [
-                                              number,
-                                              number,
-                                              number,
-                                            ])
+                                            number,
+                                            number,
+                                            number,
+                                          ])
                                           : undefined
                                       }
                                     />
@@ -1129,7 +1128,7 @@ const FundsTable = React.memo(function FundsTable({
                               target.submission_status && (
                                 <div className="flex items-center justify-center w-8 h-8">
                                   {target.submission_status ===
-                                  'in_progress' ? (
+                                    'in_progress' ? (
                                     <LottieIcon
                                       animationData={animations.hourglass}
                                       size={14}
@@ -1238,7 +1237,7 @@ const FundsTable = React.memo(function FundsTable({
                                     />
                                   ) : target.submission_status === 'pending' ||
                                     target.submission_status ===
-                                      'in_progress' ? (
+                                    'in_progress' ? (
                                     <LottieIcon
                                       animationData={animations.hourglass}
                                       size={14}
@@ -1298,7 +1297,7 @@ const FundsTable = React.memo(function FundsTable({
                                     />
                                   ) : target.submission_status === 'pending' ||
                                     target.submission_status ===
-                                      'in_progress' ? (
+                                    'in_progress' ? (
                                     <LottieIcon
                                       animationData={animations.hourglass}
                                       size={14}
