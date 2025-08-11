@@ -68,49 +68,49 @@ export const TestimonialsColumn = (props: {
 
 const testimonials = [
   {
-    text: "Suparaise saved me 40+ hours of manual form filling. I applied to 50 VCs in a single afternoon instead of weeks. The AI perfectly captured our startup's essence and did the job as if it was me.",
+    text: "Suparaise saved me 20 hours of manual form filling. I applied to 50 VCs in a single afternoon instead of weeks. The AI perfectly captured our startup's essence and did the job.",
     image: '/testimonials/1.webp',
     name: 'Rohan Gupta',
     role: 'CEO, Pineapple Payments',
   },
   {
-    text: 'Finally, a tool that helps with fundraising. Suparaise automated all our pre-seed applications while I focused on building our product.',
+    text: 'Finally, a tool that helps with fundraising. Suparaise automated all our pre-seed applications while I focused on building my product.',
     image: '/testimonials/2.webp',
     name: 'Emily Carter',
     role: 'Co-founder, HealthGenix',
   },
   {
-    text: "The agents filled out complex VC forms with remarkable accuracy. It even customized our pitch for each firm's investment thesis. Game-changer!",
+    text: "The agents filled out complex VC forms with remarkable accuracy. It even customized our pitch for each firm's investment thesis. Amazing!",
     image: '/testimonials/3.webp',
     name: 'David Carson',
     role: 'Founder, Voicyx',
   },
   {
-    text: 'We received 4 meeting requests in two weeks after starting to use Suparaise. The automated outreach feature connected us with VCs we honestly would have never discovered manually.',
+    text: 'We received 4 meeting requests in two weeks after starting to use Suparaise. The automated outreach feature connected us with VCs we honestly would have never discovered ourselves.',
     image: '/testimonials/4.webp',
     name: 'Michael Chen',
     role: 'CEO, Nexus Labs',
   },
   {
-    text: 'I was skeptical about the accuracy of the agents at the beginning, but then I started receiving submission summaries by email and meeting requests from VCs. It actually did the job.',
+    text: 'I was a bit skeptical at the beginning, but then I started receiving the submission summaries by email and few days later I booked my first meeting with an investor.',
     image: '/testimonials/5.webp',
     name: 'Vikram Singh',
     role: 'Founder, Greensprout',
   },
   {
-    text: 'Every founder knows that fundraising is a numbers game and that it is incredibly boring. Suparaise streamlined the whole outreach process. Highly recommend!',
+    text: 'Every founder knows that fundraising is incredibly boring. Suparaise streamlined the whole outreach process for Synth. Highly recommend!',
     image: '/testimonials/6.webp',
     name: 'Kenji Tanaka',
-    role: 'CEO, Synth.ai',
+    role: 'CEO, Synth',
   },
   {
-    text: 'The agents are customizable, understood our business perfectly, and tailored each application accordingly based on the information I provided. Game changer!',
+    text: 'The agents are customizable, understand your business perfectly, and tailor each application accordingly based on the information you provide.',
     image: '/testimonials/7.webp',
     name: 'Arjun Sharma',
     role: 'Founder, SaaSify',
   },
   {
-    text: 'Suparaise has a very complete list of all the VCs, accelerators, and angels in the world, so it made it easy for us to apply to all of them in record time. No manual work was required.',
+    text: 'Suparaise has a very complete list of active VCs, accelerators, and angels in the world, so it made it easy for us to apply to the one that matched our business needs. No manual work was required at all.',
     image: '/testimonials/8.webp',
     name: 'Khaled Al-Fahim',
     role: 'CEO, Namaa',
