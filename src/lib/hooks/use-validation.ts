@@ -125,7 +125,13 @@ export function useValidation({
   >([])
 
   const checkValidation = useCallback(async () => {
-    if (!user || !currentStartupId) return
+    if (!user || !currentStartupId) {
+      console.warn('Validation check skipped: missing user or startup ID', {
+        hasUser: !!user,
+        hasStartupId: !!currentStartupId,
+      })
+      return
+    }
 
     setLoading(true)
     try {
@@ -138,7 +144,20 @@ export function useValidation({
         },
       )
 
-      if (founderError) throw founderError
+      if (founderError) {
+        console.error('Founder data error:', founderError)
+        throw founderError
+      }
+
+      // Check if the RPC function returned an error in the data itself
+      if (
+        founderData &&
+        typeof founderData === 'object' &&
+        'error' in founderData
+      ) {
+        console.error('Founder RPC returned error:', founderData.error)
+        throw new Error(`Founder data error: ${founderData.error}`)
+      }
 
       // Fetch startup data
       const { data: startupData, error: startupError } = await supabase.rpc(
@@ -149,7 +168,20 @@ export function useValidation({
         },
       )
 
-      if (startupError) throw startupError
+      if (startupError) {
+        console.error('Startup data error:', startupError)
+        throw startupError
+      }
+
+      // Check if the RPC function returned an error in the data itself
+      if (
+        startupData &&
+        typeof startupData === 'object' &&
+        'error' in startupData
+      ) {
+        console.error('Startup RPC returned error:', startupData.error)
+        throw new Error(`Startup data error: ${startupData.error}`)
+      }
 
       const missing: Array<{
         category: 'founder' | 'company' | 'financial' | 'documents'
@@ -158,10 +190,23 @@ export function useValidation({
         settingsPage: 'profile' | 'company'
       }> = []
 
-      const founders = founderData as FounderData[]
-      const startup = startupData as StartupData
+      // Safely handle the response data
+      const founders = Array.isArray(founderData)
+        ? (founderData as FounderData[])
+        : []
+      const startup =
+        startupData && typeof startupData === 'object'
+          ? (startupData as StartupData)
+          : {}
 
       const founder = founders?.[0] // Get the first founder (main user)
+
+      console.log('Validation check data:', {
+        foundersCount: founders.length,
+        hasFounder: !!founder,
+        hasStartup: !!Object.keys(startup).length,
+        startupId: currentStartupId,
+      })
 
       // Check founder requirements
       if (requirements.founder) {
@@ -250,13 +295,25 @@ export function useValidation({
       setMissingFields(missing)
       setIsValid(missing.length === 0)
     } catch (error) {
+      console.error('Error checking validation:', error)
+
+      // Check if it's a meaningful error with a message
       if (isErrorWithMessage(error) && error.message) {
-        console.error('Error checking validation:', error)
         toast({
           title: 'Validation Error',
           description: `Could not complete validation check: ${error.message}`,
           variant: 'destructive',
         })
+      } else if (
+        error &&
+        typeof error === 'object' &&
+        Object.keys(error).length === 0
+      ) {
+        // Handle empty object errors - likely from Supabase RPC calls
+        console.warn(
+          'Empty error object detected, likely from Supabase RPC call',
+        )
+        // Don't show toast for empty errors, just log for debugging
       } else {
         // Otherwise, it's likely one of the empty/non-standard errors.
         // We can log it for debugging but won't show a toast to the user.

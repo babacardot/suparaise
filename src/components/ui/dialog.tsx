@@ -38,7 +38,14 @@ const DialogContent = React.forwardRef<
   }
 >(
   (
-    { className, children, showCloseButton = true, onCloseClick, variant = 'default', ...props },
+    {
+      className,
+      children,
+      showCloseButton = true,
+      onCloseClick,
+      variant = 'default',
+      ...props
+    },
     ref,
   ) => {
     const playClickSound = () => {

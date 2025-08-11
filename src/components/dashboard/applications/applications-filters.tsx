@@ -69,8 +69,8 @@ export default function ApplicationsFilters({
     try {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      void audio.play().catch(() => { })
-    } catch { }
+      void audio.play().catch(() => {})
+    } catch {}
   }, [])
 
   // Sync local state when parent filters change (e.g., on "Clear all")
@@ -379,7 +379,9 @@ export default function ApplicationsFilters({
                       )
                     })
                   ) : (
-                    <span className="text-muted-foreground text-sm">Status</span>
+                    <span className="text-muted-foreground text-sm">
+                      Status
+                    </span>
                   )}
                   {localFilters.statusFilter.length > 2 && (
                     <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
@@ -482,7 +484,10 @@ export default function ApplicationsFilters({
               className="w-40 p-0 bg-card text-card-foreground rounded-sm"
               align="start"
             >
-              <FilterSection filterKey="typeFilter" options={[...TYPE_OPTIONS]} />
+              <FilterSection
+                filterKey="typeFilter"
+                options={[...TYPE_OPTIONS]}
+              />
             </PopoverContent>
           </Popover>
         )}
@@ -533,9 +538,10 @@ export default function ApplicationsFilters({
                     }}
                     className={`
                       flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
-                      ${columnVisibility[key as keyof ColumnVisibility]
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                      ${
+                        columnVisibility[key as keyof ColumnVisibility]
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
                       }
                     `}
                   >

@@ -15,7 +15,7 @@ const faqAboutData = [
   {
     question: 'How many applications can I submit?',
     answer:
-      'The number of applications depends on your plan. Our free plan includes 2 applications per month, while our Pro plan offers 20 applications. The Max plan offers 50 applications. If you need more runs, you can continue using our services in self-service with usage-based billing. If you anticipate more than 100 runs per month, we\'ll recommend to reach out to us to upgrade to a higher plan.',
+      "The number of applications depends on your plan. Our free plan includes 2 applications per month, while our Pro plan offers 20 applications. The Max plan offers 50 applications. If you need more runs, you can continue using our services in self-service with usage-based billing. If you anticipate more than 100 runs per month, we'll recommend to reach out to us to upgrade to a higher plan.",
   },
   {
     question: 'What happens if an investor responds to my application ?',

@@ -76,16 +76,18 @@ export default function PrivacyPage() {
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
-                    <h2 className="text-2xl font-semibold">Payments and billing information</h2>
+                    <h2 className="text-2xl font-semibold">
+                      Payments and billing information
+                    </h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
-                    We use a third-party payment processor to
-                    handle payments. Payment method details are processed and stored
-                    by the processor, not by Suparaise. We receive limited
-                    information related to your transactions (for example, the last
-                    four digits of a card, card brand, and billing country) to help
-                    us manage your subscription. For information about refunds or
-                    credits, please refer to our Terms.
+                    We use a third-party payment processor to handle payments.
+                    Payment method details are processed and stored by the
+                    processor, not by Suparaise. We receive limited information
+                    related to your transactions (for example, the last four
+                    digits of a card, card brand, and billing country) to help
+                    us manage your subscription. For information about refunds
+                    or credits, please refer to our Terms.
                   </p>
                 </div>
               </div>
@@ -106,11 +108,22 @@ export default function PrivacyPage() {
                     automation.
                   </p>
                   <ul className="list-disc pl-6 mt-4 space-y-2 text-muted-foreground leading-relaxed text-lg">
-                    <li>Operate core features, including agentic form filling.</li>
-                    <li>Personalize responses and submissions based on your inputs.</li>
-                    <li>Provide support, account notices, and service updates.</li>
-                    <li>Monitor, prevent, and address abuse, fraud, and outages.</li>
-                    <li>Improve the Service, including quality and reliability.</li>
+                    <li>
+                      Operate core features, including agentic form filling.
+                    </li>
+                    <li>
+                      Personalize responses and submissions based on your
+                      inputs.
+                    </li>
+                    <li>
+                      Provide support, account notices, and service updates.
+                    </li>
+                    <li>
+                      Monitor, prevent, and address abuse, fraud, and outages.
+                    </li>
+                    <li>
+                      Improve the Service, including quality and reliability.
+                    </li>
                     <li>Comply with legal, tax, and regulatory obligations.</li>
                   </ul>
                 </div>
@@ -120,13 +133,16 @@ export default function PrivacyPage() {
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
-                    <h2 className="text-2xl font-semibold">AI and automated processing</h2>
+                    <h2 className="text-2xl font-semibold">
+                      AI and automated processing
+                    </h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
                     Some features rely on automated systems and AI models to
-                    perform tasks you instruct (for example, drafting application
-                    responses and filling forms). These systems process the
-                    content you provide to deliver the requested functionality.
+                    perform tasks you instruct (for example, drafting
+                    application responses and filling forms). These systems
+                    process the content you provide to deliver the requested
+                    functionality.
                   </p>
                 </div>
               </div>
@@ -217,8 +233,12 @@ export default function PrivacyPage() {
                   </p>
                   <ul className="list-disc pl-6 mt-4 space-y-2 text-muted-foreground leading-relaxed text-lg">
                     <li>Essential: required for core features and security.</li>
-                    <li>Functional: remember preferences and improve experience.</li>
-                    <li>Analytics: help us understand usage and performance.</li>
+                    <li>
+                      Functional: remember preferences and improve experience.
+                    </li>
+                    <li>
+                      Analytics: help us understand usage and performance.
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -227,13 +247,16 @@ export default function PrivacyPage() {
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
                   <div className="mb-4">
-                    <h2 className="text-2xl font-semibold">Data location and transfers</h2>
+                    <h2 className="text-2xl font-semibold">
+                      Data location and transfers
+                    </h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-lg">
-                    We may process and store information in the country where you
-                    live or in other countries where we or our service providers
-                    operate. Where required, we use appropriate safeguards for
-                    cross-border transfers, such as contractual commitments.
+                    We may process and store information in the country where
+                    you live or in other countries where we or our service
+                    providers operate. Where required, we use appropriate
+                    safeguards for cross-border transfers, such as contractual
+                    commitments.
                   </p>
                 </div>
               </div>

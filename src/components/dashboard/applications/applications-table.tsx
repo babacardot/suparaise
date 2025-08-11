@@ -289,7 +289,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                               </div>
                               {submission.started_at &&
                                 submission.started_at !==
-                                submission.submission_date && (
+                                  submission.submission_date && (
                                   <div className="text-[11px] text-muted-foreground">
                                     Started: {formatDate(submission.started_at)}
                                   </div>
