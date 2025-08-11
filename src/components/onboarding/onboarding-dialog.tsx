@@ -71,7 +71,7 @@ const WelcomeStep = ({
           : '3 steps process · 5 minutes'}
       </div>
 
-      <div className="relative w-48 h-48 mt-8">
+      <div className="relative w-32 h-32 sm:w-48 sm:h-48 mt-8">
         <Image
           src={welcomeContent.image}
           alt={welcomeContent.title}
@@ -81,11 +81,11 @@ const WelcomeStep = ({
         />
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+      <div className="space-y-4 px-4 sm:px-0">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">
           {welcomeContent.title}
         </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl">
+        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-xl text-center">
           {welcomeContent.subtitle}
         </p>
       </div>
@@ -1003,7 +1003,7 @@ export function OnboardingDialog({
           showCloseButton={!isFirstStartup}
           onCloseClick={!isFirstStartup ? handleCloseAttempt : undefined}
           variant="slide-up"
-          className="max-w-2xl max-h-[85vh] flex flex-col"
+          className="max-w-2xl w-full mx-4 md:mx-auto max-h-[90vh] md:max-h-[85vh] flex flex-col"
         >
           <DialogHeader className="sr-only">
             <DialogTitle>
@@ -1014,7 +1014,7 @@ export function OnboardingDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-grow overflow-y-auto p-2 space-y-8 scrollbar-hide">
+          <div className="flex-grow overflow-y-auto px-4 py-2 md:p-2 space-y-8 scrollbar-hide">
             {/* Validation Errors - Only show for non-welcome steps */}
             {currentStep > 0 && validationErrors.length > 0 && (
               <motion.div
@@ -1127,10 +1127,10 @@ export function OnboardingDialog({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.3 }}
-              className="flex justify-between pt-6 border-t"
+              className="flex flex-col sm:flex-row sm:justify-between pt-6 border-t gap-4 sm:gap-0"
             >
               {/* Left side buttons */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 order-2 sm:order-1">
                 {/* Skip button - only on step 1 for first startup */}
                 {currentStep === 1 && isFirstStartup && (
                   <Button
@@ -1156,7 +1156,7 @@ export function OnboardingDialog({
               </div>
 
               {/* Right side buttons */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 order-1 sm:order-2">
                 {/* Smart Ingest button - show on company step (step 2) */}
                 {/* {currentStep === 2 && (
                   <Button
@@ -1207,7 +1207,7 @@ export function OnboardingDialog({
           <DialogContent
             showCloseButton={false}
             variant="slide-up"
-            className="max-w-md"
+            className="max-w-md w-full mx-4 md:mx-auto"
           >
             <DialogHeader>
               <DialogTitle>Skip onboarding ?</DialogTitle>
@@ -1216,14 +1216,14 @@ export function OnboardingDialog({
                 profile.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={handleCancelSkip}>
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={handleCancelSkip} className="order-2 sm:order-1">
                 Continue onboarding
               </Button>
               <ExpandButton
                 onClick={handleConfirmSkip}
                 disabled={loading}
-                className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800"
+                className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 order-1 sm:order-2"
                 Icon={ArrowRight}
                 iconPlacement="right"
                 justify="end"
@@ -1244,22 +1244,22 @@ export function OnboardingDialog({
           <DialogContent
             showCloseButton={false}
             variant="slide-up"
-            className="max-w-md"
+            className="max-w-md w-full mx-4 md:mx-auto"
           >
             <DialogHeader>
-              <DialogTitle>Cancel creation ?</DialogTitle>
+              <DialogTitle>Cancel ?</DialogTitle>
               <DialogDescription>
                 Are you sure you want to cancel registering this new company ?
                 All progress will be lost.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={handleCancelExit}>
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={handleCancelExit} className="order-2 sm:order-1">
                 No
               </Button>
               <ExpandButton
                 onClick={handleConfirmExit}
-                className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-800 dark:hover:text-red-200 border border-red-200 dark:border-red-800"
+                className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-800 dark:hover:text-red-200 border border-red-200 dark:border-red-800 order-1 sm:order-2"
                 Icon={ArrowRight}
                 iconPlacement="right"
                 justify="end"

@@ -75,8 +75,8 @@ export default function FundsFilters({
     try {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      void audio.play().catch(() => {})
-    } catch {}
+      void audio.play().catch(() => { })
+    } catch { }
   }, [])
 
   // Sync local state when parent filters change (e.g., on "Clear all")
@@ -356,10 +356,10 @@ export default function FundsFilters({
           return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
         if (value === 'video')
           return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
-        if (value === 'financials')
-          return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
-        if (value === 'business_plan')
-          return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
+        // if (value === 'financials')
+        //   return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
+        // if (value === 'business_plan')
+        //   return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
       }
       return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
     },
@@ -823,7 +823,7 @@ export default function FundsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
+                      localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = FILTER_OPTIONS.requiredDocuments.find(
                           (d) => d.value === doc,
@@ -855,7 +855,7 @@ export default function FundsFilters({
                       )}
                   </div>
                   {localFilters.requiredDocuments &&
-                  localFilters.requiredDocuments.length > 0 ? (
+                    localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
@@ -932,13 +932,12 @@ export default function FundsFilters({
                     }}
                     className={`
                                             flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
-                                            ${
-                                              columnVisibility[
-                                                key as keyof ColumnVisibility
-                                              ]
-                                                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                                            }
+                                            ${columnVisibility[
+                        key as keyof ColumnVisibility
+                      ]
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                      }
                                         `}
                   >
                     <span className="text-sm font-medium capitalize">
@@ -973,13 +972,12 @@ export default function FundsFilters({
                 // Update immediately for toggle
                 onFiltersChange(newFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
-                localFilters.submissionFilter === 'hide_submitted'
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
                   ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
                   : localFilters.submissionFilter === 'only_submitted'
                     ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
                     : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
-              }`}
+                }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all funds (click to hide submitted)'

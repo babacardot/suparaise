@@ -24,7 +24,7 @@ export interface ApplicationsFilters {
 interface ColumnVisibility {
   status: boolean
   type: boolean
-  submitted: boolean
+  date: boolean
   notes: boolean
 }
 
@@ -65,6 +65,13 @@ export default function ApplicationsFilters({
   const [localFilters, setLocalFilters] = useState(filters)
   const isMounted = useRef(false)
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const playClickSound = useCallback(() => {
+    try {
+      const audio = new Audio('/sounds/light.mp3')
+      audio.volume = 0.4
+      void audio.play().catch(() => { })
+    } catch { }
+  }, [])
 
   // Sync local state when parent filters change (e.g., on "Clear all")
   useEffect(() => {
@@ -346,142 +353,151 @@ export default function ApplicationsFilters({
           )}
         </div>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full sm:w-40 justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
-            >
-              <div className="flex items-center space-x-2 truncate">
+        {/* Status Filter */}
+        {columnVisibility.status && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full sm:w-40 justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+              >
+                <div className="flex items-center space-x-2 truncate">
+                  {localFilters.statusFilter.length > 0 ? (
+                    localFilters.statusFilter.slice(0, 2).map((status) => {
+                      const statusColor =
+                        getStatusColor(status).split(' hover:')[0]
+                      return (
+                        <Badge
+                          key={status}
+                          className={`mr-1 ${statusColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                          style={{ pointerEvents: 'none' }}
+                        >
+                          {status === 'in_progress'
+                            ? 'In Progress'
+                            : status.charAt(0).toUpperCase() + status.slice(1)}
+                        </Badge>
+                      )
+                    })
+                  ) : (
+                    <span className="text-muted-foreground text-sm">Status</span>
+                  )}
+                  {localFilters.statusFilter.length > 2 && (
+                    <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                      +{localFilters.statusFilter.length - 2}
+                    </Badge>
+                  )}
+                </div>
                 {localFilters.statusFilter.length > 0 ? (
-                  localFilters.statusFilter.slice(0, 2).map((status) => {
-                    const statusColor =
-                      getStatusColor(status).split(' hover:')[0]
-                    return (
-                      <Badge
-                        key={status}
-                        className={`mr-1 ${statusColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        {status === 'in_progress'
-                          ? 'In Progress'
-                          : status.charAt(0).toUpperCase() + status.slice(1)}
-                      </Badge>
-                    )
-                  })
+                  <div
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      clearFilter('statusFilter', true)
+                    }}
+                    className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                  >
+                    <LottieIcon
+                      animationData={animations.cross}
+                      size={16}
+                      className="opacity-50 hover:opacity-100"
+                    />
+                  </div>
                 ) : (
-                  <span className="text-muted-foreground text-sm">Status</span>
-                )}
-                {localFilters.statusFilter.length > 2 && (
-                  <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
-                    +{localFilters.statusFilter.length - 2}
-                  </Badge>
-                )}
-              </div>
-              {localFilters.statusFilter.length > 0 ? (
-                <div
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    clearFilter('statusFilter', true)
-                  }}
-                  className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
-                >
                   <LottieIcon
-                    animationData={animations.cross}
+                    animationData={animations.arrowDown}
                     size={16}
-                    className="opacity-50 hover:opacity-100"
+                    className="ml-2 shrink-0 opacity-50 hover:opacity-100"
                   />
-                </div>
-              ) : (
-                <LottieIcon
-                  animationData={animations.arrowDown}
-                  size={16}
-                  className="ml-2 shrink-0 opacity-50 hover:opacity-100"
-                />
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-40 p-0 bg-card text-card-foreground rounded-sm"
-            align="start"
-          >
-            <FilterSection
-              filterKey="statusFilter"
-              options={[...STATUS_OPTIONS]}
-            />
-          </PopoverContent>
-        </Popover>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full sm:w-40 justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+              align="start"
             >
-              <div className="flex items-center space-x-2 truncate">
-                {localFilters.typeFilter.length > 0 ? (
-                  localFilters.typeFilter.slice(0, 2).map((type) => {
-                    const typeColor = getTypeColor(type).split(' hover:')[0]
-                    return (
-                      <Badge
-                        key={type}
-                        className={`mr-1 ${typeColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        {type}
-                      </Badge>
-                    )
-                  })
-                ) : (
-                  <span className="text-muted-foreground text-sm">Type</span>
-                )}
-                {localFilters.typeFilter.length > 2 && (
-                  <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
-                    +{localFilters.typeFilter.length - 2}
-                  </Badge>
-                )}
-              </div>
-              {localFilters.typeFilter.length > 0 ? (
-                <div
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    clearFilter('typeFilter', true)
-                  }}
-                  className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
-                >
-                  <LottieIcon
-                    animationData={animations.cross}
-                    size={16}
-                    className="opacity-50 hover:opacity-100"
-                  />
-                </div>
-              ) : (
-                <LottieIcon
-                  animationData={animations.arrowDown}
-                  size={16}
-                  className="ml-2 shrink-0 opacity-50 hover:opacity-100"
-                />
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-40 p-0 bg-card text-card-foreground rounded-sm"
-            align="start"
-          >
-            <FilterSection filterKey="typeFilter" options={[...TYPE_OPTIONS]} />
-          </PopoverContent>
-        </Popover>
+              <FilterSection
+                filterKey="statusFilter"
+                options={[...STATUS_OPTIONS]}
+              />
+            </PopoverContent>
+          </Popover>
+        )}
 
-        <div className="w-full sm:w-auto min-w-40">
-          <DateRangePicker
-            date={localFilters.dateRange}
-            setDate={handleDateRangeChange}
-            onClear={handleDateRangeClear}
-            className="w-full"
-          />
-        </div>
+        {/* Type Filter */}
+        {columnVisibility.type && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full sm:w-40 justify-between h-10 rounded-sm bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+              >
+                <div className="flex items-center space-x-2 truncate">
+                  {localFilters.typeFilter.length > 0 ? (
+                    localFilters.typeFilter.slice(0, 2).map((type) => {
+                      const typeColor = getTypeColor(type).split(' hover:')[0]
+                      return (
+                        <Badge
+                          key={type}
+                          className={`mr-1 ${typeColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
+                          style={{ pointerEvents: 'none' }}
+                        >
+                          {type}
+                        </Badge>
+                      )
+                    })
+                  ) : (
+                    <span className="text-muted-foreground text-sm">Type</span>
+                  )}
+                  {localFilters.typeFilter.length > 2 && (
+                    <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
+                      +{localFilters.typeFilter.length - 2}
+                    </Badge>
+                  )}
+                </div>
+                {localFilters.typeFilter.length > 0 ? (
+                  <div
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      clearFilter('typeFilter', true)
+                    }}
+                    className="translate-x-1.5 w-6 h-6 shrink-0 rounded-sm p-1 transition-colors"
+                  >
+                    <LottieIcon
+                      animationData={animations.cross}
+                      size={16}
+                      className="opacity-50 hover:opacity-100"
+                    />
+                  </div>
+                ) : (
+                  <LottieIcon
+                    animationData={animations.arrowDown}
+                    size={16}
+                    className="ml-2 shrink-0 opacity-50 hover:opacity-100"
+                  />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-40 p-0 bg-card text-card-foreground rounded-sm"
+              align="start"
+            >
+              <FilterSection filterKey="typeFilter" options={[...TYPE_OPTIONS]} />
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* Date Range Filter */}
+        {columnVisibility.date && (
+          <div className="w-full sm:w-auto min-w-40">
+            <DateRangePicker
+              date={localFilters.dateRange}
+              setDate={handleDateRangeChange}
+              onClear={handleDateRangeClear}
+              className="w-full"
+            />
+          </div>
+        )}
 
         {/* Column visibility toggle */}
         <div className="w-full sm:w-auto">
@@ -503,12 +519,13 @@ export default function ApplicationsFilters({
               align="end"
             >
               <div className="space-y-2">
-                {['status', 'type', 'submitted'].map((key) => (
+                {['status', 'type', 'date'].map((key) => (
                   <div
                     key={key}
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
+                      playClickSound()
                       onColumnVisibilityChange(
                         key as keyof ColumnVisibility,
                         !columnVisibility[key as keyof ColumnVisibility],
@@ -516,10 +533,9 @@ export default function ApplicationsFilters({
                     }}
                     className={`
                       flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left
-                      ${
-                        columnVisibility[key as keyof ColumnVisibility]
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                          : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                      ${columnVisibility[key as keyof ColumnVisibility]
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
                       }
                     `}
                   >

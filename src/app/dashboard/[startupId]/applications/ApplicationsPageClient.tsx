@@ -13,7 +13,7 @@ import { format } from 'date-fns'
 interface ColumnVisibility {
   status: boolean
   type: boolean
-  submitted: boolean
+  date: boolean
   notes: boolean
 }
 
@@ -102,7 +102,7 @@ export default function ApplicationsPageClient({
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     status: true,
     type: true,
-    submitted: true,
+    date: true,
     notes: false, // Hide notes by default as requested
   })
 

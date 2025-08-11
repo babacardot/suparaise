@@ -55,7 +55,7 @@ type ApplicationSubmission = {
 interface ColumnVisibility {
   status: boolean
   type: boolean
-  submitted: boolean
+  date: boolean
   notes: boolean
 }
 
@@ -211,13 +211,13 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                           </button>
                         </TableHead>
                       )}
-                      {columnVisibility.submitted && (
+                      {columnVisibility.date && (
                         <TableHead className="w-[150px]">
                           <button
                             onClick={() => handleSort('submission_date')}
                             className="flex items-center hover:text-foreground transition-colors font-medium"
                           >
-                            Submitted
+                            Date
                           </button>
                         </TableHead>
                       )}
@@ -281,7 +281,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                             </Badge>
                           </TableCell>
                         )}
-                        {columnVisibility.submitted && (
+                        {columnVisibility.date && (
                           <TableCell className="p-2">
                             <div className="space-y-1">
                               <div className="text-sm font-medium">
@@ -289,7 +289,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                               </div>
                               {submission.started_at &&
                                 submission.started_at !==
-                                  submission.submission_date && (
+                                submission.submission_date && (
                                   <div className="text-[11px] text-muted-foreground">
                                     Started: {formatDate(submission.started_at)}
                                   </div>

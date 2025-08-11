@@ -626,13 +626,16 @@ export default function AngelsFilters({
                           'checkSizes',
                           size,
                         ).split(' hover:')[0]
+                        const sizeOption = FILTER_OPTIONS.checkSizes.find(
+                          (option) => option.value === size,
+                        )
                         return (
                           <Badge
                             key={size}
                             className={`mr-1 ${sizeColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
                             style={{ pointerEvents: 'none' }}
                           >
-                            {size}
+                            {sizeOption?.label || size}
                           </Badge>
                         )
                       })
@@ -900,13 +903,12 @@ export default function AngelsFilters({
                 setLocalFilters(newFilters as unknown as AngelsFilters)
                 onFiltersChange(newFilters as unknown as AngelsFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
-                localFilters.submissionFilter === 'hide_submitted'
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
                   ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/40'
                   : localFilters.submissionFilter === 'only_submitted'
                     ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40'
                     : 'bg-card border-border text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]'
-              }`}
+                }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all angels (click to hide submitted)'

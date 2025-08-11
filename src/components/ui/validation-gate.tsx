@@ -195,7 +195,7 @@ export function ValidationGate({
           >
             <div className="px-3 py-3">
               <div className="flex items-center gap-2 mb-3">
-                <LottieIcon animationData={animations.info} size={16} />
+                <LottieIcon animationData={animations.info} size={14} />
                 <h4 className="font-medium text-sm text-sidebar-foreground">
                   Complete your profile
                 </h4>
@@ -247,14 +247,14 @@ export function ValidationGate({
                       {missingFields.filter(
                         (field) => field.category !== 'documents',
                       ).length > 4 && (
-                        <div className="text-xs text-sidebar-foreground/50 italic">
-                          +
-                          {missingFields.filter(
-                            (field) => field.category !== 'documents',
-                          ).length - 4}{' '}
-                          more fields...
-                        </div>
-                      )}
+                          <div className="text-xs text-sidebar-foreground/50 italic">
+                            +
+                            {missingFields.filter(
+                              (field) => field.category !== 'documents',
+                            ).length - 4}{' '}
+                            more fields...
+                          </div>
+                        )}
                     </div>
                   </div>
                 )}

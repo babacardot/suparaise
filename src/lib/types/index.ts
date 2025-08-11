@@ -126,18 +126,20 @@ export const FILTER_OPTIONS = {
     label: region,
   })),
 
-  requiredDocuments: DATABASE_ENUMS.required_document_type.map((doc) => {
-    const labelMap: Record<string, string> = {
-      pitch_deck: 'Deck',
-      video: 'Demo',
-      financials: 'Financials',
-      business_plan: 'Business Plan',
-    }
-    return {
-      value: doc,
-      label: labelMap[doc] || doc,
-    }
-  }),
+  requiredDocuments: DATABASE_ENUMS.required_document_type
+    .filter((doc) => !['financials', 'business_plan'].includes(doc)) // Hide these options from filters
+    .map((doc) => {
+      const labelMap: Record<string, string> = {
+        pitch_deck: 'Deck',
+        video: 'Demo',
+        // financials: 'Financials', // Commented out - not relevant yet
+        // business_plan: 'Business Plan', // Commented out - not relevant yet
+      }
+      return {
+        value: doc,
+        label: labelMap[doc] || doc,
+      }
+    }),
 
   programTypes: DATABASE_ENUMS.program_type.map((type) => ({
     value: type,
@@ -146,17 +148,17 @@ export const FILTER_OPTIONS = {
 
   equityRanges: DATABASE_ENUMS.equity_range.map((range) => ({
     value: range,
-    label: range,
+    label: range === 'variable' ? 'Variable' : range.replace('-', ' — '),
   })),
 
   fundingRanges: DATABASE_ENUMS.funding_range.map((range) => ({
     value: range,
-    label: range,
+    label: range.replace('-', ' — '),
   })),
 
   checkSizes: DATABASE_ENUMS.check_size_range.map((size) => ({
     value: size,
-    label: size,
+    label: size.replace('-', ' — '),
   })),
 
   investmentApproaches: DATABASE_ENUMS.investment_approach.map((approach) => ({

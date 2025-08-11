@@ -34,7 +34,7 @@ type ApplicationSubmission = {
 interface ColumnVisibility {
   status: boolean
   type: boolean
-  submitted: boolean
+  date: boolean
   notes: boolean
 }
 

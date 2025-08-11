@@ -73,8 +73,8 @@ export default function AcceleratorsFilters({
     try {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      void audio.play().catch(() => {})
-    } catch {}
+      void audio.play().catch(() => { })
+    } catch { }
   }, [])
 
   useEffect(() => {
@@ -338,10 +338,10 @@ export default function AcceleratorsFilters({
           return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
         if (value === 'video')
           return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
-        if (value === 'financials')
-          return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
-        if (value === 'business_plan')
-          return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
+        // if (value === 'financials')
+        //   return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
+        // if (value === 'business_plan')
+        //   return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
       }
       if (filterKey === 'programTypes') {
         if (value === 'in-person')
@@ -873,13 +873,16 @@ export default function AcceleratorsFilters({
                           'equityRanges',
                           range,
                         ).split(' hover:')[0]
+                        const equityOption = FILTER_OPTIONS.equityRanges.find(
+                          (option) => option.value === range,
+                        )
                         return (
                           <Badge
                             key={range}
                             className={`mr-1 ${rangeColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
                             style={{ pointerEvents: 'none' }}
                           >
-                            {range}
+                            {equityOption?.label || range}
                           </Badge>
                         )
                       })
@@ -948,13 +951,16 @@ export default function AcceleratorsFilters({
                           'fundingRanges',
                           range,
                         ).split(' hover:')[0]
+                        const fundingOption = FILTER_OPTIONS.fundingRanges.find(
+                          (option) => option.value === range,
+                        )
                         return (
                           <Badge
                             key={range}
                             className={`mr-1 ${rangeColor} rounded-sm transition-none hover:bg-opacity-100 hover:opacity-100`}
                             style={{ pointerEvents: 'none' }}
                           >
-                            {range}
+                            {fundingOption?.label || range}
                           </Badge>
                         )
                       })
@@ -1018,7 +1024,7 @@ export default function AcceleratorsFilters({
                 >
                   <div className="flex items-center space-x-2 truncate">
                     {localFilters.requiredDocuments &&
-                    localFilters.requiredDocuments.length > 0 ? (
+                      localFilters.requiredDocuments.length > 0 ? (
                       localFilters.requiredDocuments.slice(0, 2).map((doc) => {
                         const docOption = FILTER_OPTIONS.requiredDocuments.find(
                           (d) => d.value === doc,
@@ -1050,7 +1056,7 @@ export default function AcceleratorsFilters({
                       )}
                   </div>
                   {localFilters.requiredDocuments &&
-                  localFilters.requiredDocuments.length > 0 ? (
+                    localFilters.requiredDocuments.length > 0 ? (
                     <div
                       onClick={(e) => {
                         e.preventDefault()
@@ -1129,11 +1135,10 @@ export default function AcceleratorsFilters({
                         !columnVisibility[key as keyof ColumnVisibility],
                       )
                     }}
-                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${
-                      columnVisibility[key as keyof ColumnVisibility]
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
-                    }`}
+                    className={`flex items-center px-3 py-2 rounded-sm cursor-pointer transition-colors text-left ${columnVisibility[key as keyof ColumnVisibility]
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/40'
+                      }`}
                   >
                     <span className="text-sm font-medium capitalize">
                       {key === 'programType'
@@ -1167,13 +1172,12 @@ export default function AcceleratorsFilters({
                 setLocalFilters(newFilters)
                 onFiltersChange(newFilters)
               }}
-              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${
-                localFilters.submissionFilter === 'hide_submitted'
-                  ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
-                  : localFilters.submissionFilter === 'only_submitted'
-                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                    : 'bg-card border-border'
-              }`}
+              className={`w-full sm:w-auto h-10 px-3 rounded-sm transition-colors ${localFilters.submissionFilter === 'hide_submitted'
+                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
+                : localFilters.submissionFilter === 'only_submitted'
+                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                  : 'bg-card border-border'
+                }`}
               title={
                 localFilters.submissionFilter === 'all'
                   ? 'Showing all (click to hide submitted)'
