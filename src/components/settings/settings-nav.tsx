@@ -140,7 +140,7 @@ function NavItem({
             {requiresEnterprisePermission && (
               <Badge
                 variant="secondary"
-                className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 select-none"
               >
                 ENT
               </Badge>
@@ -344,7 +344,7 @@ export default function SettingsNav({
                     {requiresEnterprisePermission && (
                       <Badge
                         variant="secondary"
-                        className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                        className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 select-none"
                       >
                         ENT
                       </Badge>

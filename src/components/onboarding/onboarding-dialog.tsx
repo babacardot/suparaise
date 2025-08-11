@@ -65,7 +65,10 @@ const WelcomeStep = ({
       transition={{ duration: 0.5 }}
       className="flex flex-col items-center justify-center h-full space-y-6 text-center relative"
     >
-      <div className="absolute top-0 left-0 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-sm px-3 py-1 text-xs font-medium">
+      <div
+        className="absolute top-0 left-0 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-sm px-3 py-1 text-xs font-medium select-none"
+        onCopy={(e) => e.preventDefault()}
+      >
         {isFirstStartup
           ? '3 steps process · 5 minutes'
           : '3 steps process · 5 minutes'}
@@ -81,7 +84,10 @@ const WelcomeStep = ({
         />
       </div>
 
-      <div className="space-y-4 px-4 sm:px-0">
+      <div
+        className="space-y-4 px-4 sm:px-0 select-none"
+        onCopy={(e) => e.preventDefault()}
+      >
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">
           {welcomeContent.title}
         </h2>
@@ -90,7 +96,10 @@ const WelcomeStep = ({
         </p>
       </div>
 
-      <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+      <div
+        className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 select-none"
+        onCopy={(e) => e.preventDefault()}
+      >
         <div className="w-2 h-2 bg-blue-500 rounded-sm animate-pulse"></div>
         <span>{welcomeContent.statusText}</span>
       </div>

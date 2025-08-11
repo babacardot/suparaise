@@ -652,7 +652,7 @@ export const TeamStep: React.FC<
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="select-none" onCopy={(e) => e.preventDefault()}>
         <h3 className="text-lg font-semibold mb-4">Tell us about your team</h3>
         <p className="text-sm text-muted-foreground mb-6">
           Start with the basics about yourself and any co-founders. You can
@@ -1056,7 +1056,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="select-none" onCopy={(e) => e.preventDefault()}>
         <h3 className="text-lg font-semibold mb-4">
           Tell us about your company
         </h3>
@@ -1584,7 +1584,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <div>
+      <div className="select-none" onCopy={(e) => e.preventDefault()}>
         <h3 className="text-lg font-semibold mb-4">
           Tell us about your current fundraising round
         </h3>
@@ -1947,7 +1947,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <div>
+      <div className="select-none" onCopy={(e) => e.preventDefault()}>
         <h3 className="text-lg font-semibold mb-2">Summary</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Take a moment to ensure everything looks perfect.

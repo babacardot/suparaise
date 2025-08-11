@@ -311,7 +311,10 @@ export default function ApplicationsPageClient({
 
   return (
     <div className="h-full flex flex-col overflow-hidden hide-scrollbar">
-      <div className="flex-shrink-0 pb-4">
+      <div
+        className="flex-shrink-0 pb-4 select-none"
+        onCopy={(e) => e.preventDefault()}
+      >
         <h1 className="text-3xl font-bold tracking-tight mt-1.5">
           Applications
         </h1>

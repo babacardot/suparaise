@@ -145,12 +145,12 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     const level = subscription?.permission_level
     if (level === 'FREE') {
       return {
-        text: 'Upgrade to Pro to unlock more monthly runs, accelerators and faster processing.',
+        text: 'Upgrade to Pro to unlock 20 applications per month, accelerators, and faster processing.',
       }
     }
     if (level === 'PRO') {
       return {
-        text: 'Upgrade to Max to access our full database and advanced agent capabilities.',
+        text: 'Upgrade to Max for 50 monthly applications, full database access, advanced agent capabilities, and analytics.',
       }
     }
     return null

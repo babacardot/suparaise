@@ -116,15 +116,120 @@ export const FILTER_OPTIONS = {
     label: stage,
   })),
 
-  industries: DATABASE_ENUMS.industry_type.map((industry) => ({
-    value: industry,
-    label: industry,
-  })),
+  // Explicit industry ordering aligned with DB enum (user-updated)
+  industries: (() => {
+    const preferredOrder: Array<(typeof DATABASE_ENUMS.industry_type)[number]> =
+      [
+        'Agnostic',
+        'Software',
+        'AI',
+        'Deep tech',
+        'Data',
+        'Developer tools',
+        'Cybersecurity',
+        'Security',
+        'Computing',
+        'Hardware',
+        'Robotics',
+        'IoT',
+        'AR/VR',
+        'Web3',
+        'Fintech',
+        'Healthcare',
+        'Medtech',
+        'Biotechnology',
+        'Pharmaceuticals',
+        'Education',
+        'Legal',
+        'Government',
+        'HR',
+        'Insurance',
+        'Climate',
+        'Energy',
+        'Environment',
+        'Biofuels',
+        'Advanced Materials',
+        'Nanotechnology',
+        'Manufacturing',
+        'Construction',
+        'Mining',
+        'Agriculture',
+        'Automotive',
+        'Consumer',
+        'E-commerce',
+        'Marketplace',
+        'Retail',
+        'Food',
+        'Hospitality',
+        'Fashion',
+        'Media',
+        'Entertainment',
+        'Gaming',
+        'Adtech',
+        'Social',
+        'Real estate',
+        'Proptech',
+        'Logistics',
+        'Transportation',
+        'Telecommunications',
+        'Aerospace',
+        'Defense',
+        'Other',
+      ]
+    const rank = (v: (typeof DATABASE_ENUMS.industry_type)[number]) => {
+      const i = preferredOrder.indexOf(v)
+      return i === -1 ? Number.MAX_SAFE_INTEGER : i
+    }
+    return [...DATABASE_ENUMS.industry_type]
+      .sort((a, b) => rank(a) - rank(b))
+      .map((industry) => ({ value: industry, label: industry }))
+  })(),
 
-  regions: DATABASE_ENUMS.region_type.map((region) => ({
-    value: region,
-    label: region,
-  })),
+  // Explicit region ordering aligned with DB enum (user-updated)
+  regions: (() => {
+    const preferredOrder: Array<(typeof DATABASE_ENUMS.region_type)[number]> = [
+      'Global',
+      'North America',
+      'United States',
+      'Canada',
+      'LATAM',
+      'South America',
+      'Europe',
+      'UK',
+      'France',
+      'Netherlands',
+      'Sweden',
+      'Emerging Markets',
+      'EMEA',
+      'Middle East',
+      'Africa',
+      'Nigeria',
+      'Kenya',
+      'Egypt',
+      'Senegal',
+      'South Africa',
+      'Asia',
+      'South Asia',
+      'East Asia',
+      'South East Asia',
+      'India',
+      'China',
+      'Japan',
+      'Korea',
+      'Oceania',
+      'Australia',
+    ]
+    const rank = (v: (typeof DATABASE_ENUMS.region_type)[number]) => {
+      const i = preferredOrder.indexOf(v)
+      return i === -1 ? Number.MAX_SAFE_INTEGER : i
+    }
+    return [...DATABASE_ENUMS.region_type]
+      .filter(
+        (r) => r !== ('Other' as (typeof DATABASE_ENUMS.region_type)[number]),
+      )
+      .sort((a, b) => rank(a) - rank(b))
+      .map((region) => ({ value: region, label: region }))
+  })(),
 
   requiredDocuments: DATABASE_ENUMS.required_document_type
     .filter((doc) => !['financials', 'business_plan'].includes(doc)) // Hide these options from filters

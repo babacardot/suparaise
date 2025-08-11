@@ -246,10 +246,11 @@ export default function SuggestionModal({
     >
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-96 p-0 bg-sidebar border-sidebar-border rounded-sm translate-y-1"
+        className="w-96 p-0 bg-sidebar border-sidebar-border rounded-sm translate-y-1 select-none"
         side={isMobile ? 'bottom' : 'right'}
         align="center"
         sideOffset={18}
+        onCopy={(e) => e.preventDefault()}
       >
         <div className="px-3 py-3">
           {/* Suggestion Type Selector */}

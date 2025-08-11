@@ -52,7 +52,10 @@ export default function HomePageClient({
 
   return (
     <div className="h-full flex flex-col gap-2">
-      <div className="flex-shrink-0 pb-4 flex justify-between items-center">
+      <div
+        className="flex-shrink-0 pb-4 flex justify-between items-center select-none"
+        onCopy={(e) => e.preventDefault()}
+      >
         <h1 className="text-3xl font-bold tracking-tight mt-1.5">
           {greetingMessage}
         </h1>

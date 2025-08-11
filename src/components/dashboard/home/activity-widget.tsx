@@ -238,7 +238,10 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
           className,
         )}
       >
-        <CardHeader className="pb-3">
+        <CardHeader
+          className="pb-3 select-none"
+          onCopy={(e) => e.preventDefault()}
+        >
           <CardTitle className="text-base md:text-lg font-medium">
             Activity
           </CardTitle>
@@ -258,7 +261,10 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
       )}
     >
       <>
-        <CardHeader className="pb-3">
+        <CardHeader
+          className="pb-3 select-none"
+          onCopy={(e) => e.preventDefault()}
+        >
           <CardTitle className="text-base md:text-lg font-medium">
             Runs
           </CardTitle>

@@ -157,7 +157,7 @@ export function ResourcesSection({
               <CardContent className="px-4 pt-1 pb-2 h-full flex flex-col relative z-10">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-medium px-2 py-1 rounded-sm">
+                    <span className="bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-medium px-2 py-1 rounded-sm select-none">
                       Enterprise
                     </span>
                   </div>
@@ -205,7 +205,7 @@ export function ResourcesSection({
               <CardContent className="px-4 pt-1 pb-2 h-full flex flex-col relative z-10">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-medium px-2 py-1 rounded-sm">
+                    <span className="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-medium px-2 py-1 rounded-sm select-none">
                       Max
                     </span>
                   </div>
@@ -227,8 +227,8 @@ export function ResourcesSection({
                   Ready for maximum outreach?
                 </h3>
                 <p className="text-[10px] text-muted-foreground leading-tight">
-                  Full database access • 50 applications monthly • 5x faster
-                  with concurrent processing • Priority support
+                  Full database access • 50 applications/month • 5x faster
+                  processing • Priority support
                 </p>
               </CardContent>
             </Card>

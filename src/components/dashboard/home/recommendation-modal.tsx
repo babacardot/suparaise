@@ -117,10 +117,11 @@ export function RecommendationModal({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-96 p-0 bg-sidebar border-sidebar-border rounded-sm"
+          className="w-96 p-0 bg-sidebar border-sidebar-border rounded-sm select-none"
           side="bottom"
           align="end"
           sideOffset={10}
+          onCopy={(e) => e.preventDefault()}
         >
           <div className="px-3 py-3">
             <ul className="space-y-2">

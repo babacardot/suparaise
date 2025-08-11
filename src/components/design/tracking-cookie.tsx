@@ -68,6 +68,20 @@ function setCookieConsentStatus(status: string) {
   }
 }
 
+// Play a subtle click sound on user actions
+const playClickSound = () => {
+  if (typeof window === 'undefined') return
+  try {
+    const audio = new Audio('/sounds/light.mp3')
+    audio.volume = 0.4
+    audio.play().catch(() => {
+      // Autoplay policies can reject sound; ignore silently
+    })
+  } catch {
+    // Ignore audio creation errors
+  }
+}
+
 export default function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false)
   const [showAnimation, setShowAnimation] = useState(false)
@@ -170,6 +184,7 @@ export default function CookieConsent() {
   }, [handleScroll, removeScrollListener])
 
   const handleAccept = () => {
+    playClickSound()
     setAnimationType('accept')
     setShowAnimation(true)
     removeScrollListener() // Remove listener immediately on action
@@ -184,6 +199,7 @@ export default function CookieConsent() {
   }
 
   const handleDecline = () => {
+    playClickSound()
     setAnimationType('decline')
     setShowAnimation(true)
     removeScrollListener() // Remove listener immediately on action

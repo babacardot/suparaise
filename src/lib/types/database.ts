@@ -2079,57 +2079,60 @@ export type Database = {
         | '250K-500K'
         | '500K+'
       industry_type:
+        | 'Agnostic'
         | 'Software'
+        | 'AI'
+        | 'Deep tech'
+        | 'Data'
+        | 'Developer tools'
+        | 'Cybersecurity'
+        | 'Security'
+        | 'Computing'
+        | 'Hardware'
+        | 'Robotics'
+        | 'IoT'
+        | 'AR/VR'
+        | 'Web3'
         | 'Fintech'
         | 'Healthcare'
         | 'Medtech'
-        | 'AI'
-        | 'Computing'
-        | 'Deep tech'
+        | 'Biotechnology'
+        | 'Pharmaceuticals'
+        | 'Education'
+        | 'Legal'
+        | 'Government'
+        | 'HR'
+        | 'Insurance'
         | 'Climate'
+        | 'Energy'
+        | 'Environment'
+        | 'Biofuels'
+        | 'Advanced Materials'
+        | 'Nanotechnology'
+        | 'Manufacturing'
+        | 'Construction'
+        | 'Mining'
+        | 'Agriculture'
+        | 'Automotive'
         | 'Consumer'
         | 'E-commerce'
         | 'Marketplace'
-        | 'Gaming'
-        | 'Web3'
-        | 'Developer tools'
-        | 'Cybersecurity'
-        | 'Logistics'
-        | 'Adtech'
-        | 'Proptech'
-        | 'Agriculture'
-        | 'Automotive'
-        | 'Biotechnology'
-        | 'Construction'
-        | 'Education'
-        | 'Energy'
-        | 'Entertainment'
-        | 'Environment'
-        | 'Fashion'
-        | 'Real estate'
-        | 'Food'
-        | 'IoT'
-        | 'Government'
-        | 'Hospitality'
-        | 'HR'
-        | 'Insurance'
-        | 'Security'
-        | 'Social'
-        | 'Aerospace'
-        | 'AR/VR'
-        | 'Mining'
-        | 'Advanced Materials'
-        | 'Biofuels'
-        | 'Hardware'
-        | 'Nanotechnology'
-        | 'Legal'
-        | 'Manufacturing'
-        | 'Media'
-        | 'Pharmaceuticals'
         | 'Retail'
-        | 'Telecommunications'
+        | 'Food'
+        | 'Hospitality'
+        | 'Fashion'
+        | 'Media'
+        | 'Entertainment'
+        | 'Gaming'
+        | 'Adtech'
+        | 'Social'
+        | 'Real estate'
+        | 'Proptech'
+        | 'Logistics'
         | 'Transportation'
-        | 'Agnostic'
+        | 'Telecommunications'
+        | 'Aerospace'
+        | 'Defense'
         | 'Other'
       investment_approach:
         | 'hands-on'
@@ -2172,35 +2175,34 @@ export type Database = {
       region_type:
         | 'Global'
         | 'North America'
-        | 'South America'
-        | 'LATAM'
-        | 'Europe'
-        | 'Middle East'
-        | 'Africa'
-        | 'Asia'
-        | 'East Asia'
-        | 'South East Asia'
-        | 'South Asia'
-        | 'Oceania'
-        | 'EMEA'
-        | 'Emerging Markets'
-        | 'India'
-        | 'China'
-        | 'Japan'
-        | 'Korea'
-        | 'Australia'
         | 'United States'
         | 'Canada'
+        | 'LATAM'
+        | 'South America'
+        | 'Europe'
         | 'UK'
         | 'France'
+        | 'Netherlands'
+        | 'Sweden'
+        | 'Emerging Markets'
+        | 'EMEA'
+        | 'Middle East'
+        | 'Africa'
         | 'Nigeria'
         | 'Kenya'
         | 'Egypt'
         | 'Senegal'
         | 'South Africa'
-        | 'Netherlands'
-        | 'Sweden'
-        | 'Other'
+        | 'Asia'
+        | 'South Asia'
+        | 'East Asia'
+        | 'South East Asia'
+        | 'India'
+        | 'China'
+        | 'Japan'
+        | 'Korea'
+        | 'Oceania'
+        | 'Australia'
       required_document_type:
         | 'pitch_deck'
         | 'video'
@@ -2406,57 +2408,60 @@ export const Constants = {
         '500K+',
       ],
       industry_type: [
+        'Agnostic',
         'Software',
+        'AI',
+        'Deep tech',
+        'Data',
+        'Developer tools',
+        'Cybersecurity',
+        'Security',
+        'Computing',
+        'Hardware',
+        'Robotics',
+        'IoT',
+        'AR/VR',
+        'Web3',
         'Fintech',
         'Healthcare',
         'Medtech',
-        'AI',
-        'Computing',
-        'Deep tech',
+        'Biotechnology',
+        'Pharmaceuticals',
+        'Education',
+        'Legal',
+        'Government',
+        'HR',
+        'Insurance',
         'Climate',
+        'Energy',
+        'Environment',
+        'Biofuels',
+        'Advanced Materials',
+        'Nanotechnology',
+        'Manufacturing',
+        'Construction',
+        'Mining',
+        'Agriculture',
+        'Automotive',
         'Consumer',
         'E-commerce',
         'Marketplace',
-        'Gaming',
-        'Web3',
-        'Developer tools',
-        'Cybersecurity',
-        'Logistics',
-        'Adtech',
-        'Proptech',
-        'Agriculture',
-        'Automotive',
-        'Biotechnology',
-        'Construction',
-        'Education',
-        'Energy',
-        'Entertainment',
-        'Environment',
-        'Fashion',
-        'Real estate',
-        'Food',
-        'IoT',
-        'Government',
-        'Hospitality',
-        'HR',
-        'Insurance',
-        'Security',
-        'Social',
-        'Aerospace',
-        'AR/VR',
-        'Mining',
-        'Advanced Materials',
-        'Biofuels',
-        'Hardware',
-        'Nanotechnology',
-        'Legal',
-        'Manufacturing',
-        'Media',
-        'Pharmaceuticals',
         'Retail',
-        'Telecommunications',
+        'Food',
+        'Hospitality',
+        'Fashion',
+        'Media',
+        'Entertainment',
+        'Gaming',
+        'Adtech',
+        'Social',
+        'Real estate',
+        'Proptech',
+        'Logistics',
         'Transportation',
-        'Agnostic',
+        'Telecommunications',
+        'Aerospace',
+        'Defense',
         'Other',
       ],
       investment_approach: [
@@ -2505,35 +2510,34 @@ export const Constants = {
       region_type: [
         'Global',
         'North America',
-        'South America',
-        'LATAM',
-        'Europe',
-        'Middle East',
-        'Africa',
-        'Asia',
-        'East Asia',
-        'South East Asia',
-        'South Asia',
-        'Oceania',
-        'EMEA',
-        'Emerging Markets',
-        'India',
-        'China',
-        'Japan',
-        'Korea',
-        'Australia',
         'United States',
         'Canada',
+        'LATAM',
+        'South America',
+        'Europe',
         'UK',
         'France',
+        'Netherlands',
+        'Sweden',
+        'Emerging Markets',
+        'EMEA',
+        'Middle East',
+        'Africa',
         'Nigeria',
         'Kenya',
         'Egypt',
         'Senegal',
         'South Africa',
-        'Netherlands',
-        'Sweden',
-        'Other',
+        'Asia',
+        'South Asia',
+        'East Asia',
+        'South East Asia',
+        'India',
+        'China',
+        'Japan',
+        'Korea',
+        'Oceania',
+        'Australia',
       ],
       required_document_type: [
         'pitch_deck',

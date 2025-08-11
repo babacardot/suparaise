@@ -65,8 +65,8 @@ export function MobileUpgradeCard({
                 Ready to scale ?
               </h3>
               <p className="text-[10px] text-muted-foreground leading-tight">
-                500+ applications monthly • 25 parallel submissions • Unlimited
-                queue • Dedicated support
+                500+ applications • 25 parallel submissions • Unlimited queue •
+                Dedicated support
               </p>
             </CardContent>
           </Card>
