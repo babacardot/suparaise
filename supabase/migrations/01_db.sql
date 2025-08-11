@@ -37,8 +37,6 @@ CREATE TYPE region_type AS ENUM (
     'India',
     'China',
     'Japan',
-    'Korea',
-    'Oceania',
     'Australia'
 );
 CREATE TYPE founder_role AS ENUM (

@@ -284,7 +284,6 @@ export default function AcceleratorsFilters({
         'India',
         'China',
         'Japan',
-        'Korea',
       ].includes(region)
     ) {
       return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40'
@@ -306,10 +305,6 @@ export default function AcceleratorsFilters({
       ].includes(region)
     ) {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40'
-    }
-    // Oceania - includes country-level variants
-    if (['Oceania', 'Australia'].includes(region)) {
-      return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/40'
     }
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/40'
   }, [])

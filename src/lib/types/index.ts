@@ -215,8 +215,6 @@ export const FILTER_OPTIONS = {
       'India',
       'China',
       'Japan',
-      'Korea',
-      'Oceania',
       'Australia',
     ]
     const rank = (v: (typeof DATABASE_ENUMS.region_type)[number]) => {

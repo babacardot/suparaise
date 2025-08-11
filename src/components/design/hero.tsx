@@ -68,9 +68,9 @@ export function HeroSection() {
                     Automate your fundraising efforts
                   </h1>
                   <p className="mt-8 max-w-2xl text-pretty text-lg">
-                    Let our agents handle the tedious task of filling out investment
-                    application forms and reaching out to funds, so you can
-                    focus on building your business.
+                    Let our agents handle the tedious task of filling out
+                    investment application forms and reaching out to funds, so
+                    you can focus on building your business.
                   </p>
                   <div className="mt-12 flex items-center gap-2">
                     {!user && (
