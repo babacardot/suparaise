@@ -378,9 +378,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -688,8 +687,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                    .split(',')
-                    .filter(Boolean)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -2557,7 +2556,7 @@ export default function CompanySettings() {
                   />
                   {!formData.pitchDeckUrl ? (
                     <div className="flex items-center space-x-4">
-                      <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                      <div className="h-20 w-20 bg-cyan-50 dark:bg-cyan-900/20 border-2 border-dashed border-cyan-200 dark:border-cyan-800 rounded-sm flex items-center justify-center">
                         <LottieIcon
                           animationData={animations.fileplus}
                           size={32}
@@ -2575,7 +2574,7 @@ export default function CompanySettings() {
                             pitchDeckInputRef.current?.click()
                           }}
                           disabled={pitchDeckUploading}
-                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                          className="bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 hover:text-cyan-800 dark:hover:text-cyan-200 border border-cyan-200 dark:border-cyan-800 rounded-sm"
                         >
                           {pitchDeckUploading ? (
                             <>
@@ -2606,7 +2605,7 @@ export default function CompanySettings() {
                             pitchDeckInputRef.current?.click()
                           }}
                           disabled={pitchDeckUploading}
-                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                          className="bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 hover:text-cyan-800 dark:hover:text-cyan-200 border border-cyan-200 dark:border-cyan-800 rounded-sm"
                         >
                           {pitchDeckUploading ? (
                             <>
@@ -2656,7 +2655,7 @@ export default function CompanySettings() {
                   />
                   {!formData.introVideoUrl ? (
                     <div className="flex items-center space-x-4">
-                      <div className="h-20 w-20 bg-background dark:bg-muted border-2 border-dashed border-border rounded-sm flex items-center justify-center">
+                      <div className="h-20 w-20 bg-cyan-50 dark:bg-cyan-900/20 border-2 border-dashed border-cyan-200 dark:border-cyan-800 rounded-sm flex items-center justify-center">
                         <LottieIcon
                           animationData={animations.fileplus}
                           size={32}
@@ -2674,7 +2673,7 @@ export default function CompanySettings() {
                             videoInputRef.current?.click()
                           }}
                           disabled={videoUploading}
-                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                          className="bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 hover:text-cyan-800 dark:hover:text-cyan-200 border border-cyan-200 dark:border-cyan-800 rounded-sm"
                         >
                           {videoUploading ? (
                             <>
@@ -2705,7 +2704,7 @@ export default function CompanySettings() {
                             videoInputRef.current?.click()
                           }}
                           disabled={videoUploading}
-                          className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                          className="bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 hover:text-cyan-800 dark:hover:text-cyan-200 border border-cyan-200 dark:border-cyan-800 rounded-sm"
                         >
                           {videoUploading ? (
                             <>
@@ -2987,7 +2986,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {
@@ -3102,7 +3101,7 @@ export default function CompanySettings() {
                     <div className="space-y-3 pt-0">
                       <Label htmlFor="confirm" className="text-sm font-medium">
                         Please type{' '}
-                        <span className="font-semibold text-red-500">
+                        <span className="font-semibold text-red-500 pt-1">
                           DELETE
                         </span>{' '}
                         to confirm

@@ -306,6 +306,10 @@ export default React.memo(function FundsActions({
     ) {
       return 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
     }
+    // Australia - Cyan
+    if (['Australia'].includes(region)) {
+      return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
+    }
     // Default
     return 'bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
   }

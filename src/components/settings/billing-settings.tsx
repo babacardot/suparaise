@@ -437,7 +437,7 @@ export default function BillingSettings() {
                   'group relative p-4 border rounded-sm transition-all duration-200',
                   'hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/50 dark:hover:bg-purple-950/20',
                   usageBillingData.usageBillingEnabled &&
-                    'border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/10',
+                  'border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/10',
                 )}
               >
                 <div className="flex items-center justify-between">

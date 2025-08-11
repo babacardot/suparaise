@@ -636,14 +636,14 @@ BEGIN
             'submissionDelay', 30,
             'maxParallelSubmissions', CASE 
                 WHEN user_permission = 'FREE' THEN 1
-                WHEN user_permission = 'PRO' THEN 3
-                WHEN user_permission = 'MAX' THEN 5       -- Corrected to 5
-                WHEN user_permission = 'ENTERPRISE' THEN 25 -- New Enterprise tier
+                WHEN user_permission = 'PRO' THEN 2
+                WHEN user_permission = 'MAX' THEN 5
+                WHEN user_permission = 'ENTERPRISE' THEN 25
                 ELSE 1
             END,
             'maxQueueSize', CASE 
-                WHEN user_permission = 'FREE' THEN 3
-                WHEN user_permission = 'PRO' THEN 25
+                WHEN user_permission = 'FREE' THEN 2
+                WHEN user_permission = 'PRO' THEN 20
                 WHEN user_permission = 'MAX' THEN 50
                 WHEN user_permission = 'ENTERPRISE' THEN 75 -- New Enterprise tier
                 ELSE 3

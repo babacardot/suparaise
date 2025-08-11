@@ -260,6 +260,9 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     ) {
       return 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
     }
+    if (region === 'Australia') {
+      return 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
+    }
     return 'bg-slate-50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
   }, [])
 
@@ -714,7 +717,11 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                         <TableCell className="font-medium p-2 pl-4">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              {accelerator.website ? (
+                              {accelerator.website &&
+                              subscription?.permission_level &&
+                              ['PRO', 'MAX', 'ENTERPRISE'].includes(
+                                subscription.permission_level,
+                              ) ? (
                                 <a
                                   href={accelerator.website}
                                   target="_blank"

@@ -76,22 +76,22 @@ BEGIN
         CASE 
             WHEN LOWER(p_plan_name) LIKE '%pro%' THEN
                 v_permission_level := 'PRO';
-                v_monthly_limit := 50;
+                v_monthly_limit := 20;
             WHEN LOWER(p_plan_name) LIKE '%max%' THEN
                 v_permission_level := 'MAX';
-                v_monthly_limit := 120;
+                v_monthly_limit := 50;
             ELSE
                 v_permission_level := 'FREE';
-                v_monthly_limit := 3;
+                v_monthly_limit := 2;
         END CASE;
     ELSE
         -- Default based on subscription status
         IF v_calculated_is_subscribed THEN
             v_permission_level := 'PRO'; -- Default paid tier
-            v_monthly_limit := 50;
+            v_monthly_limit := 20;
         ELSE
             v_permission_level := 'FREE';
-            v_monthly_limit := 3;
+            v_monthly_limit := 2;
         END IF;
     END IF;
     
