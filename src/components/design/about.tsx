@@ -95,7 +95,7 @@ export const About = () => {
             <h1 className="text-5xl font-bold tracking-tight mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Turn months of fundraising into days
             </h1>
-            <p className="text-lg text-foreground max-w-4xl mx-auto leading-relaxed">
+            <p className="text-lg text-foreground max-w-5xl mx-auto leading-relaxed">
               Suparaise puts your fundraising on autopilot. Let AI agents handle
               everything from application forms to personalized outreach. Built
               by a founder who got tired of wasting his time on paperwork

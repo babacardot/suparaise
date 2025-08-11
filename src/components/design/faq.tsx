@@ -59,7 +59,7 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
       <section
         ref={ref}
         id="faq"
-        className={cn('pt-20 pb-32 select-none', className)}
+        className={cn('pt-10 pb-32 select-none', className)}
         {...props}
       >
         <div className="mx-auto max-w-5xl px-6">

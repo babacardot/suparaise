@@ -54,7 +54,7 @@ export async function GET() {
 
     return NextResponse.json({
       usageBillingEnabled: profile.usage_billing_enabled || false,
-      estimatedUsageCost: profile.monthly_estimated_usage_cost || 0,
+      currentMonthUsageCost: profile.monthly_estimated_usage_cost || 0,
       actualUsageCost: profile.actual_usage_cost || 0,
       lastInvoiceDate: profile.last_invoice_date,
       monthlyUsageSubmissionsCount:
