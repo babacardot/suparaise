@@ -2200,8 +2200,6 @@ export type Database = {
         | 'India'
         | 'China'
         | 'Japan'
-        | 'Korea'
-        | 'Oceania'
         | 'Australia'
       required_document_type:
         | 'pitch_deck'
@@ -2535,8 +2533,6 @@ export const Constants = {
         'India',
         'China',
         'Japan',
-        'Korea',
-        'Oceania',
         'Australia',
       ],
       required_document_type: [
