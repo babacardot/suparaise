@@ -5,6 +5,7 @@ import Pricing from '@/components/design/pricing'
 import { FaqSection } from '@/components/design/faq'
 import { Footer } from '@/components/design/footer'
 import { BackgroundText } from '@/components/design/background-text'
+import CookieConsent from '@/components/design/tracking-cookie'
 import type { Metadata } from 'next'
 // import { LandingCustomers } from '@/components/design/landing-customers'
 
@@ -23,6 +24,7 @@ export default function LandingPage() {
       <FaqSection />
       <Footer />
       <BackgroundText />
+      <CookieConsent />
     </>
   )
 }

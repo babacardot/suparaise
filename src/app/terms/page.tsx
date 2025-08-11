@@ -66,6 +66,78 @@ export default function TermsPage() {
                 </div>
               </div>
 
+              {/* Billing & Subscriptions */}
+              <div className="relative">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
+                <div className="pl-8">
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold">Billing and subscriptions</h2>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    We offer multiple plans, including free and paid tiers, and may
+                    provide usage-based billing for additional runs. Prices and plan
+                    limits are described on our pricing page and may change from time
+                    to time. Taxes, where applicable, will be added at checkout. By
+                    starting a subscription, you authorize us (and our payment
+                    processor) to charge the applicable fees on a recurring basis
+                    until you cancel.
+                  </p>
+                </div>
+              </div>
+
+              {/* Trials */}
+              <div className="relative">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
+                <div className="pl-8">
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold">Trials</h2>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    From time to time, we may offer a free or discounted trial on
+                    certain plans. Unless otherwise stated, at the end of the trial
+                    your subscription will continue automatically at the then-current
+                    rate unless you cancel before renewal.
+                  </p>
+                </div>
+              </div>
+
+              {/* Cancellations */}
+              <div className="relative">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
+                <div className="pl-8">
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold">Cancellations</h2>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    You may cancel your subscription at any time in your dashboard.
+                    When you cancel, you will retain access to paid features until the
+                    end of the current billing period. Fees already paid are not
+                    prorated.
+                  </p>
+                </div>
+              </div>
+
+              {/* Refunds and credits */}
+              <div className="relative">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
+                <div className="pl-8">
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold">Refunds and credits</h2>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    Our goal is to provide a reliable automation experience. Because
+                    the Service is delivered immediately and capacity is reserved on
+                    your behalf, all fees are generally non-refundable. In rare cases
+                    where you experience a material, verifiable technical issue that
+                    prevents you from using the Service as described, we may, at our
+                    sole discretion, offer a remedy such as troubleshooting support,
+                    additional usage, or an account credit. Any discretionary credit
+                    must be requested within seven (7) days of purchase and will not
+                    exceed the amount paid for the affected period.
+                  </p>
+                </div>
+              </div>
+
               <div className="relative">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/20 rounded-sm"></div>
                 <div className="pl-8">
