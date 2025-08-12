@@ -142,12 +142,13 @@ export const Pricing = () => {
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
                       <Check
-                        className={`size-4 shrink-0 mt-0.5 ${tier.permissionLevel === 'MAX'
+                        className={`size-4 shrink-0 mt-0.5 ${
+                          tier.permissionLevel === 'MAX'
                             ? 'text-amber-700 dark:text-amber-300'
                             : tier.permissionLevel === 'ENTERPRISE'
                               ? 'text-purple-700 dark:text-purple-300'
                               : 'text-green-700 dark:text-green-300'
-                          }`}
+                        }`}
                       />
                       {feature}
                     </li>
@@ -159,16 +160,17 @@ export const Pricing = () => {
                     asChild
                     onClick={
                       tier.permissionLevel === 'PRO' ||
-                        tier.permissionLevel === 'MAX'
+                      tier.permissionLevel === 'MAX'
                         ? playClickSound
                         : undefined
                     }
-                    className={`mt-6 w-full ${tier.popular
+                    className={`mt-6 w-full ${
+                      tier.popular
                         ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
                         : tier.permissionLevel === 'MAX'
                           ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:text-amber-800 dark:hover:text-amber-200 border border-amber-200 dark:border-amber-800'
                           : ''
-                      }`}
+                    }`}
                     variant="outline"
                   >
                     <Link href={tier.href}>{tier.buttonText}</Link>

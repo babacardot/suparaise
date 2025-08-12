@@ -30,7 +30,9 @@ export const UseCases = ({ scenarios }: { scenarios: Scenario[] }) => {
               variant="outline"
               className="rounded-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground dark:hover:bg-sidebar-accent transition-colors duration-200"
             >
-              <Link href="#technical-pre-seed">Fundraising is time-consuming</Link>
+              <Link href="#technical-pre-seed">
+                Fundraising is time-consuming
+              </Link>
             </Button>
             <Button
               asChild
