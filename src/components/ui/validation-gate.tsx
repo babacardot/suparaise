@@ -247,14 +247,14 @@ export function ValidationGate({
                       {missingFields.filter(
                         (field) => field.category !== 'documents',
                       ).length > 4 && (
-                        <div className="text-xs text-sidebar-foreground/50 italic">
-                          +
-                          {missingFields.filter(
-                            (field) => field.category !== 'documents',
-                          ).length - 4}{' '}
-                          more fields...
-                        </div>
-                      )}
+                          <div className="text-xs text-sidebar-foreground/50 italic">
+                            +
+                            {missingFields.filter(
+                              (field) => field.category !== 'documents',
+                            ).length - 4}{' '}
+                            more fields...
+                          </div>
+                        )}
                     </div>
                   </div>
                 )}
@@ -281,7 +281,7 @@ export const VALIDATION_PRESETS = {
       firstName: true,
       lastName: true,
       email: true,
-      phone: false,
+      phone: true,
       role: true,
       // bio: true,
       // linkedin: true,
@@ -295,6 +295,7 @@ export const VALIDATION_PRESETS = {
       descriptionShort: true,
       descriptionMedium: true,
       fundingRound: true,
+      googleDriveUrl: true,
       // revenueModel: true,
       // legalStructure: true,
       // employeeCount: true,
