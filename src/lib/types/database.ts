@@ -2069,7 +2069,7 @@ export type Database = {
         | 'deepseek-r1-0528'
         | 'gemini-2.5-pro'
       agent_parallel_submissions: '1' | '3' | '5' | '15' | '25' | '35'
-      agent_submission_delay: '0' | '15' | '30'
+      agent_submission_delay: '0' | '30' | '300'
       agent_tone: 'professional' | 'enthusiastic' | 'concise' | 'detailed'
       batch_size: '1-10' | '11-20' | '21-50' | '51-100' | '100+'
       browser_system:
@@ -2398,7 +2398,7 @@ export const Constants = {
         'gemini-2.5-pro',
       ],
       agent_parallel_submissions: ['1', '3', '5', '15', '25', '35'],
-      agent_submission_delay: ['0', '15', '30'],
+      agent_submission_delay: ['0', '30', '300'],
       agent_tone: ['professional', 'enthusiastic', 'concise', 'detailed'],
       batch_size: ['1-10', '11-20', '21-50', '51-100', '100+'],
       browser_system: [

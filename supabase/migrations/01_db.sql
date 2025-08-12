@@ -140,7 +140,7 @@ CREATE TYPE agent_model AS ENUM (
     'deepseek-r1-0528',
     'gemini-2.5-pro'
 );
-CREATE TYPE agent_submission_delay AS ENUM ('0', '15', '30');
+CREATE TYPE agent_submission_delay AS ENUM ('0', '30', '300');
 CREATE TYPE agent_parallel_submissions AS ENUM ('1', '3', '5', '15', '25', '35');
 CREATE TYPE check_size_range AS ENUM ('1K-10K', '10K-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K-1M', '1M+');
 CREATE TYPE investment_approach AS ENUM ('hands-on', 'passive', 'advisory', 'network-focused');
@@ -529,7 +529,7 @@ CREATE TABLE agent_settings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     startup_id UUID REFERENCES startups(id) ON DELETE CASCADE NOT NULL,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-    submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
+    submission_delay agent_submission_delay DEFAULT '300' NOT NULL,
     max_parallel_submissions agent_parallel_submissions DEFAULT '1' NOT NULL,
     max_queue_size INTEGER DEFAULT 0 NOT NULL,
     preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
@@ -924,7 +924,7 @@ CREATE TABLE agent_settings_archive (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     startup_id UUID NOT NULL,
     user_id UUID NOT NULL,
-    submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
+    submission_delay agent_submission_delay DEFAULT '300' NOT NULL,
     max_parallel_submissions agent_parallel_submissions DEFAULT '1' NOT NULL,
     model agent_model DEFAULT 'claude-4-sonnet' NOT NULL,
     preferred_tone agent_tone DEFAULT 'professional' NOT NULL,

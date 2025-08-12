@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import {
   ChevronDown,
+  ChevronRight,
   Plus,
   X,
   Check,
@@ -378,9 +379,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -532,19 +532,20 @@ const CompetitorInput: React.FC<{
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2">
+      <div className="flex">
         <Input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type competitor name and press Enter..."
+          className="rounded-l-sm rounded-r-none"
         />
         <Button
           type="button"
           variant="outline"
           onClick={addCompetitor}
           disabled={!inputValue.trim()}
-          className="shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-r-sm rounded-l-none"
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -628,6 +629,10 @@ export default function CompanySettings() {
     financialProjectionsUrl: null as string | null,
     businessPlanUrl: null as string | null,
     googleDriveUrl: '',
+    kpis: '',
+    risks: '',
+    unfairAdvantage: '',
+    useOfFunds: '',
   })
 
   // File upload states
@@ -640,6 +645,9 @@ export default function CompanySettings() {
   const videoInputRef = useRef<HTMLInputElement>(null)
   const financialProjectionsInputRef = useRef<HTMLInputElement>(null)
   const businessPlanInputRef = useRef<HTMLInputElement>(null)
+
+  // Additional context section state
+  const [isKnowledgeBaseExpanded, setIsKnowledgeBaseExpanded] = useState(false)
 
   // Fetch startup data when component mounts or startup changes
   // Debounced to prevent spam during rapid navigation
@@ -688,8 +696,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                    .split(',')
-                    .filter(Boolean)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -704,6 +712,10 @@ export default function CompanySettings() {
               startupData.financialProjectionsUrl || null,
             businessPlanUrl: startupData.businessPlanUrl || null,
             googleDriveUrl: startupData.googleDriveUrl || '',
+            kpis: startupData.kpis || '',
+            risks: startupData.risks || '',
+            unfairAdvantage: startupData.unfairAdvantage || '',
+            useOfFunds: startupData.useOfFunds || '',
           })
         }
       } catch (error) {
@@ -2189,10 +2201,10 @@ export default function CompanySettings() {
                       formData.legalStructure !== 'Not yet incorporated')
                   }
                   className={cn(
-                    'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
+                    'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm transition-all',
                     !formData.isIncorporated
-                      ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
-                      : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                      ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-900 dark:text-orange-100 font-bold border-orange-200 dark:border-orange-800'
+                      : 'border-border bg-background text-muted-foreground hover:bg-muted font-medium',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                   )}
                 >
@@ -2235,10 +2247,10 @@ export default function CompanySettings() {
                   }}
                   disabled={isLoading || Boolean(formData.isIncorporated)}
                   className={cn(
-                    'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
+                    'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm transition-all',
                     formData.isIncorporated
-                      ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800'
-                      : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                      ? 'bg-green-50 dark:bg-green-900/20 text-green-900 dark:text-green-100 font-bold border-green-200 dark:border-green-800'
+                      : 'border-border bg-background text-muted-foreground hover:bg-muted font-medium',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                   )}
                 >
@@ -2515,7 +2527,7 @@ export default function CompanySettings() {
 
           {/* Cloud storage */}
           <div className="space-y-3">
-            <Label htmlFor="googleDriveUrl">Cloud storage / Docsend</Label>
+            <Label htmlFor="googleDriveUrl">Cloud storage | Docsend</Label>
             <div className="relative">
               <Input
                 id="googleDriveUrl"
@@ -2530,7 +2542,7 @@ export default function CompanySettings() {
               <p className="text-xs text-muted-foreground mt-2">
                 Link to a folder with your pitch deck and any other materials
                 you judge relevant for investors. The agent will privilege
-                sharing this link over individual uploads.
+                sharing this link over individual uploads. <span className="text-red-600 dark:text-red-400 font-medium">This is mandatory for most funds as most investors require a pitch deck of your company.</span>
               </p>
             </div>
           </div>
@@ -2924,6 +2936,98 @@ export default function CompanySettings() {
             )}
           </div>
 
+          {/* Additional context */}
+          <div className="space-y-3">
+            <button
+              onClick={() => {
+                playClickSound()
+                setIsKnowledgeBaseExpanded(!isKnowledgeBaseExpanded)
+              }}
+              className="flex items-center gap-2 w-full text-left hover:text-foreground transition-colors"
+            >
+              {isKnowledgeBaseExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+              <span className="font-medium text-sm">Additional context</span>
+            </button>
+
+            {isKnowledgeBaseExpanded && (
+              <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <p className="text-xs text-muted-foreground">
+                  Provide detailed answers to these key questions to give your
+                  agent a deep, contextual understanding of your startup.
+                </p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="kpis" className="text-sm font-medium">
+                      About your key performance indicators
+                    </Label>
+                    <Textarea
+                      id="kpis"
+                      value={formData.kpis || ''}
+                      onChange={(e) =>
+                        handleInputChange('kpis', e.target.value)
+                      }
+                      onBlur={() => handleFieldSave('kpis')}
+                      className="rounded-sm min-h-[80px]"
+                      placeholder="e.g., Customer Acquisition Cost (CAC), Customer Lifetime Value (LTV), Churn Rate..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="risks" className="text-sm font-medium">
+                      About your current challenges
+                    </Label>
+                    <Textarea
+                      id="risks"
+                      value={formData.risks || ''}
+                      onChange={(e) =>
+                        handleInputChange('risks', e.target.value)
+                      }
+                      onBlur={() => handleFieldSave('risks')}
+                      className="rounded-sm min-h-[80px]"
+                      placeholder="e.g., Market competition, regulatory hurdles, technological challenges, key dependencies..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="unfairAdvantage"
+                      className="text-sm font-medium"
+                    >
+                      About your unfair advantage
+                    </Label>
+                    <Textarea
+                      id="unfairAdvantage"
+                      value={formData.unfairAdvantage || ''}
+                      onChange={(e) =>
+                        handleInputChange('unfairAdvantage', e.target.value)
+                      }
+                      onBlur={() => handleFieldSave('unfairAdvantage')}
+                      className="rounded-sm min-h-[80px]"
+                      placeholder="e.g., Proprietary technology, exclusive partnerships, unique data access, world-class team expertise..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="useOfFunds" className="text-sm font-medium">
+                      About your use of funds
+                    </Label>
+                    <Textarea
+                      id="useOfFunds"
+                      value={formData.useOfFunds || ''}
+                      onChange={(e) =>
+                        handleInputChange('useOfFunds', e.target.value)
+                      }
+                      onBlur={() => handleFieldSave('useOfFunds')}
+                      className="rounded-sm min-h-[80px]"
+                      placeholder="e.g., 40% for product development, 30% for sales & marketing, 20% for hiring key personnel, 10% for operational expenses..."
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Danger Zone - Only show when user has more than 1 startup */}
           {startups.length > 1 && (
             <div className="mt-8">
@@ -2982,7 +3086,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

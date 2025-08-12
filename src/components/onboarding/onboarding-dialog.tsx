@@ -400,13 +400,15 @@ export function OnboardingDialog({
         founders.forEach((founder, index) => {
           const founderLabel = index === 0 ? 'You' : `Co-founder ${index}`
 
-          // Only first name, last name, and email are required
+          // First name, last name, email and phone are required
           if (!founder.firstName.trim())
             errors.push(`First name for ${founderLabel} is required`)
           if (!founder.lastName.trim())
             errors.push(`Last name for ${founderLabel} is required`)
           if (!founder.email.trim())
             errors.push(`Email for ${founderLabel} is required`)
+          if (!founder.phone.trim())
+            errors.push(`Phone number for ${founderLabel} is required`)
 
           // Validate format only if provided - much more lenient
           if (
@@ -466,6 +468,8 @@ export function OnboardingDialog({
         if (!startup.website.trim()) errors.push('Company website is required')
         if (!startup.descriptionShort.trim())
           errors.push('One-liner is required')
+        if (!startup.googleDriveUrl.trim())
+          errors.push('Cloud storage / Docsend URL is required')
         // Removed: elevator pitch, full description, industry, location, founded year, legal structure
 
         // Validate website URL format
@@ -575,6 +579,8 @@ export function OnboardingDialog({
         errors.website = 'Company website is required'
       if (!startup.descriptionShort.trim())
         errors.descriptionShort = 'One-liner is required'
+      if (!startup.googleDriveUrl.trim())
+        errors.googleDriveUrl = 'Cloud storage / Docsend URL is required'
       // Removed: elevator pitch, full description, industry, location requirements
     }
 

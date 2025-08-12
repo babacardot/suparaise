@@ -21,6 +21,7 @@ const playSound = (soundFile: string) => {
 }
 
 const playNopeSound = () => playSound('/sounds/nope.mp3')
+const playLightSound = () => playSound('/sounds/light.mp3')
 
 // Helper function to format field names for display
 const formatFieldName = (fieldName: string): string => {
@@ -140,11 +141,10 @@ export default function AgentSettings() {
   const [isLoading, setIsLoading] = useState(false)
 
   const [dataLoading, setDataLoading] = useState(true)
-  const [isKnowledgeBaseExpanded, setIsKnowledgeBaseExpanded] = useState(false)
   const [isCustomizationExpanded, setIsCustomizationExpanded] = useState(false)
 
   const [formData, setFormData] = useState({
-    submissionDelay: 30, // seconds between submissions
+    submissionDelay: 300, // seconds between submissions (5 minutes for FREE users)
     maxParallelSubmissions: 1,
     enableDebugMode: false,
     customInstructions: '',
@@ -161,11 +161,6 @@ export default function AgentSettings() {
     enableStealth: true, // avoid detection
     enableAutopilot: false, // AI automatic selection and submission
     permissionLevel: 'FREE' as 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE', // user's subscription level
-    // Knowledge base fields
-    kpis: '',
-    risks: '',
-    unfairAdvantage: '',
-    useOfFunds: '',
   })
 
   // Fetch agent settings when component mounts or startup changes
@@ -366,8 +361,8 @@ export default function AgentSettings() {
   const getSubmissionDelayOptions = () => {
     const allOptions = [
       { value: 0, label: 'No delay', tier: 'MAX' },
-      { value: 15, label: '15 seconds', tier: 'PRO' },
-      { value: 30, label: '30 seconds', tier: 'FREE' },
+      { value: 30, label: '30 seconds', tier: 'PRO' },
+      { value: 300, label: '5 minutes', tier: 'FREE' },
     ]
 
     return allOptions
@@ -414,14 +409,7 @@ export default function AgentSettings() {
         <div className="space-y-6 pr-2">
           {/* Advanced Features */}
           <div className="space-y-4">
-            <div
-              className={cn(
-                'group relative p-4 border rounded-sm transition-all duration-200',
-                'hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20',
-                formData.enableStealth &&
-                  'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10',
-              )}
-            >
+            <div className="group relative p-4 border rounded-sm transition-all duration-200 border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -436,30 +424,14 @@ export default function AgentSettings() {
                     Use advanced patches to mimic human behavior patterns, avoid
                     bot detection, and ensure natural interaction with investor
                     portals.
+                    <span className="block mt-1 text-blue-600 dark:text-blue-400 font-medium">
+                      Always enabled for optimal performance.
+                    </span>
                   </p>
                 </div>
-                <button
-                  onClick={async () => {
-                    const newValue = !formData.enableStealth
-                    handleInputChange('enableStealth', newValue)
-                    await handleFieldSave('enableStealth', newValue)
-                  }}
-                  className={cn(
-                    'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                    formData.enableStealth
-                      ? 'bg-blue-600'
-                      : 'bg-gray-200 dark:bg-gray-700',
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
-                      formData.enableStealth
-                        ? 'translate-x-5'
-                        : 'translate-x-1',
-                    )}
-                  />
-                </button>
+                <div className="relative inline-flex h-5 w-9 items-center rounded-sm bg-blue-600 cursor-not-allowed opacity-75">
+                  <span className="inline-block h-3 w-3 transform rounded-sm bg-white translate-x-5" />
+                </div>
               </div>
             </div>
 
@@ -651,7 +623,7 @@ export default function AgentSettings() {
                     className="w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm"
                     value={formData.submissionDelay}
                     onChange={async (e) => {
-                      const newValue = parseInt(e.target.value) || 30
+                      const newValue = parseInt(e.target.value) || 300
                       const selectedOption = getSubmissionDelayOptions().find(
                         (opt) => opt.value === newValue,
                       )
@@ -750,9 +722,10 @@ export default function AgentSettings() {
           {/* Style Customization */}
           <div className="space-y-3">
             <button
-              onClick={() =>
+              onClick={() => {
+                playLightSound()
                 setIsCustomizationExpanded(!isCustomizationExpanded)
-              }
+              }}
               className="flex items-center gap-2 w-full text-left hover:text-foreground transition-colors"
             >
               {isCustomizationExpanded ? (
@@ -860,97 +833,6 @@ export default function AgentSettings() {
                       onAIEnhance={(enhancedText) =>
                         handleInputChange('customInstructions', enhancedText)
                       }
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Agent Knowledge Base - Hidden on mobile */}
-          <div className="space-y-3 hidden md:block">
-            <button
-              onClick={() =>
-                setIsKnowledgeBaseExpanded(!isKnowledgeBaseExpanded)
-              }
-              className="flex items-center gap-2 w-full text-left hover:text-foreground transition-colors"
-            >
-              {isKnowledgeBaseExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-              <span className="font-medium text-sm">Additional context</span>
-            </button>
-
-            {isKnowledgeBaseExpanded && (
-              <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
-                <p className="text-xs text-muted-foreground">
-                  Provide detailed answers to these key questions to give your
-                  agent a deep, contextual understanding of your startup.
-                </p>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="kpis" className="text-sm font-medium">
-                      About your key performance indicators
-                    </Label>
-                    <Textarea
-                      id="kpis"
-                      value={formData.kpis}
-                      onChange={(e) =>
-                        handleInputChange('kpis', e.target.value)
-                      }
-                      onBlur={() => handleFieldSave('kpis')}
-                      className="rounded-sm min-h-[80px]"
-                      placeholder="e.g., Customer Acquisition Cost (CAC), Customer Lifetime Value (LTV), Churn Rate..."
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="risks" className="text-sm font-medium">
-                      About your current challenges
-                    </Label>
-                    <Textarea
-                      id="risks"
-                      value={formData.risks}
-                      onChange={(e) =>
-                        handleInputChange('risks', e.target.value)
-                      }
-                      onBlur={() => handleFieldSave('risks')}
-                      className="rounded-sm min-h-[80px]"
-                      placeholder="e.g., Market competition, regulatory hurdles, technological challenges, key dependencies..."
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="unfairAdvantage"
-                      className="text-sm font-medium"
-                    >
-                      About your unfair advantage
-                    </Label>
-                    <Textarea
-                      id="unfairAdvantage"
-                      value={formData.unfairAdvantage}
-                      onChange={(e) =>
-                        handleInputChange('unfairAdvantage', e.target.value)
-                      }
-                      onBlur={() => handleFieldSave('unfairAdvantage')}
-                      className="rounded-sm min-h-[80px]"
-                      placeholder="e.g., Proprietary technology, exclusive partnerships, unique data access, world-class team expertise..."
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="useOfFunds" className="text-sm font-medium">
-                      About your use of funds
-                    </Label>
-                    <Textarea
-                      id="useOfFunds"
-                      value={formData.useOfFunds}
-                      onChange={(e) =>
-                        handleInputChange('useOfFunds', e.target.value)
-                      }
-                      onBlur={() => handleFieldSave('useOfFunds')}
-                      className="rounded-sm min-h-[80px]"
-                      placeholder="e.g., 40% for product development, 30% for sales & marketing, 20% for hiring key personnel, 10% for operational expenses..."
                     />
                   </div>
                 </div>

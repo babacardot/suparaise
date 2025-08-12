@@ -65,6 +65,10 @@ export type CompanySettingsData = {
   financialProjectionsUrl: Tables<'startups'>['financials_url']
   businessPlanUrl: Tables<'startups'>['business_plan_url']
   googleDriveUrl: Tables<'startups'>['google_drive_url']
+  kpis: Tables<'startups'>['kpis']
+  risks: Tables<'startups'>['risks']
+  unfairAdvantage: Tables<'startups'>['unfair_advantage']
+  useOfFunds: Tables<'startups'>['use_of_funds']
 }
 
 // We define its shape here so that TypeScript understands the object we get

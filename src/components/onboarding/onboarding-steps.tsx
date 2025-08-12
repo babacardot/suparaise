@@ -245,19 +245,20 @@ const CompetitorInput: React.FC<{
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2">
+      <div className="flex">
         <Input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type competitor name and press Enter..."
+          className="rounded-l-sm rounded-r-none"
         />
         <Button
           type="button"
           variant="outline"
           onClick={addCompetitor}
           disabled={!inputValue.trim()}
-          className="shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-r-sm rounded-l-none"
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -667,8 +668,10 @@ export const TeamStep: React.FC<
   return (
     <div className="space-y-6">
       <div className="select-none" onCopy={(e) => e.preventDefault()}>
-        <h3 className="text-lg font-semibold mb-4">Tell us about your team</h3>
-        <p className="text-sm text-muted-foreground mb-6">
+        <h3 className="text-lg font-semibold mb-4 select-none">
+          Tell us about your team
+        </h3>
+        <p className="text-sm text-muted-foreground mb-6 select-none">
           Start with the basics about yourself and any co-founders. You can
           always add more details later as your startup evolves.
         </p>
@@ -701,7 +704,10 @@ export const TeamStep: React.FC<
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-fname`}>
+                <Label
+                  htmlFor={`founder-${index}-fname`}
+                  className="select-none"
+                >
                   First name <span className="required-asterisk">*</span>
                 </Label>
                 <Input
@@ -726,7 +732,10 @@ export const TeamStep: React.FC<
                 )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-lname`}>
+                <Label
+                  htmlFor={`founder-${index}-lname`}
+                  className="select-none"
+                >
                   Last name <span className="required-asterisk">*</span>
                 </Label>
                 <Input
@@ -753,7 +762,10 @@ export const TeamStep: React.FC<
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-role`}>
+                <Label
+                  htmlFor={`founder-${index}-role`}
+                  className="select-none"
+                >
                   Role <span className="required-asterisk">*</span>
                 </Label>
                 <div className="relative">
@@ -780,7 +792,10 @@ export const TeamStep: React.FC<
                 </div>
               </div>
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-email`}>
+                <Label
+                  htmlFor={`founder-${index}-email`}
+                  className="select-none"
+                >
                   Email <span className="required-asterisk">*</span>
                 </Label>
                 <Input
@@ -798,7 +813,7 @@ export const TeamStep: React.FC<
                       : ''
                   }
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1 select-none">
                   Your company email is preferred.
                 </p>
                 {fieldErrors[index]?.email && (
@@ -810,7 +825,12 @@ export const TeamStep: React.FC<
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-phone`}>Phone</Label>
+                <Label
+                  htmlFor={`founder-${index}-phone`}
+                  className="select-none"
+                >
+                  Phone <span className="required-asterisk">*</span>
+                </Label>
                 <PhoneNumberInput
                   value={founder.phone}
                   onChange={(value) =>
@@ -828,12 +848,17 @@ export const TeamStep: React.FC<
                     {fieldErrors[index].phone}
                   </p>
                 )}
-                <p className="text-xs text-muted-foreground">
-                  Optional - helps investors reach you faster
+                <p className="text-xs text-muted-foreground select-none">
+                  Required - helps investors reach you faster
                 </p>
               </div>
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-linkedin`}>LinkedIn</Label>
+                <Label
+                  htmlFor={`founder-${index}-linkedin`}
+                  className="select-none"
+                >
+                  LinkedIn
+                </Label>
                 <Input
                   id={`founder-${index}-linkedin`}
                   value={founder.linkedin}
@@ -855,7 +880,7 @@ export const TeamStep: React.FC<
                 )}
                 {/* Show hint if LinkedIn URL was pre-populated */}
                 {prefilledFields?.linkedin && index === 0 && (
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-xs text-green-600 mt-1 select-none">
                     ✓ Pre-filled from your profile
                   </p>
                 )}
@@ -863,7 +888,12 @@ export const TeamStep: React.FC<
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-github`}>Github</Label>
+                <Label
+                  htmlFor={`founder-${index}-github`}
+                  className="select-none"
+                >
+                  Github
+                </Label>
                 <Input
                   id={`founder-${index}-github`}
                   value={founder.githubUrl}
@@ -885,7 +915,12 @@ export const TeamStep: React.FC<
                 )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor={`founder-${index}-twitter`}>X</Label>
+                <Label
+                  htmlFor={`founder-${index}-twitter`}
+                  className="select-none"
+                >
+                  X
+                </Label>
                 <Input
                   id={`founder-${index}-twitter`}
                   value={founder.twitterUrl}
@@ -907,14 +942,17 @@ export const TeamStep: React.FC<
                 )}
                 {/* Show hint if Twitter URL was pre-populated */}
                 {prefilledFields?.twitter && index === 0 && (
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-xs text-green-600 mt-1 select-none">
                     ✓ Pre-filled from your profile
                   </p>
                 )}
               </div>
             </div>
             <div className="space-y-3">
-              <Label htmlFor={`founder-${index}-website`}>
+              <Label
+                htmlFor={`founder-${index}-website`}
+                className="select-none"
+              >
                 Personal website
               </Label>
               <Input
@@ -938,7 +976,9 @@ export const TeamStep: React.FC<
               )}
             </div>
             <div className="space-y-3">
-              <Label htmlFor={`founder-${index}-bio`}>Bio</Label>
+              <Label htmlFor={`founder-${index}-bio`} className="select-none">
+                Bio
+              </Label>
               <Textarea
                 id={`founder-${index}-bio`}
                 value={founder.bio}
@@ -1071,10 +1111,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="select-none" onCopy={(e) => e.preventDefault()}>
-        <h3 className="text-lg font-semibold mb-4">
+        <h3 className="text-lg font-semibold mb-4 select-none">
           Tell us about your company
         </h3>
-        <p className="text-sm text-muted-foreground mb-6">
+        <p className="text-sm text-muted-foreground mb-6 select-none">
           Share what you&apos;re building. Don&apos;t worry about having
           everything perfect - you can refine these details anytime.
         </p>
@@ -1083,7 +1123,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <Label htmlFor="company-name">
+            <Label htmlFor="company-name" className="select-none">
               Name <span className="required-asterisk">*</span>
             </Label>
             <Input
@@ -1102,7 +1142,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             )}
           </div>
           <div className="space-y-3">
-            <Label htmlFor="company-website">
+            <Label htmlFor="company-website" className="select-none">
               Website <span className="required-asterisk">*</span>
             </Label>
             <div className="flex">
@@ -1138,7 +1178,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             {fieldErrors.website && (
               <p className="text-sm text-red-600 mt-1">{fieldErrors.website}</p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Click on the magic wand to auto-fill your details.
             </p>
           </div>
@@ -1146,7 +1186,9 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <Label htmlFor="founded-year">Founded year</Label>
+            <Label htmlFor="founded-year" className="select-none">
+              Founded year
+            </Label>
             <Input
               id="founded-year"
               type="number"
@@ -1171,12 +1213,14 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                 {fieldErrors.foundedYear}
               </p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - can update later
             </p>
           </div>
           <div className="space-y-3">
-            <Label htmlFor="location">Country</Label>
+            <Label htmlFor="location" className="select-none">
+              Country
+            </Label>
             <SingleSelectCountry
               selected={startup.location}
               onChange={(country) =>
@@ -1189,7 +1233,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                 {fieldErrors.location}
               </p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - where you&apos;re primarily based
             </p>
           </div>
@@ -1197,7 +1241,9 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <Label htmlFor="industry">Industry</Label>
+            <Label htmlFor="industry" className="select-none">
+              Industry
+            </Label>
             <div className="relative">
               <select
                 id="industry"
@@ -1228,12 +1274,14 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                 {fieldErrors.industry}
               </p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - helps match with relevant investors
             </p>
           </div>
           <div className="space-y-3">
-            <Label htmlFor="legal-structure">Legal structure</Label>
+            <Label htmlFor="legal-structure" className="select-none">
+              Legal structure
+            </Label>
             <div className="relative">
               <select
                 id="legal-structure"
@@ -1258,7 +1306,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - many early-stage startups don&apos;t have this yet
             </p>
           </div>
@@ -1266,7 +1314,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
         <div className="space-y-4">
           <div className="space-y-3">
-            <Label>Is your company incorporated?</Label>
+            <Label className="select-none">Is your company incorporated?</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
@@ -1282,10 +1330,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                 }}
                 disabled={!startup.isIncorporated}
                 className={cn(
-                  'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
+                  'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm transition-all',
                   !startup.isIncorporated
-                    ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
-                    : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                    ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-900 dark:text-orange-100 font-bold border-orange-200 dark:border-orange-800'
+                    : 'border-border bg-background text-muted-foreground hover:bg-muted font-medium',
                   'disabled:opacity-50 disabled:cursor-not-allowed',
                 )}
               >
@@ -1305,10 +1353,10 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                 }}
                 disabled={startup.isIncorporated}
                 className={cn(
-                  'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm font-medium transition-all',
+                  'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm transition-all',
                   startup.isIncorporated
-                    ? 'bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-100 border-green-200 dark:border-green-800'
-                    : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-900 dark:text-green-100 font-bold border-green-200 dark:border-green-800'
+                    : 'border-border bg-background text-muted-foreground hover:bg-muted font-medium',
                   'disabled:opacity-50 disabled:cursor-not-allowed',
                 )}
               >
@@ -1320,7 +1368,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           {startup.isIncorporated && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <Label htmlFor="incorporation-country">
+                <Label htmlFor="incorporation-country" className="select-none">
                   Incorporation country
                 </Label>
                 <SingleSelectCountry
@@ -1335,7 +1383,9 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                 />
               </div>
               <div className="space-y-3">
-                <Label htmlFor="incorporation-city">Incorporation city</Label>
+                <Label htmlFor="incorporation-city" className="select-none">
+                  Incorporation city
+                </Label>
                 <Input
                   id="incorporation-city"
                   value={startup.incorporationCity}
@@ -1353,7 +1403,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
           )}
 
           <div className="space-y-3">
-            <Label htmlFor="operating-countries">
+            <Label htmlFor="operating-countries" className="select-none">
               Countries where you operate
             </Label>
             <MultiSelectCountries
@@ -1392,14 +1442,14 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                 </div>
               </div>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - helps investors understand your market reach
             </p>
           </div>
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="one-liner">
+          <Label htmlFor="one-liner" className="select-none">
             One-liner <span className="required-asterisk">*</span>
           </Label>
           <Textarea
@@ -1432,13 +1482,15 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               {fieldErrors.descriptionShort}
             </p>
           )}
-          <p className="text-xs text-muted-foreground text-right justify-end mt-1">
+          <p className="text-[10px] text-muted-foreground text-right justify-end mt-1 select-none">
             {startup.descriptionShort.length}/100 characters
           </p>
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="elevator-pitch">Elevator pitch</Label>
+          <Label htmlFor="elevator-pitch" className="select-none">
+            Elevator pitch
+          </Label>
           <Textarea
             id="elevator-pitch"
             value={startup.descriptionMedium}
@@ -1468,13 +1520,15 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               {fieldErrors.descriptionMedium}
             </p>
           )}
-          <p className="text-xs text-muted-foreground text-right justify-end mt-1">
+          <p className="text-[10px] text-muted-foreground text-right justify-end mt-1 select-none">
             Optional • {startup.descriptionMedium.length}/300 characters
           </p>
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="full-description">Full description</Label>
+          <Label htmlFor="full-description" className="select-none">
+            Full description
+          </Label>
           <Textarea
             id="full-description"
             value={startup.descriptionLong}
@@ -1503,14 +1557,17 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               {fieldErrors.descriptionLong}
             </p>
           )}
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground select-none">
             Optional - can be used for more detailed pitches
           </p>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-3">
-            <Label htmlFor="google-drive-url">Cloud storage / Docsend</Label>
+            <Label htmlFor="google-drive-url" className="select-none">
+              Cloud storage / Docsend{' '}
+              <span className="required-asterisk">*</span>
+            </Label>
             <Input
               id="google-drive-url"
               value={startup.googleDriveUrl}
@@ -1525,9 +1582,13 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   : ''
               }
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Link to a folder with your pitch deck and any other materials you
-              judge relevant for investors.
+              judge relevant for investors.{' '}
+              <span className="text-red-600 dark:text-red-400 font-medium">
+                This is mandatory for most funds as most investors require a
+                pitch deck of your company.
+              </span>
             </p>
             {fieldErrors.googleDriveUrl && (
               <p className="text-sm text-red-600 mt-1">
@@ -1538,7 +1599,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
 
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             <div className="space-y-3">
-              <Label>Logo</Label>
+              <Label className="select-none">Logo</Label>
               <FileUploadComponent
                 {...logoUploadProps}
                 accept=".jpg,.jpeg,.png,.svg,.webp"
@@ -1552,7 +1613,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                 BETA
               </span>
               <div className="space-y-3 rounded-sm border bg-cyan-50 dark:bg-cyan-900/30 border-cyan-200 dark:border-cyan-800 px-4 pt-3 pb-4">
-                <Label>Pitch deck</Label>
+                <Label className="select-none">Pitch deck</Label>
                 <FileUploadComponent
                   {...pitchDeckUploadProps}
                   accept=".pdf,.ppt,.pptx"
@@ -1596,10 +1657,10 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="select-none" onCopy={(e) => e.preventDefault()}>
-        <h3 className="text-lg font-semibold mb-4">
+        <h3 className="text-lg font-semibold mb-4 select-none">
           Tell us about your current fundraising round
         </h3>
-        <p className="text-sm text-muted-foreground mb-6">
+        <p className="text-sm text-muted-foreground mb-6 select-none">
           Help us understand your fundraising goals. Most fields are optional -
           share what you know and leave the rest for later.
         </p>
@@ -1607,7 +1668,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <Label htmlFor="funding-round">
+            <Label htmlFor="funding-round" className="select-none">
               What round are you raising?{' '}
               <span className="required-asterisk">*</span>
             </Label>
@@ -1635,7 +1696,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
             </div>
           </div>
           <div className="space-y-3">
-            <Label htmlFor="investment-instrument">
+            <Label htmlFor="investment-instrument" className="select-none">
               What type of investment are you seeking?
             </Label>
             <div className="relative">
@@ -1660,14 +1721,16 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - can be determined later with investors
             </p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <Label htmlFor="revenue-model">Revenue model</Label>
+            <Label htmlFor="revenue-model" className="select-none">
+              Revenue model
+            </Label>
             <div className="relative">
               <select
                 id="revenue-model"
@@ -1698,12 +1761,14 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 {fieldErrors.revenueModel}
               </p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - many startups are still figuring this out
             </p>
           </div>
           <div className="space-y-3">
-            <Label htmlFor="current-runway">Runway</Label>
+            <Label htmlFor="current-runway" className="select-none">
+              Runway
+            </Label>
             <div className="relative">
               <select
                 id="current-runway"
@@ -1728,14 +1793,16 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1 select-none">
               Optional - how many months of funding you have left
             </p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <Label htmlFor="funding-amount">How much are you raising?</Label>
+            <Label htmlFor="funding-amount" className="select-none">
+              How much are you raising?
+            </Label>
             <Input
               id="funding-amount"
               type="text"
@@ -1752,12 +1819,14 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               rightAddon="USD"
               className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - can be a range or TBD
             </p>
           </div>
           <div className="space-y-3">
-            <Label htmlFor="pre-money-valuation">Pre-money valuation</Label>
+            <Label htmlFor="pre-money-valuation" className="select-none">
+              Pre-money valuation
+            </Label>
             <Input
               id="pre-money-valuation"
               type="text"
@@ -1774,7 +1843,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
               rightAddon="USD"
               className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - many early-stage companies don&apos;t have this yet
             </p>
           </div>
@@ -1783,7 +1852,9 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-3">
-              <Label htmlFor="employee-count">Team size</Label>
+              <Label htmlFor="employee-count" className="select-none">
+                Team size
+              </Label>
               <div className="relative">
                 <select
                   id="employee-count"
@@ -1810,12 +1881,14 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground select-none">
                 Optional - can include advisors/contractors
               </p>
             </div>
             <div className="space-y-3">
-              <Label htmlFor="mrr">MRR</Label>
+              <Label htmlFor="mrr" className="select-none">
+                MRR
+              </Label>
               <Input
                 id="mrr"
                 type="text"
@@ -1832,12 +1905,14 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 rightAddon="USD"
                 className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 select-none">
                 Optional - if pre-revenue, leave blank
               </p>
             </div>
             <div className="space-y-3">
-              <Label htmlFor="arr">ARR</Label>
+              <Label htmlFor="arr" className="select-none">
+                ARR
+              </Label>
               <Input
                 id="arr"
                 type="text"
@@ -1854,14 +1929,16 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 rightAddon="USD"
                 className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 select-none">
                 Optional - if pre-revenue, leave blank
               </p>
             </div>
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="traction">Traction</Label>
+            <Label htmlFor="traction" className="select-none">
+              Traction
+            </Label>
             <Textarea
               id="traction"
               value={startup.tractionSummary}
@@ -1880,13 +1957,15 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 setStartup({ ...startup, tractionSummary: enhancedText })
               }
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - can be updated as you grow
             </p>
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="market">Market</Label>
+            <Label htmlFor="market" className="select-none">
+              Market
+            </Label>
             <Textarea
               id="market"
               value={startup.marketSummary}
@@ -1905,13 +1984,15 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 setStartup({ ...startup, marketSummary: enhancedText })
               }
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-none">
               Optional - can be refined over time
             </p>
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="key-customers">Key customers</Label>
+            <Label htmlFor="key-customers" className="select-none">
+              Key customers
+            </Label>
             <Textarea
               id="key-customers"
               value={startup.keyCustomers}
@@ -1933,7 +2014,9 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="competitors">Competitors</Label>
+            <Label htmlFor="competitors" className="select-none">
+              Competitors
+            </Label>
             <CompetitorInput
               competitors={startup.competitorsList || []}
               onChange={(competitors) =>
@@ -1959,8 +2042,8 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   return (
     <div className="space-y-4">
       <div className="select-none" onCopy={(e) => e.preventDefault()}>
-        <h3 className="text-lg font-semibold mb-2">Summary</h3>
-        <p className="text-sm text-muted-foreground mb-4">
+        <h3 className="text-lg font-semibold mb-2 select-none">Summary</h3>
+        <p className="text-sm text-muted-foreground mb-4 select-none">
           Take a moment to ensure everything looks perfect.
         </p>
       </div>
@@ -1969,7 +2052,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         {/* Company Information */}
         <Card>
           <CardHeader className="-mb-2 pb-0">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-base select-none">
               <LottieIcon
                 animationData={animations.work}
                 size={20}
@@ -1982,48 +2065,50 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-muted-foreground">Name</span>
+                <span className="font-medium text-muted-foreground select-none">
+                  Name
+                </span>
                 <p>{startup.name || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Website
                 </span>
                 <p>{startup.website || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Industry
                 </span>
                 <p>{startup.industry || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Country
                 </span>
                 <p>{startup.location || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Founded year
                 </span>
                 <p>{startup.foundedYear || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Legal structure
                 </span>
                 <p>{startup.legalStructure || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Incorporated
                 </span>
                 <p>{startup.isIncorporated ? 'Yes' : 'No'}</p>
               </div>
 
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Revenue model
                 </span>
                 <p>{startup.revenueModel || 'Not provided'}</p>
@@ -2035,13 +2120,13 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 <div className="pt-2 border-t">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="font-medium text-muted-foreground">
+                      <span className="font-medium text-muted-foreground select-none">
                         Inc. country
                       </span>
                       <p>{startup.incorporationCountry || 'Not provided'}</p>
                     </div>
                     <div>
-                      <span className="font-medium text-muted-foreground">
+                      <span className="font-medium text-muted-foreground select-none">
                         Inc. city
                       </span>
                       <p>{startup.incorporationCity || 'Not provided'}</p>
@@ -2052,7 +2137,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 
             {startup.operatingCountries.length > 0 && (
               <div className="pt-2 border-t">
-                <span className="font-medium text-muted-foreground text-sm">
+                <span className="font-medium text-muted-foreground text-sm select-none">
                   Operating countries
                 </span>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -2070,7 +2155,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 
             <div className="pt-2 border-t space-y-3">
               <div>
-                <span className="font-medium text-muted-foreground text-sm">
+                <span className="font-medium text-muted-foreground text-sm select-none">
                   One-liner
                 </span>
                 <p className="text-sm break-words whitespace-pre-wrap">
@@ -2079,7 +2164,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               </div>
               {startup.descriptionMedium && (
                 <div>
-                  <span className="font-medium text-muted-foreground text-sm">
+                  <span className="font-medium text-muted-foreground text-sm select-none">
                     Elevator pitch
                   </span>
                   <p className="text-sm break-words whitespace-pre-wrap">
@@ -2089,7 +2174,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               )}
               {startup.descriptionLong && (
                 <div>
-                  <span className="font-medium text-muted-foreground text-sm">
+                  <span className="font-medium text-muted-foreground text-sm select-none">
                     Full description
                   </span>
                   <p className="text-sm break-words whitespace-pre-wrap">
@@ -2100,7 +2185,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             </div>
 
             <div className="pt-2 border-t">
-              <span className="font-medium text-muted-foreground text-sm">
+              <span className="font-medium text-muted-foreground text-sm select-none">
                 Assets
               </span>
               <div className="flex items-center gap-4 mt-1">
@@ -2134,7 +2219,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         {/* Team */}
         <Card>
           <CardHeader className="-mb-2 pb-0">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-base select-none">
               <LottieIcon
                 animationData={animations.group}
                 size={20}
@@ -2181,7 +2266,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         {/* Fundraising */}
         <Card>
           <CardHeader className="-mb-2 pb-0">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-base select-none">
               <LottieIcon
                 animationData={animations.cash}
                 size={20}
@@ -2194,17 +2279,21 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-muted-foreground">Round</span>
+                <span className="font-medium text-muted-foreground select-none">
+                  Round
+                </span>
                 <p>{startup.fundingRound || 'Not specified'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Instrument
                 </span>
                 <p>{startup.investmentInstrument || 'Not specified'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Goal</span>
+                <span className="font-medium text-muted-foreground select-none">
+                  Goal
+                </span>
                 <p>
                   {startup.fundingAmountSought > 0
                     ? `$${formatCurrency(startup.fundingAmountSought)}`
@@ -2212,7 +2301,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Pre-money valuation
                 </span>
                 <p>
@@ -2222,7 +2311,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Team size
                 </span>
                 <p>
@@ -2232,7 +2321,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">MRR</span>
+                <span className="font-medium text-muted-foreground select-none">
+                  MRR
+                </span>
                 <p>
                   {startup.mrr > 0
                     ? `$${formatCurrency(startup.mrr)}`
@@ -2240,7 +2331,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">ARR</span>
+                <span className="font-medium text-muted-foreground select-none">
+                  ARR
+                </span>
                 <p>
                   {startup.arr > 0
                     ? `$${formatCurrency(startup.arr)}`
@@ -2248,7 +2341,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-muted-foreground select-none">
                   Runway
                 </span>
                 <p>
@@ -2266,7 +2359,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               <div className="pt-2 border-t space-y-3">
                 {startup.tractionSummary && (
                   <div>
-                    <span className="font-medium text-muted-foreground text-sm">
+                    <span className="font-medium text-muted-foreground text-sm select-none">
                       Traction
                     </span>
                     <p className="text-sm break-words whitespace-pre-wrap">
@@ -2276,7 +2369,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 )}
                 {startup.marketSummary && (
                   <div>
-                    <span className="font-medium text-muted-foreground text-sm">
+                    <span className="font-medium text-muted-foreground text-sm select-none">
                       Market
                     </span>
                     <p className="text-sm break-words whitespace-pre-wrap">
@@ -2286,7 +2379,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 )}
                 {startup.keyCustomers && (
                   <div>
-                    <span className="font-medium text-muted-foreground text-sm">
+                    <span className="font-medium text-muted-foreground text-sm select-none">
                       Key customers
                     </span>
                     <p className="text-sm break-words whitespace-pre-wrap">
@@ -2297,7 +2390,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 {startup.competitorsList &&
                   startup.competitorsList.length > 0 && (
                     <div>
-                      <span className="font-medium text-muted-foreground text-sm">
+                      <span className="font-medium text-muted-foreground text-sm select-none">
                         Competitors
                       </span>
                       <div className="flex flex-wrap gap-1 mt-1">
