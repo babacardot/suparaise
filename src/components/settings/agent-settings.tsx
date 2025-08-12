@@ -15,8 +15,8 @@ const playSound = (soundFile: string) => {
     try {
       const audio = new Audio(soundFile)
       audio.volume = 0.4
-      audio.play().catch(() => {})
-    } catch {}
+      audio.play().catch(() => { })
+    } catch { }
   }, 0)
 }
 
@@ -394,6 +394,11 @@ export default function AgentSettings() {
   const isEnterpriseFeatureAvailable = () =>
     formData.permissionLevel === 'ENTERPRISE'
 
+  const showCustomizationInline =
+    formData.permissionLevel === 'PRO' ||
+    formData.permissionLevel === 'MAX' ||
+    formData.permissionLevel === 'ENTERPRISE'
+
   return (
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
@@ -440,14 +445,14 @@ export default function AgentSettings() {
                 'group relative p-4 border rounded-sm transition-all duration-200',
                 !isAdvancedFeatureAvailable()
                   ? 'bg-muted/30 border-muted'
-                  : 'hover:border-orange-200 dark:hover:border-orange-800 hover:bg-orange-50/50 dark:hover:bg-orange-950/20',
+                  : 'hover:border-amber-200 dark:hover:border-amber-800 hover:bg-amber-50/50 dark:hover:bg-amber-950/20',
                 formData.enableDebugMode &&
-                  isAdvancedFeatureAvailable() &&
-                  'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/10',
+                isAdvancedFeatureAvailable() &&
+                'border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-950/10',
               )}
             >
               {!isAdvancedFeatureAvailable() && (
-                <span className="absolute top-2 right-4 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800 px-1.5 py-0.5 rounded">
+                <span className="absolute top-2 right-4 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 px-1.5 py-0.5 rounded">
                   MAX
                 </span>
               )}
@@ -459,7 +464,7 @@ export default function AgentSettings() {
                       className={cn(
                         'font-medium text-sm',
                         !isAdvancedFeatureAvailable() &&
-                          'text-muted-foreground',
+                        'text-muted-foreground',
                       )}
                     >
                       Analytics
@@ -476,7 +481,7 @@ export default function AgentSettings() {
                     Access detailed logs, screenshots, and insights to optimize
                     your agent performance.
                     {!isAdvancedFeatureAvailable() && (
-                      <span className="block mt-1 text-orange-600 dark:text-orange-400">
+                      <span className="block mt-1 text-amber-600 dark:text-amber-400">
                         Upgrade to MAX to access this feature.
                       </span>
                     )}
@@ -502,12 +507,12 @@ export default function AgentSettings() {
                   }}
                   disabled={!isAdvancedFeatureAvailable()}
                   className={cn(
-                    'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2',
+                    'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2',
                     formData.enableDebugMode && isAdvancedFeatureAvailable()
-                      ? 'bg-orange-600'
+                      ? 'bg-amber-600'
                       : 'bg-gray-200 dark:bg-gray-700',
                     !isAdvancedFeatureAvailable() &&
-                      'opacity-50 cursor-not-allowed',
+                    'opacity-50 cursor-not-allowed',
                   )}
                 >
                   <span
@@ -529,8 +534,8 @@ export default function AgentSettings() {
                   ? 'bg-muted/30 border-muted'
                   : 'hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/50 dark:hover:bg-purple-950/20',
                 formData.enableAutopilot &&
-                  isEnterpriseFeatureAvailable() &&
-                  'border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/10',
+                isEnterpriseFeatureAvailable() &&
+                'border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/10',
               )}
             >
               {!isEnterpriseFeatureAvailable() && (
@@ -546,7 +551,7 @@ export default function AgentSettings() {
                       className={cn(
                         'font-medium text-sm',
                         !isEnterpriseFeatureAvailable() &&
-                          'text-muted-foreground',
+                        'text-muted-foreground',
                       )}
                     >
                       Autopilot
@@ -594,7 +599,7 @@ export default function AgentSettings() {
                       ? 'bg-purple-600'
                       : 'bg-gray-200 dark:bg-gray-700',
                     !isEnterpriseFeatureAvailable() &&
-                      'opacity-50 cursor-not-allowed',
+                    'opacity-50 cursor-not-allowed',
                   )}
                 >
                   <span
@@ -721,30 +726,8 @@ export default function AgentSettings() {
 
           {/* Style Customization */}
           <div className="space-y-3">
-            <button
-              onClick={() => {
-                playLightSound()
-                setIsCustomizationExpanded(!isCustomizationExpanded)
-              }}
-              className="flex items-center gap-2 w-full text-left hover:text-foreground transition-colors"
-            >
-              {isCustomizationExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-              <span className="font-medium text-sm">
-                Advanced customization
-              </span>
-              {!isProPlusFeatureAvailable() && (
-                <span className="text-xs -translate-x-4 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded ml-auto">
-                  PRO
-                </span>
-              )}
-            </button>
-
-            {isCustomizationExpanded && (
-              <div className="space-y-4 animate-in slide-in-from-top-2 duration-200">
+            {showCustomizationInline ? (
+              <div className="space-y-4">
                 <div className="space-y-3">
                   <Label htmlFor="model">Model</Label>
                   <div className="relative">
@@ -753,7 +736,7 @@ export default function AgentSettings() {
                       className={cn(
                         'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                         !isProPlusFeatureAvailable() &&
-                          'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                        'bg-muted/50 text-muted-foreground cursor-not-allowed',
                       )}
                       value={formData.model}
                       onChange={async (e) => {
@@ -780,7 +763,7 @@ export default function AgentSettings() {
                       className={cn(
                         'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                         !isProPlusFeatureAvailable() &&
-                          'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                        'bg-muted/50 text-muted-foreground cursor-not-allowed',
                       )}
                       value={formData.preferredTone}
                       onChange={async (e) => {
@@ -814,9 +797,9 @@ export default function AgentSettings() {
                       }
                       onBlur={() => handleFieldSave('customInstructions')}
                       className={cn(
-                        'rounded-sm pr-8 min-h-[100px] select-auto',
+                        'rounded-sm pr-8 min-h[100px] select-auto',
                         !isProPlusFeatureAvailable() &&
-                          'dark:bg-muted cursor-not-allowed text-muted-foreground',
+                        'dark:bg-muted cursor-not-allowed text-muted-foreground',
                       )}
                       placeholder={
                         isProPlusFeatureAvailable()
@@ -837,6 +820,124 @@ export default function AgentSettings() {
                   </div>
                 </div>
               </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    playLightSound()
+                    setIsCustomizationExpanded(!isCustomizationExpanded)
+                  }}
+                  className="flex items-center gap-2 w-full text-left hover:text-foreground transition-colors"
+                >
+                  {isCustomizationExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                  <span className="font-medium text-sm">Advanced customization</span>
+                  {!isProPlusFeatureAvailable() && (
+                    <span className="text-xs -translate-x-4 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded ml-auto">
+                      PRO
+                    </span>
+                  )}
+                </button>
+
+                {isCustomizationExpanded && (
+                  <div className="space-y-4 animate-in slide-in-from-top-2 duration-200">
+                    <div className="space-y-3">
+                      <Label htmlFor="model">Model</Label>
+                      <div className="relative">
+                        <select
+                          id="model"
+                          className={cn(
+                            'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
+                            !isProPlusFeatureAvailable() &&
+                            'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                          )}
+                          value={formData.model}
+                          onChange={async (e) => {
+                            if (!isProPlusFeatureAvailable()) return
+                            const newValue = e.target.value as typeof formData.model
+                            handleInputChange('model', newValue)
+                            await handleFieldSave('model', newValue)
+                          }}
+                          disabled={isLoading || !isProPlusFeatureAvailable()}
+                        >
+                          <option value="claude-4-sonnet">claude-4-sonnet</option>
+                          <option value="gpt-5">gpt-5</option>
+                          <option value="deepseek-r1-0528">deepseek-r1-0528</option>
+                          <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="preferredTone">Tone</Label>
+                      <div className="relative">
+                        <select
+                          id="preferredTone"
+                          className={cn(
+                            'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
+                            !isProPlusFeatureAvailable() &&
+                            'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                          )}
+                          value={formData.preferredTone}
+                          onChange={async (e) => {
+                            if (!isProPlusFeatureAvailable()) {
+                              return
+                            }
+                            const newValue = e.target
+                              .value as typeof formData.preferredTone
+                            handleInputChange('preferredTone', newValue)
+                            await handleFieldSave('preferredTone', newValue)
+                          }}
+                          disabled={isLoading || !isProPlusFeatureAvailable()}
+                        >
+                          <option value="professional">Professional</option>
+                          <option value="enthusiastic">Enthusiastic</option>
+                          <option value="concise">Concise</option>
+                          <option value="detailed">Detailed</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="customInstructions">Instructions</Label>
+                      <div className="relative">
+                        <Textarea
+                          id="customInstructions"
+                          value={formData.customInstructions}
+                          onChange={(e) =>
+                            handleInputChange('customInstructions', e.target.value)
+                          }
+                          onBlur={() => handleFieldSave('customInstructions')}
+                          className={cn(
+                            'rounded-sm pr-8 min-h-[100px] select-auto',
+                            !isProPlusFeatureAvailable() &&
+                            'dark:bg-muted cursor-not-allowed text-muted-foreground',
+                          )}
+                          placeholder={
+                            isProPlusFeatureAvailable()
+                              ? "Any specific instructions for how the agent should fill out forms or communicate. For example: 'Always mention our flagship product when describing the solution' or 'Emphasize our B2B SaaS experience'..."
+                              : 'Always mention our flagship product when describing the solution. Emphasize our B2B SaaS experience...'
+                          }
+                          rows={4}
+                          disabled={!isProPlusFeatureAvailable()}
+                          enableAI={isProPlusFeatureAvailable()}
+                          aiFieldType="instructions"
+                          aiContext={{
+                            companyName: user?.user_metadata?.companyName || '',
+                          }}
+                          onAIEnhance={(enhancedText) =>
+                            handleInputChange('customInstructions', enhancedText)
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

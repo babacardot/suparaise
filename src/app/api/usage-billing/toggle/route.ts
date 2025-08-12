@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      usageBillingEnabled: enable,
+      usageBillingEnabled: result?.usageBillingEnabled ?? enable,
       message:
         result?.message ||
         (enable

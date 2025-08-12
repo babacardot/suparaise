@@ -56,7 +56,7 @@ const toastVariants = cva(
 
 interface BaseToastProps
   extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
-    VariantProps<typeof toastVariants> {
+  VariantProps<typeof toastVariants> {
   variant?: ToastVariant
 }
 
@@ -175,7 +175,7 @@ const ToastDescription = React.forwardRef<
 
     switch (variant) {
       case 'default':
-        return 'text-orange-600/90 dark:text-orange-400/90'
+        return 'text-amber-600/90 dark:text-amber-400/90'
       case 'destructive':
         return 'text-red-600/90 dark:text-red-400/90'
       case 'info':
@@ -187,7 +187,7 @@ const ToastDescription = React.forwardRef<
       case 'locked':
         return 'text-purple-600/90 dark:text-purple-400/90'
       default:
-        return 'text-orange-600/90 dark:text-orange-400/90'
+        return 'text-amber-600/90 dark:text-amber-400/90'
     }
   }
 
@@ -233,7 +233,7 @@ const ToastProgressBar = React.forwardRef<
       className={cn(
         'h-full progress-animation',
         variant === 'default'
-          ? 'bg-orange-500'
+          ? 'bg-amber-500'
           : variant === 'destructive'
             ? 'bg-red-500'
             : variant === 'info'
@@ -244,7 +244,7 @@ const ToastProgressBar = React.forwardRef<
                   ? 'bg-cyan-500'
                   : variant === 'locked'
                     ? 'bg-purple-500'
-                    : 'bg-orange-500',
+                    : 'bg-amber-500',
       )}
       style={{ margin: 0, padding: 0 }}
     />

@@ -171,6 +171,27 @@ export default function BillingSettings() {
   const searchParams = useSearchParams()
   const startupId = params.startupId as string
 
+  // Lightweight fetch with timeout and auth cookie handling
+  const fetchWithTimeout = async (
+    input: RequestInfo | URL,
+    init: RequestInit = {},
+    timeoutMs = 15000,
+  ) => {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const res = await fetch(input, {
+        ...init,
+        signal: controller.signal,
+        credentials: 'same-origin',
+        cache: 'no-store',
+      })
+      return res
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+
   // Fetch usage billing data
   React.useEffect(() => {
     const fetchUsageBillingData = async () => {
@@ -255,7 +276,7 @@ export default function BillingSettings() {
     try {
       const priceId = STRIPE_PRICE_IDS[plan]
 
-      const response = await fetch('/api/stripe/checkout', {
+      const response = await fetchWithTimeout('/api/stripe/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -268,6 +289,15 @@ export default function BillingSettings() {
       })
 
       const data = await response.json()
+
+      if (response.status === 401) {
+        toast({
+          variant: 'info',
+          title: 'Authentication required',
+          description: 'Please sign in again to continue.',
+        })
+        throw new Error('Unauthorized')
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create checkout session')
@@ -292,7 +322,7 @@ export default function BillingSettings() {
     setUsageBillingLoading(true)
 
     try {
-      const response = await fetch('/api/usage-billing/toggle', {
+      const response = await fetchWithTimeout('/api/usage-billing/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -304,6 +334,15 @@ export default function BillingSettings() {
       })
 
       const data = await response.json()
+
+      if (response.status === 401) {
+        toast({
+          variant: 'info',
+          title: 'Authentication required',
+          description: 'Please sign in again and retry.',
+        })
+        throw new Error('Unauthorized')
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update usage billing')
@@ -349,7 +388,7 @@ export default function BillingSettings() {
     setUsageBillingLoading(true)
 
     try {
-      const response = await fetch('/api/usage-billing/spend-limit', {
+      const response = await fetchWithTimeout('/api/usage-billing/spend-limit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -360,6 +399,15 @@ export default function BillingSettings() {
       })
 
       const data = await response.json()
+
+      if (response.status === 401) {
+        toast({
+          variant: 'info',
+          title: 'Authentication required',
+          description: 'Please sign in again and retry.',
+        })
+        throw new Error('Unauthorized')
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update spend limit')
@@ -401,7 +449,7 @@ export default function BillingSettings() {
       // Build return URL based on current context
       const currentUrl = window.location.origin + window.location.pathname
 
-      const response = await fetch('/api/stripe/customer-portal', {
+      const response = await fetchWithTimeout('/api/stripe/customer-portal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -412,6 +460,15 @@ export default function BillingSettings() {
       })
 
       const data = await response.json()
+
+      if (response.status === 401) {
+        toast({
+          variant: 'info',
+          title: 'Authentication required',
+          description: 'Please sign in again to manage billing.',
+        })
+        throw new Error('Unauthorized')
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create portal session')
@@ -490,14 +547,29 @@ export default function BillingSettings() {
               </div>
               {isSubscribed && (
                 <div>
-                  <Button
-                    onClick={handleManageBilling}
-                    disabled={isPortalLoading}
-                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
-                  >
-                    {isPortalLoading && <Spinner className="h-3 w-3 mr-2" />}
-                    {isPortalLoading ? 'Opening...' : 'Billing'}
-                  </Button>
+                  {(() => {
+                    const plan = subscription?.permission_level
+                    const buttonClass = cn(
+                      'rounded-sm px-4 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200',
+                      plan === 'MAX'
+                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:text-amber-800 dark:hover:text-amber-200 border border-amber-200 dark:border-amber-800'
+                        : plan === 'ENTERPRISE'
+                          ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800'
+                          : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800',
+                    )
+                    return (
+                      <Button
+                        onClick={handleManageBilling}
+                        disabled={isPortalLoading}
+                        className={buttonClass}
+                      >
+                        {isPortalLoading && (
+                          <Spinner className="h-3 w-3 mr-2" />
+                        )}
+                        {isPortalLoading ? 'Opening...' : 'Billing'}
+                      </Button>
+                    )
+                  })()}
                 </div>
               )}
             </div>
@@ -552,7 +624,7 @@ export default function BillingSettings() {
                   'group relative rounded-sm border transition-all duration-200 p-6 shadow-sm',
                   'hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20',
                   usageBillingData.usageBillingEnabled &&
-                    'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/10',
+                  'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/10',
                 )}
               >
                 <div className="flex items-center justify-between">
@@ -590,7 +662,7 @@ export default function BillingSettings() {
                       <Button
                         onClick={() => handleToggleUsageBilling()}
                         disabled={usageBillingLoading}
-                        className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-800 dark:hover:text-red-200 border border-red-200 dark:border-red-800 rounded-sm px-4 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
+                        className="bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 hover:text-pink-800 dark:hover:text-pink-200 border border-pink-200 dark:border-pink-800 rounded-sm px-4 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
                       >
                         {usageBillingLoading ? (
                           <span className="opacity-70">Disabling…</span>
@@ -625,7 +697,7 @@ export default function BillingSettings() {
                                 ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
                                 : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
                               usageBillingLoading &&
-                                'opacity-50 cursor-not-allowed',
+                              'opacity-50 cursor-not-allowed',
                             )}
                           >
                             ${limit}
@@ -642,7 +714,7 @@ export default function BillingSettings() {
                               'px-3 py-1 text-xs rounded border transition-colors',
                               'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
                               usageBillingLoading &&
-                                'opacity-50 cursor-not-allowed',
+                              'opacity-50 cursor-not-allowed',
                               // make it appear selected when in custom mode with a valid value pending via custom
                               showSpendLimitInput && customSpendLimit
                                 ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
@@ -699,7 +771,7 @@ export default function BillingSettings() {
                             'ml-1 px-3 py-1 text-xs rounded-sm border font-medium shadow-sm hover:shadow transition-all duration-200',
                             'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border-green-200 dark:border-green-800',
                             usageBillingLoading &&
-                              'opacity-50 cursor-not-allowed',
+                            'opacity-50 cursor-not-allowed',
                           )}
                         >
                           Set limit
@@ -732,7 +804,7 @@ export default function BillingSettings() {
                         <div className="flex items-center gap-1">
                           {usageBillingData.monthlySubmissionsLimit > 0 &&
                             usageBillingData.monthlySubmissionsUsed <
-                              usageBillingData.monthlySubmissionsLimit && (
+                            usageBillingData.monthlySubmissionsLimit && (
                               <span className="text-[8px] text-emerald-600 dark:text-emerald-400">
                                 Monthly quota is used first before usage billing
                                 starts
@@ -742,7 +814,7 @@ export default function BillingSettings() {
                             <>
                               {usageBillingData.monthlySubmissionsLimit > 0 &&
                                 usageBillingData.monthlySubmissionsUsed <
-                                  usageBillingData.monthlySubmissionsLimit && (
+                                usageBillingData.monthlySubmissionsLimit && (
                                   <span className="text-[8px] text-muted-foreground">
                                     ·
                                   </span>
@@ -757,16 +829,16 @@ export default function BillingSettings() {
                       {!(
                         usageBillingData.monthlySubmissionsLimit > 0 &&
                         usageBillingData.monthlySubmissionsUsed <
-                          usageBillingData.monthlySubmissionsLimit
+                        usageBillingData.monthlySubmissionsLimit
                       ) && (
-                        <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
-                          <p>
-                            Plan quota used:{' '}
-                            {usageBillingData.monthlySubmissionsUsed}/
-                            {usageBillingData.monthlySubmissionsLimit}
-                          </p>
-                        </div>
-                      )}
+                          <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
+                            <p>
+                              Plan quota used:{' '}
+                              {usageBillingData.monthlySubmissionsUsed}/
+                              {usageBillingData.monthlySubmissionsLimit}
+                            </p>
+                          </div>
+                        )}
                     </div>
                   )
                 ) : null}
@@ -868,7 +940,7 @@ export default function BillingSettings() {
                   <Button
                     onClick={() => handleSubscribe('max_monthly')}
                     disabled={loadingPlan === 'max_monthly'}
-                    className="w-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
+                    className="w-full bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:text-amber-800 dark:hover:text-amber-200 border border-amber-200 dark:border-amber-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
                     {loadingPlan === 'max_monthly' && (
@@ -918,7 +990,7 @@ export default function BillingSettings() {
                   <Button
                     onClick={() => handleSubscribe('max_monthly')}
                     disabled={loadingPlan === 'max_monthly'}
-                    className="w-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
+                    className="w-full bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:text-amber-800 dark:hover:text-amber-200 border border-amber-200 dark:border-amber-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
                     {loadingPlan === 'max_monthly' && (
@@ -951,6 +1023,10 @@ export default function BillingSettings() {
                     </li>
                     <li className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-green-500" />
+                      Autopilot mode
+                    </li>
+                    <li className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-500" />
                       Up to 25 parallel submissions
                     </li>
                     <li className="flex items-center gap-2 text-sm">
@@ -964,7 +1040,7 @@ export default function BillingSettings() {
                     className="w-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
-                    <a href="mailto:hello@suparaise.com">Contact Sales</a>
+                    <a href="mailto:hello@suparaise.com">Contact sales</a>
                   </Button>
                 </CardContent>
               </Card>
@@ -979,7 +1055,7 @@ export default function BillingSettings() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-semibold">Custom</div>
+                  <div className="text-2xl font-semibold"></div>
                 </div>
               </div>
 
@@ -987,6 +1063,10 @@ export default function BillingSettings() {
                 <div className="flex items-start gap-2 text-sm">
                   <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
                   500+ fund applications per month
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                  Autopilot mode
                 </div>
                 <div className="flex items-start gap-2 text-sm">
                   <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
@@ -1004,7 +1084,7 @@ export default function BillingSettings() {
                 className="w-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                 variant="outline"
               >
-                <a href="mailto:hello@suparaise.com">Contact Sales</a>
+                <a href="mailto:hello@suparaise.com">Contact sales</a>
               </Button>
             </div>
           ) : null}
@@ -1110,17 +1190,30 @@ export default function BillingSettings() {
               </ul>
             </div>
 
-            <Button
-              onClick={() => {
-                playClickSound()
-                setShowSuccessModal(false)
-              }}
-              size="lg"
-              className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm font-medium py-3 shadow-sm hover:shadow transition-all duration-200"
-              variant="outline"
-            >
-              Continue
-            </Button>
+            {(() => {
+              const sp = successPlan.toLowerCase()
+              const colorClasses = sp.includes('max')
+                ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:text-amber-800 dark:hover:text-amber-200 border border-amber-200 dark:border-amber-800'
+                : sp.includes('enterprise')
+                  ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800'
+                  : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800'
+              return (
+                <Button
+                  onClick={() => {
+                    playClickSound()
+                    setShowSuccessModal(false)
+                  }}
+                  size="lg"
+                  className={cn(
+                    'w-full rounded-sm font-medium py-3 shadow-sm hover:shadow transition-all duration-200',
+                    colorClasses,
+                  )}
+                  variant="outline"
+                >
+                  Continue
+                </Button>
+              )
+            })()}
           </motion.div>
         </DialogContent>
       </Dialog>

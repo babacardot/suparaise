@@ -379,9 +379,8 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${
-                  selected.length > 1 ? 'ies' : 'y'
-                } selected`
+              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
+              } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -697,8 +696,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                    .split(',')
-                    .filter(Boolean)
+                  .split(',')
+                  .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -3095,7 +3094,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                              (formData.name || 'CONFIRM')
+                            (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

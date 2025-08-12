@@ -96,7 +96,7 @@ function getToastIcon(variant: string) {
       return (
         <Rabbit
           className={cn(
-            'h-4 w-4 text-orange-700 dark:text-orange-300',
+            'h-4 w-4 text-amber-700 dark:text-amber-300',
             'animate-[iconSlideIn_0.3s_ease-in-out]',
           )}
         />
