@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+// Removed Badge from current plan display per request
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Loader2, Check, Crown } from 'lucide-react'
@@ -22,7 +22,13 @@ import {
 } from '@/lib/stripe/client'
 import { cn } from '@/lib/actions/utils'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
@@ -157,6 +163,10 @@ export default function BillingSettings() {
   const [usageBillingLoading, setUsageBillingLoading] = useState(false)
   const [showSpendLimitInput, setShowSpendLimitInput] = useState(false)
   const [customSpendLimit, setCustomSpendLimit] = useState('')
+  const [showLimitConfigurator, setShowLimitConfigurator] = useState(false)
+  const [pendingSpendLimit, setPendingSpendLimit] = useState<number | null>(
+    null,
+  )
   const params = useParams()
   const searchParams = useSearchParams()
   const startupId = params.startupId as string
@@ -306,6 +316,13 @@ export default function BillingSettings() {
         monthlySpendLimit: spendLimit || prev.monthlySpendLimit,
       }))
 
+      // Enter configurator when enabling; exit when disabling
+      if (!usageBillingData.usageBillingEnabled) {
+        setShowLimitConfigurator(true)
+      } else {
+        setShowLimitConfigurator(false)
+      }
+
       toast({
         variant: 'success',
         title: 'Usage billing updated',
@@ -422,7 +439,6 @@ export default function BillingSettings() {
     return <BillingSettingsSkeleton />
   }
 
-  const subscriptionStatus = subscription?.subscription_status
   const periodEndDate = subscription?.subscription_current_period_end
     ? new Date(subscription.subscription_current_period_end)
     : null
@@ -440,236 +456,76 @@ export default function BillingSettings() {
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
-          {/* Usage Billing Toggle - only for Pro+ users - moved above current plan */}
-          {isSubscribed &&
-            (subscription?.permission_level === 'PRO' ||
-              subscription?.permission_level === 'MAX') && (
-              <div
-                className={cn(
-                  'group relative p-3 border rounded-sm transition-all duration-200',
-                  'hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20',
-                  usageBillingData.usageBillingEnabled &&
-                    'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/10',
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium text-base">Usage billing</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Continue applying beyond your plan limits at $2.49 per
-                      run.
-                    </p>
-
-                    {/* Usage Progress Bar - Always visible */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-semibold text-foreground">
-                          ${usageBillingData.currentMonthUsageCost.toFixed(0)} /{' '}
-                          {usageBillingData.usageBillingEnabled
-                            ? `$${usageBillingData.monthlySpendLimit.toFixed(0)}`
-                            : '—'}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Usage-Based Spending this Month
-                        </span>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className={cn(
-                            'h-full transition-all duration-500 ease-out rounded-full',
-                            usageBillingData.usageBillingEnabled
-                              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
-                              : 'bg-gradient-to-r from-gray-300 to-gray-400',
-                          )}
-                          style={{
-                            width:
-                              usageBillingData.usageBillingEnabled &&
-                              usageBillingData.monthlySpendLimit > 0
-                                ? `${Math.min((usageBillingData.currentMonthUsageCost / usageBillingData.monthlySpendLimit) * 100, 100)}%`
-                                : usageBillingData.currentMonthUsageCost > 0
-                                  ? '20%'
-                                  : '0%',
-                          }}
-                        />
-                      </div>
-
-                      {usageBillingData.usageBillingEnabled && (
-                        <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
-                          <p>
-                            Plan quota used:{' '}
-                            {usageBillingData.monthlySubmissionsUsed}/
-                            {usageBillingData.monthlySubmissionsLimit}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {usageBillingData.usageBillingEnabled && (
-                      <div className="space-y-2 mt-3">
-                        {/* Spend Limit Controls */}
-                        <div className="pt-2 border-t border-emerald-200 dark:border-emerald-800">
-                          <p className="text-xs text-muted-foreground mb-2">
-                            Set monthly spend limit:
-                          </p>
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {USAGE_BILLING_CONFIG.presetLimits.map((limit) => (
-                              <button
-                                key={limit}
-                                onClick={() => handleUpdateSpendLimit(limit)}
-                                disabled={usageBillingLoading}
-                                className={cn(
-                                  'px-3 py-1 text-xs rounded border transition-colors',
-                                  usageBillingData.monthlySpendLimit === limit
-                                    ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
-                                    : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
-                                  usageBillingLoading &&
-                                    'opacity-50 cursor-not-allowed',
-                                )}
-                              >
-                                ${limit}
-                              </button>
-                            ))}
-                            <button
-                              onClick={() =>
-                                setShowSpendLimitInput(!showSpendLimitInput)
-                              }
-                              disabled={usageBillingLoading}
-                              className={cn(
-                                'px-3 py-1 text-xs rounded border transition-colors',
-                                showSpendLimitInput
-                                  ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
-                                  : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
-                                usageBillingLoading &&
-                                  'opacity-50 cursor-not-allowed',
-                              )}
-                            >
-                              Custom
-                            </button>
-                          </div>
-                          {showSpendLimitInput && (
-                            <div className="flex gap-2 mt-2">
-                              <input
-                                type="number"
-                                value={customSpendLimit}
-                                onChange={(e) =>
-                                  setCustomSpendLimit(e.target.value)
-                                }
-                                placeholder="Enter amount"
-                                min={USAGE_BILLING_CONFIG.minSpendLimit}
-                                max={USAGE_BILLING_CONFIG.maxSpendLimit}
-                                className="flex-1 px-2 py-1 text-xs border border-zinc-200 dark:border-zinc-700 rounded bg-white dark:bg-zinc-800"
-                              />
-                              <button
-                                onClick={() => {
-                                  const limit = parseFloat(customSpendLimit)
-                                  if (
-                                    limit >=
-                                      USAGE_BILLING_CONFIG.minSpendLimit &&
-                                    limit <= USAGE_BILLING_CONFIG.maxSpendLimit
-                                  ) {
-                                    handleUpdateSpendLimit(limit)
-                                  }
-                                }}
-                                disabled={
-                                  usageBillingLoading || !customSpendLimit
-                                }
-                                className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                Set
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Action Button */}
-                    <div className="mt-3">
-                      {usageBillingData.usageBillingEnabled ? (
-                        <button
-                          onClick={() =>
-                            setShowSpendLimitInput(!showSpendLimitInput)
-                          }
-                          disabled={usageBillingLoading}
-                          className="px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-700 text-white rounded-sm hover:bg-zinc-700 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          Edit Limit
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleToggleUsageBilling()}
-                          disabled={usageBillingLoading}
-                          className="px-4 py-2 text-sm bg-emerald-600 text-white rounded-sm hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          Enable Usage Billing
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <button
-                      onClick={() => handleToggleUsageBilling()}
-                      disabled={usageBillingLoading}
-                      className={cn(
-                        'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2',
-                        usageBillingData.usageBillingEnabled
-                          ? 'bg-emerald-600'
-                          : 'bg-gray-200 dark:bg-gray-700',
-                        usageBillingLoading && 'opacity-50 cursor-not-allowed',
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
-                          usageBillingData.usageBillingEnabled
-                            ? 'translate-x-5'
-                            : 'translate-x-1',
-                        )}
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
           {/* Current Plan */}
           <div className="bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900/30 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-sm bg-white dark:bg-zinc-800 shadow-sm">
-                  <Crown className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-                </div>
+                {(() => {
+                  const plan = subscription?.permission_level
+                  const wrapperClass = cn(
+                    'p-2 rounded-sm shadow-sm border',
+                    plan === 'MAX'
+                      ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800'
+                      : plan === 'ENTERPRISE'
+                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800'
+                        : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800',
+                  )
+                  const iconClass = cn(
+                    'h-5 w-5',
+                    plan === 'MAX'
+                      ? 'text-amber-700 dark:text-amber-300'
+                      : plan === 'ENTERPRISE'
+                        ? 'text-purple-700 dark:text-purple-300'
+                        : 'text-blue-700 dark:text-blue-300',
+                  )
+                  return (
+                    <div className={wrapperClass}>
+                      <Crown className={iconClass} />
+                    </div>
+                  )
+                })()}
                 <div className="flex items-center gap-2">
                   <h3 className="text-xl font-semibold">Current plan</h3>
-                  {isSubscribed && subscription?.permission_level && (
-                    <Badge
-                      className={cn(
-                        'border text-xs font-medium',
-                        subscription.permission_level === 'MAX'
-                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                          : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-                      )}
-                    >
-                      {subscription.permission_level}
-                    </Badge>
-                  )}
                 </div>
               </div>
+              {isSubscribed && (
+                <div>
+                  <Button
+                    onClick={handleManageBilling}
+                    disabled={isPortalLoading}
+                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
+                  >
+                    {isPortalLoading && <Spinner className="h-3 w-3 mr-2" />}
+                    {isPortalLoading ? 'Opening...' : 'Billing'}
+                  </Button>
+                </div>
+              )}
             </div>
 
             {isSubscribed ? (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  Your subscription is{' '}
-                  <span className="font-medium text-foreground">
-                    {subscriptionStatus}
-                  </span>
-                  {periodEndDate &&
-                    ` and renews on ${periodEndDate.toLocaleDateString()}`}
+                  Your{' '}
+                  <span className="font-semibold">
+                    {subscription?.permission_level || 'PRO'}
+                  </span>{' '}
+                  subscription is <span className="font-semibold">active</span>
+                  {periodEndDate ? (
+                    <>
+                      {' '}
+                      and renews on{' '}
+                      <span className="font-semibold">
+                        {periodEndDate.toLocaleDateString()}
+                      </span>
+                      .
+                    </>
+                  ) : (
+                    <>.</>
+                  )}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  You can update your payment details, view your invoices, or
+                  cancel your subscription anytime.
                 </p>
               </div>
             ) : (
@@ -687,39 +543,237 @@ export default function BillingSettings() {
             )}
           </div>
 
-          {/* Subscription Management - moved above pricing for Pro+ users */}
-          {isSubscribed && (
-            <Card
-              className={cn(
-                'p-6 shadow-lg border-l-4',
-                subscription?.permission_level === 'MAX'
-                  ? 'border-l-amber-500 dark:border-l-amber-400'
-                  : 'border-l-blue-500 dark:border-l-blue-400',
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold leading-none tracking-tight">
-                    Manage subscription
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Update your payment details, view invoices, or cancel
-                    subscription.
-                  </p>
+          {/* Usage Billing Toggle - only for Pro+ users - placed below current plan */}
+          {isSubscribed &&
+            (subscription?.permission_level === 'PRO' ||
+              subscription?.permission_level === 'MAX') && (
+              <div
+                className={cn(
+                  'group relative rounded-sm border transition-all duration-200 p-6 shadow-sm',
+                  'hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20',
+                  usageBillingData.usageBillingEnabled &&
+                    'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/10',
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-0">
+                      <h3 className="font-medium text-base mt-[2px]">
+                        Usage billing
+                      </h3>
+                    </div>
+                    {!usageBillingData.usageBillingEnabled && (
+                      <p className="text-sm text-muted-foreground mt-4 -mb-1">
+                        Continue applying beyond your plan limits.
+                      </p>
+                    )}
+                  </div>
+                  <div className="ml-4 self-start">
+                    {!usageBillingData.usageBillingEnabled ? (
+                      <Button
+                        onClick={() => {
+                          setPendingSpendLimit(null)
+                          setShowSpendLimitInput(false)
+                          setCustomSpendLimit('')
+                          handleToggleUsageBilling()
+                        }}
+                        disabled={usageBillingLoading}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-4 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
+                      >
+                        {usageBillingLoading ? (
+                          <span className="opacity-70">Enabling…</span>
+                        ) : (
+                          'Enable'
+                        )}
+                      </Button>
+                    ) : !showLimitConfigurator ? (
+                      <Button
+                        onClick={() => handleToggleUsageBilling()}
+                        disabled={usageBillingLoading}
+                        className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-800 dark:hover:text-red-200 border border-red-200 dark:border-red-800 rounded-sm px-4 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
+                      >
+                        {usageBillingLoading ? (
+                          <span className="opacity-70">Disabling…</span>
+                        ) : (
+                          'Disable'
+                        )}
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
-                <div>
-                  <Button
-                    onClick={handleManageBilling}
-                    disabled={isPortalLoading}
-                    className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm px-6 py-2 text-sm font-medium shadow-sm hover:shadow transition-all duration-200"
-                  >
-                    {isPortalLoading && <Spinner className="h-3 w-3 mr-2" />}
-                    {isPortalLoading ? 'Opening...' : 'Manage Billing'}
-                  </Button>
-                </div>
+
+                {/* Full-width body below header */}
+                {usageBillingData.usageBillingEnabled ? (
+                  showLimitConfigurator ? (
+                    <div className="space-y-2 mt-3">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Set monthly spend limit:
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {[10, 20, 50, 100].map((limit) => (
+                          <button
+                            key={limit}
+                            onClick={() => {
+                              setPendingSpendLimit(limit)
+                              setShowSpendLimitInput(false)
+                              setCustomSpendLimit('')
+                            }}
+                            disabled={usageBillingLoading}
+                            className={cn(
+                              'px-3 py-1 text-xs rounded border transition-colors',
+                              pendingSpendLimit === limit
+                                ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
+                                : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
+                              usageBillingLoading &&
+                                'opacity-50 cursor-not-allowed',
+                            )}
+                          >
+                            ${limit}
+                          </button>
+                        ))}
+                        {!showSpendLimitInput ? (
+                          <button
+                            onClick={() => {
+                              setShowSpendLimitInput(true)
+                              setPendingSpendLimit(null)
+                            }}
+                            disabled={usageBillingLoading}
+                            className={cn(
+                              'px-3 py-1 text-xs rounded border transition-colors',
+                              'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
+                              usageBillingLoading &&
+                                'opacity-50 cursor-not-allowed',
+                              // make it appear selected when in custom mode with a valid value pending via custom
+                              showSpendLimitInput && customSpendLimit
+                                ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
+                                : '',
+                            )}
+                          >
+                            Custom
+                          </button>
+                        ) : (
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={customSpendLimit}
+                            onChange={(e) => {
+                              const digitsOnly = e.target.value.replace(
+                                /\D/g,
+                                '',
+                              )
+                              if (digitsOnly === '') {
+                                setCustomSpendLimit('')
+                                return
+                              }
+                              const parsed = Math.min(
+                                1000,
+                                parseInt(digitsOnly, 10),
+                              )
+                              setCustomSpendLimit(String(parsed))
+                            }}
+                            onFocus={() => setPendingSpendLimit(null)}
+                            placeholder="Custom"
+                            className="px-3 py-1 text-xs rounded border bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 w-16 focus:w-16 focus:outline-none focus:ring-0"
+                          />
+                        )}
+                        <button
+                          onClick={() => {
+                            const limit = showSpendLimitInput
+                              ? parseFloat(customSpendLimit)
+                              : (pendingSpendLimit ?? NaN)
+                            if (!Number.isFinite(limit)) return
+                            if (limit >= 5 && limit <= 1000) {
+                              handleUpdateSpendLimit(limit)
+                              setShowLimitConfigurator(false)
+                              setPendingSpendLimit(null)
+                            }
+                          }}
+                          disabled={
+                            usageBillingLoading ||
+                            (!showSpendLimitInput &&
+                              pendingSpendLimit === null) ||
+                            (showSpendLimitInput && !customSpendLimit)
+                          }
+                          className={cn(
+                            'ml-1 px-3 py-1 text-xs rounded-sm border font-medium shadow-sm hover:shadow transition-all duration-200',
+                            'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border-green-200 dark:border-green-800',
+                            usageBillingLoading &&
+                              'opacity-50 cursor-not-allowed',
+                          )}
+                        >
+                          Set limit
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 mt-[6px]">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-semibold text-foreground">
+                          ${usageBillingData.currentMonthUsageCost.toFixed(0)} /
+                          ${usageBillingData.monthlySpendLimit.toFixed(0)}
+                        </span>
+                      </div>
+                      <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-xs overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full transition-all duration-500 ease-out rounded-full',
+                            'bg-gradient-to-r from-emerald-500 to-emerald-600',
+                          )}
+                          style={{
+                            width:
+                              usageBillingData.monthlySpendLimit > 0
+                                ? `${Math.min((usageBillingData.currentMonthUsageCost / usageBillingData.monthlySpendLimit) * 100, 100)}%`
+                                : '0%',
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <div className="flex items-center gap-1">
+                          {usageBillingData.monthlySubmissionsLimit > 0 &&
+                            usageBillingData.monthlySubmissionsUsed <
+                              usageBillingData.monthlySubmissionsLimit && (
+                              <span className="text-[8px] text-emerald-600 dark:text-emerald-400">
+                                Monthly quota is used first before usage billing
+                                starts
+                              </span>
+                            )}
+                          {usageBillingData.currentMonthUsageCost > 0 && (
+                            <>
+                              {usageBillingData.monthlySubmissionsLimit > 0 &&
+                                usageBillingData.monthlySubmissionsUsed <
+                                  usageBillingData.monthlySubmissionsLimit && (
+                                  <span className="text-[8px] text-muted-foreground">
+                                    ·
+                                  </span>
+                                )}
+                              <span className="text-[8px] text-muted-foreground">
+                                Usage charges this month
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {!(
+                        usageBillingData.monthlySubmissionsLimit > 0 &&
+                        usageBillingData.monthlySubmissionsUsed <
+                          usageBillingData.monthlySubmissionsLimit
+                      ) && (
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
+                          <p>
+                            Plan quota used:{' '}
+                            {usageBillingData.monthlySubmissionsUsed}/
+                            {usageBillingData.monthlySubmissionsLimit}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )
+                ) : null}
               </div>
-            </Card>
-          )}
+            )}
+
+          {/* Subscription Management card removed; action moved into Current plan */}
 
           {/* Subscription Plans & Upgrades */}
           {!isSubscribed ? (
@@ -878,12 +932,14 @@ export default function BillingSettings() {
               <Card className="relative shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span className="text-xl font-semibold">Enterprise</span>
+                    <span className="text-xl translate-y-3 font-semibold">
+                      Enterprise
+                    </span>
                     <div className="text-right">
-                      <div className="text-2xl font-bold">Custom</div>
+                      <div className="text-2xl font-bold"></div>
                     </div>
                   </CardTitle>
-                  <CardDescription className="text-sm mt-5">
+                  <CardDescription className="text-sm mt-6">
                     Volume discounts available
                   </CardDescription>
                 </CardHeader>
@@ -957,7 +1013,17 @@ export default function BillingSettings() {
 
       {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="max-w-md" showCloseButton={false}>
+        <DialogContent
+          className="max-w-md"
+          showCloseButton={false}
+          variant="slide-up"
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Subscription activated</DialogTitle>
+            <DialogDescription>
+              Your subscription is now active.
+            </DialogDescription>
+          </DialogHeader>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

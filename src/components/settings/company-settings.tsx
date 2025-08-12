@@ -379,8 +379,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -696,8 +697,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                  .split(',')
-                  .filter(Boolean)
+                    .split(',')
+                    .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -2527,7 +2528,12 @@ export default function CompanySettings() {
 
           {/* Cloud storage */}
           <div className="space-y-3">
-            <Label htmlFor="googleDriveUrl">Cloud storage | Docsend <span className="text-red-600 dark:text-red-400 font-medium">*</span></Label>
+            <Label htmlFor="googleDriveUrl">
+              Cloud storage | Docsend{' '}
+              <span className="text-red-600 dark:text-red-400 font-medium">
+                *
+              </span>
+            </Label>
             <div className="relative">
               <Input
                 id="googleDriveUrl"
@@ -2542,10 +2548,9 @@ export default function CompanySettings() {
               <p className="text-xs text-muted-foreground mt-2">
                 Link to a folder with your pitch deck and any other materials
                 you judge relevant for investors. The agent will privilege
-                sharing this link over individual uploads.{' '}
+                sharing this link over file uploads.{' '}
                 <span className="text-blue-600 dark:text-blue-400 font-medium">
-                  This is mandatory as most investors require at least a
-                  pitch deck.
+                  This is mandatory as most investors require at least a deck.
                 </span>
               </p>
             </div>
@@ -3090,7 +3095,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                            (formData.name || 'CONFIRM')
+                              (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {
