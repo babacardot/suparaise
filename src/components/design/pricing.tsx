@@ -141,7 +141,15 @@ export const Pricing = () => {
                 <ul className="flex flex-col gap-3 mt-6 flex-1">
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
-                      <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                      <Check
+                        className={`size-4 shrink-0 mt-0.5 ${
+                          tier.permissionLevel === 'MAX'
+                            ? 'text-amber-700 dark:text-amber-300'
+                            : tier.permissionLevel === 'ENTERPRISE'
+                              ? 'text-purple-700 dark:text-purple-300'
+                              : 'text-green-700 dark:text-green-300'
+                        }`}
+                      />
                       {feature}
                     </li>
                   ))}

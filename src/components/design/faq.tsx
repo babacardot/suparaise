@@ -15,7 +15,7 @@ const faqData = [
   {
     question: 'Is my startup data secure ?',
     answer:
-      'Yes, we take security seriously. All your data is encrypted in transit and at rest. We never share your information with third parties.',
+      'Yes, we take security seriously. All your data is encrypted in transit and at rest. We never share your information with third parties. We log submission history for transparency but you have the power to erase your data at any time by deleting your account.',
   },
   {
     question: 'How quickly can I get started ?',
@@ -31,6 +31,11 @@ const faqData = [
     question: 'Do you guarantee meetings or funding success ?',
     answer:
       "We automate the application process, but we cannot guarantee meetings or funding outcomes. Success depends on your startup's fit with investor criteria, market conditions, and timing. We help you reach more investors efficiently.",
+  },
+  {
+    question: 'How do you compare to hiring a consultant?',
+    answer:
+      'Suparaise operates continuously at a fraction of the cost, with transparent logs and scalable targeting. For founder-led raises, this is faster and way more affordable.',
   },
   {
     question: 'How accurate are the agents ?',

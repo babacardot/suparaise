@@ -75,7 +75,13 @@ export function ResourcesSection({
             <div key={index} className="flex-none w-40">
               <a
                 href={item.link}
-                target={item.isInternal ? '_self' : '_blank'}
+                target={
+                  item.icon === 'lottie'
+                    ? '_blank'
+                    : item.isInternal
+                      ? '_self'
+                      : '_blank'
+                }
                 rel="noopener noreferrer"
                 className="block group"
                 onMouseEnter={() => setHoveredIndex(index)}

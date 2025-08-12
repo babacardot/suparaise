@@ -1211,11 +1211,14 @@ export default function AcceleratorsFilters({
               }}
               className="w-full sm:w-auto h-10 px-3 rounded-sm bg-card border-border text-muted-foreground hover:text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
             >
-              <LottieIcon
-                animationData={animations.trash}
-                size={16}
-                className="mr-0 opacity-50 hover:opacity-100"
-              />
+              <span className="group inline-flex items-center">
+                <LottieIcon
+                  animationData={animations.trash}
+                  size={16}
+                  className="mr-0 opacity-50 group-hover:opacity-100"
+                  hoverColor={[0.9, 0.2, 0.2]}
+                />
+              </span>
             </Button>
           </div>
         )}

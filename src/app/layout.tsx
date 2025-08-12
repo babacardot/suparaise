@@ -307,7 +307,7 @@ export default function RootLayout({
     ],
     author: {
       '@type': 'Organization',
-      name: 'lomi.',
+      name: 'Suparaise',
     },
   }
 

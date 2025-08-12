@@ -39,7 +39,8 @@ const features = [
     animation: animations.bolt,
     title: 'Accuracy',
     description:
-      'The most advanced AI models fill out applications exactly as you would, with precision that matches your voice.',
+      'The most advanced AI models fill out applications exactly as you would, with precision that matches your voice. ' +
+      'Unlike generic CRM tools, Suparaise understands investor application nuances, required fields, and common pitfalls.',
     color: 'green',
     bgClass:
       'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800',
@@ -49,7 +50,8 @@ const features = [
     animation: animations.speed,
     title: 'Scale',
     description:
-      'Our agents can fill out 5 applications simultaneously in the time it takes you to complete just one.',
+      'Our agents can fill out 5 applications simultaneously in the time it takes you to complete just one. ' +
+      'Unlike hiring a fundraising consultant, our agents work 24/7 at a fraction of the cost with transparent outcomes and machine speed.',
     color: 'blue',
     bgClass:
       'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800',
@@ -59,7 +61,8 @@ const features = [
     animation: animations.globe,
     title: 'Reach',
     description:
-      'Apply to funds, accelerators, and angels from Silicon Valley to Singapore and throughout EMEA.',
+      'Apply to funds, accelerators, and angels from Silicon Valley to Singapore and throughout EMEA. ' +
+      'More targeted than mass email tools, with personalized submissions and fund fit filtering by stage, sector, and geography.',
     color: 'amber',
     bgClass:
       'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800',
@@ -154,14 +157,35 @@ export const About = () => {
                   <h3 className="font-semibold text-lg text-foreground">
                     {feature.title}
                   </h3>
-                  <p className="text-foreground/80 text-sm leading-relaxed">
-                    {feature.description}
-                  </p>
+                  {(() => {
+                    const sentences = feature.description.split('. ')
+                    if (sentences.length <= 1) {
+                      return (
+                        <p className="text-foreground/80 text-sm leading-relaxed">
+                          {feature.description}
+                        </p>
+                      )
+                    }
+                    const firstSentence = sentences.shift() ?? ''
+                    const secondSentence = sentences.join('. ')
+                    return (
+                      <>
+                        <p className="text-foreground/80 text-sm leading-relaxed">
+                          {firstSentence.endsWith('.')
+                            ? firstSentence
+                            : `${firstSentence}.`}
+                        </p>
+                        <div className="my-3 border-t border-border/50" />
+                        <p className="text-foreground/80 text-sm leading-relaxed">
+                          {secondSentence}
+                        </p>
+                      </>
+                    )
+                  })()}
                 </div>
               ))}
             </div>
           </div>
-
           {/* Stats Section */}
           <div className="relative overflow-hidden rounded-sm bg-gradient-to-br from-muted/50 via-background to-muted/30 p-12 border mb-20">
             <div className="relative z-10">

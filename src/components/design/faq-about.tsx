@@ -33,6 +33,16 @@ const faqAboutData = [
       "Suparaise works best for pre-seed to Series A startups. If you're at the idea stage without an MVP, 70% of the investors in our database won't be a good fit yet.",
   },
   {
+    question: 'Will investors know it is automated?',
+    answer:
+      'What investors see is thoughtful, accurate investment applications that match their criterias. Agents are incentivised to use your own words and always prioritise quality and accuracy. You can set their tone, the AI models to use, and even add custom instructions.',
+  },
+  {
+    question: 'How do you maintain accuracy at scale?',
+    answer:
+      'We combine structured company data with per-investor thesis and checks. You can require review for high-priority submissions and lock sensitive answers; MAX users receive a report of all agent submissions.',
+  },
+  {
     question: 'Will Suparaise steal my startup idea ?',
     answer:
       'Absolutely not. We built Suparaise because fundraising is hard and time-consuming. We have our hands already full building this product and the other product that led us to this point. We have no interest in copying your product or using your materials for competitive purposes, we lack both the bandwidth and desire to replicate what you do. Your ideas and data are yours and we will never use them for any other purpose.',
@@ -64,9 +74,6 @@ const FaqAboutSection = React.forwardRef<HTMLElement, FaqAboutSectionProps>(
       >
         <div className="mx-auto max-w-5xl px-6">
           <div className="flex flex-col items-center gap-6 text-center">
-            <div className="flex justify-center">
-              <div className="border py-1 px-4 rounded-sm">FAQ</div>
-            </div>
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">
               Frequently asked questions
             </h2>

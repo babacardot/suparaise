@@ -3060,7 +3060,7 @@ export default function CompanySettings() {
                         Delete
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent variant="slide-up">
                       <DialogHeader>
                         <DialogTitle>Are you sure ?</DialogTitle>
                         <DialogDescription>
@@ -3129,7 +3129,7 @@ export default function CompanySettings() {
                         Delete account
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent variant="slide-up">
                       <DialogHeader>
                         <DialogTitle>Are you sure ?</DialogTitle>
                         <DialogDescription>
@@ -3199,7 +3199,7 @@ export default function CompanySettings() {
                       Delete account
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent variant="slide-up">
                     <DialogHeader>
                       <DialogTitle>Are you sure ?</DialogTitle>
                       <DialogDescription>

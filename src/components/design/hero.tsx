@@ -65,12 +65,13 @@ export function HeroSection() {
                   }}
                 >
                   <h1 className="mt-8 max-w-3xl text-balance text-5xl font-medium md:text-6xl lg:mt-16">
-                    Automate your fundraising efforts
+                    Get more investor meetings with less grind.
                   </h1>
                   <p className="mt-8 max-w-2xl text-pretty text-lg">
-                    Let our agents handle the tedious task of filling out
-                    investment application forms and reaching out to funds, so
-                    you can focus on building your business.
+                    AI agents that research targets, personalize submissions,
+                    and handle applications, so you can focus on building your
+                    business. Explore how it works for technical founders,
+                    international teams, and busy CEOs.
                   </p>
                   <div className="mt-12 flex items-center gap-2">
                     {!user && (

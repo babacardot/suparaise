@@ -524,19 +524,23 @@ export default function BillingSettings() {
                   const plan = subscription?.permission_level
                   const wrapperClass = cn(
                     'p-2 rounded-sm shadow-sm border',
-                    plan === 'MAX'
-                      ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800'
-                      : plan === 'ENTERPRISE'
-                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800'
-                        : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800',
+                    !plan || plan === 'FREE'
+                      ? 'bg-zinc-50 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800'
+                      : plan === 'MAX'
+                        ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800'
+                        : plan === 'ENTERPRISE'
+                          ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800'
+                          : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800',
                   )
                   const iconClass = cn(
                     'h-5 w-5',
-                    plan === 'MAX'
-                      ? 'text-amber-700 dark:text-amber-300'
-                      : plan === 'ENTERPRISE'
-                        ? 'text-purple-700 dark:text-purple-300'
-                        : 'text-blue-700 dark:text-blue-300',
+                    !plan || plan === 'FREE'
+                      ? 'text-zinc-600 dark:text-zinc-300'
+                      : plan === 'MAX'
+                        ? 'text-amber-700 dark:text-amber-300'
+                        : plan === 'ENTERPRISE'
+                          ? 'text-purple-700 dark:text-purple-300'
+                          : 'text-blue-700 dark:text-blue-300',
                   )
                   return (
                     <div className={wrapperClass}>
@@ -869,7 +873,7 @@ export default function BillingSettings() {
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.pro_monthly.price}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         per month
                       </div>
                     </div>
@@ -917,7 +921,7 @@ export default function BillingSettings() {
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.max_monthly.price}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         per month
                       </div>
                     </div>
@@ -934,7 +938,7 @@ export default function BillingSettings() {
                           key={index}
                           className="flex items-center gap-2 text-sm"
                         >
-                          <Check className="h-4 w-4 text-green-500" />
+                          <Check className="h-4 w-4 text-amber-600 dark:text-amber-300" />
                           {feature}
                         </li>
                       ),
@@ -967,7 +971,7 @@ export default function BillingSettings() {
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.max_monthly.price}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         per month
                       </div>
                     </div>
@@ -984,7 +988,7 @@ export default function BillingSettings() {
                           key={index}
                           className="flex items-center gap-2 text-sm"
                         >
-                          <Check className="h-4 w-4 text-green-500" />
+                          <Check className="h-4 w-4 text-amber-600 dark:text-amber-300" />
                           {feature}
                         </li>
                       ),
@@ -1021,19 +1025,19 @@ export default function BillingSettings() {
                 <CardContent className="flex flex-col h-full flex-1">
                   <ul className="space-y-2 mb-6 flex-1">
                     <li className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-purple-700 dark:text-purple-300" />
                       500+ fund applications per month
                     </li>
                     <li className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-purple-700 dark:text-purple-300" />
                       Autopilot mode
                     </li>
                     <li className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-purple-700 dark:text-purple-300" />
                       Up to 25 parallel submissions
                     </li>
                     <li className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-purple-700 dark:text-purple-300" />
                       Premium support
                     </li>
                   </ul>
@@ -1064,19 +1068,19 @@ export default function BillingSettings() {
 
               <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-8">
                 <div className="flex items-start gap-2 text-sm">
-                  <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                  <Check className="size-4 shrink-0 mt-0.5 text-purple-700 dark:text-purple-300" />
                   500+ fund applications per month
                 </div>
                 <div className="flex items-start gap-2 text-sm">
-                  <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                  <Check className="size-4 shrink-0 mt-0.5 text-purple-700 dark:text-purple-300" />
                   Autopilot mode
                 </div>
                 <div className="flex items-start gap-2 text-sm">
-                  <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                  <Check className="size-4 shrink-0 mt-0.5 text-purple-700 dark:text-purple-300" />
                   Up to 25 parallel submissions
                 </div>
                 <div className="flex items-start gap-2 text-sm">
-                  <Check className="size-4 shrink-0 mt-0.5 text-green-700 dark:text-green-300" />
+                  <Check className="size-4 shrink-0 mt-0.5 text-purple-700 dark:text-purple-300" />
                   Premium support
                 </div>
               </div>

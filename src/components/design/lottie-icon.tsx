@@ -12,6 +12,7 @@ interface LottieIconProps {
   initialFrame?: number // Frame to show initially for better static visibility
   isHovered?: boolean // External hover control
   customColor?: [number, number, number] // RGB values as decimals (0-1)
+  hoverColor?: [number, number, number] // Optional color to apply only on hover
 }
 
 const LottieIconComponent = ({
@@ -23,6 +24,7 @@ const LottieIconComponent = ({
   initialFrame,
   isHovered: externalHovered,
   customColor,
+  hoverColor,
 }: LottieIconProps) => {
   const [internalHovered, setInternalHovered] = useState(false)
   const [animData, setAnimData] = useState<LottieAnimationData | null>(null)
@@ -46,8 +48,15 @@ const LottieIconComponent = ({
     if (typeof animationData === 'object' && animationData !== null) {
       let processedData = animationData as LottieAnimationData
 
-      // If customColor is provided, override the primary color in the control layer
-      if (customColor && processedData.layers) {
+      // Determine effective color: use hoverColor when hovered, otherwise customColor
+      const effectiveColor = (
+        externalHovered !== undefined ? externalHovered : internalHovered
+      )
+        ? hoverColor || customColor
+        : customColor
+
+      // If effectiveColor is provided, override the primary color in the control layer
+      if (effectiveColor && processedData.layers) {
         processedData = JSON.parse(JSON.stringify(processedData)) // Deep clone
         const controlLayer = processedData.layers.find(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +76,7 @@ const LottieIconComponent = ({
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ) as any
             if (colorControl?.v?.k) {
-              colorControl.v.k = [...customColor, 1] // Add alpha channel
+              colorControl.v.k = [...effectiveColor, 1] // Add alpha channel
             }
           }
         }
@@ -86,7 +95,7 @@ const LottieIconComponent = ({
       setAnimData(null)
       setIsLoading(false)
     }
-  }, [animationData, customColor])
+  }, [animationData, customColor, hoverColor, externalHovered, internalHovered])
 
   // Set initial frame when animation loads
   useEffect(() => {
@@ -137,8 +146,10 @@ const LottieIconComponent = ({
     )
   }
 
-  // Apply theme-based filter if no custom color is provided and component is mounted
-  const shouldApplyThemeFilter = !customColor && mounted
+  // Apply theme-based filter only when no explicit color is active
+  // If hoverColor is provided and the icon is hovered, or customColor is provided, avoid theme filters
+  const shouldApplyThemeFilter =
+    !(customColor || (hoverColor && isHovered)) && mounted
   const isDark = resolvedTheme === 'dark'
 
   // Only apply filters if mounted and theme is resolved
