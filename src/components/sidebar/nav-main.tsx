@@ -4,7 +4,6 @@ import React, { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LottieIcon } from '@/components/design/lottie-icon'
-import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
 import { cn } from '@/lib/actions/utils'
 import {
@@ -70,7 +69,25 @@ export function NavMain({
     <SidebarGroup className="select-none">
       <SidebarMenu>
         {items.map((item, index) => {
-          const isActive = pathname === item.url
+          // Enhanced active state logic to handle sub-routes
+          const isActive = (() => {
+            // Exact match for the current path
+            if (pathname === item.url) return true
+
+            // Special handling for Settings - should remain active on all settings sub-pages
+            if (item.title === 'Settings' && pathname.includes('/settings')) {
+              // Check if this is a settings sub-route
+              const settingsBasePath = item.url
+              return (
+                pathname.startsWith(settingsBasePath + '/') ||
+                pathname === settingsBasePath
+              )
+            }
+
+            // For other items, only exact match
+            return false
+          })()
+
           const isHovered = hoveredItem === item.title
           const isFirstItem = index === 0
 
@@ -101,7 +118,7 @@ export function NavMain({
                   ? `${item.title} is only available for MAX and Enterprise users. Please upgrade your plan.`
                   : `${item.title} is only available for PRO, MAX and Enterprise users. Please upgrade your plan.`
               toast({
-                variant: 'info',
+                variant: 'locked',
                 title: 'Feature locked',
                 description: upgradeMessage,
               })
@@ -142,15 +159,14 @@ export function NavMain({
                 <span className="flex-1 group-data-[collapsible=icon]:sr-only">
                   {item.title}
                 </span>
-                <Badge
-                  variant="secondary"
+                <span
                   className={cn(
-                    'text-xs border group-data-[collapsible=icon]:sr-only',
+                    'text-xs px-1.5 py-0.5 rounded group-data-[collapsible=icon]:sr-only',
                     requiresEnterprisePermission
-                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
                       : requiresMaxPermission
-                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
                   )}
                 >
                   {requiresEnterprisePermission
@@ -158,7 +174,7 @@ export function NavMain({
                     : requiresMaxPermission
                       ? 'MAX'
                       : 'PRO'}
-                </Badge>
+                </span>
               </div>
             )
 

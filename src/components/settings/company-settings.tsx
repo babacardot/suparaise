@@ -378,8 +378,9 @@ const MultiSelectCountries: React.FC<{
         >
           <span className="truncate">
             {selected.length > 0
-              ? `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'
-              } selected`
+              ? `${selected.length} countr${
+                  selected.length > 1 ? 'ies' : 'y'
+                } selected`
               : 'Select countries...'}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -687,8 +688,8 @@ export default function CompanySettings() {
               ? startupData.operatingCountries
               : typeof startupData.operatingCountries === 'string'
                 ? (startupData.operatingCountries as string)
-                  .split(',')
-                  .filter(Boolean)
+                    .split(',')
+                    .filter(Boolean)
                 : [],
             investmentInstrument: startupData.investmentInstrument || null,
             fundingAmountSought: startupData.fundingAmountSought || 0,
@@ -1766,26 +1767,24 @@ export default function CompanySettings() {
 
               <div className="space-y-3">
                 <Label htmlFor="website">Website</Label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Input
-                      id="website"
-                      value={formData.website || ''}
-                      onChange={(e) =>
-                        handleInputChange('website', e.target.value)
-                      }
-                      onBlur={() => handleFieldSave('website')}
-                      className="rounded-sm"
-                      placeholder="https://yourcompany.com"
-                    />
-                  </div>
+                <div className="flex">
+                  <Input
+                    id="website"
+                    value={formData.website || ''}
+                    onChange={(e) =>
+                      handleInputChange('website', e.target.value)
+                    }
+                    onBlur={() => handleFieldSave('website')}
+                    className="rounded-l-sm rounded-r-none"
+                    placeholder="https://yourcompany.com"
+                  />
                   {showAutofillButton && (
                     <Button
                       type="button"
                       variant="outline"
                       onClick={handleWebsiteAutoFill}
                       disabled={!formData.website?.trim() || isAutoFilling}
-                      className="shrink-0 px-3 h-9 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-sm"
+                      className="shrink-0 px-3 h-9 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 rounded-r-sm rounded-l-none"
                       title="Auto-fill company information from website"
                     >
                       {isAutoFilling ? (
@@ -2636,12 +2635,9 @@ export default function CompanySettings() {
                 {/* Video Upload */}
                 <div className="relative space-y-3">
                   <Label>Demo</Label>
-                  <Badge
-                    variant="secondary"
-                    className="absolute -top-2 -right-2 text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
-                  >
+                  <span className="absolute -top-2 -right-2 text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 px-1.5 py-0.5 rounded">
                     BETA
-                  </Badge>
+                  </span>
                   <input
                     ref={videoInputRef}
                     type="file"
@@ -2986,7 +2982,7 @@ export default function CompanySettings() {
                           disabled={
                             isLoading ||
                             startupDeleteConfirmation !==
-                            (formData.name || 'CONFIRM')
+                              (formData.name || 'CONFIRM')
                           }
                           className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
                           onClick={() => {

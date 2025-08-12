@@ -617,11 +617,19 @@ BEGIN
             WHEN user_permission IN ('PRO', 'MAX', 'ENTERPRISE') THEN ags.preferred_tone
             ELSE 'professional'
         END,
+        'model', CASE
+            WHEN user_permission IN ('PRO', 'MAX', 'ENTERPRISE') THEN ags.model
+            ELSE 'claude-4-sonnet'
+        END,
         'enableDebugMode', CASE 
             WHEN user_permission IN ('MAX', 'ENTERPRISE') THEN ags.debug_mode
             ELSE false
         END,
         'enableStealth', ags.stealth,
+        'enableAutopilot', CASE 
+            WHEN user_permission = 'ENTERPRISE' THEN ags.autopilot
+            ELSE false
+        END,
         'customInstructions', ags.custom_instructions,
         'permissionLevel', user_permission
     )
@@ -649,8 +657,10 @@ BEGIN
                 ELSE 3
             END,
             'preferredTone', 'professional',
+            'model', 'claude-4-sonnet',
             'enableDebugMode', user_permission IN ('MAX', 'ENTERPRISE'),
             'enableStealth', true,
+            'enableAutopilot', false,
             'customInstructions', '',
             'permissionLevel', user_permission
         );
@@ -744,6 +754,14 @@ BEGIN
         );
     END IF;
 
+    -- Validate model selection based on permission level (PRO+)
+    IF p_data ? 'model' AND user_permission NOT IN ('PRO', 'MAX', 'ENTERPRISE') THEN
+        RETURN jsonb_build_object(
+            'error', 
+            'Model selection is only available for PRO, MAX, and ENTERPRISE users. Please upgrade your plan.'
+        );
+    END IF;
+
     IF p_data ? 'enableDebugMode' AND user_permission NOT IN ('MAX', 'ENTERPRISE') THEN
         RETURN jsonb_build_object(
             'error', 
@@ -765,8 +783,10 @@ BEGIN
             max_parallel_submissions = COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, max_parallel_submissions),
             max_queue_size = COALESCE((p_data->>'maxQueueSize')::INTEGER, max_queue_size),
             preferred_tone = CASE WHEN user_permission IN ('PRO', 'MAX', 'ENTERPRISE') THEN COALESCE((p_data->>'preferredTone')::agent_tone, preferred_tone) ELSE preferred_tone END,
+            model = CASE WHEN user_permission IN ('PRO', 'MAX', 'ENTERPRISE') THEN COALESCE((p_data->>'model')::agent_model, model) ELSE model END,
             debug_mode = CASE WHEN user_permission IN ('MAX', 'ENTERPRISE') THEN COALESCE((p_data->>'enableDebugMode')::BOOLEAN, debug_mode) ELSE debug_mode END,
             stealth = COALESCE((p_data->>'enableStealth')::BOOLEAN, stealth),
+            autopilot = CASE WHEN user_permission = 'ENTERPRISE' THEN COALESCE((p_data->>'enableAutopilot')::BOOLEAN, autopilot) ELSE autopilot END,
             custom_instructions = COALESCE(p_data->>'customInstructions', custom_instructions),
             updated_at = NOW()
         WHERE startup_id = p_startup_id AND user_id = p_user_id;
@@ -774,8 +794,8 @@ BEGIN
         -- Insert new settings
         INSERT INTO agent_settings (
             startup_id, user_id, submission_delay, 
-            max_parallel_submissions, max_queue_size, preferred_tone,
-            debug_mode, stealth, custom_instructions
+            max_parallel_submissions, max_queue_size, preferred_tone, model,
+            debug_mode, stealth, autopilot, custom_instructions
         ) VALUES (
             p_startup_id, p_user_id,
             COALESCE((p_data->>'submissionDelay')::agent_submission_delay, '30'::agent_submission_delay),
@@ -790,8 +810,10 @@ BEGIN
                 END
             )),
             COALESCE((p_data->>'preferredTone')::agent_tone, 'professional'),
+            COALESCE((p_data->>'model')::agent_model, 'claude-4-sonnet'),
             COALESCE((p_data->>'enableDebugMode')::BOOLEAN, false),
             COALESCE((p_data->>'enableStealth')::BOOLEAN, true),
+            COALESCE((p_data->>'enableAutopilot')::BOOLEAN, false),
             COALESCE(p_data->>'customInstructions', '')
         );
     END IF;
@@ -833,12 +855,12 @@ BEGIN
     -- Archive agent settings
     INSERT INTO agent_settings_archive (
         id, startup_id, user_id, submission_delay, max_parallel_submissions,
-        preferred_tone, debug_mode, stealth, custom_instructions,
+        preferred_tone, model, debug_mode, stealth, autopilot, custom_instructions,
         created_at, updated_at, original_id, original_startup_id, original_user_id
     )
     SELECT 
         gen_random_uuid(), startup_id, user_id, submission_delay, max_parallel_submissions,
-        preferred_tone, debug_mode, stealth, custom_instructions,
+        preferred_tone, model, debug_mode, stealth, autopilot, custom_instructions,
         created_at, updated_at, id, startup_id, user_id
     FROM agent_settings 
     WHERE user_id = p_user_id;
@@ -1638,6 +1660,7 @@ BEGIN
     SELECT jsonb_build_object(
         'usageBillingEnabled', p.usage_billing_enabled,
         'usageBillingMeterId', p.usage_billing_meter_id,
+        'monthlySpendLimit', p.monthly_spend_limit,
         'monthlyUsageSubmissionsCount', p.monthly_usage_submissions_count,
         'totalUsageSubmissions', p.total_usage_submissions,
         'monthlyEstimatedUsageCost', p.monthly_estimated_usage_cost,
@@ -1664,7 +1687,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE OR REPLACE FUNCTION toggle_usage_billing(
     p_user_id UUID,
     p_enable BOOLEAN,
-    p_meter_id TEXT DEFAULT NULL
+    p_meter_id TEXT DEFAULT NULL,
+    p_spend_limit NUMERIC DEFAULT 50.00
 )
 RETURNS JSONB AS $$
 DECLARE
@@ -1700,6 +1724,10 @@ BEGIN
             WHEN p_enable = TRUE THEN COALESCE(p_meter_id, usage_billing_meter_id)
             ELSE NULL
         END,
+        monthly_spend_limit = CASE 
+            WHEN p_enable = TRUE THEN p_spend_limit
+            ELSE monthly_spend_limit
+        END,
         updated_at = NOW()
     WHERE id = p_user_id;
 
@@ -1718,15 +1746,18 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 -- This is now handled automatically by the triggers, but keeping for manual use
 CREATE OR REPLACE FUNCTION record_usage_submission(
     p_user_id UUID,
-    p_submission_cost NUMERIC DEFAULT 0.85
+    p_submission_cost NUMERIC DEFAULT 2.49
 )
 RETURNS JSONB AS $$
 DECLARE
     user_billing_enabled BOOLEAN;
+    current_spend NUMERIC;
+    spend_limit NUMERIC;
+    new_estimated_cost NUMERIC;
 BEGIN
-    -- Check if user has usage billing enabled
-    SELECT usage_billing_enabled 
-    INTO user_billing_enabled
+    -- Check if user has usage billing enabled and get current spending info
+    SELECT usage_billing_enabled, monthly_estimated_usage_cost, monthly_spend_limit
+    INTO user_billing_enabled, current_spend, spend_limit
     FROM profiles
     WHERE id = p_user_id AND is_active = TRUE;
 
@@ -1740,18 +1771,34 @@ BEGIN
         RETURN jsonb_build_object('error', 'Usage billing is not enabled for this user');
     END IF;
 
+    -- Calculate new estimated cost
+    new_estimated_cost = current_spend + p_submission_cost;
+
+    -- Check if this would exceed the spend limit
+    IF new_estimated_cost > spend_limit THEN
+        RETURN jsonb_build_object(
+            'error', 'Spending limit exceeded', 
+            'currentSpend', current_spend,
+            'spendLimit', spend_limit,
+            'attemptedCost', p_submission_cost,
+            'message', 'This submission would exceed your monthly spend limit of $' || spend_limit::text
+        );
+    END IF;
+
     -- Update usage costs and submission count
     UPDATE profiles
     SET 
         monthly_usage_submissions_count = monthly_usage_submissions_count + 1,
         total_usage_submissions = total_usage_submissions + 1,
-        monthly_estimated_usage_cost = monthly_estimated_usage_cost + p_submission_cost,
+        monthly_estimated_usage_cost = new_estimated_cost,
         updated_at = NOW()
     WHERE id = p_user_id;
 
     RETURN jsonb_build_object(
         'success', TRUE,
         'submissionCost', p_submission_cost,
+        'newEstimatedCost', new_estimated_cost,
+        'spendLimit', spend_limit,
         'message', 'Usage submission recorded successfully'
     );
 END;
@@ -1804,7 +1851,7 @@ BEGIN
         'avgUsageCostPerSubmission', CASE 
             WHEN p.monthly_usage_submissions_count > 0 
             THEN p.monthly_estimated_usage_cost / p.monthly_usage_submissions_count
-            ELSE 0.85
+            ELSE 2.49
         END,
         'lastUpdated', p.updated_at
     )
@@ -1822,8 +1869,55 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant permissions for usage billing functions
+-- Function to update monthly spend limit
+CREATE OR REPLACE FUNCTION update_spend_limit(
+    p_user_id UUID,
+    p_spend_limit NUMERIC
+)
+RETURNS JSONB AS $$
+DECLARE
+    user_billing_enabled BOOLEAN;
+    user_permission permission_level;
+BEGIN
+    -- Validate spend limit
+    IF p_spend_limit < 0 OR p_spend_limit > 1000 THEN
+        RETURN jsonb_build_object('error', 'Spend limit must be between $0 and $1000');
+    END IF;
+
+    -- Check if user exists and has usage billing enabled
+    SELECT usage_billing_enabled, permission_level
+    INTO user_billing_enabled, user_permission
+    FROM profiles
+    WHERE id = p_user_id AND is_active = TRUE;
+
+    -- Return error if user not found
+    IF user_billing_enabled IS NULL THEN
+        RETURN jsonb_build_object('error', 'User not found or inactive');
+    END IF;
+
+    -- Only allow PRO and MAX users to update spend limits
+    IF user_permission NOT IN ('PRO', 'MAX', 'ENTERPRISE') THEN
+        RETURN jsonb_build_object('error', 'Spend limit updates are only available for PRO and MAX users');
+    END IF;
+
+    -- Update the spend limit
+    UPDATE profiles
+    SET 
+        monthly_spend_limit = p_spend_limit,
+        updated_at = NOW()
+    WHERE id = p_user_id;
+
+    RETURN jsonb_build_object(
+        'success', TRUE,
+        'monthlySpendLimit', p_spend_limit,
+        'message', 'Monthly spend limit updated successfully'
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 GRANT EXECUTE ON FUNCTION get_user_usage_billing(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION toggle_usage_billing(UUID, BOOLEAN, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION toggle_usage_billing(UUID, BOOLEAN, TEXT, NUMERIC) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_spend_limit(UUID, NUMERIC) TO authenticated;
 GRANT EXECUTE ON FUNCTION record_usage_submission(UUID, NUMERIC) TO authenticated;
 GRANT EXECUTE ON FUNCTION reset_monthly_usage_costs() TO service_role;
 GRANT EXECUTE ON FUNCTION get_usage_billing_stats(UUID) TO authenticated;

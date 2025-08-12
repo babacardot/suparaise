@@ -45,6 +45,10 @@ export const USAGE_BILLING_CONFIG = {
   processingCost: 0.69, // Processing cost portion ($0.69)
   meterId: process.env.NEXT_PUBLIC_STRIPE_USAGE_BILLING_METER_ID!, // Stripe billing meter ID
   priceId: process.env.NEXT_PUBLIC_STRIPE_USAGE_BILLING_PRICE_ID!, // Stripe price ID for usage billing
+  defaultSpendLimit: 50.0, // Default monthly spend limit
+  minSpendLimit: 10.0, // Minimum spend limit
+  maxSpendLimit: 1000.0, // Maximum spend limit
+  presetLimits: [10, 20, 50, 100, 150], // Preset spend limit options
 }
 
 // Subscription plans configuration

@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { buttonVariants } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -82,7 +81,7 @@ function NavItem({
         e.preventDefault()
         playNopeSound()
         toast({
-          variant: 'info',
+          variant: 'locked',
           title: 'Feature locked',
           description: `${item.title} is only available for Enterprise users. Please upgrade your plan.`,
         })
@@ -138,12 +137,9 @@ function NavItem({
           </div>
           <div className="flex items-center gap-2">
             {requiresEnterprisePermission && (
-              <Badge
-                variant="secondary"
-                className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 select-none"
-              >
+              <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 px-1.5 py-0.5 rounded select-none">
                 ENT
-              </Badge>
+              </span>
             )}
           </div>
         </div>
@@ -188,12 +184,9 @@ function NavItem({
         </div>
         <div className="flex items-center gap-2">
           {item.title === 'Integrations' && (
-            <Badge
-              variant="secondary"
-              className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
-            >
+            <span className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 px-1.5 py-0.5 rounded">
               BETA
-            </Badge>
+            </span>
           )}
         </div>
       </div>
@@ -342,20 +335,14 @@ export default function SettingsNav({
                       {item.title}
                     </span>
                     {requiresEnterprisePermission && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 select-none"
-                      >
+                      <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 px-1.5 py-0.5 rounded select-none">
                         ENT
-                      </Badge>
+                      </span>
                     )}
                     {item.title === 'Integrations' && hasEnterpriseAccess && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800"
-                      >
+                      <span className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 px-1.5 py-0.5 rounded">
                         BETA
-                      </Badge>
+                      </span>
                     )}
                   </span>
                 </SelectItem>

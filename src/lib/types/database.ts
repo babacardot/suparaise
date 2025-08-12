@@ -241,12 +241,14 @@ export type Database = {
       }
       agent_settings: {
         Row: {
+          autopilot: boolean
           created_at: string | null
           custom_instructions: string | null
           debug_mode: boolean
           id: string
           max_parallel_submissions: Database['public']['Enums']['agent_parallel_submissions']
           max_queue_size: number
+          model: Database['public']['Enums']['agent_model']
           preferred_tone: Database['public']['Enums']['agent_tone']
           startup_id: string
           stealth: boolean
@@ -255,12 +257,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          autopilot?: boolean
           created_at?: string | null
           custom_instructions?: string | null
           debug_mode?: boolean
           id?: string
           max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
           max_queue_size?: number
+          model?: Database['public']['Enums']['agent_model']
           preferred_tone?: Database['public']['Enums']['agent_tone']
           startup_id: string
           stealth?: boolean
@@ -269,12 +273,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          autopilot?: boolean
           created_at?: string | null
           custom_instructions?: string | null
           debug_mode?: boolean
           id?: string
           max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
           max_queue_size?: number
+          model?: Database['public']['Enums']['agent_model']
           preferred_tone?: Database['public']['Enums']['agent_tone']
           startup_id?: string
           stealth?: boolean
@@ -296,11 +302,13 @@ export type Database = {
         Row: {
           archived_at: string
           archived_reason: string
+          autopilot: boolean
           created_at: string | null
           custom_instructions: string | null
           debug_mode: boolean
           id: string
           max_parallel_submissions: Database['public']['Enums']['agent_parallel_submissions']
+          model: Database['public']['Enums']['agent_model']
           original_id: string
           original_startup_id: string
           original_user_id: string
@@ -314,11 +322,13 @@ export type Database = {
         Insert: {
           archived_at?: string
           archived_reason?: string
+          autopilot?: boolean
           created_at?: string | null
           custom_instructions?: string | null
           debug_mode?: boolean
           id?: string
           max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
+          model?: Database['public']['Enums']['agent_model']
           original_id: string
           original_startup_id: string
           original_user_id: string
@@ -332,11 +342,13 @@ export type Database = {
         Update: {
           archived_at?: string
           archived_reason?: string
+          autopilot?: boolean
           created_at?: string | null
           custom_instructions?: string | null
           debug_mode?: boolean
           id?: string
           max_parallel_submissions?: Database['public']['Enums']['agent_parallel_submissions']
+          model?: Database['public']['Enums']['agent_model']
           original_id?: string
           original_startup_id?: string
           original_user_id?: string
@@ -742,6 +754,7 @@ export type Database = {
           is_subscribed: boolean | null
           last_invoice_date: string | null
           monthly_estimated_usage_cost: number
+          monthly_spend_limit: number
           monthly_submissions_limit: number
           monthly_submissions_used: number
           monthly_usage_submissions_count: number
@@ -768,6 +781,7 @@ export type Database = {
           is_subscribed?: boolean | null
           last_invoice_date?: string | null
           monthly_estimated_usage_cost?: number
+          monthly_spend_limit?: number
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
           monthly_usage_submissions_count?: number
@@ -794,6 +808,7 @@ export type Database = {
           is_subscribed?: boolean | null
           last_invoice_date?: string | null
           monthly_estimated_usage_cost?: number
+          monthly_spend_limit?: number
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
           monthly_usage_submissions_count?: number
@@ -825,6 +840,7 @@ export type Database = {
           is_subscribed: boolean | null
           last_invoice_date: string | null
           monthly_estimated_usage_cost: number
+          monthly_spend_limit: number
           monthly_submissions_limit: number
           monthly_submissions_used: number
           monthly_usage_submissions_count: number
@@ -854,6 +870,7 @@ export type Database = {
           is_subscribed?: boolean | null
           last_invoice_date?: string | null
           monthly_estimated_usage_cost?: number
+          monthly_spend_limit?: number
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
           monthly_usage_submissions_count?: number
@@ -883,6 +900,7 @@ export type Database = {
           is_subscribed?: boolean | null
           last_invoice_date?: string | null
           monthly_estimated_usage_cost?: number
+          monthly_spend_limit?: number
           monthly_submissions_limit?: number
           monthly_submissions_used?: number
           monthly_usage_submissions_count?: number
@@ -1955,7 +1973,12 @@ export type Database = {
         Returns: Json
       }
       toggle_usage_billing: {
-        Args: { p_user_id: string; p_enable: boolean; p_meter_id?: string }
+        Args: {
+          p_user_id: string
+          p_enable: boolean
+          p_meter_id?: string
+          p_spend_limit?: number
+        }
         Returns: Json
       }
       update_accelerator_submission_status: {
@@ -1976,6 +1999,10 @@ export type Database = {
       }
       update_founder_profile: {
         Args: { p_user_id: string; p_founder_id: string; p_data: Json }
+        Returns: Json
+      }
+      update_spend_limit: {
+        Args: { p_user_id: string; p_spend_limit: number }
         Returns: Json
       }
       update_submission_session_data: {
@@ -2036,6 +2063,11 @@ export type Database = {
     }
     Enums: {
       acceptance_rate: '<1%' | '1-5%' | '6-10%' | '11-20%' | '20%+'
+      agent_model:
+        | 'claude-4-sonnet'
+        | 'gpt-5'
+        | 'deepseek-r1-0528'
+        | 'gemini-2.5-pro'
       agent_parallel_submissions: '1' | '3' | '5' | '15' | '25' | '35'
       agent_submission_delay: '0' | '15' | '30'
       agent_tone: 'professional' | 'enthusiastic' | 'concise' | 'detailed'
@@ -2359,6 +2391,12 @@ export const Constants = {
   public: {
     Enums: {
       acceptance_rate: ['<1%', '1-5%', '6-10%', '11-20%', '20%+'],
+      agent_model: [
+        'claude-4-sonnet',
+        'gpt-5',
+        'deepseek-r1-0528',
+        'gemini-2.5-pro',
+      ],
       agent_parallel_submissions: ['1', '3', '5', '15', '25', '35'],
       agent_submission_delay: ['0', '15', '30'],
       agent_tone: ['professional', 'enthusiastic', 'concise', 'detailed'],

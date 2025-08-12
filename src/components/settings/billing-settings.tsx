@@ -15,7 +15,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Loader2, Check, Crown } from 'lucide-react'
 import { useUser } from '@/lib/contexts/user-context'
 import { useToast } from '@/lib/hooks/use-toast'
-import { SUBSCRIPTION_PLANS, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
+import {
+  SUBSCRIPTION_PLANS,
+  STRIPE_PRICE_IDS,
+  USAGE_BILLING_CONFIG,
+} from '@/lib/stripe/client'
 import { cn } from '@/lib/actions/utils'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -135,19 +139,24 @@ function BillingSettingsSkeleton() {
 export default function BillingSettings() {
   const { user, subscription, subscriptionLoading, isSubscribed } = useUser()
   const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
+  const [loadingPlan, setLoadingPlan] = useState<
+    'pro_monthly' | 'max_monthly' | null
+  >(null)
   const [isPortalLoading, setIsPortalLoading] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successPlan, setSuccessPlan] = useState<string>('')
   const [usageBillingData, setUsageBillingData] = useState({
     usageBillingEnabled: false,
     currentMonthUsageCost: 0,
+    monthlySpendLimit: USAGE_BILLING_CONFIG.defaultSpendLimit,
     monthlyUsageSubmissionsCount: 0,
     totalUsageSubmissions: 0,
     monthlySubmissionsUsed: 0,
     monthlySubmissionsLimit: 0,
   })
   const [usageBillingLoading, setUsageBillingLoading] = useState(false)
+  const [showSpendLimitInput, setShowSpendLimitInput] = useState(false)
+  const [customSpendLimit, setCustomSpendLimit] = useState('')
   const params = useParams()
   const searchParams = useSearchParams()
   const startupId = params.startupId as string
@@ -165,7 +174,9 @@ export default function BillingSettings() {
         if (data && !data.error) {
           setUsageBillingData({
             usageBillingEnabled: data.usageBillingEnabled || false,
-            currentMonthUsageCost: data.currentMonthUsageCost || 0,
+            currentMonthUsageCost: data.monthlyEstimatedUsageCost || 0,
+            monthlySpendLimit:
+              data.monthlySpendLimit || USAGE_BILLING_CONFIG.defaultSpendLimit,
             monthlyUsageSubmissionsCount:
               data.monthlyUsageSubmissionsCount || 0,
             totalUsageSubmissions: data.totalUsageSubmissions || 0,
@@ -230,7 +241,7 @@ export default function BillingSettings() {
 
   const handleSubscribe = async (plan: 'pro_monthly' | 'max_monthly') => {
     playClickSound()
-    setIsLoading(true)
+    setLoadingPlan(plan)
     try {
       const priceId = STRIPE_PRICE_IDS[plan]
 
@@ -262,11 +273,11 @@ export default function BillingSettings() {
         description: 'Failed to start subscription process. Please try again.',
       })
     } finally {
-      setIsLoading(false)
+      setLoadingPlan(null)
     }
   }
 
-  const handleToggleUsageBilling = async () => {
+  const handleToggleUsageBilling = async (spendLimit?: number) => {
     playClickSound()
     setUsageBillingLoading(true)
 
@@ -278,6 +289,7 @@ export default function BillingSettings() {
         },
         body: JSON.stringify({
           enable: !usageBillingData.usageBillingEnabled,
+          spendLimit: spendLimit || usageBillingData.monthlySpendLimit,
         }),
       })
 
@@ -291,6 +303,7 @@ export default function BillingSettings() {
       setUsageBillingData((prev) => ({
         ...prev,
         usageBillingEnabled: !prev.usageBillingEnabled,
+        monthlySpendLimit: spendLimit || prev.monthlySpendLimit,
       }))
 
       toast({
@@ -308,6 +321,56 @@ export default function BillingSettings() {
           error instanceof Error
             ? error.message
             : 'Failed to update usage billing settings.',
+      })
+    } finally {
+      setUsageBillingLoading(false)
+    }
+  }
+
+  const handleUpdateSpendLimit = async (limit: number) => {
+    playClickSound()
+    setUsageBillingLoading(true)
+
+    try {
+      const response = await fetch('/api/usage-billing/spend-limit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          spendLimit: limit,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update spend limit')
+      }
+
+      // Update local state
+      setUsageBillingData((prev) => ({
+        ...prev,
+        monthlySpendLimit: limit,
+      }))
+
+      setShowSpendLimitInput(false)
+      setCustomSpendLimit('')
+
+      toast({
+        variant: 'success',
+        title: 'Spend limit updated',
+        description: `Monthly spend limit set to $${limit}`,
+      })
+    } catch (error) {
+      console.error('Spend limit error:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update spend limit.',
       })
     } finally {
       setUsageBillingLoading(false)
@@ -377,6 +440,202 @@ export default function BillingSettings() {
 
       <div className="flex-1 overflow-auto pt-6 max-h-[60.5vh] hide-scrollbar">
         <div className="space-y-6 pr-2">
+          {/* Usage Billing Toggle - only for Pro+ users - moved above current plan */}
+          {isSubscribed &&
+            (subscription?.permission_level === 'PRO' ||
+              subscription?.permission_level === 'MAX') && (
+              <div
+                className={cn(
+                  'group relative p-3 border rounded-sm transition-all duration-200',
+                  'hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20',
+                  usageBillingData.usageBillingEnabled &&
+                    'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/10',
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-medium text-base">Usage billing</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Continue applying beyond your plan limits at $2.49 per
+                      run.
+                    </p>
+
+                    {/* Usage Progress Bar - Always visible */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-semibold text-foreground">
+                          ${usageBillingData.currentMonthUsageCost.toFixed(0)} /{' '}
+                          {usageBillingData.usageBillingEnabled
+                            ? `$${usageBillingData.monthlySpendLimit.toFixed(0)}`
+                            : '—'}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Usage-Based Spending this Month
+                        </span>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full transition-all duration-500 ease-out rounded-full',
+                            usageBillingData.usageBillingEnabled
+                              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
+                              : 'bg-gradient-to-r from-gray-300 to-gray-400',
+                          )}
+                          style={{
+                            width:
+                              usageBillingData.usageBillingEnabled &&
+                              usageBillingData.monthlySpendLimit > 0
+                                ? `${Math.min((usageBillingData.currentMonthUsageCost / usageBillingData.monthlySpendLimit) * 100, 100)}%`
+                                : usageBillingData.currentMonthUsageCost > 0
+                                  ? '20%'
+                                  : '0%',
+                          }}
+                        />
+                      </div>
+
+                      {usageBillingData.usageBillingEnabled && (
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
+                          <p>
+                            Plan quota used:{' '}
+                            {usageBillingData.monthlySubmissionsUsed}/
+                            {usageBillingData.monthlySubmissionsLimit}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {usageBillingData.usageBillingEnabled && (
+                      <div className="space-y-2 mt-3">
+                        {/* Spend Limit Controls */}
+                        <div className="pt-2 border-t border-emerald-200 dark:border-emerald-800">
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Set monthly spend limit:
+                          </p>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {USAGE_BILLING_CONFIG.presetLimits.map((limit) => (
+                              <button
+                                key={limit}
+                                onClick={() => handleUpdateSpendLimit(limit)}
+                                disabled={usageBillingLoading}
+                                className={cn(
+                                  'px-3 py-1 text-xs rounded border transition-colors',
+                                  usageBillingData.monthlySpendLimit === limit
+                                    ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
+                                    : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
+                                  usageBillingLoading &&
+                                    'opacity-50 cursor-not-allowed',
+                                )}
+                              >
+                                ${limit}
+                              </button>
+                            ))}
+                            <button
+                              onClick={() =>
+                                setShowSpendLimitInput(!showSpendLimitInput)
+                              }
+                              disabled={usageBillingLoading}
+                              className={cn(
+                                'px-3 py-1 text-xs rounded border transition-colors',
+                                showSpendLimitInput
+                                  ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
+                                  : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
+                                usageBillingLoading &&
+                                  'opacity-50 cursor-not-allowed',
+                              )}
+                            >
+                              Custom
+                            </button>
+                          </div>
+                          {showSpendLimitInput && (
+                            <div className="flex gap-2 mt-2">
+                              <input
+                                type="number"
+                                value={customSpendLimit}
+                                onChange={(e) =>
+                                  setCustomSpendLimit(e.target.value)
+                                }
+                                placeholder="Enter amount"
+                                min={USAGE_BILLING_CONFIG.minSpendLimit}
+                                max={USAGE_BILLING_CONFIG.maxSpendLimit}
+                                className="flex-1 px-2 py-1 text-xs border border-zinc-200 dark:border-zinc-700 rounded bg-white dark:bg-zinc-800"
+                              />
+                              <button
+                                onClick={() => {
+                                  const limit = parseFloat(customSpendLimit)
+                                  if (
+                                    limit >=
+                                      USAGE_BILLING_CONFIG.minSpendLimit &&
+                                    limit <= USAGE_BILLING_CONFIG.maxSpendLimit
+                                  ) {
+                                    handleUpdateSpendLimit(limit)
+                                  }
+                                }}
+                                disabled={
+                                  usageBillingLoading || !customSpendLimit
+                                }
+                                className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Set
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Button */}
+                    <div className="mt-3">
+                      {usageBillingData.usageBillingEnabled ? (
+                        <button
+                          onClick={() =>
+                            setShowSpendLimitInput(!showSpendLimitInput)
+                          }
+                          disabled={usageBillingLoading}
+                          className="px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-700 text-white rounded-sm hover:bg-zinc-700 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Edit Limit
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleToggleUsageBilling()}
+                          disabled={usageBillingLoading}
+                          className="px-4 py-2 text-sm bg-emerald-600 text-white rounded-sm hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Enable Usage Billing
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <button
+                      onClick={() => handleToggleUsageBilling()}
+                      disabled={usageBillingLoading}
+                      className={cn(
+                        'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2',
+                        usageBillingData.usageBillingEnabled
+                          ? 'bg-emerald-600'
+                          : 'bg-gray-200 dark:bg-gray-700',
+                        usageBillingLoading && 'opacity-50 cursor-not-allowed',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
+                          usageBillingData.usageBillingEnabled
+                            ? 'translate-x-5'
+                            : 'translate-x-1',
+                        )}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           {/* Current Plan */}
           <div className="bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900/30 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
@@ -427,75 +686,6 @@ export default function BillingSettings() {
               </div>
             )}
           </div>
-
-          {/* Usage Billing Toggle - only for Pro+ users */}
-          {isSubscribed &&
-            (subscription?.permission_level === 'PRO' ||
-              subscription?.permission_level === 'MAX') && (
-              <div
-                className={cn(
-                  'group relative p-4 border rounded-sm transition-all duration-200',
-                  'hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/50 dark:hover:bg-purple-950/20',
-                  usageBillingData.usageBillingEnabled &&
-                  'border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/10',
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-medium text-lg">Usage billing</h3>
-                      <Badge
-                        className={cn(
-                          'border text-xs font-medium',
-                          subscription?.permission_level === 'MAX'
-                            ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                            : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-                        )}
-                      >
-                        {subscription?.permission_level}
-                      </Badge>
-                    </div>
-                    <p className="text-sm leading-relaxed text-muted-foreground mb-2">
-                      Continue running after your monthly quota with
-                      pay-per-submission billing at $2.49 per additional run.
-                    </p>
-                    {usageBillingData.usageBillingEnabled && (
-                      <div className="text-xs text-purple-600 dark:text-purple-400 space-y-1">
-                        <p>
-                          Plan quota used:{' '}
-                          {usageBillingData.monthlySubmissionsUsed}/
-                          {usageBillingData.monthlySubmissionsLimit}
-                        </p>
-                        <p>
-                          Usage submissions this month:{' '}
-                          {usageBillingData.monthlyUsageSubmissionsCount}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    onClick={handleToggleUsageBilling}
-                    disabled={usageBillingLoading}
-                    className={cn(
-                      'relative inline-flex h-5 w-9 items-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2',
-                      usageBillingData.usageBillingEnabled
-                        ? 'bg-purple-600'
-                        : 'bg-gray-200 dark:bg-gray-700',
-                      usageBillingLoading && 'opacity-50 cursor-not-allowed',
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'inline-block h-3 w-3 transform rounded-sm bg-white transition-transform',
-                        usageBillingData.usageBillingEnabled
-                          ? 'translate-x-5'
-                          : 'translate-x-1',
-                      )}
-                    />
-                  </button>
-                </div>
-              </div>
-            )}
 
           {/* Subscription Management - moved above pricing for Pro+ users */}
           {isSubscribed && (
@@ -575,14 +765,14 @@ export default function BillingSettings() {
                   </ul>
                   <Button
                     onClick={() => handleSubscribe('pro_monthly')}
-                    disabled={isLoading}
+                    disabled={loadingPlan === 'pro_monthly'}
                     className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
-                    {isLoading && (
+                    {loadingPlan === 'pro_monthly' && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    {isLoading ? 'Processing...' : 'Start Pro'}
+                    {loadingPlan === 'pro_monthly' ? '' : 'Start Pro'}
                   </Button>
                 </CardContent>
               </Card>
@@ -623,14 +813,14 @@ export default function BillingSettings() {
                   </ul>
                   <Button
                     onClick={() => handleSubscribe('max_monthly')}
-                    disabled={isLoading}
+                    disabled={loadingPlan === 'max_monthly'}
                     className="w-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
-                    {isLoading && (
+                    {loadingPlan === 'max_monthly' && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    {isLoading ? 'Processing...' : 'Go Max'}
+                    {loadingPlan === 'max_monthly' ? '' : 'Go Max'}
                   </Button>
                 </CardContent>
               </Card>
@@ -673,14 +863,14 @@ export default function BillingSettings() {
                   </ul>
                   <Button
                     onClick={() => handleSubscribe('max_monthly')}
-                    disabled={isLoading}
+                    disabled={loadingPlan === 'max_monthly'}
                     className="w-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 hover:text-teal-800 dark:hover:text-teal-200 border border-teal-200 dark:border-teal-800 font-medium py-2.5 rounded-sm shadow-sm hover:shadow transition-all duration-200"
                     variant="outline"
                   >
-                    {isLoading && (
+                    {loadingPlan === 'max_monthly' && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    {isLoading ? 'Processing...' : 'Go Max'}
+                    {loadingPlan === 'max_monthly' ? '' : 'Go Max'}
                   </Button>
                 </CardContent>
               </Card>

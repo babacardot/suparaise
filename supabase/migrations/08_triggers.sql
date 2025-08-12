@@ -214,6 +214,7 @@ DECLARE
   request_id bigint;
   supabase_url text;
   service_role_key text;
+  usage_result JSONB;
 BEGIN
   -- Only increment when status changes to 'completed'
   IF (TG_OP = 'UPDATE' AND NEW.status <> OLD.status AND NEW.status = 'completed') THEN
@@ -231,15 +232,21 @@ BEGIN
       BEGIN
         -- Determine if this should be counted as usage billing or plan-based
         IF user_usage_billing_enabled = TRUE AND user_monthly_used >= user_monthly_limit THEN
-          -- This is a usage-based submission (beyond plan quota)
-          UPDATE profiles
-          SET 
-            monthly_usage_submissions_count = monthly_usage_submissions_count + 1,
-            total_usage_submissions = total_usage_submissions + 1,
-            -- Update ESTIMATED cost (actual cost comes from Stripe invoices)
-            monthly_estimated_usage_cost = monthly_estimated_usage_cost + 0.85,
-            updated_at = NOW()
-          WHERE id = user_id_to_increment;
+          -- Call the record_usage_submission function which includes spend limit enforcement
+          BEGIN
+            SELECT INTO usage_result public.record_usage_submission(
+              user_id_to_increment,
+              2.49 -- Current usage billing cost per submission
+            );
+            
+            -- Check if spend limit was exceeded
+            IF usage_result->>'error' IS NOT NULL THEN
+              RAISE EXCEPTION 'Usage billing error: %', usage_result->>'message';
+            END IF;
+          EXCEPTION WHEN OTHERS THEN
+            -- If spend limit exceeded or other error, re-raise the exception
+            RAISE;
+          END;
           
           -- Record usage event in Stripe via API call
           IF user_stripe_customer_id IS NOT NULL THEN

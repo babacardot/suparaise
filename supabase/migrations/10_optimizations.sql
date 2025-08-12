@@ -193,7 +193,7 @@ BEGIN
     -- Get profile name efficiently
     SELECT full_name INTO profile_name
     FROM profiles
-    WHERE id = p_user_id AND is_active = TRUE;
+    WHERE id = p_user_id;
 
     RETURN jsonb_build_object(
         'needsOnboarding', NOT startup_stats.has_startups OR startup_stats.has_incomplete_startups,

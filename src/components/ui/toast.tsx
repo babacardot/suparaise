@@ -12,6 +12,7 @@ export type ToastVariant =
   | 'info'
   | 'success'
   | 'api'
+  | 'locked'
 
 const ToastProvider = ToastPrimitives.Provider
 
@@ -36,13 +37,15 @@ const toastVariants = cva(
     variants: {
       variant: {
         default:
-          'border-orange-300/20 bg-orange-50 text-orange-700 dark:bg-orange-900/80 dark:text-orange-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
+          'border-amber-300/20 bg-amber-50 text-amber-700 dark:bg-amber-900/80 dark:text-amber-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
         destructive:
           'border-red-300/20 bg-red-50 text-red-700 dark:bg-red-900/80 dark:text-red-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
         info: 'border-blue-300/20 bg-blue-50 text-blue-700 dark:bg-blue-900/80 dark:text-blue-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
         success:
           'border-green-300/20 bg-green-50 text-green-700 dark:bg-green-900/80 dark:text-green-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
         api: 'border-cyan-300/20 bg-cyan-50 text-cyan-700 dark:bg-cyan-900/80 dark:text-cyan-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
+        locked:
+          'border-purple-300/20 bg-purple-50 text-purple-700 dark:bg-purple-900/80 dark:text-purple-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
       },
     },
     defaultVariants: {
@@ -181,6 +184,8 @@ const ToastDescription = React.forwardRef<
         return 'text-green-600/90 dark:text-green-400/90'
       case 'api':
         return 'text-cyan-600/90 dark:text-cyan-400/90'
+      case 'locked':
+        return 'text-purple-600/90 dark:text-purple-400/90'
       default:
         return 'text-orange-600/90 dark:text-orange-400/90'
     }
@@ -237,7 +242,9 @@ const ToastProgressBar = React.forwardRef<
                 ? 'bg-green-500'
                 : variant === 'api'
                   ? 'bg-cyan-500'
-                  : 'bg-orange-500',
+                  : variant === 'locked'
+                    ? 'bg-purple-500'
+                    : 'bg-orange-500',
       )}
       style={{ margin: 0, padding: 0 }}
     />

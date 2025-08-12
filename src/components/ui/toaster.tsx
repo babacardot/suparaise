@@ -18,6 +18,7 @@ import {
   InfoIcon,
   Key,
   Rabbit,
+  DoorClosedLocked,
 } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 
@@ -82,6 +83,15 @@ function getToastIcon(variant: string) {
           )}
         />
       )
+    case 'locked':
+      return (
+        <DoorClosedLocked
+          className={cn(
+            'h-4 w-4 text-purple-700 dark:text-purple-300',
+            'animate-[iconSlideIn_0.3s_ease-in-out]',
+          )}
+        />
+      )
     default:
       return (
         <Rabbit
@@ -98,7 +108,9 @@ function getToastIcon(variant: string) {
 function mapToValidVariant(variantStr: string): ToastVariant {
   // Check if the provided variant is already a valid ToastVariant
   if (
-    ['default', 'destructive', 'info', 'success', 'api'].includes(variantStr)
+    ['default', 'destructive', 'info', 'success', 'api', 'locked'].includes(
+      variantStr,
+    )
   ) {
     return variantStr as ToastVariant
   }

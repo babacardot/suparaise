@@ -133,6 +133,13 @@ CREATE TYPE revenue_model_type AS ENUM (
 CREATE TYPE subscription_status AS ENUM ('active', 'inactive', 'past_due', 'canceled', 'unpaid', 'paused');
 CREATE TYPE permission_level AS ENUM ('FREE', 'PRO', 'MAX', 'ENTERPRISE');
 CREATE TYPE agent_tone AS ENUM ('professional', 'enthusiastic', 'concise', 'detailed');
+-- LLM model selection for agent
+CREATE TYPE agent_model AS ENUM (
+    'claude-4-sonnet',
+    'gpt-5',
+    'deepseek-r1-0528',
+    'gemini-2.5-pro'
+);
 CREATE TYPE agent_submission_delay AS ENUM ('0', '15', '30');
 CREATE TYPE agent_parallel_submissions AS ENUM ('1', '3', '5', '15', '25', '35');
 CREATE TYPE check_size_range AS ENUM ('1K-10K', '10K-25K', '25K-50K', '50K-100K', '100K-250K', '250K-500K', '500K-1M', '1M+');
@@ -317,6 +324,7 @@ CREATE TABLE profiles (
     -- Usage billing fields
     usage_billing_enabled BOOLEAN DEFAULT FALSE NOT NULL,
     usage_billing_meter_id TEXT, -- Stripe meter ID for tracking usage
+    monthly_spend_limit NUMERIC(10, 2) DEFAULT 50.00 NOT NULL, -- Monthly spend limit for usage billing
     -- Usage-based submissions (charged per submission)
     monthly_usage_submissions_count INTEGER DEFAULT 0 NOT NULL,
     total_usage_submissions INTEGER DEFAULT 0 NOT NULL, -- Lifetime count
@@ -330,7 +338,8 @@ CREATE TABLE profiles (
     CONSTRAINT chk_monthly_usage_submissions_count CHECK (monthly_usage_submissions_count >= 0),
     CONSTRAINT chk_total_usage_submissions CHECK (total_usage_submissions >= 0),
     CONSTRAINT chk_monthly_estimated_usage_cost CHECK (monthly_estimated_usage_cost >= 0),
-    CONSTRAINT chk_actual_usage_cost CHECK (actual_usage_cost >= 0)
+    CONSTRAINT chk_actual_usage_cost CHECK (actual_usage_cost >= 0),
+    CONSTRAINT chk_monthly_spend_limit CHECK (monthly_spend_limit >= 0)
 );
 
 -- Create trigger to auto-create profile when user signs up
@@ -524,8 +533,10 @@ CREATE TABLE agent_settings (
     max_parallel_submissions agent_parallel_submissions DEFAULT '1' NOT NULL,
     max_queue_size INTEGER DEFAULT 0 NOT NULL,
     preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
+    model agent_model DEFAULT 'claude-4-sonnet' NOT NULL,
     debug_mode BOOLEAN DEFAULT FALSE NOT NULL,
     stealth BOOLEAN DEFAULT TRUE NOT NULL,
+    autopilot BOOLEAN DEFAULT FALSE NOT NULL,
     custom_instructions TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -769,6 +780,7 @@ CREATE TABLE profiles_archive (
     -- Usage billing fields
     usage_billing_enabled BOOLEAN DEFAULT FALSE NOT NULL,
     usage_billing_meter_id TEXT,
+    monthly_spend_limit NUMERIC(10, 2) DEFAULT 50.00 NOT NULL, -- Monthly spend limit for usage billing
     -- Usage-based submissions (charged per submission)
     monthly_usage_submissions_count INTEGER DEFAULT 0 NOT NULL,
     total_usage_submissions INTEGER DEFAULT 0 NOT NULL,
@@ -914,9 +926,11 @@ CREATE TABLE agent_settings_archive (
     user_id UUID NOT NULL,
     submission_delay agent_submission_delay DEFAULT '30' NOT NULL,
     max_parallel_submissions agent_parallel_submissions DEFAULT '1' NOT NULL,
+    model agent_model DEFAULT 'claude-4-sonnet' NOT NULL,
     preferred_tone agent_tone DEFAULT 'professional' NOT NULL,
     debug_mode BOOLEAN DEFAULT FALSE NOT NULL,
     stealth BOOLEAN DEFAULT TRUE NOT NULL,
+    autopilot BOOLEAN DEFAULT FALSE NOT NULL,
     custom_instructions TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
