@@ -56,7 +56,7 @@ const toastVariants = cva(
 
 interface BaseToastProps
   extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
-  VariantProps<typeof toastVariants> {
+    VariantProps<typeof toastVariants> {
   variant?: ToastVariant
 }
 

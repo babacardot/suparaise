@@ -388,15 +388,18 @@ export default function BillingSettings() {
     setUsageBillingLoading(true)
 
     try {
-      const response = await fetchWithTimeout('/api/usage-billing/spend-limit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetchWithTimeout(
+        '/api/usage-billing/spend-limit',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            spendLimit: limit,
+          }),
         },
-        body: JSON.stringify({
-          spendLimit: limit,
-        }),
-      })
+      )
 
       const data = await response.json()
 
@@ -624,7 +627,7 @@ export default function BillingSettings() {
                   'group relative rounded-sm border transition-all duration-200 p-6 shadow-sm',
                   'hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20',
                   usageBillingData.usageBillingEnabled &&
-                  'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/10',
+                    'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/10',
                 )}
               >
                 <div className="flex items-center justify-between">
@@ -697,7 +700,7 @@ export default function BillingSettings() {
                                 ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
                                 : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
                               usageBillingLoading &&
-                              'opacity-50 cursor-not-allowed',
+                                'opacity-50 cursor-not-allowed',
                             )}
                           >
                             ${limit}
@@ -714,7 +717,7 @@ export default function BillingSettings() {
                               'px-3 py-1 text-xs rounded border transition-colors',
                               'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
                               usageBillingLoading &&
-                              'opacity-50 cursor-not-allowed',
+                                'opacity-50 cursor-not-allowed',
                               // make it appear selected when in custom mode with a valid value pending via custom
                               showSpendLimitInput && customSpendLimit
                                 ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
@@ -771,7 +774,7 @@ export default function BillingSettings() {
                             'ml-1 px-3 py-1 text-xs rounded-sm border font-medium shadow-sm hover:shadow transition-all duration-200',
                             'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border-green-200 dark:border-green-800',
                             usageBillingLoading &&
-                            'opacity-50 cursor-not-allowed',
+                              'opacity-50 cursor-not-allowed',
                           )}
                         >
                           Set limit
@@ -804,7 +807,7 @@ export default function BillingSettings() {
                         <div className="flex items-center gap-1">
                           {usageBillingData.monthlySubmissionsLimit > 0 &&
                             usageBillingData.monthlySubmissionsUsed <
-                            usageBillingData.monthlySubmissionsLimit && (
+                              usageBillingData.monthlySubmissionsLimit && (
                               <span className="text-[8px] text-emerald-600 dark:text-emerald-400">
                                 Monthly quota is used first before usage billing
                                 starts
@@ -814,7 +817,7 @@ export default function BillingSettings() {
                             <>
                               {usageBillingData.monthlySubmissionsLimit > 0 &&
                                 usageBillingData.monthlySubmissionsUsed <
-                                usageBillingData.monthlySubmissionsLimit && (
+                                  usageBillingData.monthlySubmissionsLimit && (
                                   <span className="text-[8px] text-muted-foreground">
                                     ·
                                   </span>
@@ -829,16 +832,16 @@ export default function BillingSettings() {
                       {!(
                         usageBillingData.monthlySubmissionsLimit > 0 &&
                         usageBillingData.monthlySubmissionsUsed <
-                        usageBillingData.monthlySubmissionsLimit
+                          usageBillingData.monthlySubmissionsLimit
                       ) && (
-                          <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
-                            <p>
-                              Plan quota used:{' '}
-                              {usageBillingData.monthlySubmissionsUsed}/
-                              {usageBillingData.monthlySubmissionsLimit}
-                            </p>
-                          </div>
-                        )}
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
+                          <p>
+                            Plan quota used:{' '}
+                            {usageBillingData.monthlySubmissionsUsed}/
+                            {usageBillingData.monthlySubmissionsLimit}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )
                 ) : null}

@@ -15,8 +15,8 @@ const playSound = (soundFile: string) => {
     try {
       const audio = new Audio(soundFile)
       audio.volume = 0.4
-      audio.play().catch(() => { })
-    } catch { }
+      audio.play().catch(() => {})
+    } catch {}
   }, 0)
 }
 
@@ -447,8 +447,8 @@ export default function AgentSettings() {
                   ? 'bg-muted/30 border-muted'
                   : 'hover:border-amber-200 dark:hover:border-amber-800 hover:bg-amber-50/50 dark:hover:bg-amber-950/20',
                 formData.enableDebugMode &&
-                isAdvancedFeatureAvailable() &&
-                'border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-950/10',
+                  isAdvancedFeatureAvailable() &&
+                  'border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-950/10',
               )}
             >
               {!isAdvancedFeatureAvailable() && (
@@ -464,7 +464,7 @@ export default function AgentSettings() {
                       className={cn(
                         'font-medium text-sm',
                         !isAdvancedFeatureAvailable() &&
-                        'text-muted-foreground',
+                          'text-muted-foreground',
                       )}
                     >
                       Analytics
@@ -512,7 +512,7 @@ export default function AgentSettings() {
                       ? 'bg-amber-600'
                       : 'bg-gray-200 dark:bg-gray-700',
                     !isAdvancedFeatureAvailable() &&
-                    'opacity-50 cursor-not-allowed',
+                      'opacity-50 cursor-not-allowed',
                   )}
                 >
                   <span
@@ -534,8 +534,8 @@ export default function AgentSettings() {
                   ? 'bg-muted/30 border-muted'
                   : 'hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/50 dark:hover:bg-purple-950/20',
                 formData.enableAutopilot &&
-                isEnterpriseFeatureAvailable() &&
-                'border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/10',
+                  isEnterpriseFeatureAvailable() &&
+                  'border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/10',
               )}
             >
               {!isEnterpriseFeatureAvailable() && (
@@ -551,7 +551,7 @@ export default function AgentSettings() {
                       className={cn(
                         'font-medium text-sm',
                         !isEnterpriseFeatureAvailable() &&
-                        'text-muted-foreground',
+                          'text-muted-foreground',
                       )}
                     >
                       Autopilot
@@ -599,7 +599,7 @@ export default function AgentSettings() {
                       ? 'bg-purple-600'
                       : 'bg-gray-200 dark:bg-gray-700',
                     !isEnterpriseFeatureAvailable() &&
-                    'opacity-50 cursor-not-allowed',
+                      'opacity-50 cursor-not-allowed',
                   )}
                 >
                   <span
@@ -736,7 +736,7 @@ export default function AgentSettings() {
                       className={cn(
                         'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                         !isProPlusFeatureAvailable() &&
-                        'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                          'bg-muted/50 text-muted-foreground cursor-not-allowed',
                       )}
                       value={formData.model}
                       onChange={async (e) => {
@@ -763,7 +763,7 @@ export default function AgentSettings() {
                       className={cn(
                         'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                         !isProPlusFeatureAvailable() &&
-                        'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                          'bg-muted/50 text-muted-foreground cursor-not-allowed',
                       )}
                       value={formData.preferredTone}
                       onChange={async (e) => {
@@ -799,7 +799,7 @@ export default function AgentSettings() {
                       className={cn(
                         'rounded-sm pr-8 min-h[100px] select-auto',
                         !isProPlusFeatureAvailable() &&
-                        'dark:bg-muted cursor-not-allowed text-muted-foreground',
+                          'dark:bg-muted cursor-not-allowed text-muted-foreground',
                       )}
                       placeholder={
                         isProPlusFeatureAvailable()
@@ -834,7 +834,9 @@ export default function AgentSettings() {
                   ) : (
                     <ChevronRight className="h-4 w-4" />
                   )}
-                  <span className="font-medium text-sm">Advanced customization</span>
+                  <span className="font-medium text-sm">
+                    Advanced customization
+                  </span>
                   {!isProPlusFeatureAvailable() && (
                     <span className="text-xs -translate-x-4 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded ml-auto">
                       PRO
@@ -852,20 +854,25 @@ export default function AgentSettings() {
                           className={cn(
                             'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                             !isProPlusFeatureAvailable() &&
-                            'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                              'bg-muted/50 text-muted-foreground cursor-not-allowed',
                           )}
                           value={formData.model}
                           onChange={async (e) => {
                             if (!isProPlusFeatureAvailable()) return
-                            const newValue = e.target.value as typeof formData.model
+                            const newValue = e.target
+                              .value as typeof formData.model
                             handleInputChange('model', newValue)
                             await handleFieldSave('model', newValue)
                           }}
                           disabled={isLoading || !isProPlusFeatureAvailable()}
                         >
-                          <option value="claude-4-sonnet">claude-4-sonnet</option>
+                          <option value="claude-4-sonnet">
+                            claude-4-sonnet
+                          </option>
                           <option value="gpt-5">gpt-5</option>
-                          <option value="deepseek-r1-0528">deepseek-r1-0528</option>
+                          <option value="deepseek-r1-0528">
+                            deepseek-r1-0528
+                          </option>
                           <option value="gemini-2.5-pro">gemini-2.5-pro</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -879,7 +886,7 @@ export default function AgentSettings() {
                           className={cn(
                             'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                             !isProPlusFeatureAvailable() &&
-                            'bg-muted/50 text-muted-foreground cursor-not-allowed',
+                              'bg-muted/50 text-muted-foreground cursor-not-allowed',
                           )}
                           value={formData.preferredTone}
                           onChange={async (e) => {
@@ -909,13 +916,16 @@ export default function AgentSettings() {
                           id="customInstructions"
                           value={formData.customInstructions}
                           onChange={(e) =>
-                            handleInputChange('customInstructions', e.target.value)
+                            handleInputChange(
+                              'customInstructions',
+                              e.target.value,
+                            )
                           }
                           onBlur={() => handleFieldSave('customInstructions')}
                           className={cn(
                             'rounded-sm pr-8 min-h-[100px] select-auto',
                             !isProPlusFeatureAvailable() &&
-                            'dark:bg-muted cursor-not-allowed text-muted-foreground',
+                              'dark:bg-muted cursor-not-allowed text-muted-foreground',
                           )}
                           placeholder={
                             isProPlusFeatureAvailable()
@@ -930,7 +940,10 @@ export default function AgentSettings() {
                             companyName: user?.user_metadata?.companyName || '',
                           }}
                           onAIEnhance={(enhancedText) =>
-                            handleInputChange('customInstructions', enhancedText)
+                            handleInputChange(
+                              'customInstructions',
+                              enhancedText,
+                            )
                           }
                         />
                       </div>
