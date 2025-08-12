@@ -641,10 +641,15 @@ BEGIN
     -- If no settings found, return defaults based on permission level
     IF result IS NULL THEN
         result := jsonb_build_object(
-            'submissionDelay', 30,
+            'submissionDelay', CASE 
+                WHEN user_permission = 'FREE' THEN 300
+                WHEN user_permission = 'PRO' THEN 30
+                WHEN user_permission IN ('MAX','ENTERPRISE') THEN 0
+                ELSE 300
+            END,
             'maxParallelSubmissions', CASE 
                 WHEN user_permission = 'FREE' THEN 1
-                WHEN user_permission = 'PRO' THEN 2
+                WHEN user_permission = 'PRO' THEN 3
                 WHEN user_permission = 'MAX' THEN 5
                 WHEN user_permission = 'ENTERPRISE' THEN 25
                 ELSE 1
@@ -798,7 +803,14 @@ BEGIN
             debug_mode, stealth, autopilot, custom_instructions
         ) VALUES (
             p_startup_id, p_user_id,
-            COALESCE((p_data->>'submissionDelay')::agent_submission_delay, '30'::agent_submission_delay),
+            COALESCE((p_data->>'submissionDelay')::agent_submission_delay, (
+                CASE 
+                    WHEN user_permission = 'FREE' THEN '300'
+                    WHEN user_permission = 'PRO' THEN '30'
+                    WHEN user_permission IN ('MAX','ENTERPRISE') THEN '0'
+                    ELSE '300'
+                END
+            )::agent_submission_delay),
             COALESCE((p_data->>'maxParallelSubmissions')::agent_parallel_submissions, max_parallel_allowed::text::agent_parallel_submissions),
             COALESCE((p_data->>'maxQueueSize')::INTEGER, (
                 CASE 
