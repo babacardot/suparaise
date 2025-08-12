@@ -255,7 +255,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code', // TODO: Add your Google verification code
+    google: 'zFrlk-vBZL6PImVZKJx6rdug176T64KLdzfKJn8RMCk',
     yandex: 'your-yandex-verification-code',
     yahoo: 'your-yahoo-verification-code',
   },
