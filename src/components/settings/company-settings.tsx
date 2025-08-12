@@ -2527,7 +2527,7 @@ export default function CompanySettings() {
 
           {/* Cloud storage */}
           <div className="space-y-3">
-            <Label htmlFor="googleDriveUrl">Cloud storage | Docsend</Label>
+            <Label htmlFor="googleDriveUrl">Cloud storage | Docsend <span className="text-red-600 dark:text-red-400 font-medium">*</span></Label>
             <div className="relative">
               <Input
                 id="googleDriveUrl"
@@ -2542,7 +2542,11 @@ export default function CompanySettings() {
               <p className="text-xs text-muted-foreground mt-2">
                 Link to a folder with your pitch deck and any other materials
                 you judge relevant for investors. The agent will privilege
-                sharing this link over individual uploads. <span className="text-red-600 dark:text-red-400 font-medium">This is mandatory for most funds as most investors require a pitch deck of your company.</span>
+                sharing this link over individual uploads.{' '}
+                <span className="text-blue-600 dark:text-blue-400 font-medium">
+                  This is mandatory as most investors require at least a
+                  pitch deck.
+                </span>
               </p>
             </div>
           </div>
@@ -2957,7 +2961,7 @@ export default function CompanySettings() {
               <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
                 <p className="text-xs text-muted-foreground">
                   Provide detailed answers to these key questions to give your
-                  agent a deep, contextual understanding of your startup.
+                  agent a deep, contextual understanding of your venture.
                 </p>
                 <div className="space-y-4">
                   <div className="space-y-2">

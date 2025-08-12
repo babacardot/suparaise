@@ -34,15 +34,15 @@ const MIN_CHAR_REQUIREMENTS = {
 interface TextareaProps extends React.ComponentProps<'textarea'> {
   enableAI?: boolean
   aiFieldType?:
-    | 'bio'
-    | 'description-short'
-    | 'description-medium'
-    | 'description-long'
-    | 'traction'
-    | 'market'
-    | 'customers'
-    | 'competitors'
-    | 'instructions'
+  | 'bio'
+  | 'description-short'
+  | 'description-medium'
+  | 'description-long'
+  | 'traction'
+  | 'market'
+  | 'customers'
+  | 'competitors'
+  | 'instructions'
   aiContext?: {
     companyName?: string
     industry?: string
@@ -197,14 +197,14 @@ function Textarea({
           </div>
 
           {!canUseGrammar && !canUseFullEnhancement && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[8px] text-muted-foreground">
               {grammarMinLength - currentLength} more characters needed for
               grammar correction
             </p>
           )}
 
           {canUseGrammar && !canUseFullEnhancement && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[8px] text-muted-foreground">
               {fullMinLength - currentLength} more characters needed for
               enhancement
             </p>

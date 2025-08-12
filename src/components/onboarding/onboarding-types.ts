@@ -32,7 +32,7 @@ export interface FounderData {
   role: FounderRole
   bio: string // Optional
   email: string // Required
-  phone: string // Optional - no longer required
+  phone: string 
   linkedin: string // Optional
   githubUrl: string // Optional
   personalWebsiteUrl: string // Optional
