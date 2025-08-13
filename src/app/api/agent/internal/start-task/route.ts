@@ -24,28 +24,40 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 1. Fetch all data needed to start the task
-    const { data: taskData, error: taskDataError } = await supabaseAdmin.rpc(
+    // 1. Try to fetch all data needed to start the task for fund submissions
+    const { data: fundTaskData, error: fundTaskError } = await supabaseAdmin.rpc(
       'get_submission_start_data',
       { p_submission_id: submissionId },
     )
+    let taskData = fundTaskData
 
-    if (taskDataError || !taskData) {
-      console.error(
-        `Failed to fetch task data for submission ${submissionId}:`,
-        taskDataError,
-      )
-      await supabaseAdmin
-        .from('submissions')
-        .update({ status: 'failed', agent_notes: 'Failed to fetch task data' })
-        .eq('id', submissionId)
-      return NextResponse.json(
-        { error: 'Failed to fetch task data' },
-        { status: 500 },
-      )
+    // If not a fund submission, fallback to accelerator submission start-data
+    if (fundTaskError || !taskData) {
+      const { data: accelData, error: accelError } = await supabaseAdmin
+        .rpc('get_accelerator_submission_start_data', {
+          p_submission_id: submissionId,
+        })
+      if (accelError || !accelData) {
+        console.error(
+          `Failed to fetch task data for submission ${submissionId}:`,
+          fundTaskError || accelError,
+        )
+        await supabaseAdmin
+          .from('accelerator_submissions')
+          .update({
+            status: 'failed',
+            agent_notes: 'Failed to fetch task data',
+          })
+          .eq('id', submissionId)
+        return NextResponse.json(
+          { error: 'Failed to fetch task data' },
+          { status: 500 },
+        )
+      }
+      taskData = accelData
     }
 
-    const { startup, target, founders, agentSettings } = taskData
+    const { startup, target, accelerator, founders, agentSettings } = taskData
 
     // 2. Get or create a browser profile
     const browserProfile = await getOrCreateBrowserProfileForStartup(
@@ -61,13 +73,14 @@ export async function POST(request: NextRequest) {
       { startup, founders },
       agentSettings,
     )
-    const specialist = getFormSpecialistByType(
-      target.form_type,
-      target.application_url,
-    )
+    const applicationUrl = target?.application_url || accelerator?.application_url
+    const entityName = target?.name || accelerator?.name
+    const entityFormType = target?.form_type || accelerator?.form_type
+
+    const specialist = getFormSpecialistByType(entityFormType, applicationUrl)
     const taskInstruction = specialist.buildInstruction(
-      target.application_url,
-      target.name,
+      applicationUrl,
+      entityName,
       smartData,
     )
     const specialistBrowserConfig = specialist.getBrowserConfig?.() || {}
@@ -78,9 +91,7 @@ export async function POST(request: NextRequest) {
       max_agent_steps: 50,
       profile_id: browserProfile.profile_id,
       ...specialistBrowserConfig,
-      allowed_domains: target.application_url
-        ? [new URL(target.application_url).hostname]
-        : undefined,
+      allowed_domains: applicationUrl ? [new URL(applicationUrl).hostname] : undefined,
       webhook_url: webhookUrl,
     })
 

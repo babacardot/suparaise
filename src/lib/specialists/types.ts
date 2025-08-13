@@ -14,7 +14,7 @@ export type SmartDataMapping = {
   preferredTone?: string
 }
 
-export type FormType = 'typeform' | 'google' | 'contact' | 'generic'
+export type FormType = 'typeform' | 'google' | 'airtable' | 'contact' | 'generic'
 
 export interface FormSpecialist {
   readonly type: FormType

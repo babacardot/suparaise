@@ -39,7 +39,7 @@ async function startAgentTask(submissionId: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { startupId, targetId, userId } = await request.json()
+    const { startupId, targetId, userId, targetType } = await request.json()
 
     if (!startupId || !targetId || !userId) {
       return NextResponse.json(
@@ -48,6 +48,59 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Branch: accelerators vs funds (targets)
+    if (targetType === 'accelerator') {
+      // Fetch accelerator name for response messages
+      const { data: accelerator, error: accError } = await supabaseAdmin
+        .from('accelerators')
+        .select('name')
+        .eq('id', targetId)
+        .single()
+
+      if (accError) {
+        console.error('❌ Failed to fetch accelerator name:', accError)
+        return NextResponse.json(
+          { error: 'Failed to fetch accelerator information.' },
+          { status: 500 },
+        )
+      }
+
+      // Insert directly as in_progress (no queue system for accelerators yet)
+      const { data: insertData, error: insertError } = await supabaseAdmin
+        .from('accelerator_submissions')
+        .insert({
+          startup_id: startupId,
+          accelerator_id: targetId,
+          status: 'in_progress',
+          submission_date: new Date().toISOString(),
+        })
+        .select('id')
+        .single()
+
+      if (insertError || !insertData) {
+        console.error('❌ Failed to create accelerator submission:', insertError)
+        return NextResponse.json(
+          { error: 'Failed to create accelerator submission.' },
+          { status: 500 },
+        )
+      }
+
+      const submissionId: string = insertData.id
+
+      // Start the internal task immediately
+      const taskResponse = await startAgentTask(submissionId)
+
+      return NextResponse.json({
+        success: true,
+        status: 'in_progress',
+        targetName: accelerator.name,
+        submissionId,
+        task_id: taskResponse.taskId,
+        session_replay_url: taskResponse.liveUrl,
+      })
+    }
+
+    // Funds path (default)
     // 1. Fetch target name for response messages
     const { data: target, error: targetError } = await supabaseAdmin
       .from('targets')

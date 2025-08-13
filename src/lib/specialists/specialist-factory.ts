@@ -2,6 +2,7 @@ import { SpecialistFactory, FormSpecialist } from './types'
 import { TypeformSpecialist } from './typeform-specialist'
 import { GoogleFormsSpecialist } from './google-forms-specialist'
 import { ContactFormSpecialist } from './contact-form-specialist'
+import { AirtableSpecialist } from './airtable-specialist'
 import { GenericSpecialist } from './generic-specialist'
 
 export class FormSpecialistFactory implements SpecialistFactory {
@@ -11,6 +12,7 @@ export class FormSpecialistFactory implements SpecialistFactory {
     // Register all available Browser Use specialists
     this.registerSpecialist(new TypeformSpecialist())
     this.registerSpecialist(new GoogleFormsSpecialist())
+    this.registerSpecialist(new AirtableSpecialist())
     this.registerSpecialist(new ContactFormSpecialist())
     this.registerSpecialist(new GenericSpecialist()) // Always last as fallback
   }
@@ -98,7 +100,7 @@ export class FormSpecialistFactory implements SpecialistFactory {
     const issues: string[] = []
 
     // Check for required specialists
-    const requiredTypes = ['typeform', 'google', 'contact', 'generic']
+    const requiredTypes = ['typeform', 'google', 'airtable', 'contact', 'generic']
     requiredTypes.forEach((type) => {
       if (!this.specialists.find((s) => s.type === type)) {
         issues.push(`Missing required specialist: ${type}`)

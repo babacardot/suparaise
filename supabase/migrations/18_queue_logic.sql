@@ -89,3 +89,33 @@ $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
 GRANT EXECUTE ON FUNCTION get_submission_start_data(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_submission_start_data(UUID) TO service_role; 
+
+
+-- Step 3: Accelerator start-data function (mirrors get_submission_start_data for accelerators)
+CREATE OR REPLACE FUNCTION get_accelerator_submission_start_data(p_submission_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    SELECT jsonb_build_object(
+        'submission', to_jsonb(accs),
+        'startup', to_jsonb(st),
+        'accelerator', to_jsonb(acc),
+        'founders', COALESCE(jsonb_agg(to_jsonb(f)) FILTER (WHERE f.id IS NOT NULL), '[]'::jsonb),
+        'agentSettings', to_jsonb(ags)
+    )
+    INTO result
+    FROM accelerator_submissions accs
+    JOIN startups st ON accs.startup_id = st.id
+    JOIN accelerators acc ON accs.accelerator_id = acc.id
+    JOIN agent_settings ags ON accs.startup_id = ags.startup_id
+    LEFT JOIN founders f ON accs.startup_id = f.startup_id
+    WHERE accs.id = p_submission_id
+    GROUP BY accs.id, st.id, acc.id, ags.id;
+
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION get_accelerator_submission_start_data(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_accelerator_submission_start_data(UUID) TO service_role;

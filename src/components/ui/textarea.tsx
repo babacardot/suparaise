@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Loader2, Sparkles, PenTool } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/lib/hooks/use-toast'
 
 // Minimum character requirements for AI enhancement
 const MIN_CHAR_REQUIREMENTS = {
@@ -34,15 +35,15 @@ const MIN_CHAR_REQUIREMENTS = {
 interface TextareaProps extends React.ComponentProps<'textarea'> {
   enableAI?: boolean
   aiFieldType?:
-    | 'bio'
-    | 'description-short'
-    | 'description-medium'
-    | 'description-long'
-    | 'traction'
-    | 'market'
-    | 'customers'
-    | 'competitors'
-    | 'instructions'
+  | 'bio'
+  | 'description-short'
+  | 'description-medium'
+  | 'description-long'
+  | 'traction'
+  | 'market'
+  | 'customers'
+  | 'competitors'
+  | 'instructions'
   aiContext?: {
     companyName?: string
     industry?: string
@@ -70,9 +71,51 @@ function Textarea({
   const [suggestion, setSuggestion] = React.useState<string>('')
   const [showSuggestion, setShowSuggestion] = React.useState(false)
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+  const { toast } = useToast()
+
+  // Cooldown logic: prevent repeated use within 2 minutes per field and type
+  const COOLDOWN_MS = 2 * 60 * 1000
+  const [lastUsedAt, setLastUsedAt] = React.useState<{
+    grammar?: number
+    full?: number
+  }>({})
+
+  const getRemainingCooldownMs = (type: EnhancementType) => {
+    const last = lastUsedAt[type] || 0
+    const elapsed = Date.now() - last
+    return elapsed < COOLDOWN_MS ? COOLDOWN_MS - elapsed : 0
+  }
+
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+  }
+
+  const commitViaBlur = () => {
+    // Ensure parent onBlur handlers run to save changes
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus()
+        textareaRef.current.blur()
+      }
+    }, 0)
+  }
 
   const handleAIEnhance = async (type: EnhancementType) => {
     if (!aiFieldType || !value || typeof value !== 'string' || !value.trim()) {
+      return
+    }
+
+    // Enforce cooldown per field and enhancement type
+    const remaining = getRemainingCooldownMs(type)
+    if (remaining > 0) {
+      toast({
+        variant: 'info',
+        title: 'Please wait',
+        description: `You can use ${type === 'grammar' ? 'Fix' : 'Enhance'} again in ${formatTime(remaining)} for this field.`,
+      })
       return
     }
 
@@ -99,12 +142,17 @@ function Textarea({
 
       const { enhancedText } = await response.json()
 
+      // Start cooldown on successful response regardless of whether text changed
+      setLastUsedAt((prev) => ({ ...prev, [type]: Date.now() }))
+
       if (enhancedText && enhancedText.trim() !== value.trim()) {
         if (type === 'grammar') {
           // For grammar fixes, apply the change directly
           if (onAIEnhance) {
             onAIEnhance(enhancedText)
           }
+          // Trigger blur to auto-save via parent onBlur
+          commitViaBlur()
         } else {
           // For full enhancements, show the suggestion UI
           setSuggestion(enhancedText)
@@ -125,6 +173,8 @@ function Textarea({
     }
     setSuggestion('')
     setShowSuggestion(false)
+    // Trigger blur to auto-save via parent onBlur
+    commitViaBlur()
   }
 
   const rejectSuggestion = () => {
@@ -143,6 +193,8 @@ function Textarea({
 
   const canUseGrammar = currentLength >= grammarMinLength
   const canUseFullEnhancement = currentLength >= fullMinLength
+  const isGrammarCoolingDown = getRemainingCooldownMs('grammar') > 0
+  const isFullCoolingDown = getRemainingCooldownMs('full') > 0
 
   return (
     <div className="space-y-3">
@@ -168,7 +220,7 @@ function Textarea({
               variant="outline"
               size="sm"
               onClick={() => handleAIEnhance('grammar')}
-              disabled={isEnhancing || !canUseGrammar}
+              disabled={isEnhancing || !canUseGrammar || isGrammarCoolingDown}
               className="h-7 px-2 text-xs"
             >
               {isEnhancing && enhancementType === 'grammar' ? (
@@ -184,7 +236,7 @@ function Textarea({
               variant="outline"
               size="sm"
               onClick={() => handleAIEnhance('full')}
-              disabled={isEnhancing || !canUseFullEnhancement}
+              disabled={isEnhancing || !canUseFullEnhancement || isFullCoolingDown}
               className="h-7 px-2 text-xs"
             >
               {isEnhancing && enhancementType === 'full' ? (

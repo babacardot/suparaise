@@ -29,7 +29,7 @@ type Target = {
   required_documents?: string[]
   tags?: string[]
   notes?: string
-  form_type?: 'contact' | 'typeform' | 'google' | 'generic'
+  form_type?: 'contact' | 'airtable' | 'typeform' | 'google' | 'generic'
   visibility_level?: 'FREE' | 'PRO' | 'MAX'
   created_at: string
   updated_at: string

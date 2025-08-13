@@ -5,6 +5,7 @@ export * from './base-specialist'
 // Individual specialists
 export * from './typeform-specialist'
 export * from './google-forms-specialist'
+export * from './airtable-specialist'
 export * from './contact-form-specialist'
 export * from './generic-specialist'
 
