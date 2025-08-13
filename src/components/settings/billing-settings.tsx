@@ -51,6 +51,10 @@ const playClickSound = () => {
   playSound('/sounds/light.mp3')
 }
 
+const playCompletionSound = () => {
+  playSound('/sounds/completion.mp3')
+}
+
 // Skeleton loading component that mimics the form layout
 function BillingSettingsSkeleton() {
   return (
@@ -362,6 +366,7 @@ export default function BillingSettings() {
         setShowLimitConfigurator(false)
       }
 
+      playCompletionSound()
       toast({
         variant: 'success',
         title: 'Usage billing updated',
@@ -425,6 +430,7 @@ export default function BillingSettings() {
       setShowSpendLimitInput(false)
       setCustomSpendLimit('')
 
+      playCompletionSound()
       toast({
         variant: 'success',
         title: 'Spend limit updated',
@@ -1207,7 +1213,7 @@ export default function BillingSettings() {
               return (
                 <Button
                   onClick={() => {
-                    playClickSound()
+                    playCompletionSound()
                     setShowSuccessModal(false)
                   }}
                   size="lg"

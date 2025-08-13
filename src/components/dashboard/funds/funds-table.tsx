@@ -247,8 +247,7 @@ const FundsTable = React.memo(function FundsTable({
 
   const selectedCount = selectedTargetIds.size
   const isAllSelected =
-    filteredTargets.length > 0 &&
-    selectedCount === filteredTargets.length
+    filteredTargets.length > 0 && selectedCount === filteredTargets.length
   const isIndeterminate =
     selectedCount > 0 && selectedCount < filteredTargets.length
 
@@ -1017,7 +1016,7 @@ const FundsTable = React.memo(function FundsTable({
                       )}
                       <TableHead className="text-right w-[80px]">
                         <div className="flex justify-end items-center gap-1.5">
-                          {selectedCount > 0 && (
+                          {selectedCount >= 2 && (
                             <div className="flex items-center gap-1.5 mr-0.5">
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -1032,29 +1031,34 @@ const FundsTable = React.memo(function FundsTable({
                                   sideOffset={8}
                                 >
                                   <div className="px-3 py-2">
-                                    <span className="text-xs text-sidebar-foreground">Selected (included in plan)</span>
+                                    <span className="text-xs text-sidebar-foreground">
+                                      Selected (included in plan)
+                                    </span>
                                   </div>
                                 </TooltipContent>
                               </Tooltip>
-                              {usageBilling.enabled && selectedUsageIds.size > 0 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="w-8 h-8 rounded-sm bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-xs font-semibold">
-                                      {selectedUsageIds.size}
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent
-                                    className="p-0 bg-sidebar border-sidebar-border rounded-sm shadow-lg"
-                                    align="end"
-                                    side="bottom"
-                                    sideOffset={8}
-                                  >
-                                    <div className="px-3 py-2">
-                                      <span className="text-xs text-sidebar-foreground">Selected (usage billing)</span>
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
+                              {usageBilling.enabled &&
+                                selectedUsageIds.size > 0 && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="w-8 h-8 rounded-sm bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-xs font-semibold">
+                                        {selectedUsageIds.size}
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                      className="p-0 bg-sidebar border-sidebar-border rounded-sm shadow-lg"
+                                      align="end"
+                                      side="bottom"
+                                      sideOffset={8}
+                                    >
+                                      <div className="px-3 py-2">
+                                        <span className="text-xs text-sidebar-foreground">
+                                          Selected (usage billing)
+                                        </span>
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
                             </div>
                           )}
                           {selectedCount >= 2 ? (
@@ -1367,11 +1371,11 @@ const FundsTable = React.memo(function FundsTable({
                                     }
                                     onMouseLeave={() => setHoveredButton(null)}
                                     className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${isQuotaReached
-                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
-                                      : queueStatus &&
-                                        !queueStatus.canSubmitMore
-                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
-                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
+                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
+                                        : queueStatus &&
+                                          !queueStatus.canSubmitMore
+                                          ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
+                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
                                       }`}
                                     title={
                                       queueStatus &&
