@@ -18,9 +18,6 @@ export class TypeformSpecialist extends BaseFormSpecialist {
       ...super.getBrowserConfig(),
       max_agent_steps: 60, // Typeforms can be longer due to multi-step nature
       highlight_elements: true, // Helpful for dynamic question navigation in Browser Use
-      // Prioritize non-reasoning per mapping
-      use_thinking: true,
-      flash_mode: false,
     }
   }
 
@@ -30,8 +27,11 @@ export class TypeformSpecialist extends BaseFormSpecialist {
     smartData: SmartDataMapping,
   ): string {
     const deckUrl = smartData.primary_data.asset_cloud_drive || ''
+    const planIdentifier = this.buildPlanIdentifier(smartData, targetName)
 
-    const instruction = `You are an expert agent specializing in Typeform submissions. Your task is to complete the Typeform for "${targetName}" at the URL: ${targetUrl}.
+    const instruction = `${planIdentifier}
+
+You are an expert agent specializing in Typeform submissions. Your task is to complete the Typeform for "${targetName}" at the URL: ${targetUrl}.
 
 ${this.buildCoreDataSection(smartData)}
 

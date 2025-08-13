@@ -24,13 +24,13 @@ BEGIN
 
     -- Handle different submission types
     IF p_submission_type = 'fund' THEN
-        -- Check if the failed submission exists
+        -- Check if the failed or admin_review submission exists
         SELECT * INTO submission_record 
         FROM submissions 
-        WHERE id = p_submission_id AND startup_id = p_startup_id AND status = 'failed';
+        WHERE id = p_submission_id AND startup_id = p_startup_id AND status IN ('failed', 'admin_review');
 
         IF submission_record IS NULL THEN
-            RETURN jsonb_build_object('error', 'Failed fund submission not found or it is not in a failed state.');
+            RETURN jsonb_build_object('error', 'Fund submission not found or it is not in a failed/admin_review state.');
         END IF;
 
         -- Get the target ID and delete the old record

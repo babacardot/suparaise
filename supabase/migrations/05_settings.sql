@@ -1222,14 +1222,14 @@ DECLARE
     next_queue_position INTEGER;
     submission_status submission_status;
 BEGIN
-    -- Check if submission already exists and is not failed
+    -- Check if submission already exists and is not failed or admin_review
     SELECT id, status INTO existing_submission
     FROM submissions
     WHERE startup_id = p_startup_id AND target_id = p_target_id;
 
     IF existing_submission.id IS NOT NULL THEN
-        IF existing_submission.status = 'failed' THEN
-            -- Allow retry for failed submissions by deleting the old one
+        IF existing_submission.status IN ('failed', 'admin_review') THEN
+            -- Allow retry for failed or admin_review submissions by deleting the old one
             DELETE FROM submissions WHERE id = existing_submission.id;
         ELSE
             RETURN jsonb_build_object('error', 'A submission for this target is already ' || existing_submission.status);

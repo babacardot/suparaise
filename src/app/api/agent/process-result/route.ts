@@ -14,7 +14,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-type SubmissionOutcome = 'completed' | 'failed'
+type SubmissionOutcome = 'completed' | 'admin_review'
 
 type TaskResultPayload = {
   status: string
@@ -36,7 +36,7 @@ const analyzeSubmissionOutcome = async (
     }
 
     const prompt = `You are an expert analyst for a VC fundraising automation platform. Your job is to determine the final outcome of a web automation task that filled out an application form.
-Based on the provided agent logs, summary, and error messages, you must decide if the submission was truly 'completed' or if it 'failed'.
+Based on the provided agent logs, summary, and error messages, you must decide if the submission was truly 'completed' or needs 'admin_review'.
 
 **Analysis Data:**
 - **Agent's Final Status:** ${taskResult.status}
@@ -46,13 +46,13 @@ Based on the provided agent logs, summary, and error messages, you must decide i
 
 **Instructions:**
 1. Read all the provided data carefully.
-2. Look for definitive evidence of success, such as "application submitted", "thank you for applying", "submission successful".
-3. Look for definitive evidence of failure, such as "error submitting form", "please fix the errors below", "captcha failed", "timed out".
-4. The agent's own 'finished' status can be misleading. Base your decision on the textual evidence of the outcome. A task can be "finished" but still have failed to submit the form.
-5. If there is any ambiguity or if you see clear error messages, classify it as 'failed'. It is better to retry a failed submission than to assume a success.
-6. Your response MUST be a single word: either \`completed\` or \`failed\`. Do not provide any other text or explanation.
+2. Look for DEFINITIVE evidence of success, such as "application submitted successfully", "thank you for your application", "submission received", "confirmation email sent".
+3. ONLY mark as 'completed' if there is CLEAR, UNAMBIGUOUS evidence that the form was successfully submitted and confirmed.
+4. If there is ANY uncertainty, ambiguity, error messages, timeouts, or if the outcome is unclear, mark as 'admin_review'.
+5. The agent's own 'finished' status is NOT sufficient - focus on the actual submission outcome.
+6. Your response MUST be a single word: either \`completed\` or \`admin_review\`. Do not provide any other text or explanation.
 
-**Final Verdict : completed or failed ? (completed/failed):**`
+**Final Verdict: completed or admin_review? (completed/admin_review):**`
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -74,11 +74,11 @@ Based on the provided agent logs, summary, and error messages, you must decide i
     if (resultText === 'completed') {
       return 'completed'
     }
-    return 'failed'
+    return 'admin_review'
   } catch (error) {
     console.error('AI submission analysis failed:', error)
-    // Default to failed if AI analysis encounters an error
-    return 'failed'
+    // Default to admin_review if AI analysis encounters an error
+    return 'admin_review'
   }
 }
 
@@ -228,16 +228,22 @@ export async function POST(request: NextRequest) {
           : undefined,
     }
 
-    // Update submission record with final, detailed data
+    // Create brief summary for email notifications
+    const briefSummary = result.success
+      ? 'Application successfully submitted'
+      : 'Application submission requires admin review'
+
+    // Update submission record with final data
     const { error: updateError } = await supabaseAdmin
       .from(table)
       .update({
         status: finalStatus,
-        agent_notes: result.success ? result.summary : result.error_reason,
+        agent_notes: briefSummary,
         screenshots_taken: result.screenshots_taken,
         debug_data: {
-          browser_use_result: result,
           task_id: taskId,
+          final_analysis: finalStatus,
+          brief_summary: briefSummary,
         },
         updated_at: new Date().toISOString(),
       })
@@ -250,7 +256,51 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(
-      `✅ Processed result for task ${taskId}, submission ${submissionId} in table ${table}.`,
+      `✅ Processed result for task ${taskId}, submission ${submissionId} in table ${table}. Status: ${finalStatus}`,
+    )
+
+    // Only send customer emails for successful submissions
+    if (finalStatus === 'completed') {
+      const emailPayload = {
+        emailType: 'agent_completion_customer',
+        submissionId: submissionId,
+      }
+      fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify(emailPayload),
+      }).catch((e) =>
+        console.warn(
+          `Failed to send completion email for submission ${submissionId}:`,
+          e,
+        ),
+      )
+    }
+
+    // Admin email - send appropriate email based on outcome
+    const adminEmailType =
+      finalStatus === 'admin_review'
+        ? 'agent_admin_review'
+        : 'agent_completion_admin'
+    const adminEmailPayload = {
+      emailType: adminEmailType,
+      submissionId: submissionId,
+    }
+    fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify(adminEmailPayload),
+    }).catch((e) =>
+      console.warn(
+        `Failed to send admin ${adminEmailType} email for submission ${submissionId}:`,
+        e,
+      ),
     )
 
     // Asynchronously trigger the queue processor to start the next job
@@ -277,13 +327,13 @@ export async function POST(request: NextRequest) {
       error instanceof Error ? error.message : 'Unknown error'
     console.error(`Failed to process result for task ${taskId}:`, errorMessage)
 
-    // Attempt to mark submission as failed if we have the ID
+    // Attempt to mark submission for admin review if we have the ID
     const submissionInfo = await findSubmission(taskId)
     if (submissionInfo) {
       await supabaseAdmin
         .from(submissionInfo.table)
         .update({
-          status: 'failed',
+          status: 'admin_review',
           agent_notes: `Failed to process result: ${errorMessage}`,
         })
         .eq('id', submissionInfo.id)

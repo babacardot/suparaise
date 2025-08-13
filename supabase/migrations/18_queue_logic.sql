@@ -72,16 +72,21 @@ BEGIN
         'startup', to_jsonb(st),
         'target', to_jsonb(t),
         'founders', COALESCE(jsonb_agg(to_jsonb(f)) FILTER (WHERE f.id IS NOT NULL), '[]'::jsonb),
-        'agentSettings', to_jsonb(ags)
+        'agentSettings', to_jsonb(ags),
+        'userPlan', jsonb_build_object(
+            'permission_level', p.permission_level,
+            'is_subscribed', p.is_subscribed
+        )
     )
     INTO result
     FROM submissions s
     JOIN startups st ON s.startup_id = st.id
     JOIN targets t ON s.target_id = t.id
     JOIN agent_settings ags ON s.startup_id = ags.startup_id
+    JOIN profiles p ON st.user_id = p.id
     LEFT JOIN founders f ON s.startup_id = f.startup_id
     WHERE s.id = p_submission_id
-    GROUP BY s.id, st.id, t.id, ags.id;
+    GROUP BY s.id, st.id, t.id, ags.id, p.id;
 
     RETURN result;
 END;
@@ -102,16 +107,21 @@ BEGIN
         'startup', to_jsonb(st),
         'accelerator', to_jsonb(acc),
         'founders', COALESCE(jsonb_agg(to_jsonb(f)) FILTER (WHERE f.id IS NOT NULL), '[]'::jsonb),
-        'agentSettings', to_jsonb(ags)
+        'agentSettings', to_jsonb(ags),
+        'userPlan', jsonb_build_object(
+            'permission_level', p.permission_level,
+            'is_subscribed', p.is_subscribed
+        )
     )
     INTO result
     FROM accelerator_submissions accs
     JOIN startups st ON accs.startup_id = st.id
     JOIN accelerators acc ON accs.accelerator_id = acc.id
     JOIN agent_settings ags ON accs.startup_id = ags.startup_id
+    JOIN profiles p ON st.user_id = p.id
     LEFT JOIN founders f ON accs.startup_id = f.startup_id
     WHERE accs.id = p_submission_id
-    GROUP BY accs.id, st.id, acc.id, ags.id;
+    GROUP BY accs.id, st.id, acc.id, ags.id, p.id;
 
     RETURN result;
 END;

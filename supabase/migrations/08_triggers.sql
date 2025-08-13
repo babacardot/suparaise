@@ -231,8 +231,11 @@ BEGIN
     IF user_id_to_increment IS NOT NULL THEN
       BEGIN
         -- Determine if this should be counted as usage billing or plan-based
-        IF user_usage_billing_enabled = TRUE AND user_monthly_used >= user_monthly_limit THEN
-          -- Call the record_usage_submission function which includes spend limit enforcement
+        -- Usage billing applies when:
+        -- 1. User has usage billing enabled AND
+        -- 2. This submission would exceed their plan quota (user_monthly_used + 1 > user_monthly_limit)
+        IF user_usage_billing_enabled = TRUE AND (user_monthly_used + 1) > user_monthly_limit THEN
+          -- This is a usage billing submission (beyond plan quota)
           BEGIN
             SELECT INTO usage_result public.record_usage_submission(
               user_id_to_increment,

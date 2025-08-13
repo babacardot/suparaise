@@ -20,7 +20,7 @@ export abstract class BaseFormSpecialist implements FormSpecialist {
   // Default Browser Use configuration - can be overridden by specialists
   getBrowserConfig(): Partial<BrowserUseConfig> {
     return {
-      max_agent_steps: 50,
+      max_agent_steps: 60,
       use_adblock: true,
       use_proxy: true,
       proxy_country_code: 'us',
@@ -29,9 +29,6 @@ export abstract class BaseFormSpecialist implements FormSpecialist {
       browser_viewport_height: 1080,
       highlight_elements: false,
       enable_public_share: true, // Browser Use feature for live monitoring
-      // Default to reasoning enabled; specialists may override
-      use_thinking: true,
-      flash_mode: false,
     }
   }
 
@@ -84,6 +81,15 @@ export abstract class BaseFormSpecialist implements FormSpecialist {
 - Founder nationality: If asked for founder nationality/citizenship, use the company's country (${companyCountry || 'company country not provided'}).
 - Terms & Conditions: Always accept any terms, conditions, privacy consents, or declarations required to submit. Do NOT opt into newsletters or marketing emails; leave such opt-ins unchecked.
 - Revenue questions: If asked "Are you revenue generating?", answer "Yes" only if a provided revenue value is greater than 1; otherwise answer "No". If a numeric revenue amount is required and not available, input 0. Context revenue: ${revenueText || 'n/a'}.`
+  }
+
+  // Helper method to build plan identifier for easy console recognition
+  protected buildPlanIdentifier(smartData: SmartDataMapping, targetName: string): string {
+    const planLevel = smartData.userPlan?.permission_level || 'FREE'
+    const companyName = smartData.primary_data.company_name || 'COMPANY'
+    const targetType = smartData.targetType || 'FUND'
+    
+    return `${planLevel} / ${companyName} / ${targetName} ${targetType}`
   }
 
   // Helper method to build core data section

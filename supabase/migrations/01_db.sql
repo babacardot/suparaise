@@ -1,6 +1,6 @@
 -- Custom types
 CREATE TYPE submission_type AS ENUM ('form', 'email', 'other');
-CREATE TYPE submission_status AS ENUM ('pending', 'in_progress', 'completed', 'failed');
+CREATE TYPE submission_status AS ENUM ('pending', 'in_progress', 'completed', 'failed', 'admin_review');
 CREATE TYPE form_complexity AS ENUM ('simple', 'standard', 'comprehensive');
 CREATE TYPE question_count_range AS ENUM ('1-5', '6-10', '11-20', '21+');
 CREATE TYPE required_document_type AS ENUM (

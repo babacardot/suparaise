@@ -3,13 +3,22 @@ import { createClient } from '@supabase/supabase-js'
 import { getFormSpecialistByType } from '@/lib/specialists'
 import { getOrCreateBrowserProfileForStartup } from '@/lib/browser-use/profiles'
 import { BrowserUseClient, buildSmartDataMapping } from '@/lib/utils/agent'
+import { getModelForComplexity } from '@/lib/utils/model-config'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
-// This is an internal route, not to be exposed to the public
+/**
+ * INTERNAL API: Start Browser Use task execution
+ * 
+ * This endpoint is called by:
+ * 1. /api/agent/submit (for immediate starts)
+ * 2. /functions/v1/process-queue (for queued submissions)
+ * 
+ * It handles the actual Browser Use task creation and execution
+ */
 export async function POST(request: NextRequest) {
   const { submissionId } = await request.json()
 
@@ -59,7 +68,7 @@ export async function POST(request: NextRequest) {
       taskData = accelData
     }
 
-    const { startup, target, accelerator, founders, agentSettings } = taskData
+    const { startup, target, accelerator, founders, agentSettings, userPlan } = taskData
 
     // 2. Get or create a browser profile
     const browserProfile = await getOrCreateBrowserProfileForStartup(
@@ -75,12 +84,19 @@ export async function POST(request: NextRequest) {
       { startup, founders },
       agentSettings,
     )
+    
+    // Add user plan info to smart data for instruction building
+    smartData.userPlan = userPlan
     const applicationUrl =
       target?.application_url || accelerator?.application_url
     const entityName = target?.name || accelerator?.name
     const entityFormType = target?.form_type || accelerator?.form_type
 
     const specialist = getFormSpecialistByType(entityFormType, applicationUrl)
+    
+    // Add target type to smart data for plan identifier
+    smartData.targetType = accelerator ? 'ACCELERATOR' : 'FUND'
+    
     const taskInstruction = specialist.buildInstruction(
       applicationUrl,
       entityName,
@@ -89,11 +105,18 @@ export async function POST(request: NextRequest) {
     const specialistBrowserConfig = specialist.getBrowserConfig?.() || {}
     const webhookUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/browser-use/webhook`
 
+    // Determine optimal model based on form complexity
+    const formComplexity = specialist.type === 'typeform' ? 'complex' :
+                          specialist.type === 'google' || specialist.type === 'airtable' ? 'medium' :
+                          'simple'
+
     const taskResponse = await browserUseClient.createTask(taskInstruction, {
-      llm_model: 'claude-sonnet-4-20250514',
-      max_agent_steps: 50,
+      llm_model: getModelForComplexity(formComplexity), // Dynamic model selection
+      max_agent_steps: 60,
       profile_id: browserProfile.profile_id,
       ...specialistBrowserConfig,
+      // Ensure proxy is enabled for captcha handling
+      use_proxy: true,
       allowed_domains: applicationUrl
         ? [new URL(applicationUrl).hostname]
         : undefined,

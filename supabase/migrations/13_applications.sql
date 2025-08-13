@@ -259,6 +259,7 @@ BEGIN
         'in_progress', COUNT(*) FILTER (WHERE status = 'in_progress'),
         'completed', COUNT(*) FILTER (WHERE status = 'completed'),
         'failed', COUNT(*) FILTER (WHERE status = 'failed'),
+        'admin_review', COUNT(*) FILTER (WHERE status = 'admin_review'),
         'queued', COUNT(*) FILTER (WHERE queue_position IS NOT NULL)
     ) INTO fund_stats
     FROM submissions
@@ -270,7 +271,8 @@ BEGIN
         'pending', COUNT(*) FILTER (WHERE status = 'pending'),
         'in_progress', COUNT(*) FILTER (WHERE status = 'in_progress'),
         'completed', COUNT(*) FILTER (WHERE status = 'completed'),
-        'failed', COUNT(*) FILTER (WHERE status = 'failed')
+        'failed', COUNT(*) FILTER (WHERE status = 'failed'),
+        'admin_review', COUNT(*) FILTER (WHERE status = 'admin_review')
     ) INTO angel_stats
     FROM angel_submissions
     WHERE startup_id = p_startup_id;
@@ -281,7 +283,8 @@ BEGIN
         'pending', COUNT(*) FILTER (WHERE status = 'pending'),
         'in_progress', COUNT(*) FILTER (WHERE status = 'in_progress'),
         'completed', COUNT(*) FILTER (WHERE status = 'completed'),
-        'failed', COUNT(*) FILTER (WHERE status = 'failed')
+        'failed', COUNT(*) FILTER (WHERE status = 'failed'),
+        'admin_review', COUNT(*) FILTER (WHERE status = 'admin_review')
     ) INTO accelerator_stats
     FROM accelerator_submissions
     WHERE startup_id = p_startup_id;
@@ -308,6 +311,10 @@ BEGIN
         (fund_stats->>'failed')::INTEGER + 
         (angel_stats->>'failed')::INTEGER + 
         (accelerator_stats->>'failed')::INTEGER,
+        'admin_review',
+        (fund_stats->>'admin_review')::INTEGER + 
+        (angel_stats->>'admin_review')::INTEGER + 
+        (accelerator_stats->>'admin_review')::INTEGER,
         'queued',
         (fund_stats->>'queued')::INTEGER
     );
@@ -356,9 +363,9 @@ BEGIN
             RETURN jsonb_build_object('error', 'Submission not found or access denied');
         END IF;
         
-        -- Only allow retry for failed submissions
-        IF current_status != 'failed' THEN
-            RETURN jsonb_build_object('error', 'Can only retry failed submissions');
+        -- Only allow retry for failed or admin_review submissions
+        IF current_status NOT IN ('failed', 'admin_review') THEN
+            RETURN jsonb_build_object('error', 'Can only retry failed or admin_review submissions');
         END IF;
         
         -- Delete the old submission

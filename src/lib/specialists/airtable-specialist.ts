@@ -18,9 +18,6 @@ export class AirtableSpecialist extends BaseFormSpecialist {
       ...super.getBrowserConfig(),
       max_agent_steps: 65,
       highlight_elements: true,
-      // Favor non-reasoning per mapping
-      use_thinking: true,
-      flash_mode: false,
     }
   }
 
@@ -30,8 +27,11 @@ export class AirtableSpecialist extends BaseFormSpecialist {
     smartData: SmartDataMapping,
   ): string {
     const deckUrl = smartData.primary_data.asset_cloud_drive || ''
+    const planIdentifier = this.buildPlanIdentifier(smartData, targetName)
 
-    const instruction = `You are an Airtable forms specialist. Your task is to complete the form for "${targetName}" at: ${targetUrl}.
+    const instruction = `${planIdentifier}
+
+You are an Airtable forms specialist. Your task is to complete the form for "${targetName}" at: ${targetUrl}.
 
 ${this.buildCoreDataSection(smartData)}
 

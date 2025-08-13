@@ -7,6 +7,10 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
+/**
+ * Calls the internal start-task API to begin Browser Use execution
+ * This is separated to allow queue processing to reuse the same logic
+ */
 async function startAgentTask(submissionId: string) {
   const url = `${process.env.NEXT_PUBLIC_SITE_URL}/api/agent/internal/start-task`
   try {
@@ -37,6 +41,16 @@ async function startAgentTask(submissionId: string) {
   }
 }
 
+/**
+ * PUBLIC API: Submit new fundraising applications
+ *
+ * This endpoint handles:
+ * 1. User input validation
+ * 2. Queuing logic (decides if immediate start or queue)
+ * 3. Calls internal start-task API if ready to begin
+ *
+ * The internal/start-task route handles the actual Browser Use execution
+ */
 export async function POST(request: NextRequest) {
   try {
     const { startupId, targetId, userId, targetType } = await request.json()

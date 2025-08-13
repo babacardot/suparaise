@@ -2258,7 +2258,12 @@ export type Database = {
         | 'Hardware sales'
         | 'Hybrid'
         | 'Other'
-      submission_status: 'pending' | 'in_progress' | 'completed' | 'failed'
+      submission_status:
+        | 'pending'
+        | 'in_progress'
+        | 'completed'
+        | 'failed'
+        | 'admin_review'
       submission_type: 'form' | 'email' | 'other'
       subscription_status:
         | 'active'
@@ -2600,7 +2605,13 @@ export const Constants = {
         'Hybrid',
         'Other',
       ],
-      submission_status: ['pending', 'in_progress', 'completed', 'failed'],
+      submission_status: [
+        'pending',
+        'in_progress',
+        'completed',
+        'failed',
+        'admin_review',
+      ],
       submission_type: ['form', 'email', 'other'],
       subscription_status: [
         'active',

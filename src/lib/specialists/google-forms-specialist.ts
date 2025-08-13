@@ -19,11 +19,8 @@ export class GoogleFormsSpecialist extends BaseFormSpecialist {
   getBrowserConfig(): Partial<BrowserUseConfig> {
     return {
       ...super.getBrowserConfig(),
-      max_agent_steps: 45, // Google Forms are typically more straightforward in Browser Use
+      max_agent_steps: 65, // Google Forms are typically more straightforward in Browser Use
       highlight_elements: false, // Google Forms have clear structure, no highlighting needed in Browser Use
-      // Favor non-reasoning per mapping
-      use_thinking: true,
-      flash_mode: false,
     }
   }
 
@@ -33,8 +30,11 @@ export class GoogleFormsSpecialist extends BaseFormSpecialist {
     smartData: SmartDataMapping,
   ): string {
     const deckUrl = smartData.primary_data.asset_cloud_drive || ''
+    const planIdentifier = this.buildPlanIdentifier(smartData, targetName)
 
-    const instruction = `You are a Google Forms specialist agent. Navigate to ${targetUrl} and complete the Google Form for ${targetName}.
+    const instruction = `${planIdentifier}
+
+You are a Google Forms specialist agent. Navigate to ${targetUrl} and complete the Google Form for ${targetName}.
 
 ${this.buildCoreDataSection(smartData)}
 

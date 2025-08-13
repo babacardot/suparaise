@@ -12,6 +12,11 @@ export type SmartDataMapping = {
   knowledge_base_section: string
   customInstructions?: string
   preferredTone?: string
+  userPlan?: {
+    permission_level: 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'
+    is_subscribed: boolean
+  }
+  targetType?: 'FUND' | 'ACCELERATOR'
 }
 
 export type FormType =
@@ -52,11 +57,6 @@ export interface BrowserUseConfig {
   browser_viewport_height: number
   highlight_elements: boolean
   enable_public_share: boolean
-  // Reasoning/latency trade-off flags (mutually exclusive)
-  // When enabling deep reasoning, set use_thinking=true and flash_mode=false
-  // When prioritizing speed (reduced reasoning), set flash_mode=true and use_thinking=false
-  use_thinking?: boolean
-  flash_mode?: boolean
 }
 
 // Validation and error types

@@ -18,8 +18,11 @@ export class GenericSpecialist extends BaseFormSpecialist {
     smartData: SmartDataMapping,
   ): string {
     const deckUrl = smartData.primary_data.asset_cloud_drive || ''
+    const planIdentifier = this.buildPlanIdentifier(smartData, targetName)
 
-    const instruction = `You are an expert form-filling agent. Your goal is to complete the application for "${targetName}" at the URL: ${targetUrl}.
+    const instruction = `${planIdentifier}
+
+You are an expert form-filling agent. Your goal is to complete the application for "${targetName}" at the URL: ${targetUrl}.
 
 ${this.buildCoreDataSection(smartData)}
 
@@ -57,9 +60,6 @@ Use the 'thinking' field to document your plan, decisions, and any fields you sy
   getBrowserConfig(): Partial<BrowserUseConfig> {
     return {
       ...super.getBrowserConfig(),
-      // Per mapping: non-reasoning => use_thinking=True
-      use_thinking: true,
-      flash_mode: false,
     }
   }
 }

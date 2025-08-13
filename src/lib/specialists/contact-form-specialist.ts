@@ -22,11 +22,8 @@ export class ContactFormSpecialist extends BaseFormSpecialist {
   getBrowserConfig(): Partial<BrowserUseConfig> {
     return {
       ...super.getBrowserConfig(),
-      max_agent_steps: 30, // Contact forms are usually simple and quick in Browser Use
+      max_agent_steps: 50, // Contact forms are usually simple and quick in Browser Use
       highlight_elements: false, // Simple forms don't need highlighting in Browser Use
-      // Contact forms require stronger reasoning to compose messages well
-      use_thinking: false,
-      flash_mode: true,
     }
   }
 
@@ -36,6 +33,7 @@ export class ContactFormSpecialist extends BaseFormSpecialist {
     smartData: SmartDataMapping,
   ): string {
     const { primary_data, description_by_length } = smartData
+    const planIdentifier = this.buildPlanIdentifier(smartData, targetName)
 
     const founderName = primary_data.lead_founder_name || 'the founder'
     const companyName = primary_data.company_name || 'our company'
@@ -108,7 +106,9 @@ export class ContactFormSpecialist extends BaseFormSpecialist {
 
     const message = paragraphs.filter(Boolean).join('\n\n')
 
-    const instruction = `You are a contact form specialist agent. Your task is to navigate to ${targetUrl} and complete the contact form for ${targetName} with the goal of initiating a conversation.
+    const instruction = `${planIdentifier}
+
+You are a contact form specialist agent. Your task is to navigate to ${targetUrl} and complete the contact form for ${targetName} with the goal of initiating a conversation.
 
 ${this.buildCoreDataSection(smartData)}
 

@@ -1,3 +1,5 @@
+import { MODEL_CONFIG } from './model-config'
+
 // Define types for better readability and type safety
 export type Founder = {
   firstName: string
@@ -75,6 +77,11 @@ export type SmartDataMapping = {
   knowledge_base_section: string
   customInstructions?: string
   preferredTone?: string
+  userPlan?: {
+    permission_level: 'FREE' | 'PRO' | 'MAX' | 'ENTERPRISE'
+    is_subscribed: boolean
+  }
+  targetType?: 'FUND' | 'ACCELERATOR'
 }
 
 // Minimal Browser Use API Client for task creation
@@ -127,15 +134,12 @@ export class BrowserUseClient {
       enable_public_share?: boolean
       webhook_url?: string
       profile_id?: string
-      // Reasoning/latency flags
-      use_thinking?: boolean
-      flash_mode?: boolean
     } = {},
   ) {
     const payload = {
       task,
-      llm_model: options.llm_model || 'gpt-4.1',
-      max_agent_steps: options.max_agent_steps || 100,
+      llm_model: options.llm_model || MODEL_CONFIG.default, // Using configured default model
+      max_agent_steps: options.max_agent_steps || 60,
       use_adblock: options.use_adblock ?? true,
       use_proxy: options.use_proxy ?? true,
       proxy_country_code: options.proxy_country_code || 'us',
@@ -148,9 +152,6 @@ export class BrowserUseClient {
       enable_public_share: options.enable_public_share ?? true,
       webhook_url: options.webhook_url,
       profile_id: options.profile_id,
-      // Pass through reasoning flags when provided
-      use_thinking: options.flash_mode ? false : options.use_thinking,
-      flash_mode: options.use_thinking ? false : options.flash_mode,
     }
 
     return this.makeRequest('/run-task', {
