@@ -103,7 +103,10 @@ export function ForgotPasswordForm({
     >
       <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
         <CardContent className="p-0">
-          <form onSubmit={handleSubmit} className="p-6 md:p-8">
+          <form
+            onSubmit={handleSubmit}
+            className="px-6 md:px-8 pt-5 md:pt-4 pb-4 md:pb-8"
+          >
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-start text-start">
                 <h1 className="text-2xl font-bold">Reset your password</h1>
@@ -117,7 +120,7 @@ export function ForgotPasswordForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="jonathan@company.com"
+                  placeholder="david@company.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

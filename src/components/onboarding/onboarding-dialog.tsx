@@ -233,23 +233,40 @@ export function OnboardingDialog({
               firstFounder.email = user.email || ''
             }
 
-            const fullName =
-              user.user_metadata?.full_name || user.user_metadata?.name || ''
-            if (fullName) {
-              const nameParts = fullName.split(' ')
-              firstFounder.firstName = nameParts[0] || ''
-              firstFounder.lastName = nameParts.slice(1).join(' ') || ''
+            type UserMetadata = {
+              [key: string]: unknown
+              first_name?: string
+              last_name?: string
+              full_name?: string
+              name?: string
+              linkedin_url?: string
+              twitter_url?: string
+            }
+            const meta = (user.user_metadata || {}) as UserMetadata
+            const toStr = (v: unknown) => (typeof v === 'string' ? v : '')
+            const metaFirst = toStr(meta.first_name).trim()
+            const metaLast = toStr(meta.last_name).trim()
+            if (metaFirst || metaLast) {
+              firstFounder.firstName = metaFirst
+              firstFounder.lastName = metaLast
+            } else {
+              const fullName = toStr(meta.full_name || meta.name || '')
+              if (fullName) {
+                const nameParts = fullName.split(' ')
+                firstFounder.firstName = nameParts[0] || ''
+                firstFounder.lastName = nameParts.slice(1).join(' ') || ''
+              }
             }
 
             // Pre-populate LinkedIn URL if available from OAuth
-            if (user.user_metadata?.linkedin_url && !firstFounder.linkedin) {
-              firstFounder.linkedin = user.user_metadata.linkedin_url
+            if (toStr(meta.linkedin_url) && !firstFounder.linkedin) {
+              firstFounder.linkedin = toStr(meta.linkedin_url)
               setPrefilledFields((prev) => ({ ...prev, linkedin: true }))
             }
 
             // Pre-populate Twitter URL if available from OAuth
-            if (user.user_metadata?.twitter_url && !firstFounder.twitterUrl) {
-              firstFounder.twitterUrl = user.user_metadata.twitter_url
+            if (toStr(meta.twitter_url) && !firstFounder.twitterUrl) {
+              firstFounder.twitterUrl = toStr(meta.twitter_url)
               setPrefilledFields((prev) => ({ ...prev, twitter: true }))
             }
 

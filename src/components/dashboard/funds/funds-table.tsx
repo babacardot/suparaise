@@ -28,6 +28,7 @@ import {
   VALIDATION_PRESETS,
 } from '@/components/ui/validation-gate'
 import Link from 'next/link'
+import { Checkbox } from '@/components/ui/checkbox'
 
 type Target = {
   id: string
@@ -105,6 +106,20 @@ const FundsTable = React.memo(function FundsTable({
   const [pollingSubmissions, setPollingSubmissions] = React.useState<
     Set<string>
   >(new Set())
+  // Selection buckets: plan (green) vs usage-billing (blue)
+  const [selectedPlanIds, setSelectedPlanIds] = React.useState<Set<string>>(
+    new Set(),
+  )
+  const [selectedUsageIds, setSelectedUsageIds] = React.useState<Set<string>>(
+    new Set(),
+  )
+  const selectedTargetIds = React.useMemo(() => {
+    const s = new Set<string>()
+    selectedPlanIds.forEach((id) => s.add(id))
+    selectedUsageIds.forEach((id) => s.add(id))
+    return s
+  }, [selectedPlanIds, selectedUsageIds])
+  const [isBulkSubmitting, setIsBulkSubmitting] = React.useState(false)
   const playClickSound = React.useCallback(() => {
     try {
       const audio = new Audio('/sounds/light.mp3')
@@ -132,6 +147,31 @@ const FundsTable = React.memo(function FundsTable({
     subscription &&
     subscription.monthly_submissions_used >=
       subscription.monthly_submissions_limit
+
+  // Usage billing info for selection caps and coloring
+  const USAGE_PRICE_PER_SUBMISSION = 2.49
+  const [usageBilling, setUsageBilling] = React.useState<{
+    enabled: boolean
+    monthlySpendLimit: number
+    actualUsageCost: number
+  }>({ enabled: false, monthlySpendLimit: 0, actualUsageCost: 0 })
+  React.useEffect(() => {
+    const fetchUsage = async () => {
+      try {
+        const res = await fetch('/api/usage-billing', { cache: 'no-store' })
+        if (!res.ok) return
+        const data = await res.json()
+        setUsageBilling({
+          enabled: !!data.usageBillingEnabled,
+          monthlySpendLimit: Number(data.monthlySpendLimit || 0),
+          actualUsageCost: Number(data.actualUsageCost || 0),
+        })
+      } catch {
+        // ignore
+      }
+    }
+    fetchUsage()
+  }, [])
 
   const [queueStatus, setQueueStatus] = React.useState<{
     maxParallel: number
@@ -184,6 +224,145 @@ const FundsTable = React.memo(function FundsTable({
       onSortChange(key)
     },
     [onSortChange, playClickSound],
+  )
+
+  // Selection helpers
+  // Remaining plan quota and usage-based capacity
+  const remainingPlanQuota = React.useMemo(() => {
+    if (!subscription) return 0
+    const left =
+      subscription.monthly_submissions_limit -
+      subscription.monthly_submissions_used
+    return Math.max(0, left)
+  }, [subscription])
+  const remainingUsageCapacity = React.useMemo(() => {
+    if (!usageBilling.enabled) return 0
+    const leftDollars = Math.max(
+      0,
+      usageBilling.monthlySpendLimit - usageBilling.actualUsageCost,
+    )
+    return Math.floor(leftDollars / USAGE_PRICE_PER_SUBMISSION)
+  }, [usageBilling])
+
+  const selectedCount = selectedTargetIds.size
+  const isAllSelected =
+    filteredTargets.length > 0 && selectedCount === filteredTargets.length
+  const isIndeterminate =
+    selectedCount > 0 && selectedCount < filteredTargets.length
+
+  const toggleSelectAll = React.useCallback(() => {
+    if (filteredTargets.length === 0) return
+    // Build candidates that are selectable (forms without an existing submission)
+    const candidates = filteredTargets.filter(
+      (t) => t.submission_type === 'form' && !t.submission_status,
+    )
+    const currentlySelected = selectedTargetIds
+    const selectAll =
+      candidates.every((t) => currentlySelected.has(t.id)) === false
+
+    if (!selectAll) {
+      // Unselect all
+      setSelectedPlanIds(new Set())
+      setSelectedUsageIds(new Set())
+      return
+    }
+
+    // Fill plan first, then usage up to caps
+    const nextPlan = new Set<string>()
+    const nextUsage = new Set<string>()
+    for (const t of candidates) {
+      if (nextPlan.size < remainingPlanQuota) {
+        nextPlan.add(t.id)
+      } else if (
+        usageBilling.enabled &&
+        nextUsage.size < remainingUsageCapacity
+      ) {
+        nextUsage.add(t.id)
+      } else {
+        break
+      }
+    }
+
+    setSelectedPlanIds(nextPlan)
+    setSelectedUsageIds(nextUsage)
+    if (nextPlan.size + nextUsage.size < candidates.length) {
+      toast({
+        title: 'Selection limited',
+        description: usageBilling.enabled
+          ? `You can select up to ${remainingPlanQuota} from plan and ${remainingUsageCapacity} from usage billing.`
+          : `You can select up to ${remainingPlanQuota} based on remaining plan quota.`,
+        variant: 'info',
+        duration: 3000,
+      })
+    }
+  }, [
+    filteredTargets,
+    remainingPlanQuota,
+    remainingUsageCapacity,
+    usageBilling.enabled,
+    selectedTargetIds,
+    toast,
+  ])
+
+  const toggleSelectOne = React.useCallback(
+    (targetId: string) => {
+      const target = filteredTargets.find((t) => t.id === targetId)
+      if (!target) return
+      // Only allow selection for form-type targets without an existing submission
+      if (!(target.submission_type === 'form' && !target.submission_status)) {
+        toast({
+          title: 'Not selectable',
+          description:
+            'Only unsubmitted form targets can be selected for bulk apply.',
+          variant: 'info',
+          duration: 2000,
+        })
+        return
+      }
+      // If already selected, unselect from whichever bucket contains it
+      if (selectedPlanIds.has(targetId)) {
+        const next = new Set(selectedPlanIds)
+        next.delete(targetId)
+        setSelectedPlanIds(next)
+        return
+      }
+      if (selectedUsageIds.has(targetId)) {
+        const next = new Set(selectedUsageIds)
+        next.delete(targetId)
+        setSelectedUsageIds(next)
+        return
+      }
+
+      // Add new selection: plan first until limit, otherwise usage until limit
+      if (selectedPlanIds.size < remainingPlanQuota) {
+        setSelectedPlanIds(new Set(selectedPlanIds).add(targetId))
+        return
+      }
+      if (
+        usageBilling.enabled &&
+        selectedUsageIds.size < remainingUsageCapacity
+      ) {
+        setSelectedUsageIds(new Set(selectedUsageIds).add(targetId))
+        return
+      }
+      toast({
+        title: 'Selection limit reached',
+        description: usageBilling.enabled
+          ? `No remaining capacity. Plan left: ${Math.max(0, remainingPlanQuota - selectedPlanIds.size)}, Usage left: ${Math.max(0, remainingUsageCapacity - selectedUsageIds.size)}`
+          : `No remaining plan quota for additional selections.`,
+        variant: 'info',
+        duration: 2500,
+      })
+    },
+    [
+      filteredTargets,
+      remainingPlanQuota,
+      remainingUsageCapacity,
+      usageBilling.enabled,
+      selectedPlanIds,
+      selectedUsageIds,
+      toast,
+    ],
   )
 
   // Fetch queue status
@@ -542,14 +721,7 @@ const FundsTable = React.memo(function FundsTable({
         return
       }
 
-      if (isQuotaReached) {
-        toast({
-          title: 'Limit reached',
-          description: `You have used ${subscription?.monthly_submissions_used} of your ${subscription?.monthly_submissions_limit} monthly submissions.`,
-          variant: 'default',
-        })
-        return
-      }
+      // Do not block on frontend. Backend enforces quota vs usage billing.
 
       if (submittingTargets.has(targetId)) {
         return // Already submitting
@@ -559,17 +731,6 @@ const FundsTable = React.memo(function FundsTable({
       setSubmittingTargets((prev) => new Set(Array.from(prev).concat(targetId)))
 
       try {
-        // Check queue status first
-        if (!queueStatus?.canSubmitMore) {
-          toast({
-            title: 'Queue full',
-            variant: 'destructive',
-            description:
-              'Cannot submit more applications. Queue is at capacity.',
-          })
-          return
-        }
-
         toast({
           title: 'Adding to queue',
           variant: 'info',
@@ -675,13 +836,55 @@ const FundsTable = React.memo(function FundsTable({
       startupId,
       submittingTargets,
       toast,
-      queueStatus,
       onTargetUpdate,
-      subscription,
-      isQuotaReached,
       playClickSound,
     ],
   )
+
+  // Bulk apply selected targets (forms without an existing submission)
+  const handleBulkApply = React.useCallback(async () => {
+    if (!user?.id) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const candidates = filteredTargets.filter(
+      (t) =>
+        selectedTargetIds.has(t.id) &&
+        t.submission_type === 'form' &&
+        !t.submission_status,
+    )
+
+    if (candidates.length < 2) return
+
+    playClickSound()
+    setIsBulkSubmitting(true)
+
+    try {
+      // Submit sequentially to avoid client-side burst; backend handles queue/concurrency
+      for (const t of candidates) {
+        await handleApplyForm(t.id, t.name)
+      }
+      // Clear selection after attempting submissions
+      setSelectedPlanIds(new Set())
+      setSelectedUsageIds(new Set())
+    } catch {
+      // Errors are already toasted inside handleApplyForm
+    } finally {
+      setIsBulkSubmitting(false)
+    }
+  }, [
+    user?.id,
+    filteredTargets,
+    selectedTargetIds,
+    playClickSound,
+    handleApplyForm,
+    toast,
+  ])
 
   const handleSendEmail = React.useCallback(
     (email: string | undefined) => {
@@ -743,7 +946,23 @@ const FundsTable = React.memo(function FundsTable({
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10 border-b">
                     <TableRow>
-                      <TableHead className="w-[260px] pl-4">
+                      <TableHead className="p-2 pl-0 pr-1 w-[32px]">
+                        <div className="flex items-center justify-center">
+                          {selectedCount > 0 && (
+                            <Checkbox
+                              checked={
+                                isAllSelected
+                                  ? true
+                                  : isIndeterminate
+                                    ? 'indeterminate'
+                                    : false
+                              }
+                              onCheckedChange={() => toggleSelectAll()}
+                            />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-[260px] pl-[11px]">
                         <button
                           onClick={() => handleSort('name')}
                           className="flex items-center hover:text-foreground transition-colors font-medium"
@@ -801,7 +1020,35 @@ const FundsTable = React.memo(function FundsTable({
                           </button>
                         </TableHead>
                       )}
-                      <TableHead className="text-right w-[80px]"></TableHead>
+                      <TableHead className="text-right w-[80px]">
+                        <div className="flex justify-end">
+                          {selectedCount >= 2 ? (
+                            <ValidationGate
+                              requirements={
+                                VALIDATION_PRESETS.BASIC_APPLICATION
+                              }
+                              onValidationPass={handleBulkApply}
+                            >
+                              <Button
+                                size="sm"
+                                disabled={isBulkSubmitting}
+                                className="rounded-sm px-3 h-8 mr-[3px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                              >
+                                Apply
+                              </Button>
+                            </ValidationGate>
+                          ) : (
+                            <Button
+                              size="sm"
+                              aria-hidden
+                              tabIndex={-1}
+                              className="rounded-sm px-3 h-8 mr-[3px] invisible"
+                            >
+                              Apply
+                            </Button>
+                          )}
+                        </div>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -816,7 +1063,23 @@ const FundsTable = React.memo(function FundsTable({
                         onMouseEnter={() => onTargetHover?.(target)}
                         onMouseLeave={() => onTargetLeave?.()}
                       >
-                        <TableCell className="font-medium p-2 pl-4">
+                        <TableCell
+                          className="p-2 pl-0 pr-1 w-[32px]"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex items-center justify-center">
+                            <Checkbox
+                              checked={selectedTargetIds.has(target.id)}
+                              onCheckedChange={() => toggleSelectOne(target.id)}
+                              variant={
+                                selectedUsageIds.has(target.id)
+                                  ? 'usage'
+                                  : 'default'
+                              }
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium p-2 pl-[11px]">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {target.website &&
@@ -1046,7 +1309,8 @@ const FundsTable = React.memo(function FundsTable({
                             className="flex justify-end mr-[6.5px]"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {target.submission_type === 'form' &&
+                            {selectedCount < 2 &&
+                              target.submission_type === 'form' &&
                               !target.submission_status && (
                                 <ValidationGate
                                   requirements={
@@ -1058,12 +1322,7 @@ const FundsTable = React.memo(function FundsTable({
                                 >
                                   <Button
                                     size="sm"
-                                    disabled={
-                                      submittingTargets.has(target.id) ||
-                                      (queueStatus
-                                        ? !queueStatus.canSubmitMore
-                                        : false)
-                                    }
+                                    disabled={submittingTargets.has(target.id)}
                                     onMouseEnter={() =>
                                       setHoveredButton(`apply-${target.id}`)
                                     }
@@ -1077,17 +1336,12 @@ const FundsTable = React.memo(function FundsTable({
                                           : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
                                     }`}
                                     title={
-                                      isQuotaReached
-                                        ? `You have reached your monthly submission limit of ${subscription?.monthly_submissions_limit}.`
-                                        : queueStatus &&
-                                            !queueStatus.canSubmitMore
-                                          ? 'Queue is full. Cannot add more applications.'
-                                          : queueStatus &&
-                                              queueStatus.availableSlots === 0
-                                            ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
-                                            : queueStatus
-                                              ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
-                                              : 'Submit application'
+                                      queueStatus &&
+                                      queueStatus.availableSlots === 0
+                                        ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
+                                        : queueStatus
+                                          ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
+                                          : 'Submit application'
                                     }
                                   >
                                     <LottieIcon

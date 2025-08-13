@@ -65,7 +65,7 @@ function AgentSettingsSkeleton() {
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Agents</h2>
-        <p className="text-foreground/80">
+        <p className="text-muted-foreground">
           Customize how agents represent you to investors.
         </p>
       </div>
@@ -403,7 +403,7 @@ export default function AgentSettings() {
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Agents</h2>
-        <p className="text-foreground/80">
+        <p className="text-muted-foreground">
           Customize how agents represent you to investors.
         </p>
       </div>
@@ -425,7 +425,7 @@ export default function AgentSettings() {
                       Stealth
                     </Label>
                   </div>
-                  <p className="text-xs leading-relaxed text-foreground/80">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
                     Use advanced patches to mimic human behavior patterns, avoid
                     bot detection, and ensure natural interaction with investor
                     portals.
@@ -463,7 +463,8 @@ export default function AgentSettings() {
                       htmlFor="enableDebugMode"
                       className={cn(
                         'font-medium text-sm',
-                        !isAdvancedFeatureAvailable() && 'text-foreground/80',
+                        !isAdvancedFeatureAvailable() &&
+                          'text-muted-foreground',
                       )}
                     >
                       Analytics
@@ -473,7 +474,7 @@ export default function AgentSettings() {
                     className={cn(
                       'text-xs leading-relaxed',
                       !isAdvancedFeatureAvailable()
-                        ? 'text-foreground/80/60'
+                        ? 'text-muted-foreground'
                         : 'text-foreground/80',
                     )}
                   >
@@ -549,7 +550,8 @@ export default function AgentSettings() {
                       htmlFor="enableAutopilot"
                       className={cn(
                         'font-medium text-sm',
-                        !isEnterpriseFeatureAvailable() && 'text-foreground/80',
+                        !isEnterpriseFeatureAvailable() &&
+                          'text-muted-foreground',
                       )}
                     >
                       Autopilot
@@ -559,7 +561,7 @@ export default function AgentSettings() {
                     className={cn(
                       'text-xs leading-relaxed',
                       !isEnterpriseFeatureAvailable()
-                        ? 'text-foreground/80/60'
+                        ? 'text-muted-foreground'
                         : 'text-foreground/80',
                     )}
                   >
@@ -664,7 +666,7 @@ export default function AgentSettings() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
@@ -716,7 +718,7 @@ export default function AgentSettings() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
             </div>
@@ -734,7 +736,7 @@ export default function AgentSettings() {
                       className={cn(
                         'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                         !isProPlusFeatureAvailable() &&
-                          'bg-muted/50 text-foreground/80 cursor-not-allowed',
+                          'bg-muted/50 text-muted-foreground cursor-not-allowed',
                       )}
                       value={formData.model}
                       onChange={async (e) => {
@@ -750,7 +752,7 @@ export default function AgentSettings() {
                       <option value="deepseek-r1-0528">deepseek-r1-0528</option>
                       <option value="gemini-2.5-pro">gemini-2.5-pro</option>
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -761,7 +763,7 @@ export default function AgentSettings() {
                       className={cn(
                         'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                         !isProPlusFeatureAvailable() &&
-                          'bg-muted/50 text-foreground/80 cursor-not-allowed',
+                          'bg-muted/50 text-muted-foreground cursor-not-allowed',
                       )}
                       value={formData.preferredTone}
                       onChange={async (e) => {
@@ -780,7 +782,7 @@ export default function AgentSettings() {
                       <option value="concise">Concise</option>
                       <option value="detailed">Detailed</option>
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
 
@@ -797,7 +799,7 @@ export default function AgentSettings() {
                       className={cn(
                         'rounded-sm pr-8 min-h[100px] select-auto',
                         !isProPlusFeatureAvailable() &&
-                          'dark:bg-muted cursor-not-allowed text-foreground/80',
+                          'dark:bg-muted cursor-not-allowed text-muted-foreground',
                       )}
                       placeholder={
                         isProPlusFeatureAvailable()
@@ -852,7 +854,7 @@ export default function AgentSettings() {
                           className={cn(
                             'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                             !isProPlusFeatureAvailable() &&
-                              'bg-muted/50 text-foreground/80 cursor-not-allowed',
+                              'bg-muted/50 text-muted-foreground cursor-not-allowed',
                           )}
                           value={formData.model}
                           onChange={async (e) => {
@@ -873,7 +875,7 @@ export default function AgentSettings() {
                           </option>
                           <option value="gemini-2.5-pro">gemini-2.5-pro</option>
                         </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                       </div>
                     </div>
                     <div className="space-y-3">
@@ -884,7 +886,7 @@ export default function AgentSettings() {
                           className={cn(
                             'w-full pl-3 pr-8 py-2 border border-input rounded-sm appearance-none bg-transparent text-sm',
                             !isProPlusFeatureAvailable() &&
-                              'bg-muted/50 text-foreground/80 cursor-not-allowed',
+                              'bg-muted/50 text-muted-foreground cursor-not-allowed',
                           )}
                           value={formData.preferredTone}
                           onChange={async (e) => {
@@ -903,7 +905,7 @@ export default function AgentSettings() {
                           <option value="concise">Concise</option>
                           <option value="detailed">Detailed</option>
                         </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                       </div>
                     </div>
 
@@ -923,7 +925,7 @@ export default function AgentSettings() {
                           className={cn(
                             'rounded-sm pr-8 min-h-[100px] select-auto',
                             !isProPlusFeatureAvailable() &&
-                              'dark:bg-muted cursor-not-allowed text-foreground/80',
+                              'dark:bg-muted cursor-not-allowed text-muted-foreground',
                           )}
                           placeholder={
                             isProPlusFeatureAvailable()

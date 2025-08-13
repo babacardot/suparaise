@@ -290,6 +290,7 @@ export const VALIDATION_PRESETS = {
     },
     company: {
       name: true,
+      website: true,
       industry: true,
       location: true,
       descriptionShort: true,
@@ -370,6 +371,7 @@ export const VALIDATION_PRESETS = {
     },
     company: {
       name: true,
+      website: true,
       industry: true,
       location: true,
       descriptionShort: true,

@@ -50,7 +50,7 @@ export function VerifyForm({
       {...props}
     >
       <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
-        <CardContent className="p-6 md:p-8">
+        <CardContent className="px-6 md:px-8 pt-5 md:pt-4 pb-4 md:pb-8">
           <div className="flex flex-col items-start text-start gap-6">
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-bold">Check your email</h1>

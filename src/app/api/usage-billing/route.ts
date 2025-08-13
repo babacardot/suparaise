@@ -28,6 +28,7 @@ export async function GET() {
         total_usage_submissions,
         monthly_submissions_used,
         monthly_submissions_limit,
+        monthly_spend_limit,
         permission_level,
         is_subscribed,
         stripe_customer_id
@@ -56,6 +57,7 @@ export async function GET() {
       usageBillingEnabled: profile.usage_billing_enabled || false,
       currentMonthUsageCost: profile.monthly_estimated_usage_cost || 0,
       actualUsageCost: profile.actual_usage_cost || 0,
+      monthlySpendLimit: profile.monthly_spend_limit || 0,
       lastInvoiceDate: profile.last_invoice_date,
       monthlyUsageSubmissionsCount:
         profile.monthly_usage_submissions_count || 0,

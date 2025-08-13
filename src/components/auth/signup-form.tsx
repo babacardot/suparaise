@@ -17,6 +17,8 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const router = useRouter()
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -43,6 +45,11 @@ export function SignupForm({
       password,
       options: {
         emailRedirectTo: getRedirectURL(),
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          full_name: `${firstName} ${lastName}`.trim(),
+        },
       },
     })
 
@@ -61,12 +68,15 @@ export function SignupForm({
     >
       <Card className="overflow-hidden rounded-sm w-full md:w-[450px] mx-auto">
         <CardContent className="p-0">
-          <form onSubmit={handleSignup} className="p-6 md:p-8">
+          <form
+            onSubmit={handleSignup}
+            className="px-6 md:px-8 pt-5 md:pt-4 pb-4 md:pb-8"
+          >
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-start text-start">
                 <h1 className="text-2xl font-bold">Create an account</h1>
                 <p className="text-balance text-foreground/80">
-                  Get started free, no credit card required
+                  Get started for free, no credit card is required.
                 </p>
               </div>
               <div className="space-y-2">
@@ -237,12 +247,41 @@ export function SignupForm({
                   or continue with
                 </span>
               </div>
+              {/* First/Last name row (placed below the separator) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="firstName">First name</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    placeholder="David"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    disabled={isSubmitting}
+                    className="select-auto"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="lastName">Last name</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    placeholder="Carson"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    disabled={isSubmitting}
+                    className="select-auto"
+                  />
+                </div>
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="jonathan@company.com"
+                  placeholder="david@company.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -279,7 +318,7 @@ export function SignupForm({
                 <Link
                   href="/login"
                   prefetch={true}
-                  className="underline underline-offset-4"
+                  className="hover:underline underline-offset-4"
                   onClick={playClickSound}
                 >
                   Sign in
@@ -289,9 +328,22 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
-      <div className="text-balance text-center text-xs text-foreground/80 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto -mt-4">
-        By creating an account, you agree to our <a href="/terms">Terms</a> and{' '}
-        <a href="/privacy">Privacy Policy</a>.
+      <div className="text-balance text-center text-xs text-foreground/80 mx-auto -mt-4">
+        By creating an account, you agree to our{' '}
+        <a
+          href="/terms"
+          className="hover:underline underline-offset-4 hover:text-blue-500 dark:hover:text-blue-400"
+        >
+          Terms
+        </a>{' '}
+        and{' '}
+        <a
+          href="/privacy"
+          className="hover:underline underline-offset-4 hover:text-blue-500 dark:hover:text-blue-400"
+        >
+          Privacy Policy
+        </a>
+        .
       </div>
     </div>
   )

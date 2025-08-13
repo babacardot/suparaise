@@ -1703,6 +1703,10 @@ export type Database = {
         Args: { p_startup_id: string; p_limit?: number }
         Returns: Json
       }
+      get_accelerator_submission_start_data: {
+        Args: { p_submission_id: string }
+        Returns: Json
+      }
       get_accelerators_simple: {
         Args: {
           p_limit?: number
