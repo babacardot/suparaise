@@ -28,6 +28,7 @@ import {
   VALIDATION_PRESETS,
 } from '@/components/ui/validation-gate'
 import Link from 'next/link'
+import { Checkbox } from '@/components/ui/checkbox'
 
 type Accelerator = {
   id: string
@@ -108,6 +109,19 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
   const [submittingAccelerators, setSubmittingAccelerators] = React.useState<
     Set<string>
   >(new Set())
+  // Selection buckets: plan (green) vs usage-billing (blue)
+  const [selectedPlanIds, setSelectedPlanIds] = React.useState<Set<string>>(
+    new Set(),
+  )
+  const [selectedUsageIds, setSelectedUsageIds] = React.useState<Set<string>>(
+    new Set(),
+  )
+  const selectedAcceleratorIds = React.useMemo(() => {
+    const s = new Set<string>()
+    selectedPlanIds.forEach((id) => s.add(id))
+    selectedUsageIds.forEach((id) => s.add(id))
+    return s
+  }, [selectedPlanIds, selectedUsageIds])
   const [queueStatus, setQueueStatus] = React.useState<{
     maxParallel: number
     maxQueue: number
@@ -121,14 +135,38 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     try {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      void audio.play().catch(() => {})
-    } catch {}
+      void audio.play().catch(() => { })
+    } catch { }
   }, [])
 
   const isQuotaReached =
     subscription &&
     subscription.monthly_submissions_used >=
-      subscription.monthly_submissions_limit
+    subscription.monthly_submissions_limit
+  // Usage billing info for selection caps and coloring
+  const USAGE_PRICE_PER_SUBMISSION = 2.49
+  const [usageBilling, setUsageBilling] = React.useState<{
+    enabled: boolean
+    monthlySpendLimit: number
+    actualUsageCost: number
+  }>({ enabled: false, monthlySpendLimit: 0, actualUsageCost: 0 })
+  React.useEffect(() => {
+    const fetchUsage = async () => {
+      try {
+        const res = await fetch('/api/usage-billing', { cache: 'no-store' })
+        if (!res.ok) return
+        const data = await res.json()
+        setUsageBilling({
+          enabled: !!data.usageBillingEnabled,
+          monthlySpendLimit: Number(data.monthlySpendLimit || 0),
+          actualUsageCost: Number(data.actualUsageCost || 0),
+        })
+      } catch {
+        // ignore
+      }
+    }
+    fetchUsage()
+  }, [])
 
   const showUpgradeBanner = React.useMemo(() => {
     const level = subscription?.permission_level
@@ -163,6 +201,286 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     [deferredAccelerators],
   )
 
+  // Remaining plan quota and usage-based capacity
+  const remainingPlanQuota = React.useMemo(() => {
+    if (!subscription) return 0
+    const left =
+      subscription.monthly_submissions_limit -
+      subscription.monthly_submissions_used
+    return Math.max(0, left)
+  }, [subscription])
+  const remainingUsageCapacity = React.useMemo(() => {
+    if (!usageBilling.enabled) return 0
+    const leftDollars = Math.max(
+      0,
+      usageBilling.monthlySpendLimit - usageBilling.actualUsageCost,
+    )
+    return Math.floor(leftDollars / USAGE_PRICE_PER_SUBMISSION)
+  }, [usageBilling])
+
+  const selectedCount = selectedAcceleratorIds.size
+  const isAllSelected =
+    filteredAccelerators.length > 0 &&
+    selectedCount === filteredAccelerators.length
+  const isIndeterminate =
+    selectedCount > 0 && selectedCount < filteredAccelerators.length
+
+  const toggleSelectAll = React.useCallback(() => {
+    if (filteredAccelerators.length === 0) return
+    // Eligible on current page: form-type only
+    const candidates = filteredAccelerators.filter(
+      (a) => a.submission_type === 'form',
+    )
+    const currentlySelected = selectedAcceleratorIds
+    const shouldSelectAll =
+      candidates.every((a) => currentlySelected.has(a.id)) === false
+
+    if (!shouldSelectAll) {
+      // Second click: unselect everything globally (all pages)
+      setSelectedPlanIds(new Set())
+      setSelectedUsageIds(new Set())
+      return
+    }
+
+    // Select current page candidates on top of existing selections, obeying remaining capacities
+    const nextPlan = new Set(selectedPlanIds)
+    const nextUsage = new Set(selectedUsageIds)
+    let planCapacity = Math.max(0, remainingPlanQuota - nextPlan.size)
+    let usageCapacity = usageBilling.enabled
+      ? Math.max(0, remainingUsageCapacity - nextUsage.size)
+      : 0
+
+    for (const a of candidates) {
+      if (nextPlan.has(a.id) || nextUsage.has(a.id)) continue
+      if (planCapacity > 0) {
+        nextPlan.add(a.id)
+        planCapacity -= 1
+        continue
+      }
+      if (usageCapacity > 0) {
+        nextUsage.add(a.id)
+        usageCapacity -= 1
+        continue
+      }
+      break
+    }
+
+    setSelectedPlanIds(nextPlan)
+    setSelectedUsageIds(nextUsage)
+    // Silently stop at capacity without toasting
+  }, [
+    filteredAccelerators,
+    selectedAcceleratorIds,
+    selectedPlanIds,
+    selectedUsageIds,
+    remainingPlanQuota,
+    remainingUsageCapacity,
+    usageBilling.enabled,
+  ])
+
+  const toggleSelectOne = React.useCallback(
+    (acceleratorId: string) => {
+      const accelerator = filteredAccelerators.find(
+        (a) => a.id === acceleratorId,
+      )
+      if (!accelerator) return
+      // Only allow selection for form-type accelerators
+      if (!(accelerator.submission_type === 'form')) {
+        toast({
+          title: 'Not selectable',
+          description:
+            'Only form-type accelerators can be selected for bulk apply.',
+          variant: 'info',
+          duration: 2000,
+        })
+        return
+      }
+
+      if (selectedPlanIds.has(acceleratorId)) {
+        const next = new Set(selectedPlanIds)
+        next.delete(acceleratorId)
+        setSelectedPlanIds(next)
+        return
+      }
+      if (selectedUsageIds.has(acceleratorId)) {
+        const next = new Set(selectedUsageIds)
+        next.delete(acceleratorId)
+        setSelectedUsageIds(next)
+        return
+      }
+
+      if (selectedPlanIds.size < remainingPlanQuota) {
+        setSelectedPlanIds(new Set(selectedPlanIds).add(acceleratorId))
+        return
+      }
+      if (
+        usageBilling.enabled &&
+        selectedUsageIds.size < remainingUsageCapacity
+      ) {
+        setSelectedUsageIds(new Set(selectedUsageIds).add(acceleratorId))
+        return
+      }
+      // Silently stop at capacity without toasting
+    },
+    [
+      filteredAccelerators,
+      remainingPlanQuota,
+      remainingUsageCapacity,
+      usageBilling.enabled,
+      selectedPlanIds,
+      selectedUsageIds,
+      toast,
+    ],
+  )
+
+  // Submit a single accelerator application
+  const handleApplyForm = React.useCallback(
+    async (acceleratorId: string, acceleratorName: string) => {
+      if (!user?.id) {
+        toast({
+          title: 'Error',
+          description: 'You must be logged in to submit applications',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (isQuotaReached) {
+        toast({
+          title: 'Limit reached',
+          description: `You have used ${subscription?.monthly_submissions_used} of your ${subscription?.monthly_submissions_limit} monthly submissions.`,
+          variant: 'default',
+        })
+        return
+      }
+
+      if (submittingAccelerators.has(acceleratorId)) return
+
+      playClickSound()
+      setSubmittingAccelerators(
+        (prev) => new Set(Array.from(prev).concat(acceleratorId)),
+      )
+
+      try {
+        if (!queueStatus?.canSubmitMore) {
+          toast({
+            title: 'Queue full',
+            variant: 'destructive',
+            description:
+              'Cannot submit more applications. Queue is at capacity.',
+          })
+          return
+        }
+
+        toast({
+          title: 'Adding to queue',
+          variant: 'info',
+          duration: 4000,
+          description: `Adding application to ${acceleratorName} to processing queue...`,
+        })
+
+        const response = await fetch('/api/agent/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            startupId,
+            targetId: acceleratorId,
+            userId: user.id,
+            targetType: 'accelerator',
+          }),
+        })
+
+        const result = await response.json()
+        if (!response.ok)
+          throw new Error(result.error || 'Failed to submit application')
+
+        if (result.success) {
+          if (result.status === 'queued') {
+            toast({
+              title: 'Added to queue',
+              variant: 'success',
+              description: `Application to ${acceleratorName} added to queue at position ${result.queuePosition}`,
+            })
+          } else {
+            toast({
+              title: 'Processing started',
+              variant: 'info',
+              duration: 4000,
+              description: `Application to ${acceleratorName} is now being processed`,
+            })
+          }
+        } else {
+          toast({
+            title: 'Application failed',
+            description: result.error || 'Failed to submit application',
+            variant: 'destructive',
+          })
+        }
+      } catch {
+        // console.error('Application submission error:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to submit application',
+          variant: 'destructive',
+        })
+      } finally {
+        setSubmittingAccelerators((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(acceleratorId)
+          return newSet
+        })
+      }
+    },
+    [
+      user?.id,
+      startupId,
+      submittingAccelerators,
+      toast,
+      queueStatus,
+      isQuotaReached,
+      subscription,
+      playClickSound,
+    ],
+  )
+
+  // Bulk apply selected accelerators (form-type)
+  const [isBulkSubmitting, setIsBulkSubmitting] = React.useState(false)
+  const handleBulkApply = React.useCallback(async () => {
+    if (!user?.id) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const candidates = filteredAccelerators.filter(
+      (a) => selectedAcceleratorIds.has(a.id) && a.submission_type === 'form',
+    )
+    if (candidates.length < 2) return
+
+    playClickSound()
+    setIsBulkSubmitting(true)
+    try {
+      for (const a of candidates) {
+        await handleApplyForm(a.id, a.name)
+      }
+      setSelectedPlanIds(new Set())
+      setSelectedUsageIds(new Set())
+    } catch {
+      // errors handled inside handleApplyForm
+    } finally {
+      setIsBulkSubmitting(false)
+    }
+  }, [
+    user?.id,
+    filteredAccelerators,
+    selectedAcceleratorIds,
+    playClickSound,
+    handleApplyForm,
+    toast,
+  ])
   const handleSort = React.useCallback(
     (key: string) => {
       playClickSound()
@@ -450,115 +768,6 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
     return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
   }, [])
 
-  const handleApplyForm = React.useCallback(
-    async (acceleratorId: string, acceleratorName: string) => {
-      if (!user?.id) {
-        toast({
-          title: 'Error',
-          description: 'You must be logged in to submit applications',
-          variant: 'destructive',
-        })
-        return
-      }
-
-      if (isQuotaReached) {
-        toast({
-          title: 'Limit reached',
-          description: `You have used ${subscription?.monthly_submissions_used} of your ${subscription?.monthly_submissions_limit} monthly submissions.`,
-          variant: 'default',
-        })
-        return
-      }
-
-      if (submittingAccelerators.has(acceleratorId)) return
-
-      playClickSound()
-      setSubmittingAccelerators(
-        (prev) => new Set(Array.from(prev).concat(acceleratorId)),
-      )
-
-      try {
-        if (!queueStatus?.canSubmitMore) {
-          toast({
-            title: 'Queue full',
-            variant: 'destructive',
-            description:
-              'Cannot submit more applications. Queue is at capacity.',
-          })
-          return
-        }
-
-        toast({
-          title: 'Adding to queue',
-          variant: 'info',
-          duration: 4000,
-          description: `Adding application to ${acceleratorName} to processing queue...`,
-        })
-
-        const response = await fetch('/api/agent/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            startupId,
-            targetId: acceleratorId,
-            userId: user.id,
-            targetType: 'accelerator',
-          }),
-        })
-
-        const result = await response.json()
-        if (!response.ok)
-          throw new Error(result.error || 'Failed to submit application')
-
-        if (result.success) {
-          if (result.status === 'queued') {
-            toast({
-              title: 'Added to queue',
-              variant: 'success',
-              description: `Application to ${acceleratorName} added to queue at position ${result.queuePosition}`,
-            })
-          } else {
-            toast({
-              title: 'Processing started',
-              variant: 'info',
-              duration: 4000,
-              description: `Application to ${acceleratorName} is now being processed`,
-            })
-          }
-        } else {
-          toast({
-            title: 'Application failed',
-            description: result.error || 'Failed to submit application',
-            variant: 'destructive',
-          })
-        }
-      } catch {
-        // console.error('Application submission error:', error)
-        toast({
-          title: 'Error',
-          description: 'Failed to submit application',
-          variant: 'destructive',
-        })
-      } finally {
-        setSubmittingAccelerators((prev) => {
-          const newSet = new Set(prev)
-          newSet.delete(acceleratorId)
-          return newSet
-        })
-      }
-    },
-    [
-      user?.id,
-      startupId,
-      submittingAccelerators,
-      toast,
-      queueStatus,
-      isQuotaReached,
-      subscription,
-      playClickSound,
-    ],
-  )
-
   const handleSendEmail = React.useCallback(
     (email: string | undefined) => {
       if (!email) return
@@ -603,7 +812,8 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
               </div>
             </div>
           ) : (
-            <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[75vh]">
+            <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[75vh] relative">
+              {/* moved selection bubbles to the header actions area */}
               <div
                 className="flex-1 overflow-auto hide-scrollbar"
                 data-scroll-preserve="accelerators-table-scroll"
@@ -611,7 +821,23 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10 border-b">
                     <TableRow>
-                      <TableHead className="w-[280px] pl-4">
+                      <TableHead className="p-2 pl-0 pr-1 w-[32px]">
+                        <div className="flex items-center justify-center">
+                          {selectedCount > 0 && (
+                            <Checkbox
+                              checked={
+                                isAllSelected
+                                  ? true
+                                  : isIndeterminate
+                                    ? 'indeterminate'
+                                    : false
+                              }
+                              onCheckedChange={() => toggleSelectAll()}
+                            />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-[280px] pl-[11px]">
                         <button
                           onClick={() => handleSort('name')}
                           className="flex items-center hover:text-foreground transition-colors font-medium"
@@ -699,7 +925,75 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                           </button>
                         </TableHead>
                       )}
-                      <TableHead className="text-right w-[80px]"></TableHead>
+                      <TableHead className="text-right w-[80px]">
+                        <div className="flex justify-end items-center gap-1.5">
+                          {selectedCount > 0 && (
+                            <div className="flex items-center gap-1.5 mr-0.5">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="w-8 h-8 rounded-sm bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 flex items-center justify-center text-xs font-semibold">
+                                    {selectedCount}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                  className="p-0 bg-sidebar border-sidebar-border rounded-sm shadow-lg"
+                                  align="end"
+                                  side="bottom"
+                                  sideOffset={8}
+                                >
+                                  <div className="px-3 py-2">
+                                    <span className="text-xs text-sidebar-foreground">Selected (included in plan)</span>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                              {usageBilling.enabled && selectedUsageIds.size > 0 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="w-8 h-8 rounded-sm bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-xs font-semibold">
+                                      {selectedUsageIds.size}
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent
+                                    className="p-0 bg-sidebar border-sidebar-border rounded-sm shadow-lg"
+                                    align="end"
+                                    side="bottom"
+                                    sideOffset={8}
+                                  >
+                                    <div className="px-3 py-2">
+                                      <span className="text-xs text-sidebar-foreground">Selected (usage billing)</span>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </div>
+                          )}
+                          {selectedCount >= 2 ? (
+                            <ValidationGate
+                              requirements={
+                                VALIDATION_PRESETS.BASIC_APPLICATION
+                              }
+                              onValidationPass={handleBulkApply}
+                            >
+                              <Button
+                                size="sm"
+                                disabled={isBulkSubmitting}
+                                className="rounded-sm px-3 h-8 mr-[3px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800"
+                              >
+                                Apply
+                              </Button>
+                            </ValidationGate>
+                          ) : (
+                            <Button
+                              size="sm"
+                              aria-hidden
+                              tabIndex={-1}
+                              className="rounded-sm px-3 h-8 mr-[3px] invisible"
+                            >
+                              Apply
+                            </Button>
+                          )}
+                        </div>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -714,14 +1008,38 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                         onMouseEnter={() => onAcceleratorHover?.(accelerator)}
                         onMouseLeave={() => onAcceleratorLeave?.()}
                       >
-                        <TableCell className="font-medium p-2 pl-4">
+                        <TableCell
+                          className="p-2 pl-0 pr-1 w-[32px]"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleSelectOne(accelerator.id)
+                          }}
+                        >
+                          <div className="flex items-center justify-center cursor-pointer select-none">
+                            <Checkbox
+                              checked={selectedAcceleratorIds.has(
+                                accelerator.id,
+                              )}
+                              onClick={(e) => e.stopPropagation()}
+                              onCheckedChange={() =>
+                                toggleSelectOne(accelerator.id)
+                              }
+                              variant={
+                                selectedUsageIds.has(accelerator.id)
+                                  ? 'usage'
+                                  : 'default'
+                              }
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium p-2 pl-[11px]">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {accelerator.website &&
-                              subscription?.permission_level &&
-                              ['PRO', 'MAX', 'ENTERPRISE'].includes(
-                                subscription.permission_level,
-                              ) ? (
+                                subscription?.permission_level &&
+                                ['PRO', 'MAX', 'ENTERPRISE'].includes(
+                                  subscription.permission_level,
+                                ) ? (
                                 <a
                                   href={accelerator.website}
                                   target="_blank"
@@ -980,95 +1298,100 @@ const AcceleratorsTable = React.memo(function AcceleratorsTable({
                             className="flex justify-end mr-[6.5px]"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {accelerator.submission_type === 'form' && (
-                              <ValidationGate
-                                requirements={
-                                  VALIDATION_PRESETS.BASIC_APPLICATION
-                                }
-                                onValidationPass={() =>
-                                  handleApplyForm(
-                                    accelerator.id,
-                                    accelerator.name,
-                                  )
-                                }
-                              >
-                                <Button
-                                  size="sm"
-                                  disabled={
-                                    submittingAccelerators.has(
+                            {selectedCount < 2 &&
+                              accelerator.submission_type === 'form' && (
+                                <ValidationGate
+                                  requirements={
+                                    VALIDATION_PRESETS.BASIC_APPLICATION
+                                  }
+                                  onValidationPass={() =>
+                                    handleApplyForm(
                                       accelerator.id,
-                                    ) ||
-                                    (queueStatus
-                                      ? !queueStatus.canSubmitMore
-                                      : false)
-                                  }
-                                  onMouseEnter={() =>
-                                    setHoveredButton(`apply-${accelerator.id}`)
-                                  }
-                                  onMouseLeave={() => setHoveredButton(null)}
-                                  className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    isQuotaReached
-                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
-                                      : queueStatus &&
-                                          !queueStatus.canSubmitMore
-                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
-                                        : queueStatus &&
-                                            queueStatus.availableSlots === 0
-                                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
-                                  }`}
-                                  title={
-                                    isQuotaReached
-                                      ? `You have reached your monthly submission limit of ${subscription?.monthly_submissions_limit}.`
-                                      : queueStatus &&
-                                          !queueStatus.canSubmitMore
-                                        ? 'Queue is full. Cannot add more applications.'
-                                        : queueStatus &&
-                                            queueStatus.availableSlots === 0
-                                          ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
-                                          : queueStatus
-                                            ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
-                                            : 'Submit application'
+                                      accelerator.name,
+                                    )
                                   }
                                 >
-                                  <LottieIcon
-                                    animationData={
-                                      submittingAccelerators.has(accelerator.id)
-                                        ? animations.autorenew
-                                        : isQuotaReached
-                                          ? animations.cross
+                                  <Button
+                                    size="sm"
+                                    disabled={
+                                      submittingAccelerators.has(
+                                        accelerator.id,
+                                      ) ||
+                                      (queueStatus
+                                        ? !queueStatus.canSubmitMore
+                                        : false)
+                                    }
+                                    onMouseEnter={() =>
+                                      setHoveredButton(
+                                        `apply-${accelerator.id}`,
+                                      )
+                                    }
+                                    onMouseLeave={() => setHoveredButton(null)}
+                                    className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${isQuotaReached
+                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
+                                      : queueStatus &&
+                                        !queueStatus.canSubmitMore
+                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800'
+                                        : queueStatus &&
+                                          queueStatus.availableSlots === 0
+                                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800'
+                                      }`}
+                                    title={
+                                      isQuotaReached
+                                        ? `You have reached your monthly submission limit of ${subscription?.monthly_submissions_limit}.`
+                                        : queueStatus &&
+                                          !queueStatus.canSubmitMore
+                                          ? 'Queue is full. Cannot add more applications.'
                                           : queueStatus &&
-                                              !queueStatus.canSubmitMore
+                                            queueStatus.availableSlots === 0
+                                            ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
+                                            : queueStatus
+                                              ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
+                                              : 'Submit application'
+                                    }
+                                  >
+                                    <LottieIcon
+                                      animationData={
+                                        submittingAccelerators.has(
+                                          accelerator.id,
+                                        )
+                                          ? animations.autorenew
+                                          : isQuotaReached
                                             ? animations.cross
                                             : queueStatus &&
-                                                queueStatus.availableSlots === 0
-                                              ? animations.hourglass
-                                              : animations.takeoff
-                                    }
-                                    size={14}
-                                    className=""
-                                    isHovered={
-                                      hoveredButton ===
+                                              !queueStatus.canSubmitMore
+                                              ? animations.cross
+                                              : queueStatus &&
+                                                queueStatus.availableSlots ===
+                                                0
+                                                ? animations.hourglass
+                                                : animations.takeoff
+                                      }
+                                      size={14}
+                                      className=""
+                                      isHovered={
+                                        hoveredButton ===
                                         `apply-${accelerator.id}` &&
-                                      !submittingAccelerators.has(
-                                        accelerator.id,
-                                      ) &&
-                                      !isQuotaReached &&
-                                      queueStatus?.canSubmitMore !== false
-                                    }
-                                    customColor={
-                                      isQuotaReached
-                                        ? ([0.918, 0.435, 0.071] as [
+                                        !submittingAccelerators.has(
+                                          accelerator.id,
+                                        ) &&
+                                        !isQuotaReached &&
+                                        queueStatus?.canSubmitMore !== false
+                                      }
+                                      customColor={
+                                        isQuotaReached
+                                          ? ([0.918, 0.435, 0.071] as [
                                             number,
                                             number,
                                             number,
                                           ])
-                                        : undefined
-                                    }
-                                  />
-                                </Button>
-                              </ValidationGate>
-                            )}
+                                          : undefined
+                                      }
+                                    />
+                                  </Button>
+                                </ValidationGate>
+                              )}
                             {accelerator.submission_type === 'email' &&
                               accelerator.application_email && (
                                 <ValidationGate

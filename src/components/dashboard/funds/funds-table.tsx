@@ -127,13 +127,7 @@ const FundsTable = React.memo(function FundsTable({
       void audio.play().catch(() => { })
     } catch { }
   }, [])
-  const playNopeSound = React.useCallback(() => {
-    try {
-      const audio = new Audio('/sounds/nope.mp3')
-      audio.volume = 0.6
-      void audio.play().catch(() => { })
-    } catch { }
-  }, [])
+  // Removed 'nope' sound usage for limit behavior
   // Scroll management: reset to top on page change
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null)
   const previousPageRef = React.useRef<number | null>(null)
@@ -253,13 +247,14 @@ const FundsTable = React.memo(function FundsTable({
 
   const selectedCount = selectedTargetIds.size
   const isAllSelected =
-    filteredTargets.length > 0 && selectedCount === filteredTargets.length
+    filteredTargets.length > 0 &&
+    selectedCount === filteredTargets.length
   const isIndeterminate =
     selectedCount > 0 && selectedCount < filteredTargets.length
 
   const toggleSelectAll = React.useCallback(() => {
     if (filteredTargets.length === 0) return
-    // Build candidates that are selectable (forms without an existing submission)
+    // Eligible on current page: form-type only without existing submission
     const candidates = filteredTargets.filter(
       (t) => t.submission_type === 'form' && !t.submission_status,
     )
@@ -282,50 +277,32 @@ const FundsTable = React.memo(function FundsTable({
       ? Math.max(0, remainingUsageCapacity - nextUsage.size)
       : 0
 
-    let added = 0
     for (const t of candidates) {
-      if (nextPlan.has(t.id) || nextUsage.has(t.id)) {
-        continue
-      }
+      if (nextPlan.has(t.id) || nextUsage.has(t.id)) continue
       if (planCapacity > 0) {
         nextPlan.add(t.id)
         planCapacity -= 1
-        added += 1
         continue
       }
       if (usageCapacity > 0) {
         nextUsage.add(t.id)
         usageCapacity -= 1
-        added += 1
         continue
       }
-      // No more capacity
       break
     }
 
     setSelectedPlanIds(nextPlan)
     setSelectedUsageIds(nextUsage)
-    if (added < candidates.filter((t) => !currentlySelected.has(t.id)).length) {
-      playNopeSound()
-      toast({
-        title: 'Selection limit reached',
-        description: usageBilling.enabled
-          ? `You can select up to ${remainingPlanQuota} from plan and ${remainingUsageCapacity} from usage billing.`
-          : `You can select up to ${remainingPlanQuota} based on remaining plan quota.`,
-        variant: 'limit',
-        duration: 3000,
-      })
-    }
+    // Silently stop at capacity without toasting
   }, [
     filteredTargets,
+    selectedTargetIds,
+    selectedPlanIds,
+    selectedUsageIds,
     remainingPlanQuota,
     remainingUsageCapacity,
     usageBilling.enabled,
-    selectedTargetIds,
-    toast,
-    playNopeSound,
-    selectedPlanIds,
-    selectedUsageIds,
   ])
 
   const toggleSelectOne = React.useCallback(
@@ -369,15 +346,7 @@ const FundsTable = React.memo(function FundsTable({
         setSelectedUsageIds(new Set(selectedUsageIds).add(targetId))
         return
       }
-      playNopeSound()
-      toast({
-        title: 'Selection limit reached',
-        description: usageBilling.enabled
-          ? `No remaining capacity. Plan left: ${Math.max(0, remainingPlanQuota - selectedPlanIds.size)}, Usage left: ${Math.max(0, remainingUsageCapacity - selectedUsageIds.size)}`
-          : `No remaining plan quota for additional selections.`,
-        variant: 'limit',
-        duration: 2500,
-      })
+      // Silently stop at capacity without toasting
     },
     [
       filteredTargets,
@@ -387,7 +356,6 @@ const FundsTable = React.memo(function FundsTable({
       selectedPlanIds,
       selectedUsageIds,
       toast,
-      playNopeSound,
     ],
   )
 
@@ -964,18 +932,7 @@ const FundsTable = React.memo(function FundsTable({
             </div>
           ) : (
             <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[75vh] relative">
-              {selectedCount > 0 && (
-                <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 pointer-events-none">
-                  <div className="w-6 h-6 rounded-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 flex items-center justify-center text-xs font-semibold">
-                    {selectedCount}
-                  </div>
-                  {usageBilling.enabled && selectedUsageIds.size > 0 && (
-                    <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-[10px] font-semibold">
-                      +{selectedUsageIds.size}
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* moved selection bubbles to the header actions area */}
               <div
                 ref={scrollContainerRef}
                 className="flex-1 overflow-auto hide-scrollbar"
@@ -1059,7 +1016,47 @@ const FundsTable = React.memo(function FundsTable({
                         </TableHead>
                       )}
                       <TableHead className="text-right w-[80px]">
-                        <div className="flex justify-end">
+                        <div className="flex justify-end items-center gap-1.5">
+                          {selectedCount > 0 && (
+                            <div className="flex items-center gap-1.5 mr-0.5">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="w-8 h-8 rounded-sm bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 flex items-center justify-center text-xs font-semibold">
+                                    {selectedCount}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                  className="p-0 bg-sidebar border-sidebar-border rounded-sm shadow-lg"
+                                  align="end"
+                                  side="bottom"
+                                  sideOffset={8}
+                                >
+                                  <div className="px-3 py-2">
+                                    <span className="text-xs text-sidebar-foreground">Selected (included in plan)</span>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                              {usageBilling.enabled && selectedUsageIds.size > 0 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="w-8 h-8 rounded-sm bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-xs font-semibold">
+                                      {selectedUsageIds.size}
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent
+                                    className="p-0 bg-sidebar border-sidebar-border rounded-sm shadow-lg"
+                                    align="end"
+                                    side="bottom"
+                                    sideOffset={8}
+                                  >
+                                    <div className="px-3 py-2">
+                                      <span className="text-xs text-sidebar-foreground">Selected (usage billing)</span>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </div>
+                          )}
                           {selectedCount >= 2 ? (
                             <ValidationGate
                               requirements={
@@ -1103,11 +1100,15 @@ const FundsTable = React.memo(function FundsTable({
                       >
                         <TableCell
                           className="p-2 pl-0 pr-1 w-[32px]"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleSelectOne(target.id)
+                          }}
                         >
-                          <div className="flex items-center justify-center">
+                          <div className="flex items-center justify-center cursor-pointer select-none">
                             <Checkbox
                               checked={selectedTargetIds.has(target.id)}
+                              onClick={(e) => e.stopPropagation()}
                               onCheckedChange={() => toggleSelectOne(target.id)}
                               variant={
                                 selectedUsageIds.has(target.id)
@@ -1642,10 +1643,13 @@ const FundsTable = React.memo(function FundsTable({
                 paginationData.totalCount > paginationData.limit && (
                   <div className="flex items-center justify-between border-t border-border px-4 py-2 bg-background">
                     <div className="flex-1 text-sm text-foreground/80">
-                      <span className="hidden md:inline">
-                        Showing {offset + 1} to {offset + targets.length} of{' '}
-                        {paginationData.totalCount} funds
-                      </span>
+                      {/* TODO: Re-enable when we have large result sets. Keep this line for desktop view. */}
+                      {false && (
+                        <span className="hidden md:inline">
+                          {/* TODO: uncomment the next line to re-enable the full count when data set is large */}
+                          {/* Showing {offset + 1} to {offset + targets.length} of {paginationData?.totalCount ?? 0} funds */}
+                        </span>
+                      )}
                       <span className="md:hidden">
                         Page {paginationData.currentPage} of{' '}
                         {Math.ceil(

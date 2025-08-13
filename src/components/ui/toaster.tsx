@@ -118,9 +118,15 @@ function getToastIcon(variant: string) {
 function mapToValidVariant(variantStr: string): ToastVariant {
   // Check if the provided variant is already a valid ToastVariant
   if (
-    ['default', 'destructive', 'info', 'success', 'api', 'locked', 'limit'].includes(
-      variantStr,
-    )
+    [
+      'default',
+      'destructive',
+      'info',
+      'success',
+      'api',
+      'locked',
+      'limit',
+    ].includes(variantStr)
   ) {
     return variantStr as ToastVariant
   }

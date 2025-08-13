@@ -48,7 +48,7 @@ const toastVariants = cva(
         locked:
           'border-purple-300/20 bg-purple-50 text-purple-700 dark:bg-purple-900/80 dark:text-purple-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
         limit:
-          'border-orange-300/20 bg-pink-50 text-pink-700 dark:bg-pink-900/80 dark:text-pink-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
+          'border-pink-300/20 bg-pink-50 text-pink-700 dark:bg-pink-900/80 dark:text-pink-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
       },
     },
     defaultVariants: {
@@ -249,7 +249,9 @@ const ToastProgressBar = React.forwardRef<
                   ? 'bg-cyan-500'
                   : variant === 'locked'
                     ? 'bg-purple-500'
-                    : 'bg-amber-500',
+                    : variant === 'limit'
+                      ? 'bg-pink-500'
+                      : 'bg-amber-500',
       )}
       style={{ margin: 0, padding: 0 }}
     />
