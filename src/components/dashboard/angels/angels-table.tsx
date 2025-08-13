@@ -572,7 +572,7 @@ const AngelsTable = React.memo(function AngelsTable({
                               </span>
                             </div>
                             {angel.bio && (
-                              <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+                              <p className="text-[11px] text-foreground/80 leading-relaxed line-clamp-2">
                                 {angel.bio}
                               </p>
                             )}
@@ -833,7 +833,7 @@ const AngelsTable = React.memo(function AngelsTable({
               {paginationData &&
                 paginationData.totalCount > paginationData.limit && (
                   <div className="flex items-center justify-between border-t border-border px-4 py-2 bg-background">
-                    <div className="flex-1 text-sm text-muted-foreground">
+                    <div className="flex-1 text-sm text-foreground/80">
                       <span className="hidden md:inline">
                         Showing {offset + 1} to {offset + angels.length} of{' '}
                         {paginationData.totalCount} angels

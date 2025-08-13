@@ -64,11 +64,11 @@ export function ForgotPasswordForm({
             <div className="flex flex-col items-center text-center gap-6">
               <div className="flex flex-col gap-2">
                 <h1 className="text-2xl font-bold">Check your email</h1>
-                <p className="text-balance text-muted-foreground">
+                <p className="text-balance text-foreground/80">
                   We&apos;ve sent a password reset link to{' '}
                   <strong>{email}</strong>.
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-foreground/80">
                   Click the link in the email to reset your password.
                 </p>
               </div>
@@ -76,7 +76,7 @@ export function ForgotPasswordForm({
               <div className="text-center text-sm">
                 <Link
                   href="/login"
-                  className="underline underline-offset-4 text-muted-foreground hover:text-foreground"
+                  className="underline underline-offset-4 text-foreground/80 hover:text-foreground"
                   onClick={playClickSound}
                 >
                   Back to login
@@ -85,7 +85,7 @@ export function ForgotPasswordForm({
             </div>
           </CardContent>
         </Card>
-        <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
+        <div className="text-balance text-center text-xs text-foreground/80 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
           By using this service, you agree to our <a href="/terms">Terms</a> and{' '}
           <a href="/privacy">Privacy Policy</a>.
         </div>
@@ -107,7 +107,7 @@ export function ForgotPasswordForm({
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-start text-start">
                 <h1 className="text-2xl font-bold">Reset your password</h1>
-                <p className="text-balance text-muted-foreground">
+                <p className="text-balance text-foreground/80">
                   We&apos;ll send you a link to reset your password.
                 </p>
               </div>

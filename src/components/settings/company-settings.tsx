@@ -64,6 +64,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Badge } from '@/components/ui/badge'
+import { useRouter } from 'next/navigation'
 
 const COUNTRIES = RPNInput.getCountries()
   .map(
@@ -588,6 +589,7 @@ export default function CompanySettings() {
   const { user, supabase, currentStartupId, startups, refreshStartups } =
     useUser()
   const { toast } = useToast()
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
   const [logoUploading, setLogoUploading] = useState(false)
@@ -1156,9 +1158,8 @@ export default function CompanySettings() {
         variant: 'success',
         description: `The startup "${formData.name}" has been deleted.`,
       })
-
-      // Reload the page to refresh the user's startups and context
-      window.location.reload()
+      // Redirect to dashboard root to avoid 404 on deleted startup route
+      router.replace('/dashboard')
     } catch (error) {
       console.error('Error deleting startup:', error)
       toast({
@@ -1212,6 +1213,11 @@ export default function CompanySettings() {
 
       // Sign out the user
       await supabase.auth.signOut({ scope: 'global' })
+
+      // Hard redirect to site home to avoid falling back to login page
+      if (typeof window !== 'undefined') {
+        window.location.replace(window.location.origin)
+      }
     } catch (error) {
       console.error('Error deleting account:', error)
       toast({

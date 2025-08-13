@@ -103,7 +103,7 @@ export const Pricing = () => {
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter">
             Simple, transparent pricing
           </h2>
-          <p className="text-center mt-5 opacity-75">
+          <p className="text-center mt-5 opacity-75 text-foreground/80 leading-relaxed text-md max-w-3xl mx-auto">
             Choose the plan that fits your needs.
           </p>
 
@@ -123,7 +123,7 @@ export const Pricing = () => {
 
                 <div className="text-left">
                   <h3 className="text-xl font-semibold">{tier.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-foreground/80 text-sm mt-2">
                     {tier.description}
                   </p>
                 </div>
@@ -133,7 +133,7 @@ export const Pricing = () => {
                     <span className="text-lg font-semibold">$</span>
                   )}
                   <span className="text-4xl font-semibold">{tier.price}</span>
-                  <span className="text-muted-foreground ml-1">
+                  <span className="text-foreground/80 ml-1">
                     {tier.priceSuffix}
                   </span>
                 </div>
@@ -216,11 +216,11 @@ export const Pricing = () => {
                   <h3 className="text-2xl font-semibold">{tier.name}</h3>
                   <div className="flex items-baseline mt-4">
                     <span className="text-4xl font-semibold">{tier.price}</span>
-                    <span className="text-muted-foreground ml-1">
+                    <span className="text-foreground/80 ml-1">
                       {tier.priceSuffix}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-foreground/80 text-sm mt-2">
                     {tier.description}
                   </p>
                 </div>
@@ -251,7 +251,7 @@ export const Pricing = () => {
             ))}
           </div>
 
-          <p className="text-sm text-muted-foreground mt-4">
+          <p className="text-foreground/80 text-sm mt-4">
             All plans include SSL encryption, automated Captcha solving, stealth
             mode, and can be cancelled anytime.
           </p>

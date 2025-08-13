@@ -438,7 +438,7 @@ export default React.memo(function FundsActions({
             </SheetTitle>
             <button
               onMouseDown={() => onOpenChange(false)}
-              className="text-muted-foreground hover:text-foreground sm:hidden"
+              className="text-foreground/80 hover:text-foreground sm:hidden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -467,7 +467,7 @@ export default React.memo(function FundsActions({
               {/* Focus Areas */}
               {target.stage_focus && target.stage_focus.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Focus</span>
+                  <span className="text-foreground/80 pt-1">Focus</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {target.stage_focus.map((stage) => (
                       <Badge
@@ -483,7 +483,7 @@ export default React.memo(function FundsActions({
 
               {target.industry_focus && target.industry_focus.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Industry</span>
+                  <span className="text-foreground/80 pt-1">Industry</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {target.industry_focus.map((industry) => (
                       <Badge
@@ -499,7 +499,7 @@ export default React.memo(function FundsActions({
 
               {target.region_focus && target.region_focus.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Region</span>
+                  <span className="text-foreground/80 pt-1">Region</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {target.region_focus.map((region) => (
                       <Badge
@@ -516,7 +516,7 @@ export default React.memo(function FundsActions({
               {target.required_documents &&
                 target.required_documents.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">
+                    <span className="text-foreground/80 pt-1">
                       Requirements
                     </span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
@@ -534,7 +534,7 @@ export default React.memo(function FundsActions({
 
               {target.tags && target.tags.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Tags</span>
+                  <span className="text-foreground/80 pt-1">Tags</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {target.tags.map((tag) => (
                       <Badge
@@ -572,7 +572,7 @@ export default React.memo(function FundsActions({
               {timeline.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Timeline</span>
+                    <span className="text-foreground/80">Timeline</span>
                   </div>
                   {timeline.map((event, index) => (
                     <div
@@ -597,7 +597,7 @@ export default React.memo(function FundsActions({
                           {event.label}
                         </span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[10px] text-foreground/80">
                         {formatDate(event.date)}
                       </span>
                     </div>

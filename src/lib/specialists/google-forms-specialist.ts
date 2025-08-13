@@ -21,6 +21,9 @@ export class GoogleFormsSpecialist extends BaseFormSpecialist {
       ...super.getBrowserConfig(),
       max_agent_steps: 45, // Google Forms are typically more straightforward in Browser Use
       highlight_elements: false, // Google Forms have clear structure, no highlighting needed in Browser Use
+      // Favor non-reasoning per mapping
+      use_thinking: true,
+      flash_mode: false,
     }
   }
 
@@ -29,6 +32,8 @@ export class GoogleFormsSpecialist extends BaseFormSpecialist {
     targetName: string,
     smartData: SmartDataMapping,
   ): string {
+    const deckUrl = smartData.primary_data.asset_cloud_drive || ''
+
     const instruction = `You are a Google Forms specialist agent. Navigate to ${targetUrl} and complete the Google Form for ${targetName}.
 
 ${this.buildCoreDataSection(smartData)}
@@ -62,11 +67,18 @@ ${this.buildCoreDataSection(smartData)}
 - Email fields must be valid email format
 - Number fields require numeric input only
 
-**5. Submission Process**
+**5. File Upload Handling**
+- If a File upload question exists, do not use Google Drive or local files.
+- Prefer a link/URL-based response if provided by the form (for example, a short answer field labeled "Link" or "Pitch Deck URL"). Paste: ${deckUrl || 'deck will be provided by mail'}
+- If only true file uploads are allowed, skip the file attachment and proceed.
+
+**6. Submission Process**
 - Scroll to bottom to find "Submit" button
 - Review form for any missed required fields
 - Click Submit and wait for confirmation message
 - Take screenshot of confirmation page
+
+${this.getGlobalGuidelines(smartData)}
 
 **SUCCESS CRITERIA:**
 - All required fields completed accurately

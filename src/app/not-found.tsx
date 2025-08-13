@@ -50,7 +50,7 @@ export default function NotFound() {
 
         {/* Help text */}
         <div className="mt-8 sm:mt-12 p-4 sm:p-6 mb-6 rounded-sm bg-muted/50 border">
-          <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
+          <p className="text-sm text-foreground/80 max-w-lg mx-auto leading-relaxed">
             Looks like this page got lost in the fundraising process. If you
             think this is an error, please{' '}
             <a

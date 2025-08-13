@@ -75,7 +75,7 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">
               Frequently asked questions
             </h2>
-            <p className="text-center mt-5 opacity-75">
+            <p className="text-center mt-5 opacity-75 text-foreground/80 leading-relaxed text-md max-w-3xl mx-auto">
               Everything you need to know about automating your fundraising with
               Suparaise.
             </p>
@@ -106,7 +106,7 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
                 <p className="text-sm font-medium text-foreground mb-1">
                   {contactInfo.title}
                 </p>
-                <p className="text-xs text-muted-foreground mb-4">
+                <p className="text-xs text-foreground/80 mb-4">
                   {contactInfo.description}
                 </p>
                 <Button size="sm" onClick={contactInfo.onContact}>
@@ -173,7 +173,7 @@ const FaqItem = React.forwardRef<
           className={cn(
             'p-0.5 rounded-sm flex-shrink-0 mt-1',
             'transition-colors duration-200',
-            isOpen ? 'text-primary' : 'text-muted-foreground',
+            isOpen ? 'text-primary' : 'text-foreground/80',
           )}
         >
           <ChevronDown className="h-4 w-4" />
@@ -199,7 +199,7 @@ const FaqItem = React.forwardRef<
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                className="text-sm text-muted-foreground leading-relaxed text-left"
+                className="text-foreground/80 text-sm leading-relaxed text-left"
               >
                 {answer}
               </motion.p>

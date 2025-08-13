@@ -23,7 +23,7 @@ export default function PrivacyPage() {
               <h1 className="text-5xl font-bold tracking-tight mb-6">
                 Privacy policy
               </h1>
-              <p className="text-lg text-muted-foreground max-w-5xl">
+              <p className="text-foreground/80 leading-relaxed text-md max-w-5xl">
                 Your privacy is important to us. This policy explains how we
                 collect, use, and protect your information.
               </p>
@@ -39,13 +39,13 @@ export default function PrivacyPage() {
                       Information we collect
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We collect information you provide directly to us, such as
                     when you create an account, submit your startup information,
                     or contact us for support. This includes personal details,
                     business information, and communication preferences.
                   </p>
-                  <ul className="list-disc pl-6 mt-4 space-y-2 text-muted-foreground leading-relaxed text-lg">
+                  <ul className="list-disc pl-6 mt-4 space-y-2 text-foreground/80 leading-relaxed text-md">
                     <li>
                       Account and profile: name, email, password (hashed), and
                       basic startup profile details you choose to provide.
@@ -80,7 +80,7 @@ export default function PrivacyPage() {
                       Payments and billing information
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We use a third-party payment processor to handle payments.
                     Payment method details are processed and stored by the
                     processor, not by Suparaise. We receive limited information
@@ -100,14 +100,14 @@ export default function PrivacyPage() {
                       How we use your information
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We use the information we collect to provide, maintain, and
                     improve our services, process transactions, and communicate
                     with you about your account and our services. This enables
                     us to deliver personalized and effective fundraising
                     automation.
                   </p>
-                  <ul className="list-disc pl-6 mt-4 space-y-2 text-muted-foreground leading-relaxed text-lg">
+                  <ul className="list-disc pl-6 mt-4 space-y-2 text-foreground/80 leading-relaxed text-md">
                     <li>
                       Operate core features, including agentic form filling.
                     </li>
@@ -137,7 +137,7 @@ export default function PrivacyPage() {
                       AI and automated processing
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     Some features rely on automated systems and AI models to
                     perform tasks you instruct (for example, drafting
                     application responses and filling forms). These systems
@@ -155,7 +155,7 @@ export default function PrivacyPage() {
                       Information sharing
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We do not sell your personal information. We share
                     information in limited cases, including with: (a) service
                     providers acting on our behalf (for hosting, database,
@@ -174,7 +174,7 @@ export default function PrivacyPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Data security</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We implement measures designed to protect your information,
                     including encryption in transit, access controls, least-
                     privilege practices, logging, and regular backups. No method
@@ -190,7 +190,7 @@ export default function PrivacyPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Data retention</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We retain information for as long as necessary to provide
                     the Service, comply with legal obligations, resolve
                     disputes, and enforce agreements. When no longer needed, we
@@ -206,7 +206,7 @@ export default function PrivacyPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Your rights</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     Depending on your location, you may have rights over your
                     personal information, including to access, correct, delete,
                     restrict or object to processing, and request portability.
@@ -225,13 +225,13 @@ export default function PrivacyPage() {
                       Cookies and tracking
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We use cookies and similar technologies to operate and
                     improve the Service. You can control cookies through your
                     browser settings. Disabling certain cookies may affect core
                     functionality.
                   </p>
-                  <ul className="list-disc pl-6 mt-4 space-y-2 text-muted-foreground leading-relaxed text-lg">
+                  <ul className="list-disc pl-6 mt-4 space-y-2 text-foreground/80 leading-relaxed text-md">
                     <li>Essential: required for core features and security.</li>
                     <li>
                       Functional: remember preferences and improve experience.
@@ -251,7 +251,7 @@ export default function PrivacyPage() {
                       Data location and transfers
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We may process and store information in the country where
                     you live or in other countries where we or our service
                     providers operate. Where required, we use appropriate
@@ -269,7 +269,7 @@ export default function PrivacyPage() {
                       Changes to this policy
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We may update our Privacy Policy from time to time. We will
                     notify you of any changes by posting the new Privacy Policy
                     on this page and updating the &ldquo;Last updated&rdquo;
@@ -284,7 +284,7 @@ export default function PrivacyPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Contact</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     If you have any questions about this privacy policy, please
                     contact us through our website or reach out to our support
                     team for assistance from the dashboard or via email at{' '}
@@ -302,7 +302,7 @@ export default function PrivacyPage() {
 
             {/* Footer info */}
             <div className="mt-20 pt-8 border-t border-border text-end">
-              <p className="text-sm text-muted-foreground">June 15, 2024</p>
+              <p className="text-foreground/80 text-sm">June 15, 2024</p>
             </div>
           </div>
         </div>

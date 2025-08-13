@@ -311,7 +311,7 @@ export default React.memo(function ApplicationsActions({
             </SheetTitle>
             <button
               onMouseDown={() => onOpenChange(false)}
-              className="text-muted-foreground hover:text-foreground sm:hidden"
+              className="text-foreground/80 hover:text-foreground sm:hidden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -323,7 +323,7 @@ export default React.memo(function ApplicationsActions({
                 className="flex items-center justify-between"
                 style={{ marginTop: '-15px' }}
               >
-                <span className="text-muted-foreground">Type</span>
+                <span className="text-foreground/80">Type</span>
                 <Badge
                   className={`rounded-sm text-[10px] font-normal ${getTypeColor(submission.submitted_to_type)}`}
                 >
@@ -332,7 +332,7 @@ export default React.memo(function ApplicationsActions({
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Status</span>
+                <span className="text-foreground/80">Status</span>
                 <Badge
                   className={`rounded-sm text-[10px] font-normal ${getStatusColor(submission.status)}`}
                 >
@@ -342,7 +342,7 @@ export default React.memo(function ApplicationsActions({
 
               {submission.submission_type && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Method</span>
+                  <span className="text-foreground/80">Method</span>
                   <Badge
                     className={`rounded-sm text-[10px] font-normal ${getSubmissionTypeColor(submission.submission_type)}`}
                   >
@@ -353,7 +353,7 @@ export default React.memo(function ApplicationsActions({
 
               {submission.form_complexity && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Complexity</span>
+                  <span className="text-foreground/80">Complexity</span>
                   <Badge
                     className={`rounded-sm text-[10px] font-normal ${getComplexityColor(submission.form_complexity)}`}
                   >
@@ -364,7 +364,7 @@ export default React.memo(function ApplicationsActions({
 
               {submission.queue_position && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Queue Position</span>
+                  <span className="text-foreground/80">Queue Position</span>
                   <span className="text-sm font-medium">
                     #{submission.queue_position}
                   </span>
@@ -373,7 +373,7 @@ export default React.memo(function ApplicationsActions({
 
               {submission.agent_notes && (
                 <div className="space-y-2">
-                  <span className="text-muted-foreground">Agent Notes</span>
+                  <span className="text-foreground/80">Agent Notes</span>
                   <p className="text-xs text-black dark:text-white pt-2 p-2 bg-muted/30 rounded-sm">
                     {submission.agent_notes}
                   </p>
@@ -383,9 +383,7 @@ export default React.memo(function ApplicationsActions({
               {/* Session Recording Info */}
               {submission.session_replay_url && (
                 <div className="space-y-2">
-                  <span className="text-muted-foreground">
-                    Session Recording
-                  </span>
+                  <span className="text-foreground/80">Session Recording</span>
                   <div className="space-y-2">
                     <Button
                       onClick={() =>
@@ -402,7 +400,7 @@ export default React.memo(function ApplicationsActions({
                     </Button>
                     {submission.screenshots_taken &&
                       submission.screenshots_taken > 0 && (
-                        <p className="text-[10px] text-muted-foreground text-center">
+                        <p className="text-[10px] text-foreground/80 text-center">
                           {submission.screenshots_taken} screenshots captured
                         </p>
                       )}
@@ -415,7 +413,7 @@ export default React.memo(function ApplicationsActions({
               {/* Focus Areas */}
               {submission.stage_focus && submission.stage_focus.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Focus</span>
+                  <span className="text-foreground/80 pt-1">Focus</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {submission.stage_focus.map((stage) => (
                       <Badge
@@ -432,7 +430,7 @@ export default React.memo(function ApplicationsActions({
               {submission.industry_focus &&
                 submission.industry_focus.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">Industry</span>
+                    <span className="text-foreground/80 pt-1">Industry</span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                       {submission.industry_focus.map((industry) => (
                         <Badge
@@ -449,7 +447,7 @@ export default React.memo(function ApplicationsActions({
               {submission.region_focus &&
                 submission.region_focus.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">Region</span>
+                    <span className="text-foreground/80 pt-1">Region</span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                       {submission.region_focus.map((region) => (
                         <Badge
@@ -466,7 +464,7 @@ export default React.memo(function ApplicationsActions({
               {submission.required_documents &&
                 submission.required_documents.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">
+                    <span className="text-foreground/80 pt-1">
                       Requirements
                     </span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
@@ -488,7 +486,7 @@ export default React.memo(function ApplicationsActions({
               {timeline.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Timeline</span>
+                    <span className="text-foreground/80">Timeline</span>
                   </div>
                   {timeline.map((event, index) => (
                     <div
@@ -513,7 +511,7 @@ export default React.memo(function ApplicationsActions({
                           {event.label}
                         </span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[10px] text-foreground/80">
                         {formatDate(event.date)}
                       </span>
                     </div>

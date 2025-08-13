@@ -19,7 +19,7 @@ export const UseCases = ({ scenarios }: { scenarios: Scenario[] }) => {
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
             Use cases
           </h1>
-          <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+          <p className="text-foreground/80 mt-4 max-w-2xl mx-auto">
             Practical scenarios that show how Suparaise helps founders get more
             investor meetings with less manual work.
           </p>
@@ -66,9 +66,7 @@ export const UseCases = ({ scenarios }: { scenarios: Scenario[] }) => {
             <section key={s.id} id={s.id} className="scroll-mt-24">
               <div className="rounded-sm border p-6 bg-card">
                 <h2 className="text-2xl font-semibold mb-1">{s.title}</h2>
-                <p className="text-sm text-muted-foreground mb-6">
-                  {s.subtitle}
-                </p>
+                <p className="text-sm text-foreground/80 mb-6">{s.subtitle}</p>
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>

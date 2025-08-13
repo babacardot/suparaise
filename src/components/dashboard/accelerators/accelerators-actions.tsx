@@ -443,7 +443,7 @@ export default React.memo(function AcceleratorsActions({
             </SheetTitle>
             <button
               onMouseDown={() => onOpenChange(false)}
-              className="text-muted-foreground hover:text-foreground sm:hidden"
+              className="text-foreground/80 hover:text-foreground sm:hidden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -461,7 +461,7 @@ export default React.memo(function AcceleratorsActions({
                 className="flex items-center justify-between"
                 style={{ marginTop: '-15px' }}
               >
-                <span className="text-muted-foreground">Type</span>
+                <span className="text-foreground/80">Type</span>
                 <Badge
                   className={`rounded-sm text-[10px] font-normal ${getSubmissionTypeColor(accelerator.submission_type)}`}
                 >
@@ -486,7 +486,7 @@ export default React.memo(function AcceleratorsActions({
               {accelerator.industry_focus &&
                 accelerator.industry_focus.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">Industry</span>
+                    <span className="text-foreground/80 pt-1">Industry</span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                       {accelerator.industry_focus.map((industry) => (
                         <Badge
@@ -503,7 +503,7 @@ export default React.memo(function AcceleratorsActions({
               {accelerator.region_focus &&
                 accelerator.region_focus.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">Region</span>
+                    <span className="text-foreground/80 pt-1">Region</span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                       {accelerator.region_focus.map((region) => (
                         <Badge
@@ -520,7 +520,7 @@ export default React.memo(function AcceleratorsActions({
               {accelerator.stage_focus &&
                 accelerator.stage_focus.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">Focus</span>
+                    <span className="text-foreground/80 pt-1">Focus</span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                       {accelerator.stage_focus.map((stage) => (
                         <Badge
@@ -536,7 +536,7 @@ export default React.memo(function AcceleratorsActions({
 
               {accelerator.funding_provided && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Funding</span>
+                  <span className="text-foreground/80 pt-1">Funding</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     <Badge
                       className={`rounded-sm text-[10px] ${getFundingColor()}`}
@@ -549,7 +549,7 @@ export default React.memo(function AcceleratorsActions({
 
               {accelerator.equity_taken && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Equity</span>
+                  <span className="text-foreground/80 pt-1">Equity</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     <Badge
                       className={`rounded-sm text-[10px] ${getEquityColor()}`}
@@ -562,7 +562,7 @@ export default React.memo(function AcceleratorsActions({
 
               {accelerator.program_type && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Category</span>
+                  <span className="text-foreground/80">Category</span>
                   <Badge
                     className={`rounded-sm text-[10px] font-normal ${getProgramTypeColor(accelerator.program_type)}`}
                   >
@@ -576,7 +576,7 @@ export default React.memo(function AcceleratorsActions({
               {accelerator.required_documents &&
                 accelerator.required_documents.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">
+                    <span className="text-foreground/80 pt-1">
                       Requirements
                     </span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
@@ -594,7 +594,7 @@ export default React.memo(function AcceleratorsActions({
 
               {accelerator.tags && accelerator.tags.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Tags</span>
+                  <span className="text-foreground/80 pt-1">Tags</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {accelerator.tags.map((tag) => (
                       <Badge
@@ -632,7 +632,7 @@ export default React.memo(function AcceleratorsActions({
               {timeline.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Timeline</span>
+                    <span className="text-foreground/80">Timeline</span>
                   </div>
                   {timeline.map((event, index) => (
                     <div
@@ -657,7 +657,7 @@ export default React.memo(function AcceleratorsActions({
                           {event.label}
                         </span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[10px] text-foreground/80">
                         {formatDate(event.date)}
                       </span>
                     </div>

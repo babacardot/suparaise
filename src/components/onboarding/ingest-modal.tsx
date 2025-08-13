@@ -275,7 +275,7 @@ export const SmartIngestModal: React.FC<SmartIngestModalProps> = ({
                 disabled={isAnalyzing}
                 className="min-h-[300px]"
               />
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center justify-between text-xs text-foreground/80">
                 <span>
                   Paste content from applications, pitch decks, business plans,
                   etc.

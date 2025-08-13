@@ -23,7 +23,7 @@ export default function TermsPage() {
               <h1 className="text-5xl font-bold tracking-tight mb-6">
                 Terms and conditions
               </h1>
-              <p className="text-lg text-muted-foreground max-w-5xl">
+              <p className="text-foreground/80 leading-relaxed text-md max-w-5xl">
                 Please read these terms carefully before using our service. By
                 using Suparaise, you agree to these terms.
               </p>
@@ -39,7 +39,7 @@ export default function TermsPage() {
                       Acceptance of terms
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     By accessing and using Suparaise (&ldquo;Service&rdquo;),
                     you accept and agree to be bound by the terms and provision
                     of this agreement. If you do not agree to abide by the
@@ -56,7 +56,7 @@ export default function TermsPage() {
                       Description of service
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     Suparaise is an AI agent powered platform that automates
                     venture capital fundraising processes, including form
                     submissions and outreach. Our service helps founders
@@ -75,7 +75,7 @@ export default function TermsPage() {
                       Billing and subscriptions
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We offer multiple plans, including free and paid tiers, and
                     may provide usage-based billing for additional runs. Prices
                     and plan limits are described on our pricing page and may
@@ -94,7 +94,7 @@ export default function TermsPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Trials</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     From time to time, we may offer a free or discounted trial
                     on certain plans. Unless otherwise stated, at the end of the
                     trial your subscription will continue automatically at the
@@ -110,7 +110,7 @@ export default function TermsPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Cancellations</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     You may cancel your subscription at any time in your
                     dashboard. When you cancel, you will retain access to paid
                     features until the end of the current billing period. Fees
@@ -128,7 +128,7 @@ export default function TermsPage() {
                       Refunds and credits
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     Our goal is to provide a reliable automation experience.
                     Because the Service is delivered immediately and capacity is
                     reserved on your behalf, all fees are generally
@@ -151,7 +151,7 @@ export default function TermsPage() {
                       User responsibilities
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     You are responsible for maintaining the confidentiality of
                     your account and password and for restricting access to your
                     computer. You agree to accept responsibility for all
@@ -166,7 +166,7 @@ export default function TermsPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Prohibited uses</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     You may not use our service for any illegal or unauthorized
                     purpose nor may you, in the use of the Service, violate any
                     laws in your jurisdiction. You must not transmit any harmful
@@ -183,7 +183,7 @@ export default function TermsPage() {
                       Limitation of liability
                     </h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     In no event shall Suparaise be liable for any indirect,
                     incidental, special, consequential, or punitive damages,
                     including without limitation, loss of profits, data, use,
@@ -198,7 +198,7 @@ export default function TermsPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Changes to terms</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     We reserve the right to modify these terms at any time. We
                     will always post the most current version on our website. By
                     continuing to use the Service after changes become
@@ -213,7 +213,7 @@ export default function TermsPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-semibold">Contact</h2>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-foreground/80 leading-relaxed text-md">
                     If you have any questions about these terms and conditions,
                     please contact us through our website or reach out to our
                     support team from the dashboard or via email at{' '}
@@ -231,7 +231,7 @@ export default function TermsPage() {
 
             {/* Footer info */}
             <div className="mt-20 pt-8 border-t border-border text-end">
-              <p className="text-sm text-muted-foreground">June 15, 2024</p>
+              <p className="text-foreground/80 text-sm">June 15, 2024</p>
             </div>
           </div>
         </div>

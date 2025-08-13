@@ -175,7 +175,7 @@ export const Header = () => {
 
                       {/* Quote */}
                       <div className="mt-16">
-                        <p className="text-sm text-muted-foreground max-w-md leading-relaxed italic font-medium">
+                        <p className="text-sm text-foreground/80 max-w-md leading-relaxed italic font-medium">
                           Our AI agents automatically fill out application forms
                           and send personalized outreach to hundreds of relevant
                           funds, while you focus on what matters: building and

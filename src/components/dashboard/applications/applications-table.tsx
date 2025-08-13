@@ -255,7 +255,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                               )}
                             </div>
                             {submission.queue_position && (
-                              <p className="text-[11px] text-muted-foreground">
+                              <p className="text-[11px] text-foreground/80">
                                 Queue position: {submission.queue_position}
                               </p>
                             )}
@@ -290,7 +290,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                               {submission.started_at &&
                                 submission.started_at !==
                                   submission.submission_date && (
-                                  <div className="text-[11px] text-muted-foreground">
+                                  <div className="text-[11px] text-foreground/80">
                                     Started: {formatDate(submission.started_at)}
                                   </div>
                                 )}
@@ -302,7 +302,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
                             {submission.agent_notes && (
                               <Tooltip>
                                 <TooltipTrigger>
-                                  <div className="text-xs text-muted-foreground truncate max-w-[180px]">
+                                  <div className="text-xs text-foreground/80 truncate max-w-[180px]">
                                     {submission.agent_notes}
                                   </div>
                                 </TooltipTrigger>
@@ -324,7 +324,7 @@ const ApplicationsTable = React.memo(function ApplicationsTable({
               {paginationData &&
                 paginationData.totalCount > paginationData.limit && (
                   <div className="flex items-center justify-between border-t border-border px-4 py-2 bg-background">
-                    <div className="flex-1 text-sm text-muted-foreground">
+                    <div className="flex-1 text-sm text-foreground/80">
                       <span className="hidden md:inline">
                         Showing {offset + 1} to {offset + submissions.length} of{' '}
                         {paginationData.totalCount} applications

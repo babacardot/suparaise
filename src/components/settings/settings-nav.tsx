@@ -119,7 +119,7 @@ function NavItem({
                 'flex-shrink-0',
                 isActive
                   ? 'text-primary'
-                  : 'text-muted-foreground group-hover:text-primary',
+                  : 'text-foreground/80 group-hover:text-primary',
               )}
             >
               {animationData && (
@@ -168,7 +168,7 @@ function NavItem({
               'flex-shrink-0',
               isActive
                 ? 'text-primary'
-                : 'text-muted-foreground group-hover:text-primary',
+                : 'text-foreground/80 group-hover:text-primary',
             )}
           >
             {animationData && (

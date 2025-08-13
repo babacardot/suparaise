@@ -112,7 +112,7 @@ export function ResetPasswordForm({
             </div>
           </CardContent>
         </Card>
-        <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
+        <div className="text-balance text-center text-xs text-foreground/80 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
           By using this service, you agree to our <a href="/terms">Terms</a> and{' '}
           <a href="/privacy">Privacy Policy</a>.
         </div>
@@ -134,14 +134,14 @@ export function ResetPasswordForm({
             <div className="flex flex-col items-start text-start gap-6">
               <div className="flex flex-col gap-2">
                 <h1 className="text-2xl font-bold">Invalid reset link</h1>
-                <p className="text-balance text-muted-foreground">
+                <p className="text-balance text-foreground/80">
                   The password reset link is invalid or has expired.
                 </p>
               </div>
 
               <Link
                 href="/forgot-password"
-                className="underline underline-offset-4 text-muted-foreground hover:text-foreground text-sm"
+                className="underline underline-offset-4 text-foreground/80 hover:text-foreground text-sm"
                 onClick={playClickSound}
               >
                 Request a new reset link
@@ -167,7 +167,7 @@ export function ResetPasswordForm({
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-start text-start">
                 <h1 className="text-2xl font-bold">Set new password</h1>
-                <p className="text-balance text-muted-foreground">
+                <p className="text-balance text-foreground/80">
                   Enter your new password below.
                 </p>
               </div>
@@ -218,7 +218,7 @@ export function ResetPasswordForm({
           </form>
         </CardContent>
       </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
+      <div className="text-balance text-center text-xs text-foreground/80 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto">
         By using this service, you agree to our <a href="/terms">Terms</a> and{' '}
         <a href="/privacy">Privacy Policy</a>.
       </div>

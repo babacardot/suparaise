@@ -54,7 +54,7 @@ export function VerifyForm({
           <div className="flex flex-col items-start text-start gap-6">
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-bold">Check your email</h1>
-              <p className="text-balance text-muted-foreground">
+              <p className="text-balance text-foreground/80">
                 {email ? (
                   <>
                     We&apos;ve sent a verification link to{' '}
@@ -98,7 +98,7 @@ export function VerifyForm({
             <div className="text-center text-sm">
               <Link
                 href="/login"
-                className="underline underline-offset-4 text-muted-foreground hover:text-foreground"
+                className="underline underline-offset-4 text-foreground/80 hover:text-foreground"
               >
                 Back to login
               </Link>

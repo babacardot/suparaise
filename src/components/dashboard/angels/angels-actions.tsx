@@ -252,7 +252,7 @@ export default React.memo(function AngelsActions({
             </SheetTitle>
             <button
               onMouseDown={() => onOpenChange(false)}
-              className="text-muted-foreground hover:text-foreground sm:hidden"
+              className="text-foreground/80 hover:text-foreground sm:hidden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -264,7 +264,7 @@ export default React.memo(function AngelsActions({
                 className="flex items-center justify-between"
                 style={{ marginTop: '-15px' }}
               >
-                <span className="text-muted-foreground">Type</span>
+                <span className="text-foreground/80">Type</span>
                 <Badge
                   className={`rounded-sm text-[10px] font-normal ${getSubmissionTypeColor(angel.submission_type)}`}
                 >
@@ -274,7 +274,7 @@ export default React.memo(function AngelsActions({
 
               {angel.form_complexity && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Complexity</span>
+                  <span className="text-foreground/80">Complexity</span>
                   <Badge
                     className={`rounded-sm text-[10px] font-normal ${getComplexityColor(angel.form_complexity)}`}
                   >
@@ -285,7 +285,7 @@ export default React.memo(function AngelsActions({
 
               {angel.check_size && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Check Size</span>
+                  <span className="text-foreground/80">Check Size</span>
                   <Badge
                     className={`rounded-sm text-[10px] font-normal ${getCheckSizeColor()}`}
                   >
@@ -307,7 +307,7 @@ export default React.memo(function AngelsActions({
               {/* Focus Areas */}
               {angel.stage_focus && angel.stage_focus.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Focus</span>
+                  <span className="text-foreground/80 pt-1">Focus</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.stage_focus.map((stage) => (
                       <Badge
@@ -323,7 +323,7 @@ export default React.memo(function AngelsActions({
 
               {angel.industry_focus && angel.industry_focus.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Industry</span>
+                  <span className="text-foreground/80 pt-1">Industry</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.industry_focus.map((industry) => (
                       <Badge
@@ -339,7 +339,7 @@ export default React.memo(function AngelsActions({
 
               {angel.region_focus && angel.region_focus.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Region</span>
+                  <span className="text-foreground/80 pt-1">Region</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.region_focus.map((region) => (
                       <Badge
@@ -355,7 +355,7 @@ export default React.memo(function AngelsActions({
 
               {angel.investment_approach && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Approach</span>
+                  <span className="text-foreground/80 pt-1">Approach</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     <Badge
                       className={`rounded-sm text-[10px] ${getInvestmentApproachColor()}`}
@@ -369,9 +369,7 @@ export default React.memo(function AngelsActions({
               {angel.notable_investments &&
                 angel.notable_investments.length > 0 && (
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground pt-1">
-                      Investments
-                    </span>
+                    <span className="text-foreground/80 pt-1">Investments</span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                       {angel.notable_investments.map((inv) => (
                         <Badge
@@ -387,7 +385,7 @@ export default React.memo(function AngelsActions({
 
               {angel.previous_exits && angel.previous_exits.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Exits</span>
+                  <span className="text-foreground/80 pt-1">Exits</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.previous_exits.map((exit) => (
                       <Badge
@@ -403,7 +401,7 @@ export default React.memo(function AngelsActions({
 
               {angel.domain_expertise && angel.domain_expertise.length > 0 && (
                 <div className="flex items-start justify-between">
-                  <span className="text-muted-foreground pt-1">Expertise</span>
+                  <span className="text-foreground/80 pt-1">Expertise</span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[220px]">
                     {angel.domain_expertise.map((domain) => (
                       <Badge
@@ -423,7 +421,7 @@ export default React.memo(function AngelsActions({
               {timeline.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Timeline</span>
+                    <span className="text-foreground/80">Timeline</span>
                   </div>
                   {timeline.map((event, index) => (
                     <div
@@ -448,7 +446,7 @@ export default React.memo(function AngelsActions({
                           {event.label}
                         </span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[10px] text-foreground/80">
                         {formatDate(event.date)}
                       </span>
                     </div>

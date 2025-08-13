@@ -51,7 +51,7 @@ const features = [
     title: 'Scale',
     description:
       'Our agents can fill out 5 applications simultaneously in the time it takes you to complete just one. ' +
-      'Unlike hiring a fundraising consultant, our agents work 24/7 at a fraction of the cost with transparent outcomes and machine speed.',
+      'Unlike hiring a fundraising consultant, agents work 24/7 at a fraction of the cost with transparent outcomes and machine speed.',
     color: 'blue',
     bgClass:
       'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800',
@@ -62,7 +62,7 @@ const features = [
     title: 'Reach',
     description:
       'Apply to funds, accelerators, and angels from Silicon Valley to Singapore and throughout EMEA. ' +
-      'More targeted than mass email tools, with personalized submissions and fund fit filtering by stage, sector, and geography.',
+      'More targeted than mass email tools, with personalized submissions and filtering by stage, sector, and geography.',
     color: 'amber',
     bgClass:
       'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800',
@@ -193,7 +193,7 @@ export const About = () => {
                 <h2 className="text-3xl font-semibold mb-4 text-foreground">
                   Our impact in numbers
                 </h2>
-                <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
+                <p className="text-foreground/80 leading-relaxed text-md max-w-3xl mx-auto">
                   Real numbers from founders who&apos;ve used Suparaise to
                   automate their fundraising process.
                 </p>

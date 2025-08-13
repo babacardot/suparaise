@@ -67,7 +67,7 @@ export const Footer = () => {
             >
               About
             </Link>
-            <span className="hidden sm:inline text-muted-foreground">|</span>
+            <span className="hidden sm:inline text-foreground/80">|</span>
             <Link
               href="/privacy"
               prefetch={true}
@@ -121,13 +121,13 @@ export const Footer = () => {
         </div>
 
         <div className="mt-4 pt-4 border-t flex justify-between items-center">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-foreground/80">
             © {new Date().getFullYear()} suparaise.com — All rights reserved.
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors [&_svg]:fill-current"
+              className="h-6 w-6 flex items-center justify-center text-foreground/80 hover:text-foreground transition-colors [&_svg]:fill-current"
               aria-label={
                 mounted
                   ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
@@ -143,7 +143,7 @@ export const Footer = () => {
                   loop={false}
                   autoplay={false}
                   initialFrame={0}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-foreground/80 hover:text-foreground transition-colors"
                 />
               ) : (
                 <div className="h-4 w-4 rounded-sm bg-muted animate-pulse" />
@@ -151,7 +151,7 @@ export const Footer = () => {
             </button>
             <button
               onClick={toggleSound}
-              className="h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors [&_svg]:fill-current"
+              className="h-6 w-6 flex items-center justify-center text-foreground/80 hover:text-foreground transition-colors [&_svg]:fill-current"
               aria-label={soundEnabled ? 'Turn sound off' : 'Turn sound on'}
             >
               <LottieIcon
@@ -162,7 +162,7 @@ export const Footer = () => {
                 loop={false}
                 autoplay={false}
                 initialFrame={0}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-foreground/80 hover:text-foreground transition-colors"
               />
             </button>
           </div>

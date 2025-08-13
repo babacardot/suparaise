@@ -65,7 +65,7 @@ export function SignupForm({
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-start text-start">
                 <h1 className="text-2xl font-bold">Create an account</h1>
-                <p className="text-balance text-muted-foreground">
+                <p className="text-balance text-foreground/80">
                   Get started free, no credit card required
                 </p>
               </div>
@@ -233,7 +233,7 @@ export function SignupForm({
                 </button>
               </div>
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                <span className="relative z-10 bg-background px-2 text-muted-foreground">
+                <span className="relative z-10 bg-background px-2 text-foreground/80">
                   or continue with
                 </span>
               </div>
@@ -289,7 +289,7 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto -mt-4">
+      <div className="text-balance text-center text-xs text-foreground/80 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary mx-auto -mt-4">
         By creating an account, you agree to our <a href="/terms">Terms</a> and{' '}
         <a href="/privacy">Privacy Policy</a>.
       </div>

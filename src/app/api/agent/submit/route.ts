@@ -78,7 +78,10 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (insertError || !insertData) {
-        console.error('❌ Failed to create accelerator submission:', insertError)
+        console.error(
+          '❌ Failed to create accelerator submission:',
+          insertError,
+        )
         return NextResponse.json(
           { error: 'Failed to create accelerator submission.' },
           { status: 500 },

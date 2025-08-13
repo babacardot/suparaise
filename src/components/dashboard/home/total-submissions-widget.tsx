@@ -33,13 +33,13 @@ export function TotalApplicationsWidget({
             {totalApplications}
           </div>
           {usageSubmissionsThisMonth > 0 && (
-            <div className="text-xs md:text-sm text-muted-foreground pb-1">
+            <div className="text-xs md:text-sm text-foreground/80 pb-1">
               ({totalApplications - usageSubmissionsThisMonth} plan +{' '}
               {usageSubmissionsThisMonth} usage)
             </div>
           )}
         </div>
-        <p className="text-xs text-muted-foreground mt-7">
+        <p className="text-xs text-foreground/80 mt-7">
           Across all opportunities
         </p>
       </CardContent>

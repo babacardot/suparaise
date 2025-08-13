@@ -35,15 +35,15 @@ const MIN_CHAR_REQUIREMENTS = {
 interface TextareaProps extends React.ComponentProps<'textarea'> {
   enableAI?: boolean
   aiFieldType?:
-  | 'bio'
-  | 'description-short'
-  | 'description-medium'
-  | 'description-long'
-  | 'traction'
-  | 'market'
-  | 'customers'
-  | 'competitors'
-  | 'instructions'
+    | 'bio'
+    | 'description-short'
+    | 'description-medium'
+    | 'description-long'
+    | 'traction'
+    | 'market'
+    | 'customers'
+    | 'competitors'
+    | 'instructions'
   aiContext?: {
     companyName?: string
     industry?: string
@@ -236,7 +236,9 @@ function Textarea({
               variant="outline"
               size="sm"
               onClick={() => handleAIEnhance('full')}
-              disabled={isEnhancing || !canUseFullEnhancement || isFullCoolingDown}
+              disabled={
+                isEnhancing || !canUseFullEnhancement || isFullCoolingDown
+              }
               className="h-7 px-2 text-xs"
             >
               {isEnhancing && enhancementType === 'full' ? (

@@ -100,7 +100,13 @@ export class FormSpecialistFactory implements SpecialistFactory {
     const issues: string[] = []
 
     // Check for required specialists
-    const requiredTypes = ['typeform', 'google', 'airtable', 'contact', 'generic']
+    const requiredTypes = [
+      'typeform',
+      'google',
+      'airtable',
+      'contact',
+      'generic',
+    ]
     requiredTypes.forEach((type) => {
       if (!this.specialists.find((s) => s.type === type)) {
         issues.push(`Missing required specialist: ${type}`)

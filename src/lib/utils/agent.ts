@@ -127,6 +127,9 @@ export class BrowserUseClient {
       enable_public_share?: boolean
       webhook_url?: string
       profile_id?: string
+      // Reasoning/latency flags
+      use_thinking?: boolean
+      flash_mode?: boolean
     } = {},
   ) {
     const payload = {
@@ -145,6 +148,9 @@ export class BrowserUseClient {
       enable_public_share: options.enable_public_share ?? true,
       webhook_url: options.webhook_url,
       profile_id: options.profile_id,
+      // Pass through reasoning flags when provided
+      use_thinking: options.flash_mode ? false : options.use_thinking,
+      flash_mode: options.use_thinking ? false : options.flash_mode,
     }
 
     return this.makeRequest('/run-task', {

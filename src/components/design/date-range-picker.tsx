@@ -51,7 +51,7 @@ export function DateRangePicker({
                       : ''}
               </span>
             ) : (
-              <span className="text-muted-foreground text-sm">Date</span>
+              <span className="text-foreground/80 text-sm">Date</span>
             )}
           </div>
           {isDateSet ? (

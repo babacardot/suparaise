@@ -322,7 +322,7 @@ export default function SuggestionModal({
                 }
               >
                 {useLinkedInForAngel ? (
-                  <Mail className="h-4 w-4 text-muted-foreground rounded-xs" />
+                  <Mail className="h-4 w-4 text-foreground/80 rounded-xs" />
                 ) : (
                   <Image
                     src="/integrations/linkedin.webp"

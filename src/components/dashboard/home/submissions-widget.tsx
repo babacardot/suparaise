@@ -113,7 +113,7 @@ const SubmissionCard = ({
         >
           {submission.submitted_to_type}
         </Badge>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs text-foreground/80">
           <span>{displayDate}</span>
           <span className="text-gray-400">•</span>
           <span>{displayTime}</span>

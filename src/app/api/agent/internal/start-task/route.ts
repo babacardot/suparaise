@@ -25,18 +25,20 @@ export async function POST(request: NextRequest) {
 
   try {
     // 1. Try to fetch all data needed to start the task for fund submissions
-    const { data: fundTaskData, error: fundTaskError } = await supabaseAdmin.rpc(
-      'get_submission_start_data',
-      { p_submission_id: submissionId },
-    )
+    const { data: fundTaskData, error: fundTaskError } =
+      await supabaseAdmin.rpc('get_submission_start_data', {
+        p_submission_id: submissionId,
+      })
     let taskData = fundTaskData
 
     // If not a fund submission, fallback to accelerator submission start-data
     if (fundTaskError || !taskData) {
-      const { data: accelData, error: accelError } = await supabaseAdmin
-        .rpc('get_accelerator_submission_start_data', {
+      const { data: accelData, error: accelError } = await supabaseAdmin.rpc(
+        'get_accelerator_submission_start_data',
+        {
           p_submission_id: submissionId,
-        })
+        },
+      )
       if (accelError || !accelData) {
         console.error(
           `Failed to fetch task data for submission ${submissionId}:`,
@@ -73,7 +75,8 @@ export async function POST(request: NextRequest) {
       { startup, founders },
       agentSettings,
     )
-    const applicationUrl = target?.application_url || accelerator?.application_url
+    const applicationUrl =
+      target?.application_url || accelerator?.application_url
     const entityName = target?.name || accelerator?.name
     const entityFormType = target?.form_type || accelerator?.form_type
 
@@ -91,7 +94,9 @@ export async function POST(request: NextRequest) {
       max_agent_steps: 50,
       profile_id: browserProfile.profile_id,
       ...specialistBrowserConfig,
-      allowed_domains: applicationUrl ? [new URL(applicationUrl).hostname] : undefined,
+      allowed_domains: applicationUrl
+        ? [new URL(applicationUrl).hostname]
+        : undefined,
       webhook_url: webhookUrl,
     })
 

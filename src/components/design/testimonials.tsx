@@ -139,7 +139,7 @@ const Testimonials = () => {
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter mt-5">
             What founders say
           </h2>
-          <p className="text-center mt-5 opacity-75">
+          <p className="text-center mt-5 opacity-75 text-foreground/80 leading-relaxed text-md max-w-3xl mx-auto">
             See how Suparaise is transforming the fundraising journey for
             startups.
           </p>
