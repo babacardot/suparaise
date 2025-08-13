@@ -490,7 +490,7 @@ export default function FundsFilters({
             <LottieIcon
               animationData={animations.search}
               size={16}
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/80 pointer-events-none z-10"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none z-10"
             />
             <Input
               type="text"
@@ -498,7 +498,7 @@ export default function FundsFilters({
               value={localFilters.search || ''}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
-              className="pl-10 h-10 rounded-sm bg-card border-border text-card-foreground placeholder:text-foreground/80"
+              className="pl-10 h-10 rounded-sm bg-card border-border text-card-foreground placeholder:text-muted-foreground"
             />
             {localFilters.search && (
               <button
@@ -541,7 +541,9 @@ export default function FundsFilters({
                         )
                       })
                     ) : (
-                      <span className="text-foreground/80 text-sm">Region</span>
+                      <span className="text-muted-foreground text-sm">
+                        Region
+                      </span>
                     )}
                     {localFilters.regionFocus.length > 2 && (
                       <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
@@ -612,7 +614,9 @@ export default function FundsFilters({
                         )
                       })
                     ) : (
-                      <span className="text-foreground/80 text-sm">Focus</span>
+                      <span className="text-muted-foreground text-sm">
+                        Focus
+                      </span>
                     )}
                     {localFilters.stageFocus.length > 2 && (
                       <Badge className="ml-1 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300 rounded-sm">
@@ -683,7 +687,7 @@ export default function FundsFilters({
                         )
                       })
                     ) : (
-                      <span className="text-foreground/80 text-sm">
+                      <span className="text-muted-foreground text-sm">
                         Industry
                       </span>
                     )}
@@ -763,7 +767,7 @@ export default function FundsFilters({
                         )
                       })
                     ) : (
-                      <span className="text-foreground/80 text-sm">
+                      <span className="text-muted-foreground text-sm">
                         Type
                       </span>
                     )}
@@ -838,7 +842,7 @@ export default function FundsFilters({
                         )
                       })
                     ) : (
-                      <span className="text-foreground/80 text-sm">
+                      <span className="text-muted-foreground text-sm">
                         Requirements
                       </span>
                     )}
@@ -1007,7 +1011,7 @@ export default function FundsFilters({
                 playClickSound()
                 onClearFilters()
               }}
-              className="w-full sm:w-auto h-10 px-3 rounded-sm bg-card border-border text-foreground/80 hover:text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
+              className="w-full sm:w-auto h-10 px-3 rounded-sm bg-card border-border text-muted-foreground hover:text-card-foreground hover:bg-[#E9EAEF] dark:hover:bg-[#2A2B30]"
             >
               <span className="group inline-flex items-center">
                 <LottieIcon

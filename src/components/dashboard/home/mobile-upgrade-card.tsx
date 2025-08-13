@@ -58,13 +58,13 @@ export function MobileUpgradeCard({
                     repeat: isHovered ? Infinity : 0,
                     repeatDelay: 1,
                   }}
-                  className="text-foreground/80 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors"
+                  className="text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors"
                 ></motion.div>
               </div>
               <h3 className="font-bold mb-2 text-foreground text-xs">
                 Ready to scale ?
               </h3>
-              <p className="text-[10px] text-foreground/80 leading-tight">
+              <p className="text-[10px] text-muted-foreground leading-tight">
                 500+ applications • 25 parallel submissions • Unlimited queue •
                 Dedicated support
               </p>
@@ -106,13 +106,13 @@ export function MobileUpgradeCard({
                     repeat: isHovered ? Infinity : 0,
                     repeatDelay: 1,
                   }}
-                  className="text-foreground/80 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors"
+                  className="text-muted-foreground group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors"
                 ></motion.div>
               </div>
               <h3 className="font-bold mb-2 text-foreground text-xs">
                 Ready for maximum outreach?
               </h3>
-              <p className="text-[10px] text-foreground/80 leading-tight">
+              <p className="text-[10px] text-muted-foreground leading-tight">
                 All funds • 50 applications monthly • 5x faster with concurrent
                 processing • Priority support
               </p>

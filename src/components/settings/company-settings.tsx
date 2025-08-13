@@ -1698,7 +1698,7 @@ export default function CompanySettings() {
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Company</h2>
-        <p className="text-muted-foreground">
+        <p className="text-foreground/80">
           Tell us about your startup, what you&apos;re building and why it
           matters.
         </p>

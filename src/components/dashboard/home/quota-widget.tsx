@@ -35,7 +35,7 @@ export function SubmissionsQuotaWidget({
           ></div>
         </div>
         <div className="flex justify-end mt-2">
-          <p className="text-xs text-foreground/80">
+          <p className="text-xs text-muted-foreground">
             {submissionsLeft} remaining
           </p>
         </div>

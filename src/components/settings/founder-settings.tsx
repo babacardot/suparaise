@@ -104,7 +104,7 @@ function ProfileSettingsSkeleton() {
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Founder</h2>
-        <p className="text-muted-foreground">
+        <p className="text-foreground/80">
           Manage your details and contact information.
         </p>
       </div>
@@ -775,7 +775,7 @@ export default function ProfileSettings() {
         <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">
           {founders.length > 1 ? 'Founders' : 'Founder'}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-foreground/80">
           {founders.length > 1
             ? 'Manage founder details and contact information.'
             : 'Manage your details and contact information.'}
@@ -1004,7 +1004,7 @@ export default function ProfileSettings() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
                   </div>
                 </div>
 
@@ -1252,7 +1252,7 @@ export default function ProfileSettings() {
                         ),
                       )}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
                   </div>
                 </div>
 

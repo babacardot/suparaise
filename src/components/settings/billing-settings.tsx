@@ -57,7 +57,7 @@ function BillingSettingsSkeleton() {
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Billing</h2>
-        <p className="text-muted-foreground">
+        <p className="text-foreground/80">
           Manage your subscription and billing information.
         </p>
       </div>
@@ -507,7 +507,7 @@ export default function BillingSettings() {
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold mt-3 md:-mt-2 mb-2">Billing</h2>
-        <p className="text-muted-foreground">
+        <p className="text-foreground/80">
           Manage your subscription and billing information.
         </p>
       </div>
@@ -583,7 +583,7 @@ export default function BillingSettings() {
 
             {isSubscribed ? (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-foreground/80">
                   Your{' '}
                   <span className="font-semibold">
                     {subscription?.permission_level || 'PRO'}
@@ -602,19 +602,19 @@ export default function BillingSettings() {
                     <>.</>
                   )}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-foreground/80">
                   You can update your payment details, view your invoices, or
                   cancel your subscription anytime.
                 </p>
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-foreground/80">
                   You&apos;re on the{' '}
                   <span className="font-medium text-foreground">free plan</span>
                   .
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-foreground/80">
                   Subscribe for more runs, expanded access, and advanced
                   features.
                 </p>
@@ -642,7 +642,7 @@ export default function BillingSettings() {
                       </h3>
                     </div>
                     {!usageBillingData.usageBillingEnabled && (
-                      <p className="text-sm text-muted-foreground mt-4 -mb-1">
+                      <p className="text-sm text-foreground/80 mt-4 -mb-1">
                         Continue applying beyond your plan limits.
                       </p>
                     )}
@@ -685,7 +685,7 @@ export default function BillingSettings() {
                 {usageBillingData.usageBillingEnabled ? (
                   showLimitConfigurator ? (
                     <div className="space-y-2 mt-3">
-                      <p className="text-xs text-muted-foreground mb-2">
+                      <p className="text-xs text-foreground/80 mb-2">
                         Set monthly spend limit:
                       </p>
                       <div className="flex flex-wrap items-center gap-2">
@@ -822,11 +822,11 @@ export default function BillingSettings() {
                               {usageBillingData.monthlySubmissionsLimit > 0 &&
                                 usageBillingData.monthlySubmissionsUsed <
                                   usageBillingData.monthlySubmissionsLimit && (
-                                  <span className="text-[8px] text-muted-foreground">
+                                  <span className="text-[8px] text-foreground/80">
                                     ·
                                   </span>
                                 )}
-                              <span className="text-[8px] text-muted-foreground">
+                              <span className="text-[8px] text-foreground/80">
                                 Usage charges this month
                               </span>
                             </>
@@ -873,7 +873,7 @@ export default function BillingSettings() {
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.pro_monthly.price}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-foreground/80">
                         per month
                       </div>
                     </div>
@@ -921,7 +921,7 @@ export default function BillingSettings() {
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.max_monthly.price}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-foreground/80">
                         per month
                       </div>
                     </div>
@@ -971,7 +971,7 @@ export default function BillingSettings() {
                       <div className="text-2xl font-bold">
                         ${SUBSCRIPTION_PLANS.max_monthly.price}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-foreground/80">
                         per month
                       </div>
                     </div>
@@ -1057,7 +1057,7 @@ export default function BillingSettings() {
               <div className="flex justify-between items-start mb-4">
                 <div className="text-left">
                   <h3 className="text-2xl font-semibold">Enterprise</h3>
-                  <p className="text-sm text-muted-foreground mt-4">
+                  <p className="text-sm text-foreground/80 mt-4">
                     Volume discounts available
                   </p>
                 </div>

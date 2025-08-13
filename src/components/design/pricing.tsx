@@ -251,7 +251,7 @@ export const Pricing = () => {
             ))}
           </div>
 
-          <p className="text-foreground/80 text-sm mt-4">
+          <p className="text-muted-foreground text-sm mt-4">
             All plans include SSL encryption, automated Captcha solving, stealth
             mode, and can be cancelled anytime.
           </p>

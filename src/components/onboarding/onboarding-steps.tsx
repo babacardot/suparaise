@@ -405,7 +405,7 @@ const FileUploadComponent: React.FC<
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{file.name}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-foreground/80">
               {uploadStatus === 'uploading'
                 ? `${formatFileSize(
                     (uploadProgress / 100) * file.size,
@@ -464,7 +464,7 @@ const FileUploadComponent: React.FC<
           </div>
         </div>
       )}
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-foreground/80">
         {description} (max {maxSize})
       </p>
     </div>
@@ -671,7 +671,7 @@ export const TeamStep: React.FC<
         <h3 className="text-lg font-semibold mb-4 select-none">
           Tell us about your team
         </h3>
-        <p className="text-sm text-muted-foreground mb-6 select-none">
+        <p className="text-sm text-foreground/80 mb-6 select-none">
           Start with the basics about yourself and any co-founders. You can
           always add more details later as your startup evolves.
         </p>
@@ -788,7 +788,7 @@ export const TeamStep: React.FC<
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
                 </div>
               </div>
               <div className="space-y-3">
@@ -813,7 +813,7 @@ export const TeamStep: React.FC<
                       : ''
                   }
                 />
-                <p className="text-xs text-muted-foreground mt-1 select-none">
+                <p className="text-xs text-foreground/80 mt-1 select-none">
                   Your company email is preferred.
                 </p>
                 {fieldErrors[index]?.email && (
@@ -1111,7 +1111,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
         <h3 className="text-lg font-semibold mb-4 select-none">
           Tell us about your company
         </h3>
-        <p className="text-sm text-muted-foreground mb-6 select-none">
+        <p className="text-sm text-foreground/80 mb-6 select-none">
           Share what you&apos;re building. Don&apos;t worry about having
           everything perfect - you can refine these details anytime.
         </p>
@@ -1175,7 +1175,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
             {fieldErrors.website && (
               <p className="text-sm text-red-600 mt-1">{fieldErrors.website}</p>
             )}
-            <p className="text-xs text-muted-foreground select-none">
+            <p className="text-xs text-foreground/80 select-none">
               Click on the magic wand to auto-fill your details.
             </p>
           </div>
@@ -1258,7 +1258,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
             </div>
             {fieldErrors.industry && (
               <p className="text-sm text-red-600 mt-1">
@@ -1292,7 +1292,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
             </div>
           </div>
         </div>
@@ -1318,7 +1318,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm transition-all',
                   !startup.isIncorporated
                     ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-900 dark:text-orange-100 font-bold border-orange-200 dark:border-orange-800'
-                    : 'border-border bg-background text-muted-foreground hover:bg-muted font-medium',
+                    : 'border-border bg-background text-foreground/80 hover:bg-muted font-medium',
                   'disabled:opacity-50 disabled:cursor-not-allowed',
                 )}
               >
@@ -1341,7 +1341,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   'flex items-center justify-center rounded-sm border-2 h-9 px-4 text-sm transition-all',
                   startup.isIncorporated
                     ? 'bg-green-50 dark:bg-green-900/20 text-green-900 dark:text-green-100 font-bold border-green-200 dark:border-green-800'
-                    : 'border-border bg-background text-muted-foreground hover:bg-muted font-medium',
+                    : 'border-border bg-background text-foreground/80 hover:bg-muted font-medium',
                   'disabled:opacity-50 disabled:cursor-not-allowed',
                 )}
               >
@@ -1464,7 +1464,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
               {fieldErrors.descriptionShort}
             </p>
           )}
-          <p className="text-[10px] text-muted-foreground text-right justify-end mt-1 select-none">
+          <p className="text-[10px] text-foreground/80 text-right justify-end mt-1 select-none">
             {startup.descriptionShort.length}/100 characters
           </p>
         </div>
@@ -1558,7 +1558,7 @@ export const CompanyStep: React.FC<CompanyStepProps> = ({
                   : ''
               }
             />
-            <p className="text-xs text-muted-foreground select-none">
+            <p className="text-xs text-foreground/80 select-none">
               Link to a folder with your pitch deck and any other materials you
               judge relevant for investors. <br />
               <span className="text-blue-600 dark:text-blue-400 font-medium">
@@ -1635,7 +1635,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
         <h3 className="text-lg font-semibold mb-4 select-none">
           Tell us about your current fundraising round
         </h3>
-        <p className="text-sm text-muted-foreground mb-6 select-none">
+        <p className="text-sm text-foreground/80 mb-6 select-none">
           Help us understand your fundraising goals. Most fields are optional -
           share what you know and leave the rest for later.
         </p>
@@ -1667,7 +1667,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
             </div>
           </div>
           <div className="space-y-3">
@@ -1694,7 +1694,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
             </div>
           </div>
         </div>
@@ -1726,7 +1726,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
             </div>
             {fieldErrors.revenueModel && (
               <p className="text-sm text-red-600 mt-1">
@@ -1760,7 +1760,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                 <option value={21}>21 months</option>
                 <option value={24}>24 months</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
             </div>
           </div>
         </div>
@@ -1839,7 +1839,7 @@ export const FundraisingStep: React.FC<FundraisingStepProps> = ({
                   <option value={100}>51-100 people</option>
                   <option value={200}>100+ people</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/80 pointer-events-none" />
               </div>
             </div>
             <div className="space-y-3">
@@ -1988,7 +1988,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
     <div className="space-y-4">
       <div className="select-none" onCopy={(e) => e.preventDefault()}>
         <h3 className="text-lg font-semibold mb-2 select-none">Summary</h3>
-        <p className="text-sm text-muted-foreground mb-4 select-none">
+        <p className="text-sm text-foreground/80 mb-4 select-none">
           Take a moment to ensure everything looks perfect.
         </p>
       </div>
@@ -2010,50 +2010,50 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Name
                 </span>
                 <p>{startup.name || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Website
                 </span>
                 <p>{startup.website || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Industry
                 </span>
                 <p>{startup.industry || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Country
                 </span>
                 <p>{startup.location || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Founded year
                 </span>
                 <p>{startup.foundedYear || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Legal structure
                 </span>
                 <p>{startup.legalStructure || 'Not provided'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Incorporated
                 </span>
                 <p>{startup.isIncorporated ? 'Yes' : 'No'}</p>
               </div>
 
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Revenue model
                 </span>
                 <p>{startup.revenueModel || 'Not provided'}</p>
@@ -2065,13 +2065,13 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 <div className="pt-2 border-t">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="font-medium text-muted-foreground select-none">
+                      <span className="font-medium text-foreground/80 select-none">
                         Inc. country
                       </span>
                       <p>{startup.incorporationCountry || 'Not provided'}</p>
                     </div>
                     <div>
-                      <span className="font-medium text-muted-foreground select-none">
+                      <span className="font-medium text-foreground/80 select-none">
                         Inc. city
                       </span>
                       <p>{startup.incorporationCity || 'Not provided'}</p>
@@ -2082,7 +2082,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 
             {startup.operatingCountries.length > 0 && (
               <div className="pt-2 border-t">
-                <span className="font-medium text-muted-foreground text-sm select-none">
+                <span className="font-medium text-foreground/80 text-sm select-none">
                   Operating countries
                 </span>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -2100,7 +2100,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 
             <div className="pt-2 border-t space-y-3">
               <div>
-                <span className="font-medium text-muted-foreground text-sm select-none">
+                <span className="font-medium text-foreground/80 text-sm select-none">
                   One-liner
                 </span>
                 <p className="text-sm break-words whitespace-pre-wrap">
@@ -2109,7 +2109,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               </div>
               {startup.descriptionMedium && (
                 <div>
-                  <span className="font-medium text-muted-foreground text-sm select-none">
+                  <span className="font-medium text-foreground/80 text-sm select-none">
                     Elevator pitch
                   </span>
                   <p className="text-sm break-words whitespace-pre-wrap">
@@ -2119,7 +2119,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               )}
               {startup.descriptionLong && (
                 <div>
-                  <span className="font-medium text-muted-foreground text-sm select-none">
+                  <span className="font-medium text-foreground/80 text-sm select-none">
                     Full description
                   </span>
                   <p className="text-sm break-words whitespace-pre-wrap">
@@ -2130,7 +2130,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             </div>
 
             <div className="pt-2 border-t">
-              <span className="font-medium text-muted-foreground text-sm select-none">
+              <span className="font-medium text-foreground/80 text-sm select-none">
                 Assets
               </span>
               <div className="flex items-center gap-4 mt-1">
@@ -2139,7 +2139,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   {startup.logoFile ? (
                     <Check className="h-3 w-3 pt-1 text-green-500" />
                   ) : (
-                    <X className="h-3 w-3 pt-1 text-muted-foreground" />
+                    <X className="h-3 w-3 pt-1 text-foreground/80" />
                   )}
                 </div>
                 <div className="flex items-center gap-1">
@@ -2147,7 +2147,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   {startup.pitchDeckFile ? (
                     <Check className="h-3 w-3 pt-1 text-green-500" />
                   ) : (
-                    <X className="h-3 w-3 pt-1 text-muted-foreground" />
+                    <X className="h-3 w-3 pt-1 text-foreground/80" />
                   )}
                 </div>
                 {startup.googleDriveUrl && (
@@ -2187,7 +2187,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   <p className="font-medium text-sm">
                     {founder.firstName} {founder.lastName}
                   </p>
-                  <div className="text-xs text-muted-foreground space-y-0.5">
+                  <div className="text-xs text-foreground/80 space-y-0.5">
                     <p>Email: {founder.email}</p>
                     {founder.phone && <p>Phone: {founder.phone}</p>}
                     {founder.linkedin && <p>LinkedIn: {founder.linkedin}</p>}
@@ -2224,19 +2224,19 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Round
                 </span>
                 <p>{startup.fundingRound || 'Not specified'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Instrument
                 </span>
                 <p>{startup.investmentInstrument || 'Not specified'}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Goal
                 </span>
                 <p>
@@ -2246,7 +2246,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Pre-money valuation
                 </span>
                 <p>
@@ -2256,7 +2256,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Team size
                 </span>
                 <p>
@@ -2266,7 +2266,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   MRR
                 </span>
                 <p>
@@ -2276,7 +2276,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   ARR
                 </span>
                 <p>
@@ -2286,7 +2286,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground select-none">
+                <span className="font-medium text-foreground/80 select-none">
                   Runway
                 </span>
                 <p>
@@ -2304,7 +2304,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               <div className="pt-2 border-t space-y-3">
                 {startup.tractionSummary && (
                   <div>
-                    <span className="font-medium text-muted-foreground text-sm select-none">
+                    <span className="font-medium text-foreground/80 text-sm select-none">
                       Traction
                     </span>
                     <p className="text-sm break-words whitespace-pre-wrap">
@@ -2314,7 +2314,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 )}
                 {startup.marketSummary && (
                   <div>
-                    <span className="font-medium text-muted-foreground text-sm select-none">
+                    <span className="font-medium text-foreground/80 text-sm select-none">
                       Market
                     </span>
                     <p className="text-sm break-words whitespace-pre-wrap">
@@ -2324,7 +2324,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 )}
                 {startup.keyCustomers && (
                   <div>
-                    <span className="font-medium text-muted-foreground text-sm select-none">
+                    <span className="font-medium text-foreground/80 text-sm select-none">
                       Key customers
                     </span>
                     <p className="text-sm break-words whitespace-pre-wrap">
@@ -2335,7 +2335,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 {startup.competitorsList &&
                   startup.competitorsList.length > 0 && (
                     <div>
-                      <span className="font-medium text-muted-foreground text-sm select-none">
+                      <span className="font-medium text-foreground/80 text-sm select-none">
                         Competitors
                       </span>
                       <div className="flex flex-wrap gap-1 mt-1">

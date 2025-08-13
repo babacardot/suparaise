@@ -214,7 +214,7 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
                   {period.run_count} {period.run_count === 1 ? 'run' : 'runs'}
                 </div>
               )}
-              <div className="text-foreground/80">{formatDate(dateStr)}</div>
+              <div className="text-muted-foreground">{formatDate(dateStr)}</div>
             </TooltipContent>
           </Tooltip>
         )
@@ -269,14 +269,16 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
             Runs
           </CardTitle>
           <div className="flex items-center gap-1 md:gap-2">
-            <h2 className="text-xs md:text-sm text-foreground/80">
+            <h2 className="text-xs md:text-sm text-muted-foreground">
               Last <span className="md:hidden">100</span>
               <span className="hidden md:inline">270</span> days
             </h2>
             {totalRuns > 0 && (
               <>
-                <span className="text-foreground/80 hidden sm:inline">•</span>
-                <span className="text-xs md:text-sm text-foreground/80">
+                <span className="text-muted-foreground hidden sm:inline">
+                  •
+                </span>
+                <span className="text-xs md:text-sm text-muted-foreground">
                   {totalRuns} {totalRuns === 1 ? 'run' : 'runs'}
                 </span>
               </>
@@ -285,7 +287,7 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
         </CardHeader>
         <TooltipProvider>
           <CardContent className="bg-background/50 dark:bg-background/30 mx-2 md:mx-4 mb-2 flex flex-row gap-x-1 rounded-sm p-2 md:p-4 pl-4 md:pl-4">
-            <div className="hidden flex-col font-mono text-[9px] text-foreground/80 xl:flex gap-2 md:gap-2">
+            <div className="hidden flex-col font-mono text-[9px] text-muted-foreground xl:flex gap-2 md:gap-2">
               {[null, 'Mon', null, 'Wed', null, 'Fri', null].map((day, i) => (
                 <div
                   key={i}
@@ -305,7 +307,7 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
         <CardContent className="pt-0 mx-1 md:mx-2 pb-2 md:pb-4">
           <div className="flex items-center justify-end">
             <div className="flex items-center gap-1 md:gap-2">
-              <span className="text-[10px] md:text-xs text-foreground/80">
+              <span className="text-[10px] md:text-xs text-muted-foreground">
                 Less
               </span>
               <div className="flex gap-1 md:gap-1">
@@ -317,7 +319,7 @@ export function ActivityWidget({ className = '' }: ActivityWidgetProps) {
                 <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-blue-500 dark:bg-blue-500" />
                 <div className="w-3 h-3 md:w-3 md:h-3 rounded-sm bg-blue-600 dark:bg-blue-400" />
               </div>
-              <span className="text-[10px] md:text-xs text-foreground/80">
+              <span className="text-[10px] md:text-xs text-muted-foreground">
                 More
               </span>
             </div>

@@ -126,7 +126,7 @@ function IntegrationSettingsSkeleton() {
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold -mt-2 mb-2">Integrations</h2>
-        <p className="text-muted-foreground">
+        <p className="text-foreground/80">
           Connect external services to supercharge your fundraising automation.
         </p>
       </div>
@@ -201,7 +201,7 @@ export default function IntegrationSettings() {
       <div className="h-full flex flex-col overflow-hidden">
         <div className="flex-shrink-0 pb-4">
           <h2 className="text-2xl font-semibold -mt-2 mb-2">Integrations</h2>
-          <p className="text-muted-foreground">
+          <p className="text-foreground/80">
             Connect external services to supercharge your fundraising
             automation.
           </p>
@@ -227,12 +227,12 @@ export default function IntegrationSettings() {
                         <h3 className="text-lg font-semibold text-foreground">
                           MAX
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-foreground/80">
                           Upgrade to unlock
                         </p>
                       </div>
                     </div>
-                    <p className="text-muted-foreground max-w-md mb-6">
+                    <p className="text-foreground/80 max-w-md mb-6">
                       Integrations are only available for MAX users. Upgrade
                       your plan to connect external services and automate your
                       fundraising process on additional channels.
@@ -240,7 +240,7 @@ export default function IntegrationSettings() {
 
                     {/* Preview of integrations */}
                     <div className="flex items-center gap-3 mb-4">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-foreground/80">
                         Currently available:
                       </span>
                       <div className="flex items-center gap-2">
@@ -271,7 +271,7 @@ export default function IntegrationSettings() {
                             height={20}
                           />
                         </div>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-foreground/80">
                           + more coming soon.
                         </span>
                       </div>
@@ -393,7 +393,7 @@ export default function IntegrationSettings() {
     <div className="h-full flex flex-col overflow-hidden select-none">
       <div className="flex-shrink-0 pb-4">
         <h2 className="text-2xl font-semibold -mt-2 mb-2">Integrations</h2>
-        <p className="text-muted-foreground">
+        <p className="text-foreground/80">
           Connect external services to supercharge your fundraising automation.
         </p>
       </div>
@@ -495,7 +495,7 @@ export default function IntegrationSettings() {
 
                   {isConnecting && (
                     <div className="mt-3 pt-3 border-t border-border">
-                      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center justify-center gap-2 text-xs text-foreground/80">
                         <LottieIcon
                           animationData={animations.autorenew}
                           size={14}
