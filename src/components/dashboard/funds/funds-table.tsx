@@ -124,8 +124,15 @@ const FundsTable = React.memo(function FundsTable({
     try {
       const audio = new Audio('/sounds/light.mp3')
       audio.volume = 0.4
-      void audio.play().catch(() => {})
-    } catch {}
+      void audio.play().catch(() => { })
+    } catch { }
+  }, [])
+  const playNopeSound = React.useCallback(() => {
+    try {
+      const audio = new Audio('/sounds/nope.mp3')
+      audio.volume = 0.6
+      void audio.play().catch(() => { })
+    } catch { }
   }, [])
   // Scroll management: reset to top on page change
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null)
@@ -146,7 +153,7 @@ const FundsTable = React.memo(function FundsTable({
   const isQuotaReached =
     subscription &&
     subscription.monthly_submissions_used >=
-      subscription.monthly_submissions_limit
+    subscription.monthly_submissions_limit
 
   // Usage billing info for selection caps and coloring
   const USAGE_PRICE_PER_SUBMISSION = 2.49
@@ -257,41 +264,55 @@ const FundsTable = React.memo(function FundsTable({
       (t) => t.submission_type === 'form' && !t.submission_status,
     )
     const currentlySelected = selectedTargetIds
-    const selectAll =
+    const shouldSelectAll =
       candidates.every((t) => currentlySelected.has(t.id)) === false
 
-    if (!selectAll) {
-      // Unselect all
+    if (!shouldSelectAll) {
+      // Second click: unselect everything globally (all pages)
       setSelectedPlanIds(new Set())
       setSelectedUsageIds(new Set())
       return
     }
 
-    // Fill plan first, then usage up to caps
-    const nextPlan = new Set<string>()
-    const nextUsage = new Set<string>()
+    // Select current page candidates on top of existing selections, obeying remaining capacities
+    const nextPlan = new Set(selectedPlanIds)
+    const nextUsage = new Set(selectedUsageIds)
+    let planCapacity = Math.max(0, remainingPlanQuota - nextPlan.size)
+    let usageCapacity = usageBilling.enabled
+      ? Math.max(0, remainingUsageCapacity - nextUsage.size)
+      : 0
+
+    let added = 0
     for (const t of candidates) {
-      if (nextPlan.size < remainingPlanQuota) {
-        nextPlan.add(t.id)
-      } else if (
-        usageBilling.enabled &&
-        nextUsage.size < remainingUsageCapacity
-      ) {
-        nextUsage.add(t.id)
-      } else {
-        break
+      if (nextPlan.has(t.id) || nextUsage.has(t.id)) {
+        continue
       }
+      if (planCapacity > 0) {
+        nextPlan.add(t.id)
+        planCapacity -= 1
+        added += 1
+        continue
+      }
+      if (usageCapacity > 0) {
+        nextUsage.add(t.id)
+        usageCapacity -= 1
+        added += 1
+        continue
+      }
+      // No more capacity
+      break
     }
 
     setSelectedPlanIds(nextPlan)
     setSelectedUsageIds(nextUsage)
-    if (nextPlan.size + nextUsage.size < candidates.length) {
+    if (added < candidates.filter((t) => !currentlySelected.has(t.id)).length) {
+      playNopeSound()
       toast({
-        title: 'Selection limited',
+        title: 'Selection limit reached',
         description: usageBilling.enabled
           ? `You can select up to ${remainingPlanQuota} from plan and ${remainingUsageCapacity} from usage billing.`
           : `You can select up to ${remainingPlanQuota} based on remaining plan quota.`,
-        variant: 'info',
+        variant: 'limit',
         duration: 3000,
       })
     }
@@ -302,6 +323,9 @@ const FundsTable = React.memo(function FundsTable({
     usageBilling.enabled,
     selectedTargetIds,
     toast,
+    playNopeSound,
+    selectedPlanIds,
+    selectedUsageIds,
   ])
 
   const toggleSelectOne = React.useCallback(
@@ -345,12 +369,13 @@ const FundsTable = React.memo(function FundsTable({
         setSelectedUsageIds(new Set(selectedUsageIds).add(targetId))
         return
       }
+      playNopeSound()
       toast({
         title: 'Selection limit reached',
         description: usageBilling.enabled
           ? `No remaining capacity. Plan left: ${Math.max(0, remainingPlanQuota - selectedPlanIds.size)}, Usage left: ${Math.max(0, remainingUsageCapacity - selectedUsageIds.size)}`
           : `No remaining plan quota for additional selections.`,
-        variant: 'info',
+        variant: 'limit',
         duration: 2500,
       })
     },
@@ -362,6 +387,7 @@ const FundsTable = React.memo(function FundsTable({
       selectedPlanIds,
       selectedUsageIds,
       toast,
+      playNopeSound,
     ],
   )
 
@@ -937,7 +963,19 @@ const FundsTable = React.memo(function FundsTable({
               </div>
             </div>
           ) : (
-            <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[75vh]">
+            <div className="h-full rounded-sm border overflow-hidden flex flex-col max-h-[75vh] relative">
+              {selectedCount > 0 && (
+                <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 pointer-events-none">
+                  <div className="w-6 h-6 rounded-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 flex items-center justify-center text-xs font-semibold">
+                    {selectedCount}
+                  </div>
+                  {usageBilling.enabled && selectedUsageIds.size > 0 && (
+                    <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-[10px] font-semibold">
+                      +{selectedUsageIds.size}
+                    </div>
+                  )}
+                </div>
+              )}
               <div
                 ref={scrollContainerRef}
                 className="flex-1 overflow-auto hide-scrollbar"
@@ -1083,10 +1121,10 @@ const FundsTable = React.memo(function FundsTable({
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {target.website &&
-                              subscription?.permission_level &&
-                              ['PRO', 'MAX', 'ENTERPRISE'].includes(
-                                subscription.permission_level,
-                              ) ? (
+                                subscription?.permission_level &&
+                                ['PRO', 'MAX', 'ENTERPRISE'].includes(
+                                  subscription.permission_level,
+                                ) ? (
                                 <a
                                   href={target.website}
                                   target="_blank"
@@ -1327,17 +1365,16 @@ const FundsTable = React.memo(function FundsTable({
                                       setHoveredButton(`apply-${target.id}`)
                                     }
                                     onMouseLeave={() => setHoveredButton(null)}
-                                    className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                      isQuotaReached
-                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
-                                        : queueStatus &&
-                                            !queueStatus.canSubmitMore
-                                          ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
-                                          : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
-                                    }`}
+                                    className={`rounded-sm w-8 h-8 disabled:opacity-50 disabled:cursor-not-allowed ${isQuotaReached
+                                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer'
+                                      : queueStatus &&
+                                        !queueStatus.canSubmitMore
+                                        ? 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800' // Queue is full, show gray
+                                        : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-800 dark:hover:text-green-200 border border-green-200 dark:border-green-800' // Otherwise, show green
+                                      }`}
                                     title={
                                       queueStatus &&
-                                      queueStatus.availableSlots === 0
+                                        queueStatus.availableSlots === 0
                                         ? `Will be added to queue (${queueStatus.currentQueued}/${queueStatus.maxQueue})`
                                         : queueStatus
                                           ? `Available slots: ${queueStatus.availableSlots}/${queueStatus.maxParallel}`
@@ -1351,7 +1388,7 @@ const FundsTable = React.memo(function FundsTable({
                                           : isQuotaReached
                                             ? animations.cross
                                             : queueStatus &&
-                                                !queueStatus.canSubmitMore
+                                              !queueStatus.canSubmitMore
                                               ? animations.cross // Show cross if no more submissions are possible at all
                                               : animations.takeoff // Default "apply" icon if submissions are possible (direct or queued)
                                       }
@@ -1359,7 +1396,7 @@ const FundsTable = React.memo(function FundsTable({
                                       className=""
                                       isHovered={
                                         hoveredButton ===
-                                          `apply-${target.id}` &&
+                                        `apply-${target.id}` &&
                                         !submittingTargets.has(target.id) &&
                                         !isQuotaReached &&
                                         queueStatus?.canSubmitMore !== false
@@ -1367,10 +1404,10 @@ const FundsTable = React.memo(function FundsTable({
                                       customColor={
                                         isQuotaReached
                                           ? ([0.918, 0.435, 0.071] as [
-                                              number,
-                                              number,
-                                              number,
-                                            ])
+                                            number,
+                                            number,
+                                            number,
+                                          ])
                                           : undefined
                                       }
                                     />
@@ -1381,7 +1418,7 @@ const FundsTable = React.memo(function FundsTable({
                               target.submission_status && (
                                 <div className="flex items-center justify-center w-8 h-8">
                                   {target.submission_status ===
-                                  'in_progress' ? (
+                                    'in_progress' ? (
                                     <LottieIcon
                                       animationData={animations.hourglass}
                                       size={14}
@@ -1490,7 +1527,7 @@ const FundsTable = React.memo(function FundsTable({
                                     />
                                   ) : target.submission_status === 'pending' ||
                                     target.submission_status ===
-                                      'in_progress' ? (
+                                    'in_progress' ? (
                                     <LottieIcon
                                       animationData={animations.hourglass}
                                       size={14}
@@ -1550,7 +1587,7 @@ const FundsTable = React.memo(function FundsTable({
                                     />
                                   ) : target.submission_status === 'pending' ||
                                     target.submission_status ===
-                                      'in_progress' ? (
+                                    'in_progress' ? (
                                     <LottieIcon
                                       animationData={animations.hourglass}
                                       size={14}

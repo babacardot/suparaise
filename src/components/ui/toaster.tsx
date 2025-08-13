@@ -19,6 +19,7 @@ import {
   Key,
   Rabbit,
   DoorClosedLocked,
+  BotOff,
 } from 'lucide-react'
 import { cn } from '@/lib/actions/utils'
 
@@ -92,6 +93,15 @@ function getToastIcon(variant: string) {
           )}
         />
       )
+    case 'limit':
+      return (
+        <BotOff
+          className={cn(
+            'h-4 w-4 text-pink-700 dark:text-pink-300',
+            'animate-[iconSlideIn_0.3s_ease-in-out]',
+          )}
+        />
+      )
     default:
       return (
         <Rabbit
@@ -108,7 +118,7 @@ function getToastIcon(variant: string) {
 function mapToValidVariant(variantStr: string): ToastVariant {
   // Check if the provided variant is already a valid ToastVariant
   if (
-    ['default', 'destructive', 'info', 'success', 'api', 'locked'].includes(
+    ['default', 'destructive', 'info', 'success', 'api', 'locked', 'limit'].includes(
       variantStr,
     )
   ) {
@@ -118,6 +128,9 @@ function mapToValidVariant(variantStr: string): ToastVariant {
   // Handle special cases
   if (variantStr === 'notice') {
     return 'info'
+  }
+  if (variantStr === 'warning' || variantStr === 'limit') {
+    return 'limit'
   }
 
   // Default fallback

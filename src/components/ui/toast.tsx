@@ -13,6 +13,7 @@ export type ToastVariant =
   | 'success'
   | 'api'
   | 'locked'
+  | 'limit'
 
 const ToastProvider = ToastPrimitives.Provider
 
@@ -46,6 +47,8 @@ const toastVariants = cva(
         api: 'border-cyan-300/20 bg-cyan-50 text-cyan-700 dark:bg-cyan-900/80 dark:text-cyan-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
         locked:
           'border-purple-300/20 bg-purple-50 text-purple-700 dark:bg-purple-900/80 dark:text-purple-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
+        limit:
+          'border-orange-300/20 bg-pink-50 text-pink-700 dark:bg-pink-900/80 dark:text-pink-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
       },
     },
     defaultVariants: {
@@ -56,7 +59,7 @@ const toastVariants = cva(
 
 interface BaseToastProps
   extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
-    VariantProps<typeof toastVariants> {
+  VariantProps<typeof toastVariants> {
   variant?: ToastVariant
 }
 
@@ -186,6 +189,8 @@ const ToastDescription = React.forwardRef<
         return 'text-cyan-600/90 dark:text-cyan-400/90'
       case 'locked':
         return 'text-purple-600/90 dark:text-purple-400/90'
+      case 'limit':
+        return 'text-pink-600/90 dark:text-pink-400/90'
       default:
         return 'text-amber-600/90 dark:text-amber-400/90'
     }
