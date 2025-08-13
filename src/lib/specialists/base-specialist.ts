@@ -84,11 +84,14 @@ export abstract class BaseFormSpecialist implements FormSpecialist {
   }
 
   // Helper method to build plan identifier for easy console recognition
-  protected buildPlanIdentifier(smartData: SmartDataMapping, targetName: string): string {
+  protected buildPlanIdentifier(
+    smartData: SmartDataMapping,
+    targetName: string,
+  ): string {
     const planLevel = smartData.userPlan?.permission_level || 'FREE'
     const companyName = smartData.primary_data.company_name || 'COMPANY'
     const targetType = smartData.targetType || 'FUND'
-    
+
     return `${planLevel} / ${companyName} / ${targetName} ${targetType}`
   }
 
