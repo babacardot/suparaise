@@ -12,19 +12,19 @@ import { ProductHuntBadge } from '@/components/design/product-hunt-badge'
 
 const transitionVariants = {
   item: {
+    // Make items visible immediately on first paint to avoid delaying LCP
     hidden: {
-      opacity: 0,
-      filter: 'blur(4px)',
-      y: 12,
+      opacity: 1,
+      filter: 'blur(0px)',
+      y: 0,
     },
     visible: {
       opacity: 1,
       filter: 'blur(0px)',
       y: 0,
       transition: {
-        type: 'spring' as const,
-        bounce: 0.3,
-        duration: 1.5,
+        type: 'tween' as const,
+        duration: 0.4,
       },
     },
   },
@@ -56,8 +56,8 @@ export function HeroSection() {
                     container: {
                       visible: {
                         transition: {
-                          staggerChildren: 0.05,
-                          delayChildren: 0.75,
+                          // Remove initial delay to render instantly
+                          staggerChildren: 0.02,
                         },
                       },
                     },
@@ -84,7 +84,7 @@ export function HeroSection() {
                         Icon={ChevronRight}
                         iconPlacement="right"
                       >
-                        <Link href="/signup" prefetch={true}>
+                        <Link href="/signup" prefetch={false}>
                           <span className="text-nowrap">Get started</span>
                         </Link>
                       </ExpandButton>
@@ -97,7 +97,7 @@ export function HeroSection() {
                       onClick={playClickSound}
                       className="rounded-sm px-5 text-base h-[42px] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     >
-                      <Link href="/about" prefetch={true}>
+                      <Link href="/about" prefetch={false}>
                         <span className="text-nowrap">Learn more</span>
                       </Link>
                     </Button>
@@ -117,8 +117,7 @@ export function HeroSection() {
                 container: {
                   visible: {
                     transition: {
-                      staggerChildren: 0.05,
-                      delayChildren: 1.0,
+                      staggerChildren: 0.02,
                     },
                   },
                 },
@@ -137,6 +136,9 @@ export function HeroSection() {
                     alt="Portal interface"
                     width={2700}
                     height={1440}
+                    sizes="(min-width: 1024px) 990px, 100vw"
+                    priority
+                    fetchPriority="high"
                     placeholder="blur"
                     blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                   />
@@ -146,6 +148,7 @@ export function HeroSection() {
                     alt="Portal interface"
                     width={2700}
                     height={1440}
+                    sizes="(min-width: 1024px) 990px, 100vw"
                     placeholder="blur"
                     blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                   />

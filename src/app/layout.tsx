@@ -316,6 +316,7 @@ export default function RootLayout({
       <head>
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="theme-color" content="#000000" />
+        <link rel="preconnect" href="https://api.producthunt.com" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

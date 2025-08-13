@@ -70,6 +70,7 @@ export function ProductHuntBadge({
         alt="Suparaise - Agents that apply to funds for you, on autopilot | Product Hunt"
         width={dimensions.width}
         height={dimensions.height}
+        loading="lazy"
         style={{
           width: dimensions.displayWidth,
           height: dimensions.displayHeight,
