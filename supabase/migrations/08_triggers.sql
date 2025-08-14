@@ -77,6 +77,7 @@ BEGIN
     service_role_key := secrets.get_config('service_role_key');
     function_url := supabase_url || '/functions/v1/send-email';
     
+    -- Send admin email for both completed and failed submissions
     BEGIN
       -- Invoke edge function to send email to the admin
       SELECT INTO request_id net.http_post(
@@ -90,26 +91,35 @@ BEGIN
           'Authorization', 'Bearer ' || service_role_key
         )
       );
+      
+      RAISE NOTICE 'Admin completion email sent for submission %', NEW.id;
+      
     EXCEPTION WHEN OTHERS THEN
       RAISE WARNING 'Failed to send admin completion email for submission %: %', NEW.id, SQLERRM;
     END;
 
-    BEGIN
-      -- Invoke edge function to send email to the customer
-      SELECT INTO request_id net.http_post(
-        url := function_url,
-        body := jsonb_build_object(
-          'emailType', 'agent_completion_customer',
-          'submissionId', NEW.id
-        ),
-        headers := jsonb_build_object(
-          'Content-Type', 'application/json',
-          'Authorization', 'Bearer ' || service_role_key
-        )
-      );
-    EXCEPTION WHEN OTHERS THEN
-      RAISE WARNING 'Failed to send customer completion email for submission %: %', NEW.id, SQLERRM;
-    END;
+    -- Send customer email ONLY for completed submissions (not failed ones)
+    IF NEW.status = 'completed' THEN
+      BEGIN
+        -- Invoke edge function to send email to the customer
+        SELECT INTO request_id net.http_post(
+          url := function_url,
+          body := jsonb_build_object(
+            'emailType', 'agent_completion_customer',
+            'submissionId', NEW.id
+          ),
+          headers := jsonb_build_object(
+            'Content-Type', 'application/json',
+            'Authorization', 'Bearer ' || service_role_key
+          )
+        );
+        
+        RAISE NOTICE 'Customer completion email sent for submission %', NEW.id;
+        
+      EXCEPTION WHEN OTHERS THEN
+        RAISE WARNING 'Failed to send customer completion email for submission %: %', NEW.id, SQLERRM;
+      END;
+    END IF;
   END IF;
 
   RETURN NEW;
