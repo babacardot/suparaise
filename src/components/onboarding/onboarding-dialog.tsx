@@ -43,19 +43,19 @@ const WelcomeStep = ({
 }) => {
   const welcomeContent = isFirstStartup
     ? {
-        title: 'Welcome to suparaise.com',
-        subtitle:
-          "We're about to help you get meeting with investors, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
-        image: '/random/onboarding.svg',
-        statusText: 'Onboarding',
-      }
+      title: 'Welcome to suparaise.com',
+      subtitle:
+        "We're about to help you get meeting with investors, but first, we need to understand your startup as well as you do. Your detailed input is what will make our agents successful.",
+      image: '/random/onboarding.svg',
+      statusText: 'Onboarding',
+    }
     : {
-        title: 'Ready to launch another venture ?',
-        subtitle:
-          "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
-        image: '/random/test_your_app.svg',
-        statusText: 'New venture',
-      }
+      title: 'Ready to launch another venture ?',
+      subtitle:
+        "Let's set up a new profile. This will help our agents represent this venture accurately to investors. You can always change this later.",
+      image: '/random/test_your_app.svg',
+      statusText: 'New venture',
+    }
 
   return (
     <motion.div
@@ -458,7 +458,7 @@ export function OnboardingDialog({
             (otherFounder, otherIndex) =>
               otherIndex !== index &&
               otherFounder.email.trim().toLowerCase() ===
-                founder.email.trim().toLowerCase(),
+              founder.email.trim().toLowerCase(),
           )
           if (duplicateIndex !== -1) {
             errors.push(
@@ -470,7 +470,7 @@ export function OnboardingDialog({
           if (
             !isFirstStartup &&
             founder.email.trim().toLowerCase() ===
-              (user?.email || '').toLowerCase()
+            (user?.email || '').toLowerCase()
           ) {
             errors.push(
               `${founderLabel} cannot use the same email as your account for additional startups. Please use a different email address.`,
@@ -913,6 +913,14 @@ export function OnboardingDialog({
     // Skip validation for welcome step
     if (currentStep === 0) {
       setCurrentStep(1)
+      // Scroll to top of dialog content
+      const dialogContent = document.querySelector('[data-slot="dialog-content"]')
+      if (dialogContent) {
+        const scrollContainer = dialogContent.querySelector('.scrollbar-hide')
+        if (scrollContainer) {
+          scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      }
       return
     }
 
@@ -930,6 +938,17 @@ export function OnboardingDialog({
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1)
       setValidationAttempted(false) // Reset for next step
+
+      // Scroll to top of dialog content after state update
+      setTimeout(() => {
+        const dialogContent = document.querySelector('[data-slot="dialog-content"]')
+        if (dialogContent) {
+          const scrollContainer = dialogContent.querySelector('.scrollbar-hide')
+          if (scrollContainer) {
+            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
+          }
+        }
+      }, 100)
     }
   }
 
@@ -1036,6 +1055,7 @@ export function OnboardingDialog({
           onCloseClick={!isFirstStartup ? handleCloseAttempt : undefined}
           variant="slide-up"
           className="max-w-2xl w-full mx-4 md:mx-auto max-h-[90vh] md:max-h-[85vh] flex flex-col"
+          data-slot="dialog-content"
         >
           <DialogHeader className="sr-only">
             <DialogTitle>
@@ -1115,9 +1135,9 @@ export function OnboardingDialog({
                     logoUploadProps={logoUploadProps}
                     pitchDeckUploadProps={pitchDeckUploadProps}
                     fieldErrors={getStartupFieldErrors()}
-                    // showIngestModal={showIngestModal}
-                    // setShowIngestModal={setShowIngestModal}
-                    // onIngestData={handleIngestData}
+                  // showIngestModal={showIngestModal}
+                  // setShowIngestModal={setShowIngestModal}
+                  // onIngestData={handleIngestData}
                   />
                 </motion.div>
               )}
